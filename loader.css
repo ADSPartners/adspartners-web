@@ -1,0 +1,133 @@
+/* ============================================================
+   adsPartners · pantalla de carga
+   Overlay que se muestra hasta que window.load + min 2.5s.
+   ============================================================ */
+
+#ads-loader{
+  --ads-rosa:    #f5cbd7;
+  --ads-rosa-2:  #efb9ca;
+  --ads-beige:   #e7e2da;
+  --ads-bg:      #140802;
+  --ads-bg-2:    #1d0d05;
+  --ads-fg:      #f0e7dc;
+  --ads-fg-soft: rgba(240,231,220,.55);
+  --ads-fg-line: rgba(240,231,220,.18);
+
+  position:fixed; inset:0;
+  z-index: 9999;
+  background: radial-gradient(120% 90% at 50% 50%, var(--ads-bg-2) 0%, var(--ads-bg) 70%, #0c0501 100%);
+  overflow:hidden;
+  color: var(--ads-fg);
+  font-family: "Open Sauce", "Open Sauce Sans", system-ui, sans-serif;
+  cursor: none; /* respeta el cursor custom de la web */
+}
+#ads-loader::after{
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background-image: radial-gradient(rgba(255,240,220,.022) 1px, transparent 1px);
+  background-size: 3px 3px;
+  opacity:.9;
+}
+
+/* Contador arriba a la izquierda */
+#ads-loader .adsl-counter{
+  position:absolute; top:36px; left:40px;
+  display:flex; align-items:center; gap:14px;
+  z-index:3;
+}
+#ads-loader .adsl-dot{
+  width:8px; height:8px; border-radius:50%;
+  background: var(--ads-beige);
+  box-shadow:0 0 0 5px rgba(231,226,218,.18);
+  animation: adsl-pulse 1.6s ease-in-out infinite;
+}
+@keyframes adsl-pulse{
+  0%,100%{ transform:scale(1);   box-shadow:0 0 0 0   rgba(231,226,218,.28); }
+  50%    { transform:scale(.85); box-shadow:0 0 0 10px rgba(231,226,218,0);  }
+}
+#ads-loader .adsl-num{
+  font-weight:500; font-size:14px; letter-spacing:.04em;
+  color: var(--ads-fg);
+  font-variant-numeric: tabular-nums;
+  display:flex; align-items:baseline; gap:2px;
+}
+#ads-loader .adsl-num .adsl-pct{ opacity:.5; font-size:11px; margin-left:1px; }
+#ads-loader .adsl-label{
+  font-size:10.5px; letter-spacing:.24em; text-transform:uppercase;
+  color: var(--ads-fg-soft);
+  border-left:1px solid var(--ads-fg-line);
+  padding-left:14px;
+}
+
+/* Logo central */
+#ads-loader .adsl-logo{
+  position:absolute; left:50%; top:50%;
+  transform: translate(-50%, -58%);
+  width: min(360px, 38vw);
+  aspect-ratio: 2500 / 1036.277;
+  z-index:2;
+}
+#ads-loader .adsl-logo svg{ width:100%; height:100%; display:block; overflow:visible; }
+#ads-loader .adsl-glass{
+  fill:none; stroke: var(--ads-fg); stroke-width:5; stroke-linejoin:round;
+  opacity:.55;
+}
+#ads-loader .adsl-glass-bg{ fill: var(--ads-fg); opacity:.05; }
+#ads-loader .adsl-water{ fill: var(--ads-rosa); }
+#ads-loader .adsl-water-front{ fill: var(--ads-rosa-2); opacity:.65; }
+
+/* Burbujas dentro del agua */
+#ads-loader .adsl-bubble{
+  fill: rgba(255,255,255,.55);
+  animation: adsl-rise 4.5s ease-in infinite;
+  transform-origin: center;
+}
+@keyframes adsl-rise{
+  0%   { transform: translateY(80px); opacity:0; }
+  10%  { opacity:1; }
+  90%  { opacity:.7; }
+  100% { transform: translateY(-160px); opacity:0; }
+}
+#ads-loader .adsl-bubble.b2{ animation-delay:-1.2s; animation-duration:5.2s; }
+#ads-loader .adsl-bubble.b3{ animation-delay:-2.6s; animation-duration:3.8s; }
+#ads-loader .adsl-bubble.b4{ animation-delay:-3.5s; animation-duration:6s;   }
+
+/* Mensajes abajo */
+#ads-loader .adsl-msgs{
+  position:absolute; left:50%; bottom:36px;
+  transform:translateX(-50%);
+  text-align:center;
+  width:min(820px, 92vw);
+  z-index:3;
+}
+#ads-loader .adsl-line{
+  position:relative; height:1.5em;
+  font-family: "Apple Garamond", Georgia, serif;
+  font-style:italic; font-weight:400;
+  font-size:26px; line-height:1.5;
+  color: var(--ads-fg);
+  letter-spacing:.005em;
+}
+#ads-loader .adsl-line span{
+  position:absolute; left:0; right:0; top:0;
+  opacity:0;
+  transform: translateY(18px) scale(.985);
+  filter: blur(8px);
+  transition:
+    opacity .7s cubic-bezier(.22,.61,.36,1),
+    transform .85s cubic-bezier(.22,.61,.36,1),
+    filter .7s cubic-bezier(.22,.61,.36,1);
+}
+#ads-loader .adsl-line span.show{
+  opacity:1; transform: translateY(0) scale(1); filter: blur(0);
+}
+#ads-loader .adsl-line span.out{
+  opacity:0; transform: translateY(-18px) scale(1.01); filter: blur(8px);
+}
+
+/* Salida del overlay */
+#ads-loader.adsl-bye{
+  transition: opacity .55s ease .05s, transform .7s cubic-bezier(.6,0,.2,1) .05s;
+  opacity:0;
+  transform: scale(1.02);
+  pointer-events:none;
+}
