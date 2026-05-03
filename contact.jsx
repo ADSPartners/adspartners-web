@@ -135,12 +135,16 @@ function Shop({ cartCount, onOpenProduct }) {
 function CheckoutModal({ product, onClose }) {
   const { t } = useT();
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState(null);
   const formRef = useRef2(null);
 
   // Lock body + ESC
   useEffect(() => {
     if (!product) return;
     setSubmitted(false);
+    setSending(false);
+    setError(null);
     document.body.style.overflow = 'hidden';
     const onKey = (e) => { if (e.key === 'Escape') onClose(); };
     document.addEventListener('keydown', onKey);
@@ -151,9 +155,6 @@ function CheckoutModal({ product, onClose }) {
   }, [product, onClose]);
 
   if (!product) return null;
-
-  const [sending, setSending] = useState(false);
-  const [error, setError] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
