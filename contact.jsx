@@ -152,10 +152,41 @@ function CheckoutModal({ product, onClose }) {
 
   if (!product) return null;
 
-  const handleSubmit = (e) => {
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
-    if (formRef.current) formRef.current.reset();
+    if (sending) return;
+    setError(null);
+    setSending(true);
+
+    const form = formRef.current;
+    const data = new FormData(form);
+    // Metadatos útiles para el correo
+    data.append('_subject', `Nueva solicitud · ${product.title}`);
+    data.append('_template', 'table');
+    data.append('_captcha', 'false');
+    data.append('producto', product.title);
+    data.append('origen', window.location.href);
+
+    try {
+      const res = await fetch('https://formsubmit.co/ajax/adsgroup@ads-partners.com', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' },
+        body: data,
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const json = await res.json();
+      if (json.success === false && json.success !== 'true') throw new Error(json.message || 'Error');
+      setSubmitted(true);
+      if (form) form.reset();
+    } catch (err) {
+      console.error('FormSubmit error:', err);
+      setError('No hemos podido enviar el formulario. Inténtalo de nuevo o escríbenos a adsgroup@ads-partners.com');
+    } finally {
+      setSending(false);
+    }
   };
 
   const handleBackdrop = (e) => { if (e.target === e.currentTarget) onClose(); };
@@ -216,7 +247,12 @@ function CheckoutModal({ product, onClose }) {
                 <label dangerouslySetInnerHTML={{ __html: t('mod.f.msg') }}></label>
                 <textarea name="msg" rows="3"></textarea>
               </div>
-              <button type="submit" className="msubmit" data-cursor="cta">{t('mod.submit')}</button>
+              <button type="submit" className="msubmit" data-cursor="cta" disabled={sending}>
+                {sending ? 'Enviando…' : t('mod.submit')}
+              </button>
+              {error && (
+                <p style={{marginTop:12, fontSize:13, color:'#b34a3a', fontStyle:'italic'}}>{error}</p>
+              )}
             </form>
           </div>
         )}
