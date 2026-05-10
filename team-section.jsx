@@ -6,7 +6,7 @@ function getT3Members(t) {
   {
     id: 'alvaro', first: 'Álvaro', last: 'Espinosa', role: t('team.role.alvaro'),
     file: 'AE—01·26',
-    photo: 'assets/team/alvaro.png',
+    photo: 'assets/team/alvaro.png?v=2',
     pos: 'center 28%',
     stats: [
     { k: t('team.stat.coffees'), v: '26,7' },
@@ -18,7 +18,7 @@ function getT3Members(t) {
   {
     id: 'daniel', first: 'Daniel', last: 'Céspedes', role: t('team.role.daniel'),
     file: 'DC—02·26',
-    photo: 'assets/team/dani.png',
+    photo: 'assets/team/dani.png?v=2',
     pos: 'center 18%',
     stats: [
     { k: t('team.stat.coffees'), v: '3' },
@@ -30,7 +30,7 @@ function getT3Members(t) {
   {
     id: 'sebas', first: 'Sebastián', last: 'Lorenzo', role: t('team.role.sebas'),
     file: 'SL—03·26',
-    photo: 'assets/team/sebas.png',
+    photo: 'assets/team/sebas.png?v=2',
     pos: 'center 18%',
     stats: [
     { k: t('team.stat.coffees'), v: '19' },
