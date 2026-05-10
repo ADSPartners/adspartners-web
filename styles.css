@@ -2521,3 +2521,465 @@ body.lang-switched-in .lang-mark {
 
 /* selection */
 ::selection { background: var(--rosa); color: var(--marron); }
+
+/* Descripción inline dentro de la card — oculta por defecto en TODO viewport.
+   Solo se enciende dentro del breakpoint móvil (≤700px) sobre la card activa. */
+.cli-card__desc-mobile { display: none; }
+
+/* clients-row-bg: spans hermanos del grid que en el render original eran
+   invisibles (sin dimensiones). Los neutralizamos a nivel base para que
+   no se cuelen visualmente en ningún viewport. El bg de la card activa
+   se sigue pintando vía la variable --cli-bg sobre la propia .cli-card. */
+.clients-row-bg {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+}
+
+/* =====================================================================
+   ============ MOBILE / TABLET OPTIMIZATIONS (no desktop) =============
+   Added 05/2026 — solo para <=1024px. Desktop intacto.
+   Usa !important donde un componente JSX inyecta estilos en línea.
+   ===================================================================== */
+
+/* ---------- TABLET (≤1024px) ---------- */
+@media (max-width: 1024px) {
+
+  /* HERO — afinar padding inline + meta */
+  .hero[style] {
+    padding: 96px 32px 56px !important;
+  }
+  .hero-meta {
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    font-size: 10px;
+  }
+  .hero-meta span:nth-child(3) { display: none; } /* "studio" duplicado */
+  .hero-title { padding-left: 0 !important; }
+  .hero-title .hero-growthstudio { white-space: normal; }
+  .hero-foot { gap: 24px; padding-top: 24px; }
+  .hero-tagline { max-width: 70vw; }
+
+  /* CLIENTS — el problema gordo: min-height enorme + márgenes inline */
+  .clients,
+  section.clients[style] {
+    padding: 80px 28px 100px !important;
+    min-height: 0 !important;
+  }
+  .clients-topbar,
+  .clients-topbar[style] {
+    margin: 0 0 56px !important;
+  }
+  .clients-bg { display: none; } /* el bg full-section no aporta en mobile */
+  .clients-stage { grid-template-columns: 1fr; gap: 32px; }
+  .clients-cards { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  /* Las row-bg son <span> hermanos del grid de cards: en desktop se posicionan
+     absolutamente sobre cada columna, pero al cambiar a 2 cols se cuelan como
+     items reales. Las ocultamos desde tablet hacia abajo. */
+  .clients-row-bg { display: none !important; }
+  .clients-row-bg { display: none; }
+  .cli-card { min-height: 180px; padding: 16px; }
+  .cli-card.is-active {
+    background-image: var(--cli-bg) !important;
+    background-size: cover;
+    background-position: center;
+    background-blend-mode: multiply;
+    background-color: rgba(20,9,4,.55);
+  }
+  /* En tablet la copy lateral se queda visible apilada bajo las cards
+     (el .clients-stage ya pasa a 1 col arriba). Le damos altura suficiente
+     para que el texto no se solape con la siguiente sección. */
+  .clients-copy-wrap {
+    min-height: 0;
+    margin-top: 8px;
+    padding-bottom: 24px;
+  }
+  .clients-copy { max-width: 70ch; position: static; }
+  .clients-copy p { font-size: 14.5px; line-height: 1.6; }
+  /* Card activa: que crezca con el contenido en lugar de cortar */
+  .cli-card { min-height: 200px; height: auto; }
+  .cli-card.is-active { min-height: 260px; }
+  /* En tablet escondemos la pista "ACTIVO" cuando está activa,
+     ya estaba pero reforzamos */
+  .cli-card.is-active .cli-card__active { opacity: 0; visibility: hidden; }
+
+  /* SERVICES — paneles más compactos en tablet */
+  .services { padding: 80px 28px; }
+  .studio-panel { min-height: 0; padding: 28px 24px; gap: 22px; }
+  .studio-name { font-size: clamp(36px, 6vw, 56px); }
+  .studio-list { align-self: stretch; }
+  .studio-item { padding: 16px 0; }
+
+  /* WIN-WIN — figura inline forzada a 100px, hay que tumbarla */
+  .win-win-wrap { padding: 80px 32px; }
+  .ww-blocks { gap: 56px; }
+  .ww-figure__value,
+  .ww-figure__value[style] {
+    font-size: clamp(64px, 12vw, 100px) !important;
+    padding: 8px 0 14px !important;
+  }
+  .ww-title__slash,
+  .ww-title__slash[style] {
+    font-size: clamp(40px, 7vw, 60px) !important;
+  }
+  .ww-masthead,
+  .ww-masthead[style] {
+    margin: 0 0 64px !important;
+    gap: 32px;
+  }
+  .ww-lede { font-size: clamp(20px, 2.6vw, 28px); }
+
+  /* TEAM — el título tiene white-space:nowrap; libéralo */
+  .t3__title h1 > span { white-space: normal; }
+  .t3__title { padding: 28px 32px 0 !important; }
+  .t3__title h1 { font-size: clamp(48px, 9vw, 100px); }
+  .t3__title .lede {
+    position: static;
+    transform: none;
+    margin-top: 16px;
+    max-width: 100%;
+  }
+  .t3__head { padding: 36px 32px 0 !important; gap: 24px; }
+  .t3__head .right { font-size: 10px; }
+  .t3__topbar { padding: 18px 32px 12px; font-size: 10px; }
+  .t3__stage { padding: 0 32px; margin-top: 36px; }
+  .t3__row { padding: 40px 0 56px; gap: 32px; }
+  .t3__foot {
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin: 36px 32px 0;
+  }
+  .t3__foot .seal {
+    grid-column: 1 / -1;
+    justify-self: center;
+    width: 180px;
+  }
+
+  /* FAQS — padding más realista */
+  .faqs { padding: 80px 32px; }
+  .faqs-grid { gap: 48px; }
+
+  /* MANIFIESTO */
+  .manifesto { padding: 80px 32px 100px; }
+
+  /* SHOP */
+  .shop { padding: 90px 28px; }
+  .shop__head { margin-bottom: 56px; }
+  .shop__grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+
+  /* FOOTER */
+  .foot { padding: 64px 28px 32px; }
+  .foot__top { gap: 32px; margin-bottom: 48px; }
+  .foot__logo { padding: 40px 0 32px; margin-bottom: 32px; }
+
+  /* MARQUEE */
+  .marquee { padding: 18px 0; }
+}
+
+/* ---------- TABLET PEQUEÑO (≤900px) ---------- */
+@media (max-width: 900px) {
+  .clients-cards { grid-template-columns: repeat(2, 1fr); }
+
+  /* Team a 768px: 3 cols caben holgadas */
+  .t3__row { grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .t3__row > .t3__pol:nth-child(4) {
+    grid-column: auto;
+    max-width: 100%;
+    justify-self: stretch;
+  }
+}
+
+/* ---------- MÓVIL (≤700px) ---------- */
+@media (max-width: 700px) {
+
+  /* HERO */
+  .hero,
+  .hero[style] {
+    padding: 88px 20px 48px !important;
+    min-height: 92vh;
+  }
+  .hero-meta { font-size: 9.5px; gap: 6px 14px; }
+  .hero-meta span:nth-child(2) { display: none; } /* mantener solo location/time */
+  .hero-title,
+  .hero-title[style] {
+    padding: 32px 0 0 !important;
+    font-size: clamp(56px, 18vw, 110px);
+  }
+  .hero-title .hero-creative { font-size: .5em; padding-left: 0; }
+  .hero-foot {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding-top: 28px;
+  }
+  .hero-tagline { font-size: 16px; max-width: 100%; white-space: normal; }
+  .hero-tagline .tag-part { white-space: normal; display: inline; }
+  .hero-stamp { text-align: left; justify-self: start; font-size: 10px; }
+  .hero-stamp strong { font-size: 16px; margin-bottom: 4px; }
+
+  /* MARQUEE - reduce el font y separación */
+  .marquee { padding: 14px 0; }
+  .marquee-track { gap: 36px; font-size: clamp(24px, 7vw, 40px); }
+  .marquee-track > span { gap: 36px; }
+
+  /* MANIFIESTO */
+  .manifesto { padding: 64px 20px 80px; }
+  .manifesto-grid { gap: 32px; }
+  .manifesto-photo { width: 200px; }
+  .manifesto-text { font-size: clamp(22px, 5.6vw, 32px); line-height: 1.18; }
+  .manifesto-text-wrap { gap: 20px; }
+
+  /* CLIENTS — todo apilado */
+  .clients,
+  section.clients[style] {
+    padding: 64px 20px 72px !important;
+  }
+  .clients-topbar,
+  .clients-topbar[style] {
+    margin: 0 0 36px !important;
+  }
+  .clients-cards { grid-template-columns: 1fr; gap: 8px; }
+  .cli-card { min-height: 96px; padding: 14px 16px; }
+  .cli-card__name { font-size: 14px; max-width: 100%; }
+  .cli-card.is-active { min-height: 220px; }
+  .cli-card.is-active .cli-card__name { font-size: 15px; }
+  /* En mobile: una card abierta muestra desc directamente */
+  .cli-card__desc-mobile {
+    display: none;
+    margin-top: 14px;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: rgba(231, 226, 218, .85);
+    padding-top: 12px;
+    border-top: 1px solid rgba(231, 226, 218, .14);
+  }
+  .cli-card.is-active .cli-card__desc-mobile { display: flex; flex-direction: column; gap: 8px; }
+  .cli-card__desc-p { display: block; }
+  .cli-card__active { display: none; }
+  .cli-card__tags { font-size: 10.5px; }
+
+  /* SERVICES — apilado: ambos paneles tienen mucho contenido y a 390px en
+     2 cols se hace ilegible. 1 col deja respirar la lista de servicios. */
+  .services { padding: 64px 20px; }
+  .services-header { margin-bottom: 44px; }
+  .services-title { font-size: clamp(52px, 14vw, 92px); }
+  .services-kicker { font-size: clamp(20px, 5.2vw, 30px); margin-bottom: 18px; }
+  .services-intro { width: 100%; text-align: left; font-size: 15px; }
+  .studios-grid { margin-top: 32px; gap: 14px; grid-template-columns: 1fr; }
+  .studio-panel { padding: 24px 20px; gap: 20px; min-height: 0; }
+  .studio-name { font-size: clamp(34px, 9vw, 52px); }
+  /* Studios — texto del foot que se cortaba a la derecha */
+  .studio-line { font-size: 13.5px; line-height: 1.5; max-width: 100%; }
+  .studio-item { grid-template-columns: 56px 1fr 24px; gap: 12px; padding: 14px 0; }
+  .studio-item__name { font-size: clamp(18px, 5vw, 22px); }
+  .studio-item__code { font-size: 10px; letter-spacing: .18em; }
+  .studio-foot { min-height: 80px; padding-top: 16px; overflow: visible; }
+  .studio-detail, .studio-tagline, .studio-pull {
+    font-size: 13.5px !important;
+    line-height: 1.55 !important;
+    max-width: 100% !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+    text-wrap: pretty;
+  }
+  .studio-tagline { inset: 20px 0 0 0 !important; padding-right: 4px; }
+  .studio-code { font-size: 10.5px; margin-bottom: 14px; }
+
+  /* WIN-WIN — apilado: a 390px las cifras grandes quedan muy comprimidas
+     en 2 cols; mejor cada bloque a página completa, con más impacto. */
+  .win-win-wrap { padding: 64px 20px 72px; }
+  .ww-title { font-size: clamp(44px, 13vw, 80px); }
+  .ww-blocks { grid-template-columns: 1fr; gap: 48px; margin-bottom: 56px; }
+  .ww-block { gap: 24px; }
+  .ww-block__head { gap: 14px; }
+  .ww-block__rule { width: 24px; }
+  .ww-block__title { font-size: 10.5px; letter-spacing: .22em; }
+  .ww-figure__value,
+  .ww-figure__value[style] {
+    font-size: clamp(80px, 22vw, 130px) !important;
+    padding: 4px 0 10px !important;
+    line-height: .82 !important;
+  }
+  /* El segundo bloque (?? %) alineado a la derecha para romper el ritmo */
+  .ww-block:nth-child(2) { text-align: right; }
+  .ww-block:nth-child(2) .ww-block__head { justify-content: flex-end; }
+  .ww-block:nth-child(2) .ww-figure { align-items: flex-end; }
+  .ww-block:nth-child(2) .ww-block__body { margin-left: auto; }
+  .ww-block:nth-child(2) .ww-list__item { grid-template-columns: 1fr 26px; direction: rtl; }
+  .ww-block:nth-child(2) .ww-list__name,
+  .ww-block:nth-child(2) .ww-list__idx { direction: ltr; text-align: right; }
+  .ww-figure__label { font-size: 10px; letter-spacing: .2em; }
+  .ww-block__body { font-size: 14px; line-height: 1.6; }
+  .ww-list__item { grid-template-columns: 26px 1fr; gap: 14px; padding: 12px 0; }
+  .ww-list__name { font-size: 16px; }
+  .ww-list__idx { font-size: 10px; }
+  .ww-title__slash,
+  .ww-title__slash[style] {
+    font-size: clamp(32px, 9vw, 50px) !important;
+  }
+  .ww-masthead,
+  .ww-masthead[style] {
+    margin: 0 0 48px !important;
+  }
+  .ww-blocks { gap: 48px; margin-bottom: 56px; }
+  .ww-block { gap: 24px; }
+  .ww-block__body { font-size: 14px; }
+  .ww-close { padding-top: 16px; gap: 24px; }
+
+  /* TEAM */
+  .t3__topbar { padding: 14px 20px 10px; font-size: 9.5px; letter-spacing: .14em; }
+  .t3__head { padding: 28px 20px 0 !important; grid-template-columns: 1fr; gap: 14px; }
+  .t3__head .right { text-align: left; }
+  .t3__title { padding: 20px 20px 0 !important; }
+  .t3__title h1 { font-size: clamp(40px, 13vw, 70px); line-height: .9; }
+  .t3__title .lede { font-size: 15px; margin-top: 14px; }
+  /* TEAM — apilado: a 390px las polaroids en fila quedan ~115px y se
+     pierde el efecto dossier (foto, nombre, ID). 1 col con polaroid grande
+     y centrada es lo que mejor cuenta el concepto. */
+  .t3__stage { padding: 0 24px; margin-top: 28px; }
+  .t3__row {
+    grid-template-columns: 1fr;
+    padding: 28px 0 36px;
+    gap: 36px;
+    max-width: 280px;
+    margin: 0 auto;
+  }
+  .t3__row > .t3__pol:nth-child(4) { max-width: 100%; grid-column: auto; justify-self: stretch; }
+  .t3__pol__face { padding: 12px; }
+  .t3__cap { padding: 14px 4px 6px; }
+  .t3__cap .name { font-size: 13px; }
+  .t3__cap .role { font-size: 10px; letter-spacing: .18em; }
+  .t3__prints { display: none; } /* huellas: distraen y pesan en mobile */
+  .t3__credit { font-size: 14px; padding: 12px 20px; }
+  .t3__credit .sep { padding: 0 6px; }
+  .t3__foot {
+    grid-template-columns: 1fr;
+    gap: 18px;
+    margin: 28px 20px 0 !important;
+    padding: 20px 0 24px !important;
+  }
+  /* En móvil: solo el sello Founders Advisory; quita archivo, cargo, contacto */
+  .t3__foot > *:not(.seal) { display: none !important; }
+  .t3__foot .seal {
+    grid-column: 1;
+    justify-self: center;
+    width: 200px;
+    transform: rotate(-2deg);
+  }
+  .t3__foot .seal__top { font-size: 24px; padding: 14px 10px 11px; }
+
+  /* FAQS */
+  .faqs { padding: 64px 20px; }
+  .faqs-title { font-size: clamp(34px, 9vw, 56px); }
+  .faqs-grid { gap: 32px; }
+  .faq-q {
+    grid-template-columns: 28px 1fr 22px;
+    gap: 10px;
+    padding: 22px 0;
+    font-size: clamp(17px, 4.4vw, 22px);
+  }
+  .faq-q-num { font-size: 10px; letter-spacing: .18em; }
+  .faq-q-icon { font-size: 22px; }
+  .faq-a > p { padding: 0 0 20px 38px; font-size: 14px; }
+
+  /* Anti-peek: en móvil la respuesta solo existe si .open (sin hover). */
+  .faq-a { display: none !important; }
+  .faq-item.open .faq-a { display: grid !important; grid-template-rows: 1fr !important; }
+  .faq-q:hover { opacity: 1; }
+
+  /* SHOP — 1 columna: a 390px en 3 cards quedan ~115px y la copy de
+     producto se vuelve ilegible. 1 col da peso a cada producto. */
+  .shop { padding: 72px 20px; }
+  .shop__topbar { margin-bottom: 36px; padding-bottom: 12px; font-size: 9px; gap: 8px; }
+  .shop__head { grid-template-columns: 1fr; gap: 18px; align-items: start; margin-bottom: 40px; }
+  .shop__title { font-size: clamp(38px, 10vw, 64px); }
+  .shop__right { align-items: flex-start; text-align: left; justify-self: start; }
+  .shop__sub { font-size: 16px; }
+  .shop__grid { grid-template-columns: 1fr; gap: 14px; }
+  .product__body { padding: 18px; gap: 8px; }
+  .product__name { font-size: 18px; line-height: 1.25; }
+  .product__desc { font-size: 13.5px; line-height: 1.5; }
+  .product__price { font-size: 14px; }
+
+  /* MODAL */
+  .modal { padding: 12px; }
+  .modal__box { padding: 24px 20px; border-radius: 14px; }
+  .modal__title { font-size: 24px; }
+  .modal__sub { font-size: 14px; margin-bottom: 18px; }
+  .mform { gap: 12px; }
+  .mfield input, .mfield textarea, .mfield select { padding: 12px; font-size: 16px; } /* 16px previene zoom iOS */
+  .msubmit { padding: 14px; font-size: 14px; }
+
+  /* FOOTER — 2 columnas en móvil para reducir scroll */
+  .foot { padding: 56px 20px 28px; }
+  .foot__top {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px 20px;
+    margin-bottom: 36px;
+  }
+  /* "La firma" arriba ocupa todo el ancho; el resto en 2 cols */
+  .foot__col:first-child { grid-column: 1 / -1; }
+  .foot__col h4 { margin-bottom: 12px; font-size: 10px; letter-spacing: .18em; }
+  .foot__col ul { gap: 8px; }
+  .foot__col ul a, .foot__col ul span { font-size: 13px; }
+  .foot__tag { font-size: 16px; max-width: 100%; line-height: 1.4; }
+  .foot__logo { padding: 32px 0 28px; margin-bottom: 28px; }
+  .foot__bottom { gap: 10px; padding-top: 20px; }
+  .foot__bottom .small { font-size: 9.5px; letter-spacing: .1em; }
+
+  /* SECTION-LABEL común */
+  .section-label { margin-bottom: 36px; font-size: 10px; letter-spacing: .18em; }
+
+  /* Reveal: en mobile las animaciones largas marean */
+  .reveal { transform: translateY(20px); transition-duration: .6s; }
+}
+
+/* ---------- MÓVIL PEQUEÑO (≤380px) ---------- */
+@media (max-width: 380px) {
+  .nav { padding: 10px 14px; height: 64px; }
+  .nav-cart { width: 156px; height: 32px; padding: 0 10px; font-size: 9px; }
+  .nav-cart-text { font-size: 9px; gap: 10px; }
+  .nav-logo { height: 22px; }
+  .nav-cta-group { gap: 10px; }
+
+  .hero-title { font-size: clamp(48px, 18vw, 88px); }
+  .marquee-track { font-size: clamp(22px, 7vw, 32px); }
+  .ww-title { font-size: clamp(40px, 14vw, 72px); }
+  .ww-figure__value,
+  .ww-figure__value[style] { font-size: clamp(56px, 18vw, 84px) !important; }
+  .services-title { font-size: clamp(48px, 14vw, 80px); }
+  .shop__title { font-size: clamp(34px, 11vw, 56px); }
+  .t3__title h1 { font-size: clamp(34px, 13vw, 56px); }
+  .faqs-title { font-size: clamp(30px, 9vw, 48px); }
+}
+
+/* ---------- LANDSCAPE móvil (altura corta) ---------- */
+@media (max-width: 900px) and (max-height: 500px) and (orientation: landscape) {
+  .hero { min-height: auto; padding-top: 80px !important; padding-bottom: 32px !important; }
+  .hero-foot { grid-template-columns: 1fr auto; }
+}
+
+/* ---------- TOUCH: hover effects opcionales ---------- */
+@media (hover: none) and (pointer: coarse) {
+  /* En táctil, el hover puede dejar estados raros pegados.
+     Activamos los efectos al hacer scroll, no al hover. */
+  .product:hover { transform: none; box-shadow: none; }
+  .manifesto-photo:hover { transform: rotate(-4.2deg); }
+  .t3__pol:hover { transform: none; }
+  .t3__pol:hover .t3__photo img { transform: none; }
+  /* FAQs en táctil ya gestionado en @media max-width:700px */
+  .faq-q:hover { opacity: 1; }
+  /* Marca claramente las áreas tocables del menú lateral si reaparecen */
+  .side-menu { display: none !important; } /* refuerzo del 760px */
+}
+
+/* ---------- Anti-overflow horizontal ---------- */
+@media (max-width: 1024px) {
+  html, body { overflow-x: hidden; max-width: 100%; }
+  .marquee-track { will-change: transform; }
+}
+
