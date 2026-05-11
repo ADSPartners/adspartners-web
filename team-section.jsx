@@ -4,9 +4,9 @@ const { useMemo: useMemoT3, useState: useStateT3 } = React;
 function getT3Members(t) {
   return [
   {
-    id: 'alvaro', first: 'Álvaro', last: 'Espinosa', role: t('team.role.alvaro'),
+    id: 'alvaro', first: 'Álvaro', last: '', role: t('team.role.alvaro'),
     file: 'AE—01·26',
-    photo: 'assets/team/alvaro.png?v=2',
+    photo: 'assets/team/alvaro.png?v=3',
     pos: 'center 28%',
     stats: [
     { k: t('team.stat.coffees'), v: '26,7' },
@@ -16,9 +16,9 @@ function getT3Members(t) {
 
   },
   {
-    id: 'daniel', first: 'Daniel', last: 'Céspedes', role: t('team.role.daniel'),
+    id: 'daniel', first: 'Daniel', last: '', role: t('team.role.daniel'),
     file: 'DC—02·26',
-    photo: 'assets/team/dani.png?v=2',
+    photo: 'assets/team/dani.png?v=3',
     pos: 'center 18%',
     stats: [
     { k: t('team.stat.coffees'), v: '3' },
@@ -28,9 +28,9 @@ function getT3Members(t) {
 
   },
   {
-    id: 'sebas', first: 'Sebastián', last: 'Lorenzo', role: t('team.role.sebas'),
+    id: 'sebas', first: 'Sebastián', last: '', role: t('team.role.sebas'),
     file: 'SL—03·26',
-    photo: 'assets/team/sebas.png?v=2',
+    photo: 'assets/team/sebas.png?v=3',
     pos: 'center 18%',
     stats: [
     { k: t('team.stat.coffees'), v: '19' },
@@ -161,10 +161,10 @@ function Polaroid({ m, i }) {
         <div className="t3__pol__face t3__pol__face--front">
           <div className="t3__photo" data-fileno={m.file}>
             <span className="id">FILE · 0{i + 1}/03</span>
-            <img src={m.photo} alt={`${m.first} ${m.last}`} style={{ objectPosition: m.pos }} />
+            <img src={m.photo} alt={m.first} style={{ objectPosition: m.pos }} />
           </div>
           <div className="t3__cap">
-            <span className="name">{m.last}, {m.first}</span>
+            <span className="name">{m.first}</span>
             <span className="role">0{i + 1} / 03</span>
           </div>
         </div>
@@ -176,7 +176,6 @@ function Polaroid({ m, i }) {
             </div>
             <div className="t3__back__name">
               <span className="t3__back__first">{m.first}</span>
-              <span className="t3__back__last">{m.last}</span>
             </div>
             <ul className="t3__back__stats">
               {m.stats.map((s, j) =>
@@ -197,7 +196,7 @@ function Polaroid({ m, i }) {
             </div>
           </div>
           <div className="t3__cap">
-            <span className="name">{m.last}, {m.first}</span>
+            <span className="name">{m.first}</span>
             <span className="role">{t('team.expediente')}</span>
           </div>
         </div>
@@ -263,9 +262,9 @@ function Team({ color = false, showFile = true, showPrints = true, showSmudges =
         </div>
 
         <p className="t3__credit">
-          <b>Álvaro Espinosa</b><span className="sep">/</span>
-          <b>Daniel Céspedes</b><span className="sep">/</span>
-          <b>Sebastián Lorenzo</b>
+          <b>Álvaro</b><span className="sep">/</span>
+          <b>Daniel</b><span className="sep">/</span>
+          <b>Sebastián</b>
         </p>
       </div>
 

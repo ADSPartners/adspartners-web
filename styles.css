@@ -1667,7 +1667,7 @@ body.lang-switched-in .lang-mark {
 .t3__back__stats li { display: grid; grid-template-columns: 1fr auto 1fr; align-items: baseline; gap: 6px; font-size: 10.5px; letter-spacing: .04em; }
 .t3__back__stats .k { text-transform: lowercase; opacity: .65; }
 .t3__back__stats .dots { border-bottom: 1px dotted rgba(20,17,13,.35); height: .65em; align-self: end; }
-.t3__back__stats .v { font-family: var(--sans); font-weight: 700; font-size: 13px; text-align: right; letter-spacing: -.01em; }
+.t3__back__stats .v { font-family: var(--sans); font-weight: 700; font-size: 10.5px; text-align: right; letter-spacing: -.01em; line-height: 1.25; }
 .t3__back__stats .v .t3__unit { font-size: .55em; font-weight: 700; margin: 0 4px 0 1px; letter-spacing: 0; vertical-align: .25em; }
 .t3__back__stats li.t3__back__note {
   display: block; margin-top: 14px; padding-top: 10px;
