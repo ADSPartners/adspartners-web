@@ -2983,3 +2983,203 @@ body.lang-switched-in .lang-mark {
   .marquee-track { will-change: transform; }
 }
 
+/* ============================================================
+   MOBILE REDESIGN — Clients (case-study stack) + Services
+   Rediseño SOLO móvil (≤700px). No toca desktop.
+   Referencia visual: madeinevolve.com en vista móvil.
+   ============================================================ */
+@media (max-width: 700px) {
+
+  /* ============ CLIENTS — case-study stack ============
+     Cada cliente es un bloque autocontenido en 2 columnas:
+     foto a un lado, nombre + tags al otro. Zigzag alternando lados.
+     Sin descripción en móvil.
+  ==================================================== */
+
+  /* Padding general más generoso para el stack vertical */
+  .clients,
+  section.clients[style] {
+    padding: 56px 20px 80px !important;
+  }
+
+  /* La copy del lado derecho (que en desktop reaccionaba al hover)
+     pasa a actuar como cabecera del bloque en móvil: marca + párrafos
+     manifiesto, colocados entre la topbar y la primera card. */
+  .clients-copy-wrap {
+    display: block !important;
+    order: -1 !important;
+    position: static !important;
+    min-height: 0 !important;
+    margin: 0 0 40px !important;
+    padding: 0 !important;
+  }
+  /* La copy dinámica (la que cambia al hacer hover) no aplica en móvil */
+  .clients-copy:not(.clients-copy-default) { display: none !important; }
+  /* La copy "default": siempre visible, posición estática */
+  .clients-copy-default {
+    position: static !important;
+    opacity: 1 !important;
+    transform: none !important;
+    inset: auto !important;
+    max-width: none !important;
+    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .clients-copy-default > p { margin: 0 !important; }
+  .clients-copy-brand {
+    font-size: 22px !important;
+    margin-bottom: 6px !important;
+  }
+  .clients-copy-default > p:not(.clients-copy-brand) {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-style: normal;
+    font-size: 15px;
+    line-height: 1.5;
+    color: rgba(231, 226, 218, .82);
+  }
+
+  /* Stack vertical entre casos */
+  .clients-cards {
+    display: flex !important;
+    flex-direction: column;
+    gap: 48px !important;
+  }
+
+  /* Card = grid de 2 columnas (imagen | texto).
+     3 filas: 1 para nombre, 1 para tags, 1 para empujar (la imagen
+     ocupa las 3, pegando su top al de nombre/tags). */
+  .cli-card {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto 1fr;
+    column-gap: 18px;
+    row-gap: 8px;
+    align-items: start;
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 0 !important;
+    background: transparent !important;
+    background-image: none !important;
+    border: none !important;
+    border-radius: 0;
+    overflow: visible;
+    text-align: left;
+  }
+
+  /* Quita el sheen del hover/active */
+  .cli-card::before { display: none !important; }
+
+  /* Estados activo/hover/focus: neutralizados visualmente en móvil */
+  .cli-card.is-active,
+  .cli-card:hover,
+  .cli-card:focus {
+    background: transparent !important;
+    background-image: none !important;
+    border-color: transparent !important;
+  }
+
+  /* IMAGEN — columna 1 por defecto, span las 3 filas (top alineado) */
+  .cli-card::after {
+    content: "";
+    display: block;
+    grid-column: 1 / 2;
+    grid-row: 1 / -1;
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    background-image: var(--cli-bg);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: rgba(231, 226, 218, .05);
+    border-radius: 4px;
+    align-self: start;
+  }
+
+  /* NOMBRE — columna 2, fila 1, top-aligned (a la altura del top de la imagen) */
+  .cli-card__name {
+    grid-column: 2 / 3;
+    grid-row: 1;
+    align-self: start;
+    position: static !important;
+    color: var(--beige) !important;
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: clamp(24px, 7vw, 34px) !important;
+    line-height: 1 !important;
+    letter-spacing: -.015em;
+    max-width: 100% !important;
+    opacity: 1 !important;
+    margin: 0 0 4px;
+  }
+
+  /* TAGS — columna 2, fila 2 (debajo del nombre) */
+  .cli-card__tags {
+    grid-column: 2 / 3;
+    grid-row: 2;
+    align-self: start;
+    position: static !important;
+    display: block !important;
+    margin: 0 !important;
+    opacity: 1 !important;
+    transform: none !important;
+    font-family: var(--serif);
+    font-style: normal;
+    font-weight: 400;
+    font-size: 13px !important;
+    letter-spacing: 0;
+    text-transform: none;
+    color: rgba(231, 226, 218, .7);
+    line-height: 1.5;
+  }
+  .cli-card__tags span { display: inline; }
+  .cli-card__tags span:not(:last-child)::after {
+    content: ", ";
+    white-space: pre;
+  }
+
+  /* DESCRIPCIÓN — fuera en móvil */
+  .cli-card__desc-mobile,
+  .cli-card.is-active .cli-card__desc-mobile {
+    display: none !important;
+  }
+
+  /* Badge "ACTIVO" — fuera en móvil */
+  .cli-card__active { display: none !important; }
+
+  /* ZIGZAG — pares invierten la columna de la imagen
+     (`:nth-of-type` cuenta solo los <button>, ignorando los .clients-row-bg <span>) */
+  .cli-card:nth-of-type(even)::after {
+    grid-column: 2 / 3;
+    grid-row: 1 / -1;
+  }
+  .cli-card:nth-of-type(even) .cli-card__name,
+  .cli-card:nth-of-type(even) .cli-card__tags {
+    grid-column: 1 / 2;
+  }
+
+  /* ============ SERVICES — sin flechas, sin background ============ */
+
+  /* Quita el fondo de imagen que aparece al pasar/clicar */
+  .services-bg,
+  .services .services-bg,
+  .services.is-hovering .services-bg-img,
+  .services-bg-img,
+  .services-bg-img.is-active {
+    display: none !important;
+  }
+
+  /* Asegura que el fondo de la sección queda limpio */
+  .services { background-image: none !important; }
+
+  /* Quita la flecha ↗ de cada subservicio */
+  .studio-item__arrow { display: none !important; }
+
+  /* Reajusta el grid de la fila ahora que ya no hay tercera columna */
+  .studio-item {
+    grid-template-columns: 56px 1fr !important;
+  }
+}
+
