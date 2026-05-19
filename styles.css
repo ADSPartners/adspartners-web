@@ -91,19 +91,32 @@ body.cursor-dark .cursor-dot { background: var(--marron); }
 /* ============ NAV ============ */
 .nav {
   position: fixed;
-  top: 0; left: 0; right: 0;
+  top: 14px; left: 16px; right: 16px;
   z-index: 100;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   align-items: center;
-  padding: 18px 24px;
+  padding: 18px 28px;
   gap: 0;
   pointer-events: none;
   font-size: 12px;
   letter-spacing: .04em;
   color: var(--beige);
-  mix-blend-mode: difference;
-  height: 76px;
+  height: 68px;
+  /* Liquid glass flotante: pill translúcida con blur suave */
+  background: rgba(28, 14, 6, 0.28);
+  -webkit-backdrop-filter: blur(22px) saturate(170%);
+  backdrop-filter: blur(22px) saturate(170%);
+  border-radius: 999px;
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.22),
+    0 1px 0 rgba(255, 255, 255, 0.06) inset;
+  /* Aísla el filter del resto del documento (mejora rendimiento + corrige artefactos) */
+  isolation: isolate;
+}
+/* Fallback: si el navegador no soporta backdrop-filter, oscurece un poco más */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .nav { background: rgba(28, 14, 6, 0.82); }
 }
 .nav-block { pointer-events: auto; display: flex; flex-direction: column; justify-content: center; line-height: 1.4; min-width: 0; }
 .nav-logo-block {
@@ -732,6 +745,98 @@ body.lang-switched-in .lang-mark {
   font-weight: 500;
   background: linear-gradient(to top, rgba(0,0,0,.55), rgba(0,0,0,0));
   pointer-events: none;
+}
+
+/* ============ MANIFIESTO — DUO POLAROIDS ============ */
+/* Dos polaroids más pequeños superpuestos que juntos ocupan el mismo bounding
+   box que la foto original. Mantienen la posición sticky del contenedor.
+   Usamos `figure.manifesto-photo--duo` (especificidad 0,1,1) para ganar a las
+   media queries que aplican sobre `.manifesto-photo` (0,1,0). */
+figure.manifesto-photo--duo {
+  position: sticky;
+  top: 160px;
+  margin: 0;
+  align-self: start;
+  justify-self: center;
+  width: min(280px, 90%);
+  aspect-ratio: 280 / 360;
+  transform: none;
+  filter: none;
+  display: block;
+}
+figure.manifesto-photo--duo:hover {
+  transform: none;
+}
+figure.manifesto-photo--duo .manifesto-pol {
+  position: absolute;
+  width: 70%;
+  overflow: hidden;
+  transition: transform .8s cubic-bezier(.2,.9,.2,1);
+  filter: drop-shadow(0 14px 28px rgba(0, 0, 0, .55))
+          drop-shadow(0 4px 8px rgba(0, 0, 0, .35));
+}
+figure.manifesto-photo--duo .manifesto-pol img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+figure.manifesto-photo--duo .manifesto-pol--1 {
+  top: 0;
+  left: 0;
+  transform: rotate(-6deg);
+  z-index: 1;
+}
+figure.manifesto-photo--duo .manifesto-pol--2 {
+  bottom: -6%;
+  right: 0;
+  width: 70%;
+  aspect-ratio: 3 / 3.4;
+  transform: rotate(5deg);
+  z-index: 2;
+}
+figure.manifesto-photo--duo .manifesto-pol--2 img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 78%;
+}
+figure.manifesto-photo--duo:hover .manifesto-pol--1 {
+  transform: rotate(-3.5deg) translateY(-4px);
+}
+figure.manifesto-photo--duo:hover .manifesto-pol--2 {
+  transform: rotate(3deg) translateY(-4px);
+}
+figure.manifesto-photo--duo .manifesto-pol figcaption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 22px 12px 10px;
+  font-family: var(--sans);
+  font-size: 8.5px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--beige);
+  font-weight: 500;
+  background: linear-gradient(to top, rgba(0,0,0,.55), rgba(0,0,0,0));
+  pointer-events: none;
+}
+/* En viewports < 1100px el contenedor pierde el sticky (queda en flujo),
+   pero seguimos necesitando un containing block para los polaroids absolutos. */
+@media (max-width: 1100px) {
+  figure.manifesto-photo--duo {
+    position: relative;
+    top: auto;
+    width: 220px;
+  }
+}
+@media (max-width: 760px) {
+  figure.manifesto-photo--duo {
+    width: 200px;
+  }
 }
 .manifesto-text-wrap {
   justify-self: end;
@@ -1775,7 +1880,7 @@ body.lang-switched-in .lang-mark {
   position: relative;
   overflow: hidden;
   padding: 130px 40px 180px 90px;
-  min-height: 1100px;
+  min-height: 940px;
   display: flex;
   flex-direction: column;
 }
@@ -2727,7 +2832,7 @@ body.lang-switched-in .lang-mark {
 
   /* MANIFIESTO */
   .manifesto { padding: 64px 20px 80px; }
-  .manifesto-grid { gap: 32px; }
+  .manifesto-grid { gap: 56px; }
   .manifesto-photo { width: 200px; }
   .manifesto-text { font-size: clamp(22px, 5.6vw, 32px); line-height: 1.18; }
   .manifesto-text-wrap { gap: 20px; }

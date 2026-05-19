@@ -237,12 +237,17 @@ function Manifiesto() {
   return (
     <section className="section manifesto" id="manifiesto" data-screen-label="Manifiesto" data-nav-theme="dark">
       <div className="manifesto-grid">
-        <figure className="manifesto-photo">
-          <img src="assets/team/los_tres.jpeg" alt={t('mani.poladroid.alt')} />
-          <figcaption>
-            <span>[ADSPARTNERS]</span>
-            <span>2025</span>
-          </figcaption>
+        <figure className="manifesto-photo manifesto-photo--duo">
+          <div className="manifesto-pol manifesto-pol--1">
+            <img src="assets/team/manifesto-1.jpeg" alt={t('mani.poladroid.alt')} />
+          </div>
+          <div className="manifesto-pol manifesto-pol--2">
+            <img src="assets/team/manifesto-2.jpeg" alt="" />
+            <figcaption>
+              <span>[ADSPARTNERS]</span>
+              <span>2025</span>
+            </figcaption>
+          </div>
         </figure>
         <div className="manifesto-text-wrap" ref={textRef}>
           {renderPara(p1, 'p1')}
@@ -495,7 +500,7 @@ function Clients() {
         <div className="clients-bg-veil"></div>
       </div>
 
-      <div className="clients-topbar" style={{ margin: "15.2px 0px 480px" }}>
+      <div className="clients-topbar" style={{ margin: "15.2px 0px 320px" }}>
         <a href="#clientes" className="clients-topbar-label" data-cursor="cta">
           <span className="ctl-bracket ctl-bracket-l">&lt;</span>
           <span className="ctl-text">
@@ -517,6 +522,7 @@ function Clients() {
             key={c.id}
             type="button"
             className={`cli-card ${hovering && i === active ? 'is-active' : ''}`}
+            style={{ '--cli-bg': `url(${c.img})` }}
             onMouseEnter={() => {setActive(i);setHovering(true);}}
             onFocus={() => {setActive(i);setHovering(true);}}
             data-cursor="cta"
