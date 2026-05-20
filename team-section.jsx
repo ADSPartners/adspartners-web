@@ -1,5 +1,56 @@
 /* global React, useT */
-const { useMemo: useMemoT3, useState: useStateT3 } = React;
+const { useMemo: useMemoT3, useState: useStateT3, useEffect: useEffectT3, useRef: useRefT3 } = React;
+
+// Auto-fit: binary-search the largest font-size that fits the container without overflow.
+function useFitText(min = 7, max = 14, deps = []) {
+  const ref = useRefT3(null);
+  const run = (el) => {
+    if (!el || !el.clientHeight) return;
+    let lo = min, hi = max;
+    for (let i = 0; i < 22; i++) {
+      const mid = (lo + hi) / 2;
+      el.style.fontSize = mid + 'px';
+      if (el.scrollHeight > el.clientHeight + 1) hi = mid;
+      else lo = mid;
+    }
+    let fs = lo;
+    el.style.fontSize = fs.toFixed(2) + 'px';
+    // Post-check: sub-pixel wrapping can flip overflow on/off at the converged value.
+    // Step back in small decrements until it definitively fits.
+    let guard = 24;
+    while (guard-- > 0 && el.scrollHeight > el.clientHeight + 0.5 && fs > min) {
+      fs -= 0.25;
+      el.style.fontSize = fs.toFixed(2) + 'px';
+    }
+  };
+  useEffectT3(() => {
+    const el = ref.current;
+    if (!el) return;
+    let raf = 0;
+    const schedule = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => run(el));
+    };
+    schedule();
+    const ro = new ResizeObserver(schedule);
+    ro.observe(el);
+    window.addEventListener('resize', schedule);
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(schedule);
+    }
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+      window.removeEventListener('resize', schedule);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps);
+  return { ref, refit: () => {
+    const el = ref.current;
+    if (!el) return;
+    requestAnimationFrame(() => run(el));
+  }};
+}
 
 function getT3Members(t) {
   return [
@@ -8,36 +59,21 @@ function getT3Members(t) {
     file: 'AE—01·26',
     photo: 'assets/team/alvaro.png?v=3',
     pos: 'center 28%',
-    stats: [
-    { k: t('team.stat.coffees'), v: '26,7' },
-    { k: t('team.stat.sleep'), v: '5,7' },
-    { k: t('team.stat.ontime'), v: '0' },
-    { k: t('team.stat.alvaro.note'), v: '' }]
-
+    bio: [t('team.bio.alvaro.1'), t('team.bio.alvaro.2'), t('team.bio.alvaro.3')]
   },
   {
     id: 'daniel', first: 'Daniel', last: '', role: t('team.role.daniel'),
     file: 'DC—02·26',
     photo: 'assets/team/dani.png?v=3',
     pos: 'center 18%',
-    stats: [
-    { k: t('team.stat.coffees'), v: '3' },
-    { k: t('team.stat.sleep'), v: '4,3' },
-    { k: t('team.stat.dani.financiacion'), v: <>10,3<span className="t3__unit">(M)</span>€</> },
-    { k: t('team.stat.dani.note'), v: '' }]
-
+    bio: [t('team.bio.daniel.1'), t('team.bio.daniel.2'), t('team.bio.daniel.3'), t('team.bio.daniel.4')]
   },
   {
     id: 'sebas', first: 'Sebastián', last: '', role: t('team.role.sebas'),
     file: 'SL—03·26',
     photo: 'assets/team/sebas.png?v=3',
     pos: 'center 18%',
-    stats: [
-    { k: t('team.stat.coffees'), v: '19' },
-    { k: t('team.stat.sleep'), v: t('team.stat.sebas.sleep') },
-    { k: t('team.stat.sebas.pitis'), v: '4' },
-    { k: t('team.stat.sebas.note'), v: '' }]
-
+    bio: [t('team.bio.sebas.1'), t('team.bio.sebas.2'), t('team.bio.sebas.3')]
   }];
 
 }
@@ -148,12 +184,13 @@ function Fingerprints() {
 function Polaroid({ m, i }) {
   const { t } = useT();
   const [flipped, setFlipped] = useStateT3(false);
+  const { ref: bioRef, refit: refitBio } = useFitText(7, 18, [m.id, m.bio.join('|')]);
   return (
     <article
       className={'t3__pol' + (flipped ? ' is-flip' : '')}
-      onClick={() => setFlipped((f) => !f)}
+      onClick={() => { setFlipped((f) => !f); setTimeout(refitBio, 850); }}
       role="button" tabIndex={0}
-      onKeyDown={(e) => {if (e.key === 'Enter' || e.key === ' ') {e.preventDefault();setFlipped((f) => !f);}}}
+      onKeyDown={(e) => {if (e.key === 'Enter' || e.key === ' ') {e.preventDefault();setFlipped((f) => !f);setTimeout(refitBio, 850);}}}
       aria-pressed={flipped}
       data-cursor="cta">
       
@@ -176,20 +213,11 @@ function Polaroid({ m, i }) {
             </div>
             <div className="t3__back__name">
               <span className="t3__back__first">{m.first}</span>
+              <span className="t3__back__role">{m.role}</span>
             </div>
-            <ul className="t3__back__stats">
-              {m.stats.map((s, j) =>
-              <li key={j} className={!s.v ? 't3__back__note' : undefined}>
-                  {s.v ?
-                <>
-                      <span className="k">{s.k}</span>
-                      <span className="dots" aria-hidden="true"></span>
-                      <span className="v">{s.v}</span>
-                    </> :
-                <span className="note">{s.k}</span>}
-                </li>
-              )}
-            </ul>
+            <div className="t3__back__bio" ref={bioRef}>
+              {m.bio.map((p, j) => <p key={j}>{p}</p>)}
+            </div>
             <div className="t3__back__foot">
               <span>{t('team.archivado')}</span>
               <span>{t('team.adsp.founder')}</span>

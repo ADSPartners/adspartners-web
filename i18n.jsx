@@ -107,7 +107,7 @@ const DICT = {
     'team.kicker.right2': 'archivado · 04·2026',
     'team.title.1.html': 'Los <em>personajes</em>',
     'team.title.2': 'detrás de todo esto',
-    'team.lede': 'Los founder, sin equipo innecesario, sin fachada repelente, pero con ganas de comerse el p*uto mundo, ¡SIEMPRE!',
+    'team.lede': 'Los founder, sin equipo innecesario, sin fachada repelente, pero con ganas de comerse el mundo, ¡SIEMPRE!',
     'team.foot.archivo.k': 'archivo',
     'team.foot.archivo.v': 'adsP · 03 · team · v3',
     'team.foot.cargo.k': 'cargo',
@@ -118,18 +118,23 @@ const DICT = {
     'team.expediente': 'expediente',
     'team.archivado': 'archivado · 04·2026',
     'team.adsp.founder': 'adsP · founder',
-    'team.role.alvaro': 'Founder · Strategist',
-    'team.role.daniel': 'Founder · Analista',
-    'team.role.sebas': 'Founder · Director',
-    'team.stat.coffees': 'cafés/día',
-    'team.stat.sleep': 'horas sueño',
-    'team.stat.ontime': 'Reuniones a tiempo',
-    'team.stat.alvaro.note': 'Trabaja mejor con cerveza que con café',
-    'team.stat.dani.financiacion': 'financiación a ads',
-    'team.stat.dani.note': 'Las personas mienten, los números no. Por eso le hago caso a los números.',
-    'team.stat.sebas.sleep': '2-10 (depende de la alergia)',
-    'team.stat.sebas.pitis': 'pitis/branding',
-    'team.stat.sebas.note': 'Poner 2 colores no es branding ni es nada. YO ASÍ NO TRABAJO!',
+    'team.role.alvaro': 'Growth Strategy & Director',
+    'team.role.daniel': 'Performance & Finance',
+    'team.role.sebas': 'Creative & Brand Direction',
+
+    // bios — back of polaroid
+    'team.bio.alvaro.1': 'Cuando era niño ya preguntaba “¿y esto para qué sirve?” como cinco veces seguidas.',
+    'team.bio.alvaro.2': 'Hoy, por desgracia para el descanso del equipo, sigue siendo igual de pesado. La diferencia es que ahora esa manía ayuda a encontrar qué parte de un negocio no está funcionando del todo.',
+    'team.bio.alvaro.3': 'Este peque de aquí con cara de niño bueno es ahora el que monta la estrategia detrás de la venta. Ten cuidado, sus amigos dicen que le vende hielo hasta a un esquimal.',
+
+    'team.bio.daniel.1': 'De pequeño ya preguntaba cuánto costaba algo antes de comprarlo.',
+    'team.bio.daniel.2': 'Hoy sigue siendo igual de agarrao. ¿Que qué significa eso? Que no va a gastar ni un euro más del necesario. Y sí, hablamos de tu dinero.',
+    'team.bio.daniel.3': 'Esta adorable criatura es ahora quien convierte datos en decisiones. El que mira campañas, costes, márgenes y resultados hasta asegurarse de que cada euro se gasta con cabeza.',
+    'team.bio.daniel.4': 'No le quieras llevar la contraria cuando se trata de números.',
+
+    'team.bio.sebas.1': 'Cuando era niño seguramente ya miraba más el encuadre que la foto.',
+    'team.bio.sebas.2': 'Hoy sigue con lo mismo. El contenido puede estar muy bien, sí, pero si además no se ve bien, Sebas muerde.',
+    'team.bio.sebas.3': 'Este pequeño artista con gafas de Chanel es ahora quien evita que una marca parezca hecha con una plantilla y tres referencias de Pinterest. No solo hace las cosas bonitas. Hace que tengan criterio, intención y comunidad. O eso dice él.',
 
     // WORK MODEL — THE WIN-WIN METHOD
     'work.label': 'Cómo trabajamos',
@@ -172,7 +177,7 @@ const DICT = {
 
     // Cierre
     'work.pull.line1': 'No ganamos antes que tú.',
-    'work.pull.line2.html': 'Ese es el <em>puto</em> punto.',
+    'work.pull.line2.html': 'Ese es el <em>punto</em>.',
     'work.foot.l': 'Alineación de intereses',
     'work.foot.c': 'Sin mensual disfrazado',
     'work.foot.r': 'Variable sobre resultados',
@@ -237,7 +242,7 @@ const DICT = {
     'faq.10.a': 'Por una birra. En serio. Sin PowerPoint, sin pitch deck, sin sermón motivacional con "journey", "ecosistema" y "storytelling 360". Nos cuentas dónde estás y te decimos si podemos ayudarte. Si encajamos, al lío. Si no, te vas con una cerveza gratis y un par de ideas que no tenías al entrar. Mal trato no es.',
 
     // CONTACT (SHOP)
-    'shop.k': '¿Nos conocemos? coño, claro!',
+    'shop.k': '¿Nos conocemos? claro!',
     'shop.cart': 'Carrito',
     'shop.add': 'Añadir al carrito',
     'shop.t1': 'Antes de trabajar juntos,',
@@ -403,7 +408,7 @@ const DICT = {
     'team.kicker.right2': 'filed · 04·2026',
     'team.title.1.html': 'The <em>characters</em>',
     'team.title.2': 'behind this all',
-    'team.lede': 'The founders, no unnecessary team, no off-putting facade, but ready to take on the f*cking world, ALWAYS!',
+    'team.lede': 'The founders, no unnecessary team, no off-putting facade, but ready to take on the world, ALWAYS!',
     'team.foot.archivo.k': 'archive',
     'team.foot.archivo.v': 'adsP · 03 · team · v3',
     'team.foot.cargo.k': 'role',
@@ -414,18 +419,23 @@ const DICT = {
     'team.expediente': 'case file',
     'team.archivado': 'filed · 04·2026',
     'team.adsp.founder': 'adsP · founder',
-    'team.role.alvaro': 'Founder · Strategist',
-    'team.role.daniel': 'Founder · Analyst',
-    'team.role.sebas': 'Founder · Director',
-    'team.stat.coffees': 'coffees/day',
-    'team.stat.sleep': 'hours of sleep',
-    'team.stat.ontime': 'Meetings on time',
-    'team.stat.alvaro.note': 'Works better with beer than with coffee',
-    'team.stat.dani.financiacion': 'ads funding',
-    'team.stat.dani.note': 'People lie, numbers don\'t. So I listen to the numbers.',
-    'team.stat.sebas.sleep': '2-10 (depends on the allergies)',
-    'team.stat.sebas.pitis': 'cigs/branding',
-    'team.stat.sebas.note': 'Slapping 2 colors on it isn\'t branding. I DO NOT WORK LIKE THIS!',
+    'team.role.alvaro': 'Growth Strategy & Director',
+    'team.role.daniel': 'Performance & Finance',
+    'team.role.sebas': 'Creative & Brand Direction',
+
+    // bios — back of polaroid
+    'team.bio.alvaro.1': 'As a kid he was already asking “and what is this for?” five times in a row.',
+    'team.bio.alvaro.2': 'Today, unfortunately for the team\'s sanity, he\'s just as relentless. The difference is that now that habit helps us find which part of a business isn\'t quite working.',
+    'team.bio.alvaro.3': 'This little one with a good-boy face is now the one building the strategy behind the sale. Careful — his friends say he could sell ice to an eskimo.',
+
+    'team.bio.daniel.1': 'As a kid he already asked how much something cost before buying it.',
+    'team.bio.daniel.2': 'Today he\'s just as tight. What does that mean? That he won\'t spend a euro more than necessary. And yes, we\'re talking about your money.',
+    'team.bio.daniel.3': 'This adorable creature is the one who turns data into decisions. The one watching campaigns, costs, margins and results until every euro is spent with a head on its shoulders.',
+    'team.bio.daniel.4': 'Don\'t argue with him when numbers are involved.',
+
+    'team.bio.sebas.1': 'As a kid he was probably already looking at the framing more than the picture itself.',
+    'team.bio.sebas.2': 'Today he\'s still at it. The content can be great, sure, but if it doesn\'t look great too, Sebas bites.',
+    'team.bio.sebas.3': 'This little artist with Chanel glasses is the one keeping a brand from looking like a template with three Pinterest refs. He doesn\'t just make things pretty. He gives them a point of view, intent, and community. Or so he says.',
 
     // WORK MODEL — THE WIN-WIN METHOD
     'work.label': 'How we work',
