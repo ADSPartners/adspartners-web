@@ -141,14 +141,14 @@ const DICT = {
     'work.num': '(04)',
     'work.kicker': 'El método',
     'work.title': 'THE WIN-WIN METHOD',
-    'work.lede.html': '600€ <span class="alt">para construir el sistema.</span> Variable <span class="alt">para hacerlo crecer.</span>',
+    'work.lede.html': '1000€ <span class="alt">para construir el sistema.</span> Variable <span class="alt">para hacerlo crecer.</span>',
     'work.lede.disclaimer': 'Calma. No es un fijo mensual disfrazado. Es el punto de partida para pensar, ordenar y construir bien antes de mover un euro en serio.',
     'work.topbar.r': 'adsPartners® · win/win method',
 
     // Bloque 01 — STARTING POINT
     'work.b1.num': '01',
     'work.b1.title': 'EL PUNTO DE PARTIDA',
-    'work.b1.figure': '600€',
+    'work.b1.figure': '1000€',
     'work.b1.figure.label': 'Fee de estrategia',
     'work.b1.body': 'Solo para arrancar. Tranqui, tranqui… luego olvídate de costes fijos. Con esto montamos el sistema y nos ponemos en marcha juntos.\n\nCon esto nos da para la cerveza a la que te invitamos, sí.',
     'work.b1.tag.1': 'Funnel Strategy',
@@ -158,7 +158,7 @@ const DICT = {
     'work.b1.tag.5': 'Tracking & Measurement',
     'work.b1.tag.6': 'Creative Angles',
     'work.b1.tag.7': 'Offer Architecture',
-    'work.b1.note': 'Los 600€ no son por «empezar a hablar». Son por entrar a ordenar la máquina.',
+    'work.b1.note': 'Los 1000€ no son por «empezar a hablar». Son por entrar a ordenar la máquina.',
 
     // Bloque 02 — VARIABLE GAME
     'work.b2.num': '02',
@@ -220,8 +220,8 @@ const DICT = {
     'faqs.num': '(07)',
     'faqs.title.1.html': 'Preguntas <em>frecuentes.</em>',
     'faqs.title.2.html': 'Respuestas <span class="accent">sin filtro.</span>',
-    'faq.1.q': '¿600€ por hablar? ¿En serio?',
-    'faq.1.a': 'No, 600€ por dejar de hablar. Por entrar, abrir el capó y ver dónde sangra el negocio. Si te parece caro, espera a ver lo que cuesta otro trimestre improvisando con la agencia que llama "estrategia" a un Google Doc de tres bullets. Bastante más que esos 600€, ¿no? Además, que con eso te invitamos a la birra hombre...',
+    'faq.1.q': '¿1000€ por hablar? ¿En serio?',
+    'faq.1.a': 'No, 1000€ por dejar de hablar. Por entrar, abrir el capó y ver dónde sangra el negocio. Si te parece caro, espera a ver lo que cuesta otro trimestre improvisando con la agencia que llama "estrategia" a un Google Doc de tres bullets. Bastante más que esos 1000€, ¿no? Además, que con eso te invitamos a la birra hombre...',
     'faq.2.q': '¿Y eso del variable cómo funciona?',
     'faq.2.a': 'Cobramos un porcentaje sobre lo que generamos por encima de tu línea base. Tú creces, nosotros cobramos. Tú no creces, nosotros no facturamos y empezamos a sudar. Que es exactamente como queremos sudar: contigo, no contra ti. La mitad del sector cobra fijo y reza para que no le pidan resultados. Nosotros al revés.',
     'faq.3.q': '¿Trabajáis con cualquier marca?',
@@ -442,14 +442,14 @@ const DICT = {
     'work.num': '(04)',
     'work.kicker': 'The method',
     'work.title': 'THE WIN-WIN METHOD',
-    'work.lede.html': '€600 <span class="alt">to build the system.</span> Variable <span class="alt">to grow it.</span>',
+    'work.lede.html': '€1000 <span class="alt">to build the system.</span> Variable <span class="alt">to grow it.</span>',
     'work.lede.disclaimer': 'Easy. Not a monthly retainer in disguise. It\'s the starting point to think, order and build properly before moving a serious euro.',
     'work.topbar.r': 'adsPartners® · win/win method',
 
     // Block 01 — STARTING POINT
     'work.b1.num': '01',
     'work.b1.title': 'THE STARTING POINT',
-    'work.b1.figure': '€600',
+    'work.b1.figure': '€1000',
     'work.b1.figure.label': 'Strategy fee',
     'work.b1.body': 'Just to get started. Easy, easy… then forget about fixed costs. With this we build the system and get moving together.\n\nThis covers the beer we\'re buying you, yes.',
     'work.b1.tag.1': 'Funnel Strategy',
@@ -459,7 +459,7 @@ const DICT = {
     'work.b1.tag.5': 'Tracking & Measurement',
     'work.b1.tag.6': 'Creative Angles',
     'work.b1.tag.7': 'Offer Architecture',
-    'work.b1.note': 'The €600 isn\'t for «starting the conversation». It\'s for stepping in to order the machine.',
+    'work.b1.note': 'The €1000 isn\'t for «starting the conversation». It\'s for stepping in to order the machine.',
 
     // Block 02 — VARIABLE GAME
     'work.b2.num': '02',
@@ -521,8 +521,8 @@ const DICT = {
     'faqs.num': '(07)',
     'faqs.title.1.html': 'Frequent <em>questions.</em>',
     'faqs.title.2.html': 'Unfiltered <span class="accent">answers.</span>',
-    'faq.1.q': 'A €600 fee just to talk? Seriously?',
-    'faq.1.a': 'No, €600 to stop talking. To get under the hood and see where the business is bleeding. If that feels expensive, wait until you see what one more quarter of improvising costs you with the agency that calls "strategy" a Google Doc with three bullets. Quite a bit more than those €600, right? Besides, with that we\'re getting you a beer, come on...',
+    'faq.1.q': 'A €1000 fee just to talk? Seriously?',
+    'faq.1.a': 'No, €1000 to stop talking. To get under the hood and see where the business is bleeding. If that feels expensive, wait until you see what one more quarter of improvising costs you with the agency that calls "strategy" a Google Doc with three bullets. Quite a bit more than those €1000, right? Besides, with that we\'re getting you a beer, come on...',
     'faq.2.q': 'How does the variable thing work?',
     'faq.2.a': 'We charge a percentage on what we generate above your baseline. You grow, we get paid. You don\'t grow, we don\'t bill and we start sweating. Which is exactly how we want to sweat: with you, not against you. Half the industry charges fixed and prays nobody asks for results. We do the opposite.',
     'faq.3.q': 'Do you work with any brand?',
