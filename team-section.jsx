@@ -59,14 +59,14 @@ function getT3Members(t) {
     file: 'AE—01·26',
     photo: 'assets/team/alvaro.png?v=3',
     pos: 'center 28%',
-    bio: [t('team.bio.alvaro.1'), t('team.bio.alvaro.2'), t('team.bio.alvaro.3')]
+    bio: [t('team.bio.alvaro.1'), t('team.bio.alvaro.2'), t('team.bio.alvaro.3'), t('team.bio.alvaro.4')]
   },
   {
     id: 'daniel', first: 'Daniel', last: '', role: t('team.role.daniel'),
     file: 'DC—02·26',
     photo: 'assets/team/dani.png?v=3',
     pos: 'center 18%',
-    bio: [t('team.bio.daniel.1'), t('team.bio.daniel.2'), t('team.bio.daniel.3'), t('team.bio.daniel.4')]
+    bio: [t('team.bio.daniel.1'), t('team.bio.daniel.2'), t('team.bio.daniel.3')]
   },
   {
     id: 'sebas', first: 'Sebastián', last: '', role: t('team.role.sebas'),
@@ -207,10 +207,6 @@ function Polaroid({ m, i }) {
         </div>
         <div className="t3__pol__face t3__pol__face--back">
           <div className="t3__back">
-            <div className="t3__back__head">
-              <span className="t3__back__id">{m.file}</span>
-              <span className="t3__back__no">0{i + 1} / 03</span>
-            </div>
             <div className="t3__back__name">
               <span className="t3__back__first">{m.first}</span>
               <span className="t3__back__role">{m.role}</span>
@@ -218,14 +214,6 @@ function Polaroid({ m, i }) {
             <div className="t3__back__bio" ref={bioRef}>
               {m.bio.map((p, j) => <p key={j}>{p}</p>)}
             </div>
-            <div className="t3__back__foot">
-              <span>{t('team.archivado')}</span>
-              <span>{t('team.adsp.founder')}</span>
-            </div>
-          </div>
-          <div className="t3__cap">
-            <span className="name">{m.first}</span>
-            <span className="role">{t('team.expediente')}</span>
           </div>
         </div>
       </div>
@@ -255,7 +243,7 @@ function Team({ color = false, showFile = true, showPrints = true, showSmudges =
         </div>
       }
 
-      <div className="t3__topbar">
+      <div className="t3__topbar" style={{ display: 'none' }}>
         <span className="l">
           <span className="dot"></span>
           <span>{t('team.topbar.l')}</span>
@@ -263,7 +251,7 @@ function Team({ color = false, showFile = true, showPrints = true, showSmudges =
         <span>{t('team.topbar.r')}</span>
       </div>
 
-      <header className="t3__head">
+      <header className="t3__head" style={{ display: 'none' }}>
         <div className="t3__kicker">
           <span className="num">03</span>
           <span>{t('team.kicker')}</span>
@@ -276,16 +264,14 @@ function Team({ color = false, showFile = true, showPrints = true, showSmudges =
       </header>
 
       <div className="t3__title">
-        <h1>
-          <span dangerouslySetInnerHTML={{ __html: t('team.title.1.html') }} /><br />
-          <span className="sub">{t('team.title.2')}</span>
-        </h1>
-        <p className="lede">{t('team.lede')}</p>
+        <div className="ww-intro" style={{ margin: '0 auto 8px', textAlign: 'center' }}>
+          <h2 className="ww-intro__title">{t('team.title.1.html')}</h2>
+          <p className="ww-intro__sub" style={{ maxWidth: '760px', marginLeft: 'auto', marginRight: 'auto' }}>{t('team.founders.sub')}</p>
+        </div>
       </div>
 
       <div className="t3__stage">
         <div className="t3__row">
-          {showPrints && <Fingerprints />}
           {members.map((m, i) => <Polaroid key={m.id} m={m} i={i} />)}
         </div>
 
@@ -296,7 +282,7 @@ function Team({ color = false, showFile = true, showPrints = true, showSmudges =
         </p>
       </div>
 
-      <div className="t3__foot" style={{ padding: "24px 0px 61.6px" }}>
+      <div className="t3__foot" style={{ display: 'none', padding: "24px 0px 61.6px" }}>
         <div><span className="k">{t('team.foot.archivo.k')}</span><span className="v">{t('team.foot.archivo.v')}</span></div>
         <div><span className="k">{t('team.foot.cargo.k')}</span><span className="v">{t('team.foot.cargo.v')}</span></div>
         <div><span className="k">{t('team.foot.contacto.k')}</span><span className="v">adsgroup@ads-partners.com</span></div>

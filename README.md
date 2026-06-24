@@ -41,3 +41,46 @@ window.AdsLoader.done()        // marca como "carga real terminada"
 window.AdsLoader.forceClose()  // cierra el overlay inmediatamente
 window.AdsLoader.config        // { minSeconds, fakeProgressSeconds, ... }
 ```
+
+## Conexión con n8n (formulario "Quedamos")
+
+El formulario de la carta es el embudo: cuando el lead lo envía, manda **todos sus datos en un JSON** a un webhook de n8n.
+
+### 1. Pegar la URL del webhook
+En `components.jsx`, arriba del todo:
+
+```js
+const N8N_WEBHOOK_URL = ''; // ← pega aquí la "Production URL" del nodo Webhook de n8n
+```
+
+- **Vacío** → el formulario sigue funcionando por correo (`mailto`), así la web funciona aunque aún no esté conectado.
+- **Con URL** → hace `POST` (JSON) al webhook. Si el POST falla, cae automáticamente al `mailto` para no perder el lead.
+
+### 2. CORS en n8n
+Para que el navegador pueda enviar directo desde la web, en el nodo **Webhook** de n8n → *Options* → **Allowed Origins (CORS)** pon `*` (o tu dominio). Si no, el envío usará el respaldo por correo.
+
+### 3. Estructura del JSON que recibe n8n
+
+```json
+{
+  "source": "adspartners.com/quedamos",
+  "lang": "es",
+  "submitted_at": "2026-06-25T10:00:00.000Z",
+  "name": "...",
+  "company": "...",
+  "role": "...",
+  "web": "...",
+  "mode": "ONLINE o PRESENCIAL",
+  "place": "...",
+  "drink": "...",
+  "email": "...",
+  "phone": "...",
+  "extra": "...",
+  "signature": "...",
+  "meeting": { "date": "2026-06-25", "time": "12:00", "label": "Jueves, 25 de junio · 12:00" }
+}
+```
+
+En n8n los campos llegan bajo `{{ $json.body }}` (p.ej. `{{ $json.body.email }}`, `{{ $json.body.meeting.date }}`). Desde ahí conectas tu secuencia de emails y Outlook.
+
+> El calendario (Lun–Sáb, 10:00–15:00, intervalos de 1h) solo rellena el campo *FECHA Y HORA*; no reserva nada por sí solo. La reserva real la gestionas tú en n8n/Outlook con `meeting.date` y `meeting.time`.

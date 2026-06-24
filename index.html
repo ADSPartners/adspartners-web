@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>adsPartners® — Growth Studio</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=183" />
   <link rel="stylesheet" href="loader.css" />
-  <link rel="stylesheet" href="cookie-consent.css" />
+  <link rel="stylesheet" href="cookie-consent.css?v=1" />
   <link rel="icon" type="image/svg+xml" href="assets/logos/favicon.svg?v=2" />
   <link rel="alternate icon" type="image/png" sizes="32x32" href="assets/logos/favicon-32.png?v=2" />
   <link rel="apple-touch-icon" sizes="180x180" href="assets/logos/apple-touch-icon.png?v=2" />
@@ -31,6 +31,16 @@
 
   <div id="root"></div>
 
+  <!-- Hero animated wave/displacement filter -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <filter id="heroWaves" x="-15%" y="-15%" width="130%" height="130%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.006 0.010" numOctaves="2" seed="7" result="noise">
+        <animate attributeName="baseFrequency" dur="20s" values="0.006 0.010;0.011 0.015;0.006 0.010" repeatCount="indefinite" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1"></animate>
+      </feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="26" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+    </filter>
+  </svg>
+
   <!-- React + Babel -->
   <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
@@ -45,6 +55,23 @@
       let rx = mx, ry = my;
       let dx = mx, dy = my;
       window.addEventListener('mousemove', (e) => { mx = e.clientX; my = e.clientY; });
+
+      // Detect the background theme directly under the cursor so it can use
+      // exact corporate colours (no blend-mode tricks).
+      let lastTheme = null;
+      function updateCursorTheme() {
+        const el = document.elementFromPoint(mx, my);
+        let theme = 'dark';
+        if (el) {
+          const themed = el.closest('[data-nav-theme]');
+          if (themed) theme = themed.getAttribute('data-nav-theme') || 'dark';
+        }
+        if (theme !== lastTheme) {
+          lastTheme = theme;
+          document.body.classList.toggle('cursor-on-light', theme === 'light');
+        }
+      }
+
       function tick() {
         rx += (mx - rx) * 0.18;
         ry += (my - ry) * 0.18;
@@ -52,6 +79,7 @@
         dy += (my - dy) * 0.55;
         ring.style.transform = `translate(${rx}px, ${ry}px) translate(-50%, -50%)`;
         dot.style.transform = `translate(${dx}px, ${dy}px) translate(-50%, -50%)`;
+        updateCursorTheme();
         requestAnimationFrame(tick);
       }
       tick();
@@ -62,7 +90,7 @@
         if (!t || !t.closest) return;
         document.body.classList.remove('cursor-hover', 'cursor-text-mode', 'cursor-cta');
         if (t.closest('[data-cursor="cta"]')) document.body.classList.add('cursor-cta');
-        else if (t.closest('input, textarea')) document.body.classList.add('cursor-text-mode');
+        else if (t.closest('input, textarea, [data-cursor="text"]')) document.body.classList.add('cursor-text-mode');
         else if (t.closest('a, button, .product, .day, .time-slot, .polaroid, .service-row, .client-row')) document.body.classList.add('cursor-hover');
       });
     })();
@@ -71,10 +99,9 @@
   <!-- App scripts -->
   <script src="legal-content.jsx"></script>
   <script type="text/babel" src="i18n.jsx"></script>
+  <script type="text/babel" src="cookie-consent.jsx"></script>
   <script type="text/babel" src="components.jsx"></script>
   <script type="text/babel" src="team-section.jsx"></script>
-  <script type="text/babel" src="contact.jsx"></script>
-  <script type="text/babel" src="cookie-consent.jsx"></script>
   <script type="text/babel" src="app.jsx"></script>
 </body>
 </html>
