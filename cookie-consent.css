@@ -1,0 +1,154 @@
+/* ============================================================
+   COOKIE CONSENT — adsPartners
+   Banner + panel de preferencias. Estética marca (marrón/beige/rosa).
+   ============================================================ */
+
+.cc-root { position: fixed; inset: 0; z-index: 4000; pointer-events: none; }
+.cc-root * { box-sizing: border-box; }
+
+/* scrim only when the settings panel is open */
+.cc-scrim {
+  position: absolute; inset: 0;
+  background: rgba(25, 9, 0, 0.42);
+  backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+  opacity: 1;
+  pointer-events: auto;
+  animation: cc-fade .35s ease both;
+}
+@keyframes cc-fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* ---------- shared card ---------- */
+.cc-card {
+  position: absolute;
+  pointer-events: auto;
+  background: var(--marron);
+  color: var(--beige);
+  border-radius: 18px;
+  box-shadow: 0 24px 70px -20px rgba(25,9,0,.7), 0 4px 14px rgba(25,9,0,.3);
+  font-family: var(--sans);
+}
+
+/* ---------- compact banner (slim bar, bottom-left) ---------- */
+.cc-banner {
+  left: clamp(12px, 3vw, 28px);
+  bottom: clamp(12px, 3vw, 28px);
+  width: min(720px, calc(100vw - 24px));
+  padding: 14px 16px 14px 20px;
+  display: flex; align-items: center; gap: 18px;
+  flex-wrap: wrap;
+  opacity: 1;
+  animation: cc-rise .5s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes cc-rise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+
+.cc-banner .cc-body {
+  flex: 1 1 280px; min-width: 220px;
+  display: flex; align-items: baseline; gap: 9px;
+  font-size: 12.5px; line-height: 1.5; opacity: .85;
+  margin: 0;
+}
+.cc-banner .cc-blip {
+  flex: none; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--rosa); transform: translateY(-1px);
+  animation: cc-pulse 2.4s ease-in-out infinite;
+}
+@keyframes cc-pulse { 0%,100% { opacity: .5; } 50% { opacity: 1; } }
+
+.cc-banner .cc-actions {
+  display: flex; align-items: center; gap: 8px;
+  flex: none;
+}
+.cc-banner .cc-btn { padding: 9px 16px; font-size: 11.5px; }
+
+.cc-btn {
+  font-family: var(--sans); font-weight: 600;
+  font-size: 12.5px; letter-spacing: .02em;
+  padding: 13px 18px; border-radius: 100px;
+  transition: background .2s, color .2s, border-color .2s, opacity .2s;
+  white-space: nowrap; text-align: center;
+  border: 1px solid transparent;
+}
+.cc-btn--primary { background: var(--rosa); color: var(--marron); }
+.cc-btn--primary:hover { background: #fff; }
+.cc-btn--ghost { background: transparent; color: var(--beige); border-color: color-mix(in srgb, var(--beige) 34%, transparent); }
+.cc-btn--ghost:hover { border-color: var(--beige); background: color-mix(in srgb, var(--beige) 8%, transparent); }
+.cc-btn--text { background: transparent; color: var(--beige); opacity: .65; }
+.cc-btn--text:hover { opacity: 1; }
+
+.cc-body a { color: var(--rosa); text-decoration: underline; text-underline-offset: 2px; white-space: nowrap; }
+.cc-body a:hover { opacity: .8; }
+
+/* title used only inside settings panel */
+.cc-title {
+  font-family: var(--serif); font-weight: 400;
+  font-size: 25px; line-height: 1.05; margin-bottom: 12px;
+}
+.cc-panel .cc-body { font-size: 13.5px; line-height: 1.6; opacity: .82; margin-bottom: 0; }
+
+/* ---------- settings panel (centered) ---------- */
+.cc-panel {
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+  width: min(560px, calc(100vw - 28px));
+  max-height: min(86vh, 720px);
+  display: flex; flex-direction: column;
+  padding: 0;
+  pointer-events: auto;
+  animation: cc-pop .4s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes cc-pop {
+  from { opacity: 0; transform: translate(-50%, -46%) scale(.98); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+.cc-panel-head { padding: 26px 28px 18px; border-bottom: 1px solid color-mix(in srgb, var(--beige) 16%, transparent); position: relative; }
+.cc-panel-head .cc-title { margin-bottom: 8px; }
+.cc-panel-head .cc-body { margin-bottom: 0; }
+.cc-close {
+  position: absolute; top: 20px; right: 22px;
+  width: 30px; height: 30px; border-radius: 50%;
+  display: grid; place-items: center; font-size: 14px;
+  color: var(--beige); opacity: .6;
+  border: 1px solid color-mix(in srgb, var(--beige) 26%, transparent);
+  transition: opacity .2s, background .2s;
+}
+.cc-close:hover { opacity: 1; background: color-mix(in srgb, var(--beige) 10%, transparent); }
+
+.cc-cats { padding: 8px 28px; overflow-y: auto; flex: 1; }
+.cc-cat {
+  display: flex; align-items: flex-start; gap: 16px;
+  padding: 18px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--beige) 12%, transparent);
+}
+.cc-cat:last-child { border-bottom: none; }
+.cc-cat-text { flex: 1; }
+.cc-cat-title { font-weight: 600; font-size: 14px; margin-bottom: 5px; }
+.cc-cat-desc { font-size: 12.5px; line-height: 1.5; opacity: .68; }
+.cc-cat-locked { font-size: 11px; letter-spacing: .04em; text-transform: uppercase; opacity: .55; padding-top: 6px; white-space: nowrap; }
+
+/* toggle switch */
+.cc-switch {
+  flex: none; margin-top: 2px;
+  width: 46px; height: 26px; border-radius: 100px;
+  background: color-mix(in srgb, var(--beige) 22%, transparent);
+  border: 1px solid color-mix(in srgb, var(--beige) 30%, transparent);
+  position: relative; transition: background .25s, border-color .25s;
+}
+.cc-switch::after {
+  content: ""; position: absolute; top: 2px; left: 2px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--beige); transition: transform .25s cubic-bezier(.2,.8,.2,1);
+}
+.cc-switch.is-on { background: var(--rosa); border-color: var(--rosa); }
+.cc-switch.is-on::after { transform: translateX(20px); background: var(--marron); }
+
+.cc-panel-foot { padding: 18px 28px 24px; border-top: 1px solid color-mix(in srgb, var(--beige) 16%, transparent); display: flex; gap: 9px; flex-wrap: wrap; }
+.cc-panel-foot .cc-btn { flex: 1; min-width: 120px; }
+
+@media (max-width: 560px) {
+  .cc-banner { left: 8px; right: 8px; bottom: 8px; width: auto; padding: 14px 14px 16px; gap: 12px; }
+  .cc-banner .cc-actions { width: 100%; }
+  .cc-banner .cc-actions .cc-btn { flex: 1; }
+  .cc-title { font-size: 22px; }
+}

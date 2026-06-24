@@ -1,4 +1,4 @@
-/* global React, ReactDOM, I18nProvider, Nav, SideMenu, Hero, Marquee, Manifiesto, Services, Team, WorkModel, Clients, FAQs, Footer, Shop, CheckoutModal, useReveal, useT */
+/* global React, ReactDOM, I18nProvider, Nav, SideMenu, Hero, Marquee, Manifiesto, Services, Team, WorkModel, Clients, FAQs, Footer, Shop, CheckoutModal, CookieConsent, useReveal, useT */
 const { useState, useEffect } = React;
 
 function MarqueeI18n() {
@@ -41,6 +41,7 @@ function AppInner() {
       <FAQs />
       <Footer onCartClick={scrollToContact} />
       <CheckoutModal product={openProduct} onClose={() => setOpenProduct(null)} />
+      {typeof CookieConsent !== 'undefined' && <CookieConsent />}
     </>
   );
 }

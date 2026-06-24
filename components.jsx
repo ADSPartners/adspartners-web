@@ -564,7 +564,8 @@ function Clients() {
 
 // ============= FOOTER =============
 function Footer({ onCartClick }) {
-  const { t } = useT();
+  const { t, lang } = useT();
+  const en = lang === 'en';
   return (
     <footer className="foot" data-screen-label="Footer" data-nav-theme="dark">
       <div className="foot__top">
@@ -608,7 +609,7 @@ function Footer({ onCartClick }) {
       <div className="foot__bottom">
         <span className="small">{t('foot.bot.left')}</span>
         <span className="small" style={{ opacity: .45, letterSpacing: '.18em' }}>{t('foot.bot.center')}</span>
-        <span className="small"><a href="#">Aviso</a> · <a href="#">Privacidad</a> · <a href="#">Cookies</a></span>
+        <span className="small"><a href="aviso-legal.html">{en ? 'Legal notice' : 'Aviso legal'}</a> · <a href="privacidad.html">{en ? 'Privacy' : 'Privacidad'}</a> · <a href="cookies.html">Cookies</a> · <a href="#" onClick={(e) => { e.preventDefault(); window.dispatchEvent(new Event('open-cookie-settings')); }} data-cursor="cta">{en ? 'Cookie settings' : 'Configurar cookies'}</a></span>
       </div>
     </footer>);
 
