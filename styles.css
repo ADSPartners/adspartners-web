@@ -548,7 +548,7 @@ body.lang-switched-in .lang-mark {
   z-index: 0;
   background:
     linear-gradient(rgba(25, 9, 0, .05), rgba(25, 9, 0, .05)),
-    url('assets/hero/Fondo-Hero_adsPartners.png?v=2') center / cover no-repeat;
+    url('assets/hero/Fondo-Hero_adsPartners.jpg?v=3') center / cover no-repeat;
   transform-origin: 50% 46%;
   filter: url(#heroWaves);
   animation: heroBreathe 26s ease-in-out infinite alternate;
@@ -585,6 +585,14 @@ body.lang-switched-in .lang-mark {
 }
 @media (prefers-reduced-motion: reduce) {
   .hero::before, .hero-grain { animation: none; }
+  .hero::before { filter: none; }
+}
+/* RENDIMIENTO MÓVIL: el filtro SVG de desplazamiento (feTurbulence+feDisplacementMap)
+   y el grano animado son carísimos de pintar por frame y causaban jank/retraso en
+   móvil. En pantallas ≤ 1024px usamos la imagen estática sin esos efectos. */
+@media (max-width: 1024px) {
+  .hero::before { filter: none; animation: none; }
+  .hero-grain { animation: none; }
 }
 .hero-meta {
   position: relative;
@@ -1582,7 +1590,7 @@ figure.manifesto-photo--duo .manifesto-pol figcaption {
   inset: -7%;
   background:
     linear-gradient(rgba(245, 243, 241, .7), rgba(245, 243, 241, .7)),
-    url('assets/hero/Fondo-Hero_adsPartners.png?v=2') center / cover no-repeat;
+    url('assets/hero/Fondo-Hero_adsPartners.jpg?v=3') center / cover no-repeat;
   transform-origin: 50% 46%;
   filter: url(#heroWaves);
   animation: heroBreathe 26s ease-in-out infinite alternate;
@@ -1601,6 +1609,11 @@ figure.manifesto-photo--duo .manifesto-pol figcaption {
 }
 @media (prefers-reduced-motion: reduce) {
   .ww-bg::before, .ww-bg::after { animation: none; }
+  .ww-bg::before { filter: none; }
+}
+@media (max-width: 1024px) {
+  .ww-bg::before { filter: none; animation: none; }
+  .ww-bg::after { animation: none; }
 }
 .win-win-wrap > .ww-inner {
   max-width: none;
@@ -3756,6 +3769,15 @@ figure.manifesto-photo--duo .manifesto-pol figcaption {
   margin-bottom: 100vh;
   background: var(--beige);
 }
+/* Anti-costura entre secciones: todas las secciones a pantalla completa son
+   hijas directas de .scroll-content y comparten su borde en coordenadas
+   fraccionarias (en pantallas con dpr > 1). El antialiasing de ese borde deja
+   ver 0,5px del fondo beige del .scroll-content como una línea fina. Solapamos
+   1px cada sección con la siguiente (la posterior pinta encima) para cerrar la
+   costura. El solape cae sobre el padding/fondo, no sobre el contenido. */
+.scroll-content > * {
+  margin-bottom: -1px;
+}
 .foot {
   background: var(--beige);
   color: var(--marron);
@@ -3871,6 +3893,7 @@ figure.manifesto-photo--duo .manifesto-pol figcaption {
   position: relative;
   z-index: 1;
   flex: 1;
+  min-height: 0; /* permite que el flex item se encoja en vez de desbordar */
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -3881,6 +3904,12 @@ figure.manifesto-photo--duo .manifesto-pol figcaption {
   width: 100%;
   max-width: 1500px;
   height: auto;
+  /* Nunca recortar el logotipo: si el espacio vertical disponible es menor que
+     la altura natural de la imagen, se escala (manteniendo proporción) para caber
+     entera en lugar de quedar cortada por el overflow:hidden del contenedor. */
+  max-height: 100%;
+  object-fit: contain;
+  object-position: bottom center;
   display: block;
   opacity: .96;
 }
@@ -4070,7 +4099,8 @@ figure.manifesto-photo--duo .manifesto-pol figcaption {
   .shop__grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
 
   /* FOOTER */
-  .foot { padding: 64px 28px 32px; }
+  /* (.foot mantiene su padding base 0; las reglas .foot__top/.foot__logo son
+     restos del footer antiguo y no afectan al markup actual.) */
   .foot__top { gap: 32px; margin-bottom: 48px; }
   .foot__logo { padding: 40px 0 32px; margin-bottom: 32px; }
 
@@ -4316,7 +4346,8 @@ figure.manifesto-photo--duo .manifesto-pol figcaption {
   .msubmit { padding: 14px; font-size: 14px; }
 
   /* FOOTER — 2 columnas en móvil para reducir scroll */
-  .foot { padding: 56px 12px 28px; }
+  /* (.foot SIN padding extra: el footer es de altura fija 100vh; cualquier padding
+     añadido comprime el espacio del logotipo gigante y lo recortaba.) */
   .foot__top {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -4373,6 +4404,9 @@ figure.manifesto-photo--duo .manifesto-pol figcaption {
 
 /* ---------- TOUCH: hover effects opcionales ---------- */
 @media (hover: none) and (pointer: coarse) {
+  /* En táctil el cursor custom no se ejecuta (ver index.html); ocultamos sus
+     elementos para que no queden dos puntos pegados en la esquina superior. */
+  .cursor { display: none !important; }
   /* En táctil, el hover puede dejar estados raros pegados.
      Activamos los efectos al hacer scroll, no al hover. */
   .product:hover { transform: none; box-shadow: none; }
@@ -4387,8 +4421,17 @@ figure.manifesto-photo--duo .manifesto-pol figcaption {
 
 /* ---------- Anti-overflow horizontal ---------- */
 @media (max-width: 1024px) {
+  /* OJO: overflow-x:hidden SOLO en html. Ponerlo en body convierte al body en
+     contenedor de scroll y desactiva el position:sticky del workflow y el pin
+     de win-win. El desbordamiento real ya se elimina con el margen de .wfl. */
   html, body { max-width: 100%; }
   html { overflow-x: hidden; }
+  html, body { overscroll-behavior-x: none; }
+  /* La lista workflow usaba margin: 0 -25px (full-bleed desktop). En móvil el
+     padding lateral de la sección es 20px, así que -25px sobresale 5px por lado
+     y vuelve la página desplazable en horizontal (y deja ver el footer fijo al
+     hacer overscroll). Igualamos el sangrado al padding real. */
+  .wfl { margin-left: -20px; margin-right: -20px; }
   .marquee-track { will-change: transform; }
 }
 

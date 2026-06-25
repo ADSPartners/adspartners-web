@@ -57,21 +57,21 @@ function getT3Members(t) {
   {
     id: 'alvaro', first: 'Álvaro', last: '', role: t('team.role.alvaro'),
     file: 'AE—01·26',
-    photo: 'assets/team/alvaro.png?v=3',
+    photo: 'assets/team/alvaro.jpg?v=4',
     pos: 'center 28%',
     bio: [t('team.bio.alvaro.1'), t('team.bio.alvaro.2'), t('team.bio.alvaro.3'), t('team.bio.alvaro.4')]
   },
   {
     id: 'daniel', first: 'Daniel', last: '', role: t('team.role.daniel'),
     file: 'DC—02·26',
-    photo: 'assets/team/dani.png?v=3',
+    photo: 'assets/team/dani.jpg?v=4',
     pos: 'center 18%',
     bio: [t('team.bio.daniel.1'), t('team.bio.daniel.2'), t('team.bio.daniel.3')]
   },
   {
     id: 'sebas', first: 'Sebastián', last: '', role: t('team.role.sebas'),
     file: 'SL—03·26',
-    photo: 'assets/team/sebas.png?v=3',
+    photo: 'assets/team/sebas.jpg?v=4',
     pos: 'center 18%',
     bio: [t('team.bio.sebas.1'), t('team.bio.sebas.2'), t('team.bio.sebas.3')]
   }];

@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>adsPartners® — Growth Studio</title>
-  <link rel="stylesheet" href="styles.css?v=183" />
+  <link rel="stylesheet" href="styles.css?v=188" />
   <link rel="stylesheet" href="loader.css" />
   <link rel="stylesheet" href="cookie-consent.css?v=1" />
   <link rel="icon" type="image/svg+xml" href="assets/logos/favicon.svg?v=2" />
@@ -49,6 +49,13 @@
   <!-- Cursor logic -->
   <script>
     (function() {
+      // Solo en dispositivos con puntero fino (ratón). En táctil el cursor custom
+      // no aporta nada y el bucle rAF + elementFromPoint por frame causaba jank
+      // y retraso en móvil. Salimos sin arrancar nada.
+      if (!window.matchMedia || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+        document.body.classList.add('no-custom-cursor');
+        return;
+      }
       const ring = document.getElementById('cursorRing');
       const dot = document.getElementById('cursorDot');
       let mx = window.innerWidth / 2, my = window.innerHeight / 2;
@@ -72,14 +79,17 @@
         }
       }
 
-      function tick() {
+      // Throttle: la detección de tema bajo el cursor usa elementFromPoint, que
+      // fuerza hit-testing. No hace falta cada frame; ~10 veces/seg sobra.
+      let lastThemeCheck = 0;
+      function tick(now) {
         rx += (mx - rx) * 0.18;
         ry += (my - ry) * 0.18;
         dx += (mx - dx) * 0.55;
         dy += (my - dy) * 0.55;
         ring.style.transform = `translate(${rx}px, ${ry}px) translate(-50%, -50%)`;
         dot.style.transform = `translate(${dx}px, ${dy}px) translate(-50%, -50%)`;
-        updateCursorTheme();
+        if (!now || now - lastThemeCheck > 100) { lastThemeCheck = now || 0; updateCursorTheme(); }
         requestAnimationFrame(tick);
       }
       tick();

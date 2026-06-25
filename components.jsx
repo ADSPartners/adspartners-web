@@ -387,7 +387,7 @@ function Services() {
             {items.map((n) =>
             <li className="services-index__row srv-reveal" key={n} data-cursor="cta">
               <span className="services-index__name">{t('srv.item.' + n)}</span>
-              <span className="services-index__hoverimg" style={{ '--rot': (n % 2 === 0 ? -5 : 5) + 'deg', '--img': `url('assets/services/${imgs[n]}.jpg')` }} aria-hidden="true"></span>
+              <span className="services-index__hoverimg" style={{ '--rot': (n % 2 === 0 ? -5 : 5) + 'deg', '--img': `url('assets/services/${imgs[n]}.jpg?v=2')` }} aria-hidden="true"></span>
               <span className="services-index__arrow" aria-hidden="true">↗</span>
             </li>
             )}
@@ -442,7 +442,7 @@ function WorkflowList() {
       {rows.map((n, i) =>
       <div key={n} className="wfl-row" style={{ top: (96 + i * 50) + 'px', zIndex: i + 1 }}>
         <div className="wfl-row__media" aria-hidden="true">
-          <div className="wfl-row__img" style={{ '--img': `url('assets/workflow/${imgs[n]}.jpg')` }}></div>
+          <div className="wfl-row__img" style={{ '--img': `url('assets/workflow/${imgs[n]}.jpg?v=2')` }}></div>
         </div>
         <div className="wfl-row__num">{String(n).padStart(2, '0')}</div>
         <h3 className="wfl-row__title">{t('work.wf.' + n + '.title')}</h3>
@@ -476,9 +476,9 @@ function WorkModel() {
 function Clients() {
   const { t } = useT();
   const clients = [
-  { id: 'aqva', letter: 'a.', name: t('cli.aqva.name'), img: 'assets/clients/aqva.png', tags: t('cli.aqva.tags'), desc: t('cli.aqva.desc') },
-  { id: 'inversalia', letter: 'b.', name: t('cli.inversalia.name'), img: 'assets/clients/inversalia.png', tags: t('cli.inversalia.tags'), desc: t('cli.inversalia.desc') },
-  { id: 'sapphira', letter: 'c.', name: t('cli.sapphira.name'), img: 'assets/clients/sapphira.png', tags: t('cli.sapphira.tags'), desc: t('cli.sapphira.desc') }];
+  { id: 'sapphira', letter: 'a.', name: t('cli.sapphira.name'), img: 'assets/clients/sapphira.jpg', tags: t('cli.sapphira.tags'), desc: t('cli.sapphira.desc') },
+  { id: 'inversalia', letter: 'b.', name: t('cli.inversalia.name'), img: 'assets/clients/inversalia.jpg', tags: t('cli.inversalia.tags'), desc: t('cli.inversalia.desc') },
+  { id: 'aqva', letter: 'c.', name: t('cli.aqva.name'), img: 'assets/clients/aqva.jpg', tags: t('cli.aqva.tags'), desc: t('cli.aqva.desc') }];
 
 
   const [active, setActive] = useState(0);
