@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>404 — Página no encontrada · adsPartners®</title>
+<link rel="icon" type="image/svg+xml" href="assets/logos/favicon.svg?v=2" />
+<link rel="alternate icon" type="image/png" sizes="32x32" href="assets/logos/favicon-32.png?v=2" />
+<link rel="apple-touch-icon" sizes="180x180" href="assets/logos/apple-touch-icon.png?v=2" />
+<style>
+  /* ============ FUENTES DEL SITIO ============ */
+  @font-face { font-family: 'Open Sauce'; src: url('assets/fonts/OpenSauceSans-Light.ttf') format('truetype'); font-weight: 300; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'Open Sauce'; src: url('assets/fonts/OpenSauceSans-Regular.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'Open Sauce'; src: url('assets/fonts/OpenSauceSans-Medium.ttf') format('truetype'); font-weight: 500; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'Open Sauce'; src: url('assets/fonts/OpenSauceSans-SemiBold.ttf') format('truetype'); font-weight: 600; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'Open Sauce'; src: url('assets/fonts/OpenSauceSans-Bold.ttf') format('truetype'); font-weight: 700; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'Apple Garamond'; src: url('assets/fonts/AppleGaramond.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'Apple Garamond'; src: url('assets/fonts/AppleGaramond-Italic.ttf') format('truetype'); font-weight: 400; font-style: italic; font-display: swap; }
+  @font-face { font-family: 'Apple Garamond'; src: url('assets/fonts/AppleGaramond-Light.ttf') format('truetype'); font-weight: 300; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'Apple Garamond'; src: url('assets/fonts/AppleGaramond-Bold.ttf') format('truetype'); font-weight: 700; font-style: normal; font-display: swap; }
+
+  /* ============ TOKENS DEL SITIO ============ */
+  :root {
+    --marron: #34190A;
+    --beige: #E7E2DA;
+    --rosa: #F5CBD7;
+    --blanco: #F5F3F1;
+    --negro: #190900;
+    --marron-soft: #4a2614;
+    /* rosa más profunda (misma familia de tono) para texto/fichas sobre fondo claro */
+    --rosa-ink: oklch(0.62 0.12 9);
+
+    --sand: #EAE4DA;
+    --sand-deep: #DED6C8;
+    --line: rgba(52, 25, 11, 0.12);
+
+    --sans: 'Open Sauce', system-ui, sans-serif;
+    --serif: 'Apple Garamond', Georgia, serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  a { color: inherit; text-decoration: none; }
+  html, body { height: 100%; }
+
+  body {
+    min-height: 100vh;
+    background:
+      radial-gradient(1100px 620px at 50% -8%, var(--blanco) 0%, var(--beige) 58%),
+      var(--beige);
+    color: var(--marron);
+    font-family: var(--sans);
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 96px 20px 56px;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* ============ NAV (del sitio) ============ */
+  .nav {
+    position: fixed;
+    top: 6px; left: 8px; right: 8px;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 8px 14px;
+    pointer-events: none;
+    font-size: 11px;
+    letter-spacing: .04em;
+    color: var(--marron);
+    height: 44px;
+    isolation: isolate;
+  }
+  .nav--light { color: var(--marron); }
+  .nav-block { pointer-events: auto; display: flex; flex-direction: column; justify-content: center; line-height: 1.4; min-width: 0; }
+  .nav-logo-block { align-items: flex-start; }
+  .nav-logo {
+    height: 26px; width: 64px; display: block;
+    background-color: currentColor;
+    -webkit-mask: url('assets/logos/isotipo_marron.svg') left center / contain no-repeat;
+            mask: url('assets/logos/isotipo_marron.svg') left center / contain no-repeat;
+  }
+  .nav-tag, .nav-contact { align-items: flex-start; text-align: left; }
+  .nav-tag span { letter-spacing: .08em; text-transform: uppercase; opacity: .85; font-size: 10.5px; }
+  .nav-contact { font-size: 10.5px; letter-spacing: .03em; min-width: 0; overflow: hidden; }
+  .nav-contact span:last-child { text-transform: uppercase; opacity: .7; margin-top: 1px; font-size: 10.5px; }
+  .nav-mail {
+    position: relative; display: inline-block; align-self: flex-start;
+    text-decoration: none; color: inherit;
+    border-bottom: 1px solid currentColor; padding-bottom: 1px;
+    overflow: hidden; height: 1.4em; font-size: 11.5px; cursor: pointer;
+  }
+  .nav-mail-default, .nav-mail-copied { display: block; transition: transform .35s cubic-bezier(.7,0,.3,1); }
+  .nav-mail-copied { position: absolute; top: 100%; left: 0; font-family: var(--serif); font-style: italic; font-weight: 400; }
+  .nav-mail:hover .nav-mail-default { transform: translateY(-100%); }
+  .nav-mail:hover .nav-mail-copied { transform: translateY(-100%); }
+  .nav-cta-group { display: flex; flex-direction: row; align-items: center; gap: 18px; flex-wrap: nowrap; white-space: nowrap; min-width: 0; }
+  .nav-cart {
+    position: relative;
+    border: 1px solid currentColor; border-radius: 999px;
+    padding: 0 10px; font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase;
+    color: inherit; background: transparent; overflow: hidden; cursor: pointer; text-decoration: none;
+    display: flex; align-items: center; justify-content: center;
+    height: 30px; width: 200px; flex-shrink: 0;
+    transition: background .35s ease, color .35s ease;
+  }
+  .nav-cart-text {
+    position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%);
+    display: flex; align-items: center; justify-content: center; gap: 14px;
+    font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap;
+    transition: transform .45s cubic-bezier(.7,0,.3,1), opacity .35s ease;
+    font-family: var(--sans); font-weight: 500;
+  }
+  .nav-cart-default { transform: translateY(-50%); opacity: 1; }
+  .nav-cart-hover { transform: translateY(120%); opacity: 0; }
+  .nav-cart:hover .nav-cart-default { transform: translateY(-220%); opacity: 0; }
+  .nav-cart:hover .nav-cart-hover { transform: translateY(-50%); opacity: 1; }
+  .nav-lang {
+    pointer-events: auto; background: transparent; border: 0; color: inherit; padding: 0;
+    font-family: var(--sans); font-size: 11.5px; letter-spacing: .14em; font-weight: 600;
+    cursor: pointer; text-transform: uppercase; position: relative; opacity: .75;
+    transition: opacity .25s ease;
+  }
+  .nav-lang::after { content: ''; position: absolute; left: 0; right: 0; bottom: -3px; height: 1px; background: currentColor; transform: scaleX(0); transform-origin: left center; transition: transform .35s cubic-bezier(.2,.8,.2,1); }
+  .nav-lang:hover { opacity: 1; }
+  .nav-lang:hover::after { transform: scaleX(1); }
+
+  @media (max-width: 1000px) {
+    .nav { gap: 16px; padding: 14px 18px; }
+    .nav-tag, .nav-contact { display: none; }
+  }
+  @media (max-width: 700px) { .nav { padding: 12px 16px; } }
+  @media (max-width: 480px) {
+    .nav-cart { width: 180px; padding: 0 12px; }
+    .nav-lang { font-size: 11px; }
+    .nav-cta-group { gap: 12px; }
+  }
+
+  .wrap {
+    width: 100%;
+    max-width: 540px;
+    text-align: center;
+  }
+
+  /* ============ CABECERA DEL ERROR ============ */
+  .eyebrow {
+    font-family: var(--sans);
+    font-weight: 600;
+    letter-spacing: .26em;
+    text-transform: uppercase;
+    font-size: 11px;
+    color: var(--marron-soft);
+    margin-bottom: 18px;
+  }
+
+  .code {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: clamp(92px, 17vw, 162px);
+    line-height: .82;
+    letter-spacing: -.04em;
+    color: var(--marron);
+    display: inline-block;
+  }
+  .code .zero { color: var(--marron); }
+
+  .headline {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: clamp(28px, 5vw, 46px);
+    line-height: 1.12;
+    letter-spacing: -.02em;
+    margin-top: 22px;
+    color: var(--marron);
+    text-wrap: balance;
+  }
+
+  .sub {
+    font-family: var(--sans);
+    font-weight: 400;
+    font-size: 16px;
+    color: var(--marron-soft);
+    margin-top: 16px;
+    line-height: 1.6;
+    max-width: 40ch;
+    margin-left: auto;
+    margin-right: auto;
+    text-wrap: pretty;
+  }
+  .sub em { font-family: var(--serif); font-style: italic; font-weight: 400; color: var(--rosa-ink); }
+  .sub strong { font-weight: 600; color: var(--marron); }
+
+  /* ============ JUEGO ============ */
+  .game {
+    margin: 40px auto 0;
+    width: min(316px, 84vw);
+  }
+
+  .status {
+    font-family: var(--sans);
+    font-weight: 600;
+    letter-spacing: .14em;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: var(--marron-soft);
+    min-height: 20px;
+    margin-bottom: 18px;
+    transition: color .25s ease;
+  }
+  .status.win  { color: var(--marron); }
+  .status.lose { color: var(--rosa-ink); }
+  .status.draw { color: var(--marron-soft); }
+
+  .board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    aspect-ratio: 1 / 1;
+  }
+
+  .cell {
+    background: var(--sand);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    font-family: var(--sans);
+    font-weight: 500;
+    font-size: clamp(32px, 12vw, 48px);
+    color: var(--marron);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform .12s ease, background .2s ease, box-shadow .2s ease;
+    user-select: none;
+    line-height: 1;
+  }
+  .cell:hover:not(.taken):not(:disabled) {
+    background: var(--sand-deep);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(25, 9, 0, .10);
+  }
+  .cell:focus-visible {
+    outline: 2px solid var(--marron);
+    outline-offset: 2px;
+  }
+  .cell.x { color: var(--marron); }
+  .cell.o { color: var(--rosa-ink); }
+  .cell.taken { cursor: default; }
+  .cell.win-cell {
+    background: var(--rosa);
+    border-color: transparent;
+    color: var(--marron);
+    animation: pop .3s ease;
+  }
+  @keyframes pop {
+    0%   { transform: scale(.82); }
+    60%  { transform: scale(1.08); }
+    100% { transform: scale(1); }
+  }
+  @keyframes drop {
+    0%   { opacity: 0; transform: scale(.4) rotate(-8deg); }
+    100% { opacity: 1; transform: scale(1) rotate(0); }
+  }
+  .cell .mark { display: inline-block; animation: drop .18s ease both; }
+
+  /* ============ MARCADOR ============ */
+  .scoreline {
+    margin-top: 24px;
+    font-family: var(--sans);
+    font-size: 14px;
+    color: var(--marron-soft);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: .01em;
+  }
+  .scoreline strong { color: var(--marron); font-weight: 600; }
+
+  /* ============ ACCIONES ============ */
+  .actions {
+    margin-top: 30px;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .btn {
+    font-family: var(--sans);
+    font-weight: 600;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    font-size: 11px;
+    height: 46px;
+    padding: 0 26px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: 1px solid var(--marron);
+    background: transparent;
+    color: var(--marron);
+    cursor: pointer;
+    text-decoration: none;
+    transition: background .3s ease, color .3s ease, transform .12s ease;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn.primary { background: var(--marron); color: var(--beige); }
+  .btn.primary:hover { background: transparent; color: var(--marron); }
+  .btn.ghost:hover { background: rgba(52, 25, 11, .06); }
+  .btn:focus-visible { outline: 2px solid var(--marron); outline-offset: 3px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cell, .btn, .cell .mark, .cell.win-cell { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+  <nav class="nav nav--light">
+    <a class="nav-block nav-logo-block" href="/" aria-label="adsPartners">
+      <span class="nav-logo" role="img" aria-label="adsPartners"></span>
+    </a>
+    <div class="nav-block nav-tag">
+      <span>Creative</span>
+      <span>Growth Studio</span>
+    </div>
+    <div class="nav-block nav-contact">
+      <a href="#" id="navMail" class="nav-mail">
+        <span class="nav-mail-default">adsgroup@ads-partners.com</span>
+        <span class="nav-mail-copied">Click to copy</span>
+      </a>
+      <span>Not for everyone</span>
+    </div>
+    <div class="nav-block nav-cta-group">
+      <button class="nav-lang" type="button" aria-label="Change language">EN</button>
+      <a class="nav-cart" href="/" aria-label="¿Quedamos?">
+        <span class="nav-cart-text nav-cart-default">¿Quedamos?</span>
+        <span class="nav-cart-text nav-cart-hover">Te vamos a caer bien</span>
+      </a>
+    </div>
+  </nav>
+
+  <main class="wrap">
+    <h1 class="code">4<span class="zero">0</span>4</h1>
+    <p class="headline">Esta página se nos ha escapado.</p>
+
+    <section class="game" aria-label="Tres en raya contra FRESA, la IA de adsPartners">
+      <div class="status" id="status" role="status" aria-live="polite">Tú eres ✕ — FRESA es ◯. Empiezas tú.</div>
+      <div class="board" id="board" role="grid"></div>
+    </section>
+
+    <p class="scoreline" id="score"><strong>Tú</strong> 0 · <strong>FRESA</strong> 0 · <strong>Tablas</strong> 0</p>
+
+    <div class="actions">
+      <button class="btn primary" id="reset" type="button">Otra partida</button>
+      <a class="btn ghost" href="/">Volver al inicio</a>
+    </div>
+  </main>
+
+<script>
+(function () {
+  var HUMAN = 'X', AI = 'O';
+  var board = Array(9).fill('');
+  var locked = false;
+  var score = { you: 0, ai: 0, draw: 0 };
+
+  var boardEl  = document.getElementById('board');
+  var statusEl = document.getElementById('status');
+  var scoreEl  = document.getElementById('score');
+  var resetEl  = document.getElementById('reset');
+
+  var WINS = [
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
+  ];
+
+  // ---- construir celdas ----
+  var cells = [];
+  for (var i = 0; i < 9; i++) {
+    var c = document.createElement('button');
+    c.className = 'cell';
+    c.type = 'button';
+    c.setAttribute('role', 'gridcell');
+    c.setAttribute('aria-label', 'Casilla ' + (i + 1));
+    c.dataset.idx = i;
+    c.addEventListener('click', onCellClick);
+    boardEl.appendChild(c);
+    cells.push(c);
+  }
+
+  function winnerInfo(b) {
+    for (var k = 0; k < WINS.length; k++) {
+      var w = WINS[k];
+      if (b[w[0]] && b[w[0]] === b[w[1]] && b[w[1]] === b[w[2]]) {
+        return { player: b[w[0]], line: w };
+      }
+    }
+    if (b.every(function (v) { return v; })) return { player: 'draw', line: null };
+    return null;
+  }
+
+  // ---- minimax: jugada perfecta ----
+  function minimax(b, player) {
+    var info = winnerInfo(b);
+    if (info) {
+      if (info.player === AI) return { score: 10 };
+      if (info.player === HUMAN) return { score: -10 };
+      return { score: 0 };
+    }
+    var best = player === AI ? { score: -Infinity } : { score: Infinity };
+    for (var i = 0; i < 9; i++) {
+      if (!b[i]) {
+        b[i] = player;
+        var result = minimax(b, player === AI ? HUMAN : AI);
+        b[i] = '';
+        if (player === AI) {
+          if (result.score > best.score) best = { score: result.score, idx: i };
+        } else {
+          if (result.score < best.score) best = { score: result.score, idx: i };
+        }
+      }
+    }
+    return best;
+  }
+
+  function onCellClick(e) {
+    var idx = +e.currentTarget.dataset.idx;
+    if (locked || board[idx]) return;
+    place(idx, HUMAN);
+    var info = winnerInfo(board);
+    if (info) return endRound(info);
+    locked = true;
+    statusEl.textContent = 'FRESA está pensando…';
+    statusEl.className = 'status';
+    setTimeout(aiMove, 380);
+  }
+
+  // FRESA juega en ciclos de 3: gana las 2 primeras, se deja ganar la 3ª.
+  // gameNo arranca en 1; ((gameNo - 1) % 3 === 2) marca la partida "que pierde".
+  var gameNo = 1;
+
+  function fresaShouldLose() {
+    return ((gameNo - 1) % 3) === 2; // 3ª, 6ª, 9ª… partida del ciclo
+  }
+
+  // Devuelve la jugada que conduce a la DERROTA de FRESA (minimax invertido):
+  // FRESA elige el peor resultado para sí misma, dando ventaja al humano.
+  function worstMove(b) {
+    var best = { score: Infinity };
+    for (var i = 0; i < 9; i++) {
+      if (!b[i]) {
+        b[i] = AI;
+        var result = minimax(b.slice(), HUMAN); // valora desde el turno del humano
+        b[i] = '';
+        if (result.score < best.score) best = { score: result.score, idx: i };
+      }
+    }
+    return best;
+  }
+
+  function aiMove() {
+    var empties = [];
+    for (var i = 0; i < 9; i++) if (!board[i]) empties.push(i);
+
+    var move;
+    if (fresaShouldLose()) {
+      // partida que FRESA debe perder: juega para perjudicarse
+      move = worstMove(board.slice()).idx;
+    } else {
+      // partida que FRESA gana: jugada perfecta
+      move = minimax(board.slice(), AI).idx;
+    }
+    if (move == null) move = empties[0]; // por seguridad
+
+    place(move, AI);
+    var info = winnerInfo(board);
+    if (info) return endRound(info);
+    locked = false;
+    statusEl.textContent = 'Tu turno';
+    statusEl.className = 'status';
+  }
+
+  function place(idx, player) {
+    board[idx] = player;
+    var cell = cells[idx];
+    cell.innerHTML = '<span class="mark">' + (player === HUMAN ? '✕' : '◯') + '</span>';
+    cell.classList.add('taken', player === HUMAN ? 'x' : 'o');
+    cell.setAttribute('aria-label', 'Casilla ' + (idx + 1) + ': ' + (player === HUMAN ? 'tuya' : 'FRESA'));
+  }
+
+  function endRound(info) {
+    locked = true;
+    if (info.player === 'draw') {
+      score.draw++;
+      statusEl.textContent = 'Tablas. Mejor de lo que parece.';
+      statusEl.className = 'status draw';
+    } else if (info.player === HUMAN) {
+      score.you++;
+      statusEl.textContent = '¡Le has ganado a FRESA! Página perdida, orgullo recuperado.';
+      statusEl.className = 'status win';
+      highlight(info.line);
+    } else {
+      score.ai++;
+      statusEl.textContent = 'Gana FRESA. La revancha está ahí abajo.';
+      statusEl.className = 'status lose';
+      highlight(info.line);
+    }
+    updateScore();
+  }
+
+  function highlight(line) {
+    if (!line) return;
+    line.forEach(function (i) { cells[i].classList.add('win-cell'); });
+  }
+
+  function updateScore() {
+    scoreEl.innerHTML =
+      '<strong>Tú</strong> ' + score.you +
+      ' · <strong>FRESA</strong> ' + score.ai +
+      ' · <strong>Tablas</strong> ' + score.draw;
+  }
+
+  function reset() {
+    gameNo++;
+    board = Array(9).fill('');
+    locked = false;
+    cells.forEach(function (c) {
+      c.className = 'cell';
+      c.innerHTML = '';
+      c.setAttribute('aria-label', 'Casilla ' + (+c.dataset.idx + 1));
+    });
+    statusEl.textContent = 'Tú eres ✕ — FRESA es ◯. Empiezas tú.';
+    statusEl.className = 'status';
+  }
+
+  resetEl.addEventListener('click', reset);
+})();
+</script>
+
+<script>
+(function () {
+  var mail = document.getElementById('navMail');
+  if (!mail) return;
+  var copied = mail.querySelector('.nav-mail-copied');
+  var t;
+  mail.addEventListener('click', function (e) {
+    e.preventDefault();
+    if (navigator.clipboard) navigator.clipboard.writeText('adsgroup@ads-partners.com');
+    copied.textContent = 'Copiado ✓';
+    clearTimeout(t);
+    t = setTimeout(function () { copied.textContent = 'Click to copy'; }, 1800);
+  });
+})();
+</script>
+</body>
+</html>

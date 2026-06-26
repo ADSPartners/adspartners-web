@@ -24,14 +24,16 @@ import {
 import { join } from 'node:path';
 
 const ROOT = import.meta.dirname;
-const DIST = join(ROOT, 'dist');
+// Salida en /docs porque GitHub Pages (deploy clásico desde rama, sin Actions)
+// solo puede publicar la raíz o la carpeta /docs. Aquí servimos /docs.
+const DIST = join(ROOT, 'docs');
 
 // Páginas HTML que el build debe transformar (las demás se copian tal cual).
 const PAGES = ['index.html', 'aviso-legal.html', 'cookies.html', 'privacidad.html'];
 
 // Ficheros/carpetas de raíz que NO se publican (código fuente o config).
 const SKIP_ROOT = new Set([
-  'node_modules', '.git', '.github', 'dist', 'build.mjs', 'package.json',
+  'node_modules', '.git', '.github', 'dist', 'docs', 'build.mjs', 'package.json',
   'package-lock.json', 'pnpm-lock.yaml', '.gitignore', 'README.md',
   // GIF duplicado en raíz que ninguna página usa (la buena vive en assets/).
   'letter-thanks.gif',
@@ -154,7 +156,7 @@ async function main() {
   // Resumen de peso.
   const sizeOf = (p) => { try { return statSync(join(DIST, p)).size; } catch { return 0; } };
   const kb = (n) => `${(n / 1024).toFixed(1)} KB`;
-  console.log('\nListo. dist/ generado.');
+  console.log('\nListo. docs/ generado (lo que publica GitHub Pages).');
   console.log(`  vendor React prod: ${kb(sizeOf('vendor/react.production.min.js') + sizeOf('vendor/react-dom.production.min.js'))}`);
   console.log(`  (antes: ~4,3 MB de JS de terceros + compilación en el navegador)`);
 }
