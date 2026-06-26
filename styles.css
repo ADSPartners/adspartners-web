@@ -591,8 +591,9 @@ body.lang-switched-in .lang-mark {
    y el grano animado son carísimos de pintar por frame y causaban jank/retraso en
    móvil. En pantallas ≤ 1024px usamos la imagen estática sin esos efectos. */
 @media (max-width: 1024px) {
-  .hero::before { filter: none; animation: none; }
-  .hero-grain { animation: none; }
+  /* HERO con efecto completo en móvil (igual que escritorio), por petición. */
+  .hero-grain { animation: heroGrain .12s steps(1, end) infinite; }
+  .hero::before { filter: url(#heroWaves); animation: heroBreathe 26s ease-in-out infinite alternate; }
 }
 .hero-meta {
   position: relative;
