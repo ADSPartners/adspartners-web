@@ -476,9 +476,9 @@ function WorkModel() {
 function Clients() {
   const { t } = useT();
   const clients = [
-  { id: 'sapphira', letter: 'a.', name: t('cli.sapphira.name'), img: 'assets/clients/sapphira.jpg', tags: t('cli.sapphira.tags'), desc: t('cli.sapphira.desc') },
-  { id: 'inversalia', letter: 'b.', name: t('cli.inversalia.name'), img: 'assets/clients/inversalia.jpg', tags: t('cli.inversalia.tags'), desc: t('cli.inversalia.desc') },
-  { id: 'aqva', letter: 'c.', name: t('cli.aqva.name'), img: 'assets/clients/aqva.jpg', tags: t('cli.aqva.tags'), desc: t('cli.aqva.desc') }];
+  { id: 'sapphira', letter: 'a.', name: t('cli.sapphira.name'), img: window.IMG.sapphira, tags: t('cli.sapphira.tags'), desc: t('cli.sapphira.desc') },
+  { id: 'inversalia', letter: 'b.', name: t('cli.inversalia.name'), img: window.IMG.inversalia, tags: t('cli.inversalia.tags'), desc: t('cli.inversalia.desc') },
+  { id: 'aqva', letter: 'c.', name: t('cli.aqva.name'), img: window.IMG.aqva, tags: t('cli.aqva.tags'), desc: t('cli.aqva.desc') }];
 
 
   const [active, setActive] = useState(0);
