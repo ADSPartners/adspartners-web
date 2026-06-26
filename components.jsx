@@ -7,7 +7,9 @@ const { useState, useEffect, useRef } = React;
 // así que la web funciona aunque todavía no hayas conectado la automatización.
 // Cuando lo pegues, el formulario hará POST de un JSON con todos los datos del lead.
 // (Ver README → "Conexión con n8n" para la estructura del JSON y el tema CORS.)
-const N8N_WEBHOOK_URL = '';
+const N8N_WEBHOOK_URL = 'https://n8n.ads-partners.com/webhook/ads-carta';
+// Newsletter del footer → guarda el email en el Excel de leads (hoja "Newsletter").
+const N8N_NEWSLETTER_URL = 'https://n8n.ads-partners.com/webhook/ads-newsletter';
 
 // ============= REVEAL HOOK =============
 function useReveal() {
@@ -975,7 +977,21 @@ function Footer({ onCartClick }) {
   const onJoin = (e) => {
     e.preventDefault();
     const input = e.currentTarget.querySelector('.foot__newsinput');
-    if (input && !input.value.trim()) { input.focus(); return; }
+    const email = input ? input.value.trim() : '';
+    if (!email) { if (input) input.focus(); return; }
+    // Guarda el email en el Excel de leads vía n8n. Best-effort: si falla el POST
+    // no bloqueamos la UX (igual mostramos el GIF de gracias).
+    if (N8N_NEWSLETTER_URL) {
+      try {
+        fetch(N8N_NEWSLETTER_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email, lang: lang, source: 'adspartners.com/footer' }),
+          keepalive: true
+        }).catch(() => {});
+      } catch (err) {}
+    }
+    if (input) input.value = '';
     setJoined(true);
   };
   const copyMail = (e) => {
