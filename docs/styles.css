@@ -587,13 +587,13 @@ body.lang-switched-in .lang-mark {
   .hero::before, .hero-grain { animation: none; }
   .hero::before { filter: none; }
 }
-/* RENDIMIENTO MÓVIL: el filtro SVG de desplazamiento (feTurbulence+feDisplacementMap)
-   y el grano animado son carísimos de pintar por frame y causaban jank/retraso en
-   móvil. En pantallas ≤ 1024px usamos la imagen estática sin esos efectos. */
+/* HERO en movil: el filtro SVG de ondas (feTurbulence+feDisplacementMap) es lo mas caro
+   de pintar por frame y causa tirones en movil. En <=1024px dejamos solo el respiro suave
+   (scale, barato) y quitamos el filtro de ondas y el grano rapido.
+   prefers-reduced-motion lo apaga del todo. */
 @media (max-width: 1024px) {
-  /* HERO con efecto completo en móvil (igual que escritorio), por petición. */
-  .hero-grain { animation: heroGrain .12s steps(1, end) infinite; }
-  .hero::before { filter: url(#heroWaves); animation: heroBreathe 26s ease-in-out infinite alternate; }
+  .hero::before { filter: none; animation: heroBreathe 26s ease-in-out infinite alternate; }
+  .hero-grain { animation: none; }
 }
 .hero-meta {
   position: relative;
