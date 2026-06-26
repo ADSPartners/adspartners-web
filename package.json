@@ -1,0 +1,16 @@
+{
+  "name": "adspartners-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Web de adsPartners. El JSX se compila en el build (no en el navegador).",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.29.7",
+    "@babel/plugin-transform-block-scoping": "^7.29.7",
+    "@babel/preset-react": "^7.29.7",
+    "esbuild": "0.25.5"
+  }
+}
