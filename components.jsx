@@ -1,4 +1,4 @@
-/* global React, useT, THtml */
+/* global React, useT */
 const { useState, useEffect, useRef } = React;
 
 // ============= LEAD CAPTURE · n8n =============
@@ -106,7 +106,7 @@ function LangToggle() {
 }
 
 // ============= NAV =============
-function Nav({ cartCount, onCartClick }) {
+function Nav({ onCartClick }) {
   const { t } = useT();
   const [copied, setCopied] = useState(false);
   const [theme, setTheme] = useState('dark');
@@ -172,7 +172,7 @@ function Nav({ cartCount, onCartClick }) {
 }
 
 // ============= SIDE MENU =============
-function SideMenu({ onCartClick }) {
+function SideMenu() {
   const { t } = useT();
   const items = [
   { href: '#manifiesto', key: 'side.manifesto' },
@@ -222,18 +222,12 @@ function SideMenu({ onCartClick }) {
       window.removeEventListener('resize', onScroll);
     };
   }, []);
-  const handleClick = (e, href) => {
-    if (href === '#contacto') {
-      e.preventDefault();
-      onCartClick();
-    }
-  };
   return (
     <aside className={`side-menu side-menu--${theme}`} aria-label={t('side.aria')}>
       <ul className="side-menu-list">
         {items.map((it, i) =>
         <li key={it.href} className={`side-menu-item ${i === active ? 'active' : ''}`}>
-            <a href={it.href} onClick={(e) => handleClick(e, it.href)} data-cursor="cta" style={{ padding: "0px 0px 0px 4px" }}>
+            <a href={it.href} data-cursor="cta" style={{ padding: "0px 0px 0px 4px" }}>
               <span className="side-menu-dots"></span>
               <span className="side-menu-text">{t(it.key)}</span>
             </a>
@@ -268,7 +262,6 @@ function Hero() {
 
 }
 
-// ============= MARQUEE =============
 // ============= MANIFIESTO =============
 function Manifiesto() {
   const { t, lang } = useT();
@@ -404,37 +397,6 @@ function Services() {
 // (Team component is now defined in team-section.jsx)
 
 // ============= WORK MODEL — THE WIN-WIN METHOD =============
-function WorkflowCards() {
-  const [open, setOpen] = useState(null);
-  useEffect(() => {
-    if (open === null) return;
-    const onKey = (e) => { if (e.key === 'Escape') setOpen(null); };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [open]);
-  const cards = [0, 1, 2, 3];
-  return (
-    <div className={`wf-cards ${open !== null ? 'has-open' : ''}`}>
-      {cards.map((i) =>
-      <article
-        key={i}
-        className={`wf-card ${open === i ? 'is-open' : ''} ${open !== null && open !== i ? 'is-hidden' : ''}`}
-        onClick={() => {if (open === null) setOpen(i);}}
-        data-cursor="cta">
-
-        {open === i &&
-        <button
-          className="wf-card__close"
-          aria-label="Cerrar"
-          onClick={(e) => {e.stopPropagation();setOpen(null);}}
-          data-cursor="cta">✕</button>
-        }
-      </article>
-      )}
-    </div>);
-
-}
-
 function WorkflowList() {
   const { t } = useT();
   const rows = [1, 2, 3, 4];
@@ -920,7 +882,7 @@ function Quedamos() {
       <div className="qd-modal qd-thanks qd-thanks--gif" style={{ '--count-dur': '15.15s' }} onClick={() => setSent(false)}>
         <div className="qd-thanks__box qd-thanks__box--gif" onClick={(e) => e.stopPropagation()}>
           <button className="qd-modal__close" onClick={() => setSent(false)} aria-label={lang === 'en' ? 'Close' : 'Cerrar'} data-cursor="cta">✕</button>
-          <img className="qd-thanks__gif" src="assets/letter-thanks.gif" alt="" />
+          <img className="qd-thanks__gif" src="assets/letter-thanks.webp" alt="" />
           <span className="qd-thanks__bar" aria-hidden="true"></span>
         </div>
       </div>
@@ -1065,7 +1027,7 @@ function Footer({ onCartClick }) {
       <div className="qd-modal qd-thanks qd-thanks--gif" onClick={() => setJoined(false)}>
         <div className="qd-thanks__box qd-thanks__box--gif" onClick={(e) => e.stopPropagation()}>
           <button className="qd-modal__close" onClick={() => setJoined(false)} aria-label={lang === 'en' ? 'Close' : 'Cerrar'} data-cursor="cta">✕</button>
-          <img className="qd-thanks__gif" src="assets/newsletter-thanks.gif" alt="" />
+          <img className="qd-thanks__gif" src="assets/newsletter-thanks.webp" alt="" />
           <span className="qd-thanks__bar" aria-hidden="true"></span>
         </div>
       </div>

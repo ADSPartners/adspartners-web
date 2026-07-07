@@ -35,8 +35,6 @@ const PAGES = ['index.html', 'aviso-legal.html', 'cookies.html', 'privacidad.htm
 const SKIP_ROOT = new Set([
   'node_modules', '.git', '.github', 'dist', 'docs', 'build.mjs', 'package.json',
   'package-lock.json', 'pnpm-lock.yaml', '.gitignore', 'README.md',
-  // GIF duplicado en raíz que ninguna página usa (la buena vive en assets/).
-  'letter-thanks.gif',
 ]);
 
 // React de producción auto-alojado; reemplaza a las versiones dev de unpkg.

@@ -114,7 +114,7 @@ window.IMG={
         document.body.classList.remove('cursor-hover', 'cursor-text-mode', 'cursor-cta');
         if (t.closest('[data-cursor="cta"]')) document.body.classList.add('cursor-cta');
         else if (t.closest('input, textarea, [data-cursor="text"]')) document.body.classList.add('cursor-text-mode');
-        else if (t.closest('a, button, .product, .day, .time-slot, .polaroid, .service-row, .client-row')) document.body.classList.add('cursor-hover');
+        else if (t.closest('a, button, .day, .time-slot')) document.body.classList.add('cursor-hover');
       });
     })();
   </script>

@@ -14,7 +14,7 @@ function AppInner() {
   return (
     <>
       <Nav onCartClick={scrollToContact} />
-      <SideMenu onCartClick={scrollToContact} />
+      <SideMenu />
       <div className="scroll-content">
         <Hero />
         <Manifiesto />
