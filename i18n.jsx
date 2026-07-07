@@ -169,7 +169,7 @@ const DICT = {
     'work.wf.4.desc': 'Las campañas se lanzan. Primeras señales en 2-3 semanas. Señal sólida entre 60 y 90 días. A partir de ahí, optimizamos.',
     'win.left.html': 'NOSOTROS<br>GANAMOS',
     'win.right.html': 'SOLO SI<br>TU CRECES',
-    'win.col.l': 'Tarifa inicial para construir el sistema.',
+    'win.col.l': 'Fee inicial para construir el sistema.',
     'win.col.r': 'Variable para hacerlo crecer.',
     'win.note': 'El fee inicial (sin IVA incluido)* cubre la construcción completa antes del lanzamiento. <br> Dos semanas desde el kickoff hasta campañas en vivo. <br><br> Después del lanzamiento, pasamos a un modelo variable. Un porcentaje del crecimiento que consigas. <br> Hablado contigo, no impuesto.',
     'win.manifesto.p1': 'La lógica es simple: si tú creces, nosotros cobramos. Si no creces, no cobramos. Mismo lado de la mesa.',
