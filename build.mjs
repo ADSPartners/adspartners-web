@@ -17,6 +17,7 @@
 
 import { transform as esbuildMinify } from 'esbuild';
 import babel from '@babel/core';
+import { JSDOM, VirtualConsole } from 'jsdom';
 import { createHash } from 'node:crypto';
 import {
   cpSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync,
@@ -131,11 +132,107 @@ function copyStatic() {
   writeFileSync(join(DIST, '.nojekyll'), '');
 }
 
+// Pre-render de la home: ejecuta la app React en un DOM headless (jsdom) UNA vez
+// en el build y hornea el HTML resultante dentro de <div id="root">. Así los bots
+// que NO ejecutan JavaScript (crawlers de IA: GPTBot, ClaudeBot, PerplexityBot…, y
+// también el primer pase de Google) ven el contenido real en el HTML crudo, en vez
+// de un <div id="root"> vacío. En el navegador, React vuelve a montar limpio encima
+// (la app usa createRoot().render(), que reemplaza el contenido; no hay hidratación
+// ni riesgo de mismatch). Es BEST-EFFORT: si algo falla, se avisa y se publica sin
+// prerender (el resto de mejoras SEO se despliega igual).
+async function prerenderIndex(bundleName) {
+  const htmlFile = join(DIST, 'index.html');
+  const html = readFileSync(htmlFile, 'utf8');
+  try {
+    const virtualConsole = new VirtualConsole(); // silencia el ruido de scripts inline
+    const dom = new JSDOM(html, {
+      runScripts: 'dangerously',   // deja correr los inline (define window.IMG, etc.)
+      pretendToBeVisual: true,     // aporta requestAnimationFrame
+      url: 'https://ads-partners.com/',
+      virtualConsole,
+    });
+    const { window } = dom;
+
+    // Polyfills de APIs de navegador que los efectos de los componentes tocan.
+    if (!window.matchMedia) {
+      window.matchMedia = (q) => ({
+        matches: false, media: q || '', onchange: null,
+        addEventListener() {}, removeEventListener() {},
+        addListener() {}, removeListener() {}, dispatchEvent() { return false; },
+      });
+    }
+    // IO que "dispara" intersección al observar → useReveal marca el contenido como
+    // visible (si no, quedaría con clases de pre-reveal; el texto igualmente estaría
+    // en el DOM, pero así el snapshot queda limpio).
+    window.IntersectionObserver = class {
+      constructor(cb) { this.cb = cb; }
+      observe(el) { try { this.cb([{ isIntersecting: true, target: el, intersectionRatio: 1 }], this); } catch (e) {} }
+      unobserve() {} disconnect() {} takeRecords() { return []; }
+    };
+    window.ResizeObserver = window.ResizeObserver || class { observe() {} unobserve() {} disconnect() {} };
+    window.scrollTo = () => {};
+    if (!window.requestAnimationFrame) window.requestAnimationFrame = (cb) => setTimeout(() => cb(0), 0);
+    if (!window.cancelAnimationFrame) window.cancelAnimationFrame = (id) => clearTimeout(id);
+
+    // React de producción (vendored) + bundle compilado, evaluados en el window.
+    window.eval(readFileSync(join(DIST, 'vendor', 'react.production.min.js'), 'utf8'));
+    window.eval(readFileSync(join(DIST, 'vendor', 'react-dom.production.min.js'), 'utf8'));
+    if (!window.React || !window.ReactDOM) {
+      console.warn('  ! Prerender omitido: React no quedó expuesto en window. Se publica sin prerender.');
+      window.close();
+      return false;
+    }
+    // Fuerza commit SÍNCRONO: createRoot().render() de React 18 es asíncrono y su
+    // scheduler no asienta dentro de jsdom en el build. Envolvemos render en flushSync
+    // (mismo createRoot real; solo cambia el timing del commit). El cliente NO se toca.
+    const RD = window.ReactDOM;
+    const origCreateRoot = RD.createRoot.bind(RD);
+    RD.createRoot = (container) => {
+      const root = origCreateRoot(container);
+      const origRender = root.render.bind(root);
+      root.render = (el) => { try { RD.flushSync(() => origRender(el)); } catch (e) { origRender(el); } };
+      return root;
+    };
+
+    window.eval(readFileSync(join(DIST, bundleName), 'utf8')); // ReactDOM.createRoot(#root).render(<App/>)
+
+    // Deja que los efectos (IO/reveal) asienten tras el commit síncrono.
+    for (let i = 0; i < 15; i++) await new Promise((r) => setTimeout(r, 40));
+
+    const root = window.document.getElementById('root');
+    let inner = root ? root.innerHTML : '';
+
+    // Guarda: el snapshot debe ser sustancial y contener copy esperado. Si no, no se
+    // inyecta (mejor sin prerender que con un root a medias).
+    const ok = inner.length > 4000 && /Growth|Founders|Manifiesto|Quedamos|adsPartners/i.test(inner);
+    if (!ok) {
+      console.warn(`  ! Prerender omitido: snapshot insuficiente (${inner.length} chars). Se publica sin prerender.`);
+      window.close();
+      return false;
+    }
+
+    // Quita las imágenes base64 (window.IMG) del snapshot: el HTML estático se queda
+    // ligero y los crawlers leen igual el alt/texto. El navegador restaura las reales
+    // al re-montar. `data:,` es un data-URI vacío válido (sin petición de red).
+    inner = inner.replace(/data:image\/[a-z0-9.+-]+;base64,[A-Za-z0-9+/=\s]+/gi, 'data:,');
+
+    const injected = html.replace('<div id="root"></div>', `<div id="root" data-prerendered="1">${inner}</div>`);
+    writeFileSync(htmlFile, injected);
+    window.close();
+    console.log(`  · Prerender OK: ${(inner.length / 1024).toFixed(1)} KB de HTML horneado en #root`);
+    return true;
+  } catch (e) {
+    console.warn(`  ! Prerender falló (${e && e.message ? e.message : e}). Se publica sin prerender.`);
+    return false;
+  }
+}
+
 async function main() {
   rmSync(DIST, { recursive: true, force: true });
   mkdirSync(DIST, { recursive: true });
 
   console.log('Compilando bundles…');
+  let indexBundle = null;
   for (const page of PAGES) {
     const html = readFileSync(join(ROOT, page), 'utf8');
     // Scripts .jsx locales en orden de aparición.
@@ -145,11 +242,18 @@ async function main() {
     if (srcs.length === 0) { console.warn(`  ! ${page}: sin scripts .jsx`); continue; }
     const stem = page === 'index.html' ? 'app' : 'legal';
     const bundleName = await compileBundle(srcs, stem);
+    if (page === 'index.html') indexBundle = bundleName;
     writeFileSync(join(DIST, page), transformHtml(html, bundleName));
   }
 
   console.log('Copiando estáticos (css, loader, assets, vendor, CNAME)…');
   copyStatic();
+
+  // Pre-render de la home (best-effort; necesita docs/vendor/ ya copiado).
+  if (indexBundle) {
+    console.log('Pre-renderizando la home para bots sin JS (crawlers de IA + Google)…');
+    await prerenderIndex(indexBundle);
+  }
 
   // Resumen de peso.
   const sizeOf = (p) => { try { return statSync(join(DIST, p)).size; } catch { return 0; } };
