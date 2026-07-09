@@ -5,7 +5,7 @@ Integración con CRM
 Estructura SEO
 Automatización de Copy con IA`,"cli.inversalia.desc":`Inversalia es una firma de inversión inmobiliaria enfocada en operaciones residenciales de alto valor, especialmente en Madrid. Su posicionamiento se basa en confianza, discreción y acompañamiento patrimonial, alejándose del enfoque inmobiliario tradicional centrado únicamente en enseñar y vender propiedades.
 
-Desde adsPartners trabajamos la identidad, la narrativa de marca, la estructura web, la integración con CRM y la automatización de publicación de inmuebles. También desarrollamos una arquitectura SEO y un sistema high-tech de generación asistida de textos para mejorar la presentación de cada propiedad.
+Para Inversalia desarrollamos la identidad, la narrativa de marca, la estructura web, la integración con CRM y la automatización de publicación de inmuebles. También desarrollamos una arquitectura SEO y un sistema high-tech de generación asistida de textos para mejorar la presentación de cada propiedad.
 
 El objetivo fue crear su presencia digital y convertirla en una herramienta real de marca, captación y gestión comercial. Una web elegante, sí, pero sobre todo ordenada, funcional y conectada con su operativa interna.`,"cli.sapphira.name":"Sapphira Privé","cli.sapphira.tags":`Estrategia de Oferta
 Estrategia de Landing
@@ -15,7 +15,7 @@ Estrategia de Meta Ads
 Automatización de CRM
 Modelado de Performance`,"cli.sapphira.desc":`Sapphira Privé es una clínica de medicina estética con tratamientos de ticket medio alto. Su reto era captar pacientes cualificados y evitar el típico problema de muchas campañas del sector: generar leads baratos, pero con poca intención real de compra.
 
-Desde adsPartners trabajamos la estrategia de oferta, la estructura de landing, el guion de VSL, la estrategia de Meta Ads y el sistema de cualificación conectado al CRM. También modelamos escenarios de rendimiento para entender qué CPL, tasa de cierre y ticket medio hacían viable la captación.
+Para Sapphira Privé trabajamos la estrategia de oferta, la estructura de landing, el guion de VSL, la estrategia de Meta Ads y el sistema de cualificación conectado al CRM. También modelamos escenarios de rendimiento para entender qué CPL, tasa de cierre y ticket medio hacían viable la captación.
 
 El objetivo fue construir un funnel más serio y filtrado. En una clínica así, el anuncio no puede limitarse a llamar la atención; tiene que preparar la decisión, cualificar al paciente y facilitar el cierre comercial.`,"cli.aqva.name":"AQVA Swimwear","cli.aqva.tags":`Estrategia de Funnel
 Arquitectura de Oferta
