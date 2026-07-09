@@ -713,6 +713,14 @@ function Quedamos() {
     return () => clearTimeout(id);
   }, [sent]);
 
+  // El chat (ChatGlobo) abre la carta directamente al pulsar "¿Quedamos?" — mismo
+  // patrón de evento window que usa el cookie-consent.
+  React.useEffect(() => {
+    const open = () => setRevealed(true);
+    window.addEventListener('open-quedamos', open);
+    return () => window.removeEventListener('open-quedamos', open);
+  }, []);
+
   // Letter segments per language. type: 'text'|'date', req marks required (*)
   const F = {
     es: [

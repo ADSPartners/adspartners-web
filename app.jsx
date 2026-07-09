@@ -1,4 +1,4 @@
-/* global React, ReactDOM, I18nProvider, Nav, SideMenu, Hero, Manifiesto, Services, Team, WorkModel, WinWin, Clients, Footer, Quedamos, useReveal, useT, CookieConsent */
+/* global React, ReactDOM, I18nProvider, Nav, SideMenu, Hero, Manifiesto, Services, Team, WorkModel, WinWin, Clients, Footer, Quedamos, useReveal, useT, CookieConsent, ChatGlobo */
 const { useState, useEffect } = React;
 
 function AppInner() {
@@ -27,6 +27,7 @@ function AppInner() {
       </div>
       <Footer onCartClick={scrollToContact} />
       {typeof CookieConsent !== 'undefined' && <CookieConsent />}
+      {typeof ChatGlobo !== 'undefined' && <ChatGlobo onCTA={scrollToContact} />}
     </>
   );
 }

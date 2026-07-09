@@ -107,6 +107,18 @@ const DICT = {
     'cli.aqva.tags': 'Estrategia de Funnel\nArquitectura de Oferta\nEstrategia de Paid Media\nTesteo Creativo\nSelección de Producto\nEstrategia de Cross-Sell',
     'cli.aqva.desc': 'AQVA Swimwear es una marca de baño premium con enfoque eco-friendly, construida alrededor de producto, estética y sostenibilidad. Su reto era transformar una propuesta visual potente en un sistema comercial capaz de generar ventas medibles.\n\nTrabajamos la estructura inicial del funnel, la selección de productos estratégicos, la lógica de oferta y la estrategia de paid media. También analizamos oportunidades de cross-sell para aumentar el valor medio de pedido desde la primera compra.\n\nEl objetivo fue ordenar qué vender, cómo presentarlo y cómo validar la demanda mediante campañas. No se trataba solo de lanzar anuncios, sino de construir una estructura donde creatividad, producto y números trabajasen en la misma dirección.',
 
+    // CHAT GLOBO (FRESA ventas)
+    'chat.bubble': '¿Hablamos?',
+    'chat.title': 'FRESA',
+    'chat.subtitle': 'El asistente de adsPartners',
+    'chat.intro': '¡Hola! Soy FRESA, el asistente de adsPartners. Cuéntame en qué anda tu negocio y te explico cómo trabajamos. Si encaja, agendamos una llamada.',
+    'chat.placeholder': 'Escribe tu mensaje…',
+    'chat.send': 'Enviar',
+    'chat.cta': '¿Quedamos?',
+    'chat.whatsapp': 'WhatsApp',
+    'chat.error': 'Uy, ahora mismo no puedo responder. Prueba de nuevo en un momento o escríbenos por WhatsApp.',
+    'chat.limit': 'Mejor seguimos en una llamada, que cunde más. Pulsa «¿Quedamos?» y lo vemos.',
+
     // LOCALE
     '_locale': 'es-ES',
   },
@@ -213,6 +225,18 @@ const DICT = {
     'cli.aqva.name': 'AQVA Swimwear',
     'cli.aqva.tags': 'Funnel Strategy\nOffer Architecture\nPaid Media Strategy\nCreative Testing\nProduct Selection\nCross-Sell Strategy',
     'cli.aqva.desc': 'AQVA Swimwear is a premium swimwear brand with an eco-friendly approach, built around product, aesthetics and sustainability. Its challenge was to transform a strong visual proposal into a commercial system capable of generating measurable sales.\n\nWe worked on the initial funnel structure, the selection of strategic products, the offer logic and the paid media strategy. We also analyzed cross-sell opportunities to increase the average order value from the first purchase.\n\nThe goal was to define what to sell, how to present it and how to validate demand through campaigns. It wasn\u2019t just about launching ads, but about building a structure where creative, product and numbers worked in the same direction.',
+
+    // CHAT GLOBO (FRESA sales)
+    'chat.bubble': 'Let\'s talk?',
+    'chat.title': 'FRESA',
+    'chat.subtitle': 'adsPartners assistant',
+    'chat.intro': 'Hi! I\'m FRESA, the adsPartners assistant. Tell me about your business and I\'ll explain how we work. If it\'s a fit, we\'ll set up a call.',
+    'chat.placeholder': 'Type your message…',
+    'chat.send': 'Send',
+    'chat.cta': 'Want to meet?',
+    'chat.whatsapp': 'WhatsApp',
+    'chat.error': 'Sorry, I can\'t reply right now. Try again in a moment or reach us on WhatsApp.',
+    'chat.limit': 'Let\'s carry on over a call — it works better. Hit "Want to meet?" and we\'ll take it from there.',
 
     // LOCALE
     '_locale': 'en-GB',
