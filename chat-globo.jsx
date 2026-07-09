@@ -12,7 +12,7 @@ const { useState: useStateCG, useEffect: useEffectCG, useRef: useRefCG, useCallb
 const CG_API = (typeof window !== 'undefined' && window.__CHAT_API__) ||
   ((typeof location !== 'undefined' && /^(localhost|127\.0\.0\.1)$/.test(location.hostname))
     ? 'http://localhost:3000/api/chat-ventas'
-    : 'https://ventas.ads-partners.com/api/chat-ventas');
+    : 'https://fresa-ventas-production.up.railway.app/api/chat-ventas');
 const CG_HIST_KEY = 'ads_chat_history';
 const CG_MAX_TURNS = 20;
 
