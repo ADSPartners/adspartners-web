@@ -114,7 +114,7 @@
     var fakeS = Math.min(CFG.fakeProgressSeconds, minS - 0.2);
 
     // curva inversa-exponencial: lento al principio, rápido al final
-    var k = Math.min(1, elapsed / fakeS);
+    var k = Math.max(0, Math.min(1, elapsed / fakeS));
     var eased = Math.pow(k, 2.6);
     var p = eased * 0.92;
 
