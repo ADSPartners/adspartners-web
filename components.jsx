@@ -176,11 +176,9 @@ function SideMenu() {
   const { t } = useT();
   const items = [
   { href: '#manifiesto', key: 'side.manifesto' },
-  { href: '#clientes', key: 'side.cases' },
   { href: '#growth', key: 'side.studio' },
   { href: '#trabajo', key: 'side.work' },
   { href: '#winwin', key: 'side.winwin' },
-  { href: '#equipo', key: 'side.team' },
   { href: '#quedamos', key: 'side.ecomm' }];
 
 
@@ -431,118 +429,6 @@ function WorkModel() {
 
         <WorkflowList />
 
-      </div>
-    </section>);
-
-}
-
-// ============= CLIENTS =============
-function Clients() {
-  const { t } = useT();
-  const clients = [
-  { id: 'sapphira', letter: 'a.', name: t('cli.sapphira.name'), img: window.IMG.sapphira, tags: t('cli.sapphira.tags'), desc: t('cli.sapphira.desc') },
-  { id: 'inversalia', letter: 'b.', name: t('cli.inversalia.name'), img: window.IMG.inversalia, tags: t('cli.inversalia.tags'), desc: t('cli.inversalia.desc') },
-  { id: 'aqva', letter: 'c.', name: t('cli.aqva.name'), img: window.IMG.aqva, tags: t('cli.aqva.tags'), desc: t('cli.aqva.desc') }];
-
-
-  const [active, setActive] = useState(0);
-  const [hovering, setHovering] = useState(false);
-  const current = clients[active];
-  // Carrusel móvil: barra de progreso tipo "thumb" que sigue el scroll horizontal.
-  // En escritorio el contenedor no hace scroll y la barra está oculta por CSS, así
-  // que esto no afecta a la vista de ordenador.
-  const cardsRef = useRef(null);
-  const thumbRef = useRef(null);
-  useEffect(() => {
-    const el = cardsRef.current, thumb = thumbRef.current;
-    if (!el || !thumb) return;
-    const update = () => {
-      const max = el.scrollWidth - el.clientWidth;
-      const frac = max > 0 ? el.scrollLeft / max : 0;
-      const wPct = el.scrollWidth > 0 ? Math.min(100, (el.clientWidth / el.scrollWidth) * 100) : 100;
-      thumb.style.width = wPct + '%';
-      thumb.style.left = (frac * (100 - wPct)) + '%';
-    };
-    update();
-    el.addEventListener('scroll', update, { passive: true });
-    window.addEventListener('resize', update);
-    return () => { el.removeEventListener('scroll', update); window.removeEventListener('resize', update); };
-  }, []);
-
-  return (
-    <section
-      className={`section clients ${hovering ? 'is-hovering' : ''}`}
-      id="clientes"
-      data-screen-label="Clientes"
-      data-nav-theme="dark" style={{ padding: "0px 40px 180px 90px" }}>
-      
-      <div className="clients-bg" aria-hidden="true">
-        {clients.map((c, i) =>
-        <div
-          key={c.id}
-          className={`clients-bg-img ${hovering && i === active ? 'is-active' : ''}`}
-          style={{ backgroundImage: `url(${c.img})` }} />
-
-        )}
-        <div className="clients-bg-veil"></div>
-      </div>
-
-      <p className="clients-eyebrow">{t('cli.eyebrow')}</p>
-
-      <div className="clients-stage">
-        <div
-          className="clients-cards"
-          ref={cardsRef}
-          onMouseLeave={() => setHovering(false)}
-          onBlur={() => setHovering(false)}>
-          
-          {clients.map((c, i) =>
-          <button
-            key={c.id}
-            type="button"
-            className={`cli-card ${hovering && i === active ? 'is-active' : ''}`}
-            style={{ '--cli-bg': `url(${c.img})` }}
-            onMouseEnter={() => {setActive(i);setHovering(true);}}
-            onFocus={() => {setActive(i);setHovering(true);}}
-            data-cursor="cta"
-            aria-label={c.name}>
-            
-              <span className="cli-card__name">{c.name}</span>
-              <span className="cli-card__tags">
-                {c.tags.split('\n').map((tag) =>
-              <span key={tag}>{tag}</span>
-              )}
-              </span>
-              <span className="cli-card__desc">
-                {c.desc.split('\n\n').map((para, idx) =>
-              <p key={idx}>{para}</p>
-              )}
-              </span>
-            </button>
-          )}
-        </div>
-
-        {/* Barra de progreso del carrusel — solo visible en móvil (CSS) */}
-        <div className="clients-progress" aria-hidden="true">
-          <div className="clients-progress__thumb" ref={thumbRef}></div>
-        </div>
-
-        <div className="clients-copy-wrap">
-          <aside className={`clients-copy ${hovering ? 'is-visible' : ''}`}>
-            {current.desc.split('\n\n').map((para, idx) =>
-            <p key={idx}>{para.split(/\.\s+/).map((sentence, i, arr) =>
-              <React.Fragment key={i}>{sentence}{i < arr.length - 1 ? '. ' : ''}</React.Fragment>
-              )}</p>
-            )}
-          </aside>
-          <aside className={`clients-copy clients-copy-default ${hovering ? '' : 'is-visible'}`}>
-            {['clients.default.p1','clients.default.p2','clients.default.p3','clients.default.p4'].map((k) =>
-            <p key={k}>{t(k).split('\n').map((ln, i, arr) =>
-              <React.Fragment key={i}>{ln}{i < arr.length - 1 ? <br /> : null}</React.Fragment>
-              )}</p>
-            )}
-          </aside>
-        </div>
       </div>
     </section>);
 
@@ -1183,4 +1069,4 @@ function WinWin() {
 
 }
 
-Object.assign(window, { Nav, SideMenu, Hero, Manifiesto, Services, WorkModel, WinWin, Clients, Footer, Quedamos, useReveal });
+Object.assign(window, { Nav, SideMenu, Hero, Manifiesto, Services, WorkModel, WinWin, Footer, Quedamos, useReveal });

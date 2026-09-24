@@ -204,7 +204,7 @@ async function prerenderIndex(bundleName) {
 
     // Guarda: el snapshot debe ser sustancial y contener copy esperado. Si no, no se
     // inyecta (mejor sin prerender que con un root a medias).
-    const ok = inner.length > 4000 && /Growth|Founders|Manifiesto|Quedamos|adsPartners/i.test(inner);
+    const ok = inner.length > 4000 && /Growth|Manifiesto|Quedamos|adsPartners/i.test(inner);
     if (!ok) {
       console.warn(`  ! Prerender omitido: snapshot insuficiente (${inner.length} chars). Se publica sin prerender.`);
       window.close();

@@ -1,4 +1,4 @@
-/* global React, ReactDOM, I18nProvider, Nav, SideMenu, Hero, Manifiesto, Services, Team, WorkModel, WinWin, Clients, Footer, Quedamos, useReveal, useT, CookieConsent, ChatGlobo */
+/* global React, ReactDOM, I18nProvider, Nav, SideMenu, Hero, Manifiesto, Services, WorkModel, WinWin, Footer, Quedamos, useReveal, useT, CookieConsent, ChatGlobo */
 const { useState, useEffect } = React;
 
 function AppInner() {
@@ -18,11 +18,9 @@ function AppInner() {
       <div className="scroll-content">
         <Hero />
         <Manifiesto />
-        <Clients />
         <Services />
         <WorkModel />
         <WinWin />
-        <Team />
         <Quedamos />
       </div>
       <Footer onCartClick={scrollToContact} />

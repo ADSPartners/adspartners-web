@@ -15,8 +15,6 @@ const DICT = {
 
     // SIDE MENU
     'side.manifesto': 'SOBRE ADSPARTNERS',
-    'side.cases': 'NUESTROS SOCIOS',
-    'side.team': 'FOUNDERS',
     'side.studio': 'LO QUE HACEMOS',
     'side.work': 'CÓMO LO HACEMOS',
     'side.winwin': 'WIN — WIN',
@@ -49,27 +47,6 @@ const DICT = {
     'srv.item.5': 'Captación de leads',
     'srv.item.6': 'Automatización con IA',
 
-    // TEAM
-    'team.title.1.html': 'Founders',
-    'team.founders.sub': 'Tres fundadores. Diferentes entre nosotros pero complementarios en cada proyecto. Creemos en que el esfuerzo, la constancia y búsqueda de la excelencia son las claves del éxito. Cuando hablas con nosotros, hablas con la gente que está encima del trabajo.',
-    'team.role.alvaro': 'Strategy & Sales',
-    'team.role.daniel': 'Performance & Finance',
-    'team.role.sebas': 'Brand & Creative',
-
-    // bios — back of polaroid
-    'team.bio.alvaro.1': 'Cuando era niño, se preguntaba para todo "¿y esto para qué sirve?".',
-    'team.bio.alvaro.2': 'Hoy en día, sigue siendo igual, y no para hasta que la respuesta es clara o automatizada.',
-    'team.bio.alvaro.3': 'Es el estratega que está detrás de cada venta y el encargado de que los flujos se puedan automatizar con Inteligencia Artificial.',
-    'team.bio.alvaro.4': 'Está constantemente investigando y buscando soluciones o mejoras a todo negocio que no esté sacando su máximo potencial.',
-
-    'team.bio.daniel.1': 'De pequeño ya preguntaba cuánto costaba algo antes de comprarlo. Y después, se preguntaba si era inteligente gastar ese dinero.',
-    'team.bio.daniel.2': 'Hoy en día, no gasta nada que no pueda llevarle hasta un punto positivo.',
-    'team.bio.daniel.3': 'Es el encargado de que tus campañas se optimicen y sean beneficiosas. Convierte datos en decisiones. Decisiones en resultados. Y resultados en rentabilidad.',
-
-    'team.bio.sebas.1': 'Cuando era pequeño jugaba a aprenderse los logos de las empresas. Siempre quería combinar los colores de su ropa. Y le gustaba llamar la atención.',
-    'team.bio.sebas.2': 'Hoy en día, buscar llamar la atención de las personas creando marcas y poniéndolas en acción.',
-    'team.bio.sebas.3': 'Es el encargado de que las marcas comuniquen correctamente lo que quieren representar a través de las nuevas tecnologías.',
-
     // WORK MODEL — THE WIN-WIN METHOD
     'work.intro.sub': 'No trabajamos para ti. Trabajamos contigo.',
     'work.wf.1.title': 'Descubrimiento.',
@@ -87,25 +64,6 @@ const DICT = {
     'win.note': 'El fee inicial (sin IVA incluido)* cubre la construcción completa antes del lanzamiento. <br> Dos semanas desde el kickoff hasta campañas en vivo. <br><br> Después del lanzamiento, pasamos a un modelo variable. Un porcentaje del crecimiento que consigas. <br> Hablado contigo, no impuesto.',
     'win.manifesto.p1': 'La lógica es simple: si tú creces, nosotros cobramos. Si no creces, no cobramos. Mismo lado de la mesa.',
     'win.manifesto.p2': 'La mitad del sector cobra fijo y reza para que nadie le pida resultados. Nosotros hacemos lo contrario.',
-
-    // CLIENTS
-    'cli.eyebrow': 'No buscamos clientes. Buscamos socios.',
-    'clients.default.p1': 'Toda marca ya está en movimiento. Equipos. Números. Problemas. Decisiones a medio tomar.',
-    'clients.default.p2': 'El marketing como servicio mira el negocio desde fuera. Nosotros no. Entramos. Aprendemos el negocio. Vemos qué funciona, qué no y qué falta. Marca, creatividad y performance no son tres departamentos. Son una sola práctica. Tratarlos por separado es donde el crecimiento muere en silencio.',
-    'clients.default.p3': 'Reforzamos el sistema. Mejoramos las decisiones. Hacemos el crecimiento replicable.',
-    'clients.default.p4': 'Socios, no proveedores. Esa es toda la historia.',
-    // INVERSALIA
-    'cli.inversalia.name': 'Inversalia',
-    'cli.inversalia.tags': 'Creación de Branding\nNarrativa de Branding\nDesarrollo Web\nIntegración con CRM\nEstructura SEO\nAutomatización de Copy con IA',
-    'cli.inversalia.desc': 'Inversalia es una firma de inversión inmobiliaria enfocada en operaciones residenciales de alto valor, especialmente en Madrid. Su posicionamiento se basa en confianza, discreción y acompañamiento patrimonial, alejándose del enfoque inmobiliario tradicional centrado únicamente en enseñar y vender propiedades.\n\nPara Inversalia desarrollamos la identidad, la narrativa de marca, la estructura web, la integración con CRM y la automatización de publicación de inmuebles. También desarrollamos una arquitectura SEO y un sistema high-tech de generación asistida de textos para mejorar la presentación de cada propiedad.\n\nEl objetivo fue crear su presencia digital y convertirla en una herramienta real de marca, captación y gestión comercial. Una web elegante, sí, pero sobre todo ordenada, funcional y conectada con su operativa interna.',
-    // SAPPHIRA
-    'cli.sapphira.name': 'Sapphira Privé',
-    'cli.sapphira.tags': 'Estrategia de Oferta\nEstrategia de Landing\nCreación de Funnel\nFunnel de Cualificación de Leads\nEstrategia de Meta Ads\nAutomatización de CRM\nModelado de Performance',
-    'cli.sapphira.desc': 'Sapphira Privé es una clínica de medicina estética con tratamientos de ticket medio alto. Su reto era captar pacientes cualificados y evitar el típico problema de muchas campañas del sector: generar leads baratos, pero con poca intención real de compra.\n\nPara Sapphira Privé trabajamos la estrategia de oferta, la estructura de landing, el guion de VSL, la estrategia de Meta Ads y el sistema de cualificación conectado al CRM. También modelamos escenarios de rendimiento para entender qué CPL, tasa de cierre y ticket medio hacían viable la captación.\n\nEl objetivo fue construir un funnel más serio y filtrado. En una clínica así, el anuncio no puede limitarse a llamar la atención; tiene que preparar la decisión, cualificar al paciente y facilitar el cierre comercial.',
-    // AQVA
-    'cli.aqva.name': 'AQVA Swimwear',
-    'cli.aqva.tags': 'Estrategia de Funnel\nArquitectura de Oferta\nEstrategia de Paid Media\nTesteo Creativo\nSelección de Producto\nEstrategia de Cross-Sell',
-    'cli.aqva.desc': 'AQVA Swimwear es una marca de baño premium con enfoque eco-friendly, construida alrededor de producto, estética y sostenibilidad. Su reto era transformar una propuesta visual potente en un sistema comercial capaz de generar ventas medibles.\n\nTrabajamos la estructura inicial del funnel, la selección de productos estratégicos, la lógica de oferta y la estrategia de paid media. También analizamos oportunidades de cross-sell para aumentar el valor medio de pedido desde la primera compra.\n\nEl objetivo fue ordenar qué vender, cómo presentarlo y cómo validar la demanda mediante campañas. No se trataba solo de lanzar anuncios, sino de construir una estructura donde creatividad, producto y números trabajasen en la misma dirección.',
 
     // CHAT GLOBO (FRESA ventas)
     'chat.bubble': '¿Hablamos?',
@@ -134,8 +92,6 @@ const DICT = {
 
     // SIDE MENU
     'side.manifesto': 'ABOUT ADSPARTNERS',
-    'side.cases': 'OUR PARTNERS',
-    'side.team': 'FOUNDERS',
     'side.studio': 'WHAT WE DO',
     'side.work': 'HOW WE DO IT',
     'side.winwin': 'WIN — WIN',
@@ -168,27 +124,6 @@ const DICT = {
     'srv.item.5': 'Lead Acquisition',
     'srv.item.6': 'AI Automation',
 
-    // TEAM
-    'team.title.1.html': 'Founders',
-    'team.founders.sub': 'Three founders. Different from each other but complementary on every project. We believe effort, consistency and the pursuit of excellence are the keys to success. When you talk to us, you talk to the people on top of the work.',
-    'team.role.alvaro': 'Strategy & Sales',
-    'team.role.daniel': 'Performance & Finance',
-    'team.role.sebas': 'Brand & Creative',
-
-    // bios — back of polaroid
-    'team.bio.alvaro.1': 'As a kid he asked about everything: "and what is this for?".',
-    'team.bio.alvaro.2': 'Today he\'s still the same, and he doesn\'t stop until the answer is clear or automated.',
-    'team.bio.alvaro.3': 'He\'s the strategist behind every sale and the one making sure flows can be automated with Artificial Intelligence.',
-    'team.bio.alvaro.4': "He's constantly researching and looking for solutions or improvements for any business that isn't reaching its full potential.",
-
-    'team.bio.daniel.1': 'As a kid he already asked how much something cost before buying it. And then he wondered whether it was smart to spend that money.',
-    'team.bio.daniel.2': 'Today, he doesn\'t spend anything that can\'t take him to a positive outcome.',
-    'team.bio.daniel.3': 'He\'s the one who makes your campaigns optimized and profitable. He turns data into decisions. Decisions into results. And results into profitability.',
-
-    'team.bio.sebas.1': 'As a kid he played at memorizing company logos. He always wanted to match the colors of his clothes. And he liked to draw attention.',
-    'team.bio.sebas.2': 'Today, he seeks to draw people\'s attention by creating brands and putting them into action.',
-    'team.bio.sebas.3': 'He\'s the one who makes sure brands communicate correctly what they want to represent through new technologies.',
-
     // WORK MODEL — THE WIN-WIN METHOD
     'work.intro.sub': "We don't work for you. We work with you.",
     'work.wf.1.title': 'Discovery.',
@@ -206,25 +141,6 @@ const DICT = {
     'win.note': 'The initial fee (VAT not included)* covers the full build before launch. <br> Two weeks from kickoff to live campaigns. <br><br> After launch, we move to a variable model. A percentage of the growth you achieve. <br>Talked through with you, not imposed.',
     'win.manifesto.p1': 'The logic is simple: if you grow, we get paid. If you don\'t, we don\'t. Same side of the table.',
     'win.manifesto.p2': 'Most agencies charge fixed and pray nobody asks for results. We do the opposite.',
-
-    // CLIENTS
-    'cli.eyebrow': "We don't look for clients. We look for partners.",
-    'clients.default.p1': 'Every brand is already in motion. Teams. Numbers. Problems. Decisions half-made.',
-    'clients.default.p2': 'Marketing as a service watches the business from outside. We don\'t. We come inside. We learn the business. We see what\'s working, what isn\'t, and what\'s missing. Brand, creative and performance aren\'t three departments. They\'re one practice. Treating them apart is where growth quietly dies.',
-    'clients.default.p3': 'We tighten the system. We sharpen the calls. We make growth repeatable.',
-    'clients.default.p4': 'Partnership over service. That\'s the whole thing.',
-    // INVERSALIA
-    'cli.inversalia.name': 'Inversalia',
-    'cli.inversalia.tags': 'Brand Creation\nBrand Narrative\nWebsite Building\nCRM Integration\nSEO Structure\nAI Copy Automation',
-    'cli.inversalia.desc': 'Inversalia is a real estate investment firm focused on high-value residential operations, especially in Madrid. Its positioning is based on trust, discretion and patrimonial guidance, moving away from the traditional real estate approach centered solely on showing and selling properties.\n\nAt adsPartners we worked on the identity, brand narrative, website structure, CRM integration and automated property publishing. We also developed an SEO architecture and a high-tech assisted copy generation system to improve the presentation of each property.\n\nThe goal was to create their digital presence and turn it into a real tool for branding, acquisition and commercial management. An elegant website, yes, but above all organized, functional and connected to their internal operations.',
-    // SAPPHIRA
-    'cli.sapphira.name': 'Sapphira Privé',
-    'cli.sapphira.tags': 'Offer Strategy\nLanding Page Strategy\nFunnel Creation\nLead Qualification Funnel\nMeta Ads Strategy\nCRM Automation\nPerformance Modelling',
-    'cli.sapphira.desc': 'Sapphira Privé is an aesthetic medicine clinic with high-ticket treatments. Its challenge was to attract qualified patients and avoid the typical problem of many campaigns in the sector: generating cheap leads with little real intent to buy.\n\nAt adsPartners we worked on the offer strategy, landing page structure, VSL script, Meta Ads strategy and the qualification system connected to the CRM. We also modelled performance scenarios to understand which CPL, close rate and average ticket made acquisition viable.\n\nThe goal was to build a more serious and filtered funnel. In a clinic like this, the ad cannot just grab attention; it has to prepare the decision, qualify the patient and ease the commercial close.',
-    // AQVA
-    'cli.aqva.name': 'AQVA Swimwear',
-    'cli.aqva.tags': 'Funnel Strategy\nOffer Architecture\nPaid Media Strategy\nCreative Testing\nProduct Selection\nCross-Sell Strategy',
-    'cli.aqva.desc': 'AQVA Swimwear is a premium swimwear brand with an eco-friendly approach, built around product, aesthetics and sustainability. Its challenge was to transform a strong visual proposal into a commercial system capable of generating measurable sales.\n\nWe worked on the initial funnel structure, the selection of strategic products, the offer logic and the paid media strategy. We also analyzed cross-sell opportunities to increase the average order value from the first purchase.\n\nThe goal was to define what to sell, how to present it and how to validate demand through campaigns. It wasn\u2019t just about launching ads, but about building a structure where creative, product and numbers worked in the same direction.',
 
     // CHAT GLOBO (FRESA sales)
     'chat.bubble': 'Let\'s talk?',
