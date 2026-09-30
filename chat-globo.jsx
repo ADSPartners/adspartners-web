@@ -2,7 +2,7 @@
 // ============================================================
 //  CHAT GLOBO — FRESA de cara al público (ventas)
 //  Burbuja flotante que abre un chat de ventas. Aparece al pasar el Hero.
-//  Cerebro AISLADO (sin datos privados): backend en ventas.ads-partners.com.
+//  Cerebro AISLADO (sin datos privados): backend fresa-ventas en Railway (CG_API).
 //  Clona la mecánica de cookie-consent (fixed root + card de marca + storage).
 // ============================================================
 const { useState: useStateCG, useEffect: useEffectCG, useRef: useRefCG, useCallback: useCallbackCG } = React;
@@ -24,20 +24,59 @@ function cgWriteHist(msgs) {
   try { sessionStorage.setItem(CG_HIST_KEY, JSON.stringify(msgs.slice(-20))); } catch (e) {}
 }
 
-// Turnstile OPCIONAL: si el widget de Cloudflare está cargado y hay sitekey
-// (window.__TURNSTILE_SITEKEY__), obtiene un token; si no, devuelve '' y el backend
-// omite la verificación (mientras no tenga TURNSTILE_SECRET). Ver README del backend.
+// Turnstile (Cloudflare): demuestra al backend que quien escribe es una persona en esta web,
+// para que nadie llame a la API del bot directamente y nos gaste presupuesto.
+// Sitekey PÚBLICA del widget (modo "Invisible") creado en Cloudflare → Turnstile. Vacía = sin
+// token: el backend solo debe aceptar eso mientras no tenga TURNSTILE_SECRET configurado.
+const CG_TURNSTILE_SITEKEY = '';
+const CG_TURNSTILE_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+let cgTurnstileLoading = null;
+
+// El script de Cloudflare se carga solo cuando alguien escribe al bot, no a cada visita.
+function cgLoadTurnstile() {
+  if (window.turnstile) return Promise.resolve(true);
+  if (!cgTurnstileLoading) {
+    cgTurnstileLoading = new Promise((resolve) => {
+      const s = document.createElement('script');
+      s.src = CG_TURNSTILE_SRC;
+      s.async = true;
+      s.onload = () => resolve(!!window.turnstile);
+      s.onerror = () => { cgTurnstileLoading = null; resolve(false); };
+      document.head.appendChild(s);
+    });
+  }
+  return cgTurnstileLoading;
+}
+
+// Un token nuevo por mensaje (cada token vale una sola vez). Si algo falla, devuelve ''
+// y el backend decide (con TURNSTILE_SECRET puesto, lo rechaza).
 async function cgTurnstileToken() {
+  const sitekey = CG_TURNSTILE_SITEKEY || window.__TURNSTILE_SITEKEY__;
+  if (!sitekey) return '';
   try {
-    const sitekey = window.__TURNSTILE_SITEKEY__;
-    if (!sitekey || !window.turnstile) return '';
+    if (!(await cgLoadTurnstile())) return '';
     return await new Promise((resolve) => {
+      const box = document.createElement('div');
+      box.style.cssText = 'position:fixed;width:0;height:0;overflow:hidden';
+      document.body.appendChild(box);
+      let widgetId = null;
+      let timer = null;
+      const done = (token) => {
+        clearTimeout(timer);
+        try { if (widgetId !== null) window.turnstile.remove(widgetId); } catch (e) {}
+        box.remove();
+        resolve(token || '');
+      };
+      timer = setTimeout(() => done(''), 10000);
       try {
-        window.turnstile.ready(() => {
-          window.turnstile.execute(undefined, { sitekey, action: 'chat' })
-            .then(resolve).catch(() => resolve(''));
+        widgetId = window.turnstile.render(box, {
+          sitekey,
+          action: 'chat',
+          callback: done,
+          'error-callback': () => done(''),
+          'timeout-callback': () => done(''),
         });
-      } catch (e) { resolve(''); }
+      } catch (e) { done(''); }
     });
   } catch (e) { return ''; }
 }
