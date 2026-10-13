@@ -91,8 +91,8 @@ body.cursor-ver .cursor-dot { opacity: 0; }
 
 /* La lista de trabajos: una fila por cliente, sin imágenes. Al señalar una, se llena de crema desde abajo
    y las demás se apagan. */
-.trabajos { padding-top: clamp(64px, 6.6vw, 104px); padding-bottom: calc(clamp(64px, 6.6vw, 104px) + 32px); }
-.trabajos .proyectos-cab { margin-bottom: clamp(32px, 4vw, 60px); }
+.proyectos.trabajos { padding: var(--sec-y) var(--sec-x) calc(var(--sec-y) + var(--radio)); }   /* los márgenes del resto de la home */
+.trabajos .proyectos-cab { margin-bottom: clamp(36px, 4.6vw, 72px); }
 .trabajos .proyectos-titulo { font-size: clamp(48px, 7.6vw, 124px); }
 .tlista { list-style: none; margin: 0; padding: 0; border-top: 1px solid rgba(231, 226, 218, .2); }
 .tlista li { border-bottom: 1px solid rgba(231, 226, 218, .2); }
@@ -472,7 +472,6 @@ body.cursor-ver .cursor-dot { opacity: 0; }
 }
 @media (max-width: 700px) {
   .proyectos { padding: 100px 20px 110px; }
-  .trabajos { padding-top: 72px; padding-bottom: 96px; }
   /* Cada trabajo, en tres líneas: cliente y flecha, qué hicimos, y rama con su dato. */
   .tfila { grid-template-columns: 30px minmax(0, 1fr) 22px; row-gap: 6px; column-gap: 12px; min-height: 0; padding: 18px 0; }
   .tfila__num { grid-column: 1; grid-row: 1; }

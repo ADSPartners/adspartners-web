@@ -6,43 +6,31 @@
 window.SECCIONES = {
   es: {
     portada: {
-      etq: 'Finance · Tech · Brand',
       fijo: 'Ponemos en orden',
       rota: ['vuestros números.', 'vuestras horas.', 'vuestra marca.'],
       sub: 'Finanzas, tecnología y marca. Un solo equipo, dentro de vuestra empresa.',
-      teclea: 'Para empresas que han crecido más deprisa que sus cuentas, sus procesos y su marca.',
-      tarjeta: 'Quién lo lleva',
-      equipo: [
-        { rama: 'ads Finance', quien: 'Daniel de Céspedes' },
-        { rama: 'ads Tech', quien: 'Álvaro Espinosa' },
-        { rama: 'ads Brand', quien: 'Sebastián Lorenzo' },
-      ],
+      pie: 'Para empresas que han crecido más deprisa que sus cuentas, sus procesos y su marca.',
+      ramas: 'Finance · Tech · Brand',
     },
-
-    cinta: ['Margen por línea de negocio', 'Facturas que se leen solas', 'Cuadro de mando', 'Asistentes de IA', 'Arquitectura de marca', 'Control mensual', 'Herramientas a medida', 'Identidad visual', 'Webs'],
 
     diferencias: {
       etq: 'Cómo trabajamos',
-      titulo: 'Seis cosas que no vais {a tener que pedirnos.}',
+      titulo: 'Cuatro cosas que no vais {a tener que pedirnos.}',
       lado: 'Vienen de serie, contratéis una rama o las tres.',
       celdas: [
         { id: 'dentro', t: 'Que vayamos.', d: 'El Diagnóstico se hace dentro de vuestra empresa. Después, una visita al mes, estéis donde estéis.' },
         { id: 'persona', t: 'Un solo teléfono.', d: 'Somos tres, pero habláis con una persona. Coordinarnos es cosa nuestra.' },
-        { id: 'fases', t: 'El precio, antes.', d: 'Cada fase empieza con su alcance y su precio cerrados.' },
-        { id: 'una', t: 'Empezar por una.', d: 'Finance, Tech o Brand. Las otras dos, cuando toque.' },
-        { id: 'ritmo', t: 'Que se entienda.', d: 'Cada cambio se explica, se prueba y se ajusta con vuestro equipo.' },
-        { id: 'descuento', t: 'Lo pagado, descontado.', d: 'Si seguís después del Diagnóstico, lo que costó se resta del plan.' },
+        { id: 'fases', t: 'El precio, antes.', d: 'Cada fase empieza con su alcance y su precio cerrados. Y si seguís tras el Diagnóstico, lo que costó se descuenta.' },
+        { id: 'ritmo', t: 'A vuestro ritmo.', d: 'Se empieza por una rama y las otras llegan cuando toque. Cada cambio se explica, se prueba y se ajusta con vuestro equipo.' },
       ],
       piezas: {
-        visita: 'Visita',
+        visita: 'Una visita al mes',
         vosotros: 'Vosotros',
         referencia: 'Vuestra persona',
         fase: 'Fase',
         alcance: 'Alcance',
         precio: 'Precio',
-        cerrado: 'cerrado',
         ritmo: ['Se explica', 'Se prueba', 'Se ajusta'],
-        descuento: 'del Diagnóstico, descontado',
       },
     },
 
@@ -117,18 +105,17 @@ window.SECCIONES = {
         { id: 'mes', etq: 'Cada mes', t: 'Seguimos ahí', d: 'Una visita al mes, estéis donde estéis, y la misma persona al teléfono.' },
       ],
       vis: {
-        charla: { n: '45', u: 'min', modos: ['Online', 'En persona'], pie: 'Sin compromiso' },
+        charla: { n: '45', u: 'min', pie: 'Online o en persona · Sin compromiso' },
         semanas: { cab: 'Semana', dias: ['L', 'M', 'X', 'J', 'V'], pie: 'Días dentro de vuestra empresa' },
         mapa: { cab: 'El mapa de vuestra empresa', filas: ['Qué gana cada línea de negocio', 'Qué procesos se pueden automatizar', 'Cómo se ve cada marca del grupo', 'Plan con plazos y presupuesto'], sello: 'Es vuestro' },
         fases: { filas: [{ n: 'ads Finance', v: '30 días', w: 0.34, d: 'hasta el primer cierre' }, { n: 'ads Tech', v: '4–6 semanas', w: 0.5, d: 'hasta el primer sistema' }, { n: 'ads Brand', v: '4–12 semanas', w: 1, d: 'según el proyecto' }] },
-        mes: { visita: 'Visita' },
+        mes: { visita: 'Una visita al mes' },
       },
     },
 
     testimonios: {
       etq: 'Lo dicen ellos',
       titulo: 'No lo decimos {nosotros.}',
-      arrastra: 'Arrastra',
       lista: [
         {
           q: 'Pasé de tirarme días haciendo artes finales y presentación para mis clientes a simplemente un clic. Por fin tengo tiempo para hacer mi trabajo bien y no presentaciones.',
@@ -191,43 +178,31 @@ window.SECCIONES = {
 
   en: {
     portada: {
-      etq: 'Finance · Tech · Brand',
       fijo: 'We bring order to',
       rota: ['your numbers.', 'your hours.', 'your brand.'],
       sub: 'Finance, technology and brand. One team, inside your company.',
-      teclea: 'For companies that have grown faster than their books, their processes and their brand.',
-      tarjeta: 'Who runs it',
-      equipo: [
-        { rama: 'ads Finance', quien: 'Daniel de Céspedes' },
-        { rama: 'ads Tech', quien: 'Álvaro Espinosa' },
-        { rama: 'ads Brand', quien: 'Sebastián Lorenzo' },
-      ],
+      pie: 'For companies that have grown faster than their books, their processes and their brand.',
+      ramas: 'Finance · Tech · Brand',
     },
-
-    cinta: ['Margin by business line', 'Invoices that read themselves', 'Dashboard', 'AI assistants', 'Brand architecture', 'Monthly control', 'Custom tools', 'Visual identity', 'Websites'],
 
     diferencias: {
       etq: 'How we work',
-      titulo: 'Six things you will not {have to ask us for.}',
+      titulo: 'Four things you will not {have to ask us for.}',
       lado: 'They come as standard, whether you hire one branch or all three.',
       celdas: [
         { id: 'dentro', t: 'That we show up.', d: 'The Diagnosis is done inside your company. After that, one visit a month, wherever you are.' },
         { id: 'persona', t: 'One phone number.', d: 'There are three of us, but you talk to one person. Coordinating is our job.' },
-        { id: 'fases', t: 'The price, first.', d: 'Each phase starts with its scope and its price fixed.' },
-        { id: 'una', t: 'Start with one.', d: 'Finance, Tech or Brand. The other two, when the time comes.' },
-        { id: 'ritmo', t: 'That it makes sense.', d: 'Every change is explained, tested and adjusted with your team.' },
-        { id: 'descuento', t: 'What you paid, deducted.', d: 'If you go on after the Diagnosis, its cost comes off the plan.' },
+        { id: 'fases', t: 'The price, first.', d: 'Each phase starts with its scope and its price fixed. And if you go on after the Diagnosis, its cost is deducted.' },
+        { id: 'ritmo', t: 'At your own pace.', d: 'You start with one branch and the others come when the time is right. Every change is explained, tested and adjusted with your team.' },
       ],
       piezas: {
-        visita: 'Visit',
+        visita: 'One visit a month',
         vosotros: 'You',
         referencia: 'Your contact',
         fase: 'Phase',
         alcance: 'Scope',
         precio: 'Price',
-        cerrado: 'fixed',
         ritmo: ['Explained', 'Tested', 'Adjusted'],
-        descuento: 'of the Diagnosis, deducted',
       },
     },
 
@@ -302,18 +277,17 @@ window.SECCIONES = {
         { id: 'mes', etq: 'Every month', t: 'We stay', d: 'One visit a month, wherever you are, and the same person on the phone.' },
       ],
       vis: {
-        charla: { n: '45', u: 'min', modos: ['Online', 'In person'], pie: 'No strings attached' },
+        charla: { n: '45', u: 'min', pie: 'Online or in person · No strings attached' },
         semanas: { cab: 'Week', dias: ['M', 'T', 'W', 'T', 'F'], pie: 'Days inside your company' },
         mapa: { cab: 'The map of your company', filas: ['What each business line earns', 'Which processes can be automated', 'How each brand in the group looks', 'A plan with timings and budget'], sello: 'It is yours' },
         fases: { filas: [{ n: 'ads Finance', v: '30 days', w: 0.34, d: 'to the first monthly close' }, { n: 'ads Tech', v: '4–6 weeks', w: 0.5, d: 'to the first system' }, { n: 'ads Brand', v: '4–12 weeks', w: 1, d: 'depending on the project' }] },
-        mes: { visita: 'Visit' },
+        mes: { visita: 'One visit a month' },
       },
     },
 
     testimonios: {
       etq: 'In their words',
       titulo: 'Don’t take {our word for it.}',
-      arrastra: 'Drag',
       lista: [
         {
           q: 'I went from spending days on final artwork and presentations for my clients to a single click. I finally have time to do my job well, not presentations.',
