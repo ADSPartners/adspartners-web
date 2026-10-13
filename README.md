@@ -42,16 +42,17 @@ index.html, aviso-legal.html, cookies.html, privacidad.html, 404.html   ← fuen
 proyecto.html      plantilla de las páginas /proyectos/<slug>/ (el build genera una por proyecto)
 app.jsx            orden de los bloques de la home
 components.jsx     barra, menú lateral, portada, carta «Quedamos» y pie
-secciones.jsx      los bloques de la home (ramas, Diagnóstico, recorrido, preguntas…)
+secciones.jsx      los bloques de la home (portada, tarjetas, ramas, método, preguntas…)
 secciones-data.jsx TEXTOS de esos bloques, en español e inglés
-proyectos.jsx      sección «Selected Work» y páginas de proyecto
-proyectos-data.jsx TEXTOS y datos de cada proyecto
+proyectos.jsx      lista «Selected Work» y páginas de proyecto
+proyectos-data.jsx TEXTOS y datos de cada proyecto, y la lista de trabajos de la home
 i18n.jsx           textos cortos (barra, menú, portada) y cambio de idioma
 cookie-consent.jsx, chat-globo.jsx, legal*.jsx
 styles.css, secciones.css, proyectos.css, loader.css, legal.css, cookie-consent.css, chat-globo.css
 cursor.js          cursor propio (compartido por la home y los proyectos)
+scroll.js          scroll suave con Lenis (solo con ratón) y window.adsIr
 assets/            imágenes, vídeos, fuentes, logos
-vendor/            React de producción (auto-alojado)
+vendor/            React de producción y Lenis (auto-alojados)
 build.mjs          compilador del sitio
 docs/              SALIDA compilada que sirve GitHub Pages  (generada por el build)
 ```
@@ -62,8 +63,9 @@ docs/              SALIDA compilada que sirve GitHub Pages  (generada por el bui
   (lo que va entre `{llaves}` sale en cursiva). Los de los proyectos, en
   `proyectos-data.jsx`. Si se toca una de las preguntas frecuentes, hay que
   cambiarla también en el bloque de datos estructurados de `index.html`.
-- **Añadir un proyecto**: una entrada en `proyectos-data.jsx` y su carpeta en
-  `assets/proyectos/<slug>/` (lo explica la cabecera de ese fichero).
+- **Añadir un trabajo a la lista de la home**: una línea en `window.TRABAJOS`, al final
+  de `proyectos-data.jsx`. Si además va a tener página propia: una entrada en
+  `window.PROYECTOS` y su carpeta en `assets/proyectos/<slug>/` (lo explica la cabecera).
 - **Pantalla de carga**: solo CSS (`loader.css`); sale una vez por sesión.
 - **Estilos y caché**: al cambiar un `.css`, subir el `?v=` de su enlace en
   `index.html` y `proyecto.html`.

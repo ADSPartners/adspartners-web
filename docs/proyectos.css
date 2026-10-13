@@ -1,8 +1,4 @@
-/* ============================================================
-   PROYECTOS — sección "Selected Work" de la home y páginas /proyectos/<slug>/
-   Usa los tokens, fuentes y piezas de styles.css (qd-prompt__btn, ww-bg,
-   manifesto-text, reveal, lang-curtain). Aquí solo lo nuevo.
-   ============================================================ */
+
 
 /* ---------- Cursor "Ver caso" ---------- */
 .cursor-ring::after {
@@ -77,159 +73,7 @@ body.cursor-ver .cursor-dot { opacity: 0; }
   color: rgba(231, 226, 218, .7);
 }
 
-/* Los casos, uno por fila: lo que se ve a un lado y sus datos al otro, alternando. */
-.proyectos-filas { display: flex; flex-direction: column; gap: clamp(80px, 11vw, 170px); }
-.pfila {
-  display: grid;
-  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-  gap: clamp(28px, 5vw, 88px);
-  align-items: center;
-  color: inherit;
-}
-.pfila:nth-child(even) { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
-.pfila:nth-child(even) .pfila__medio { order: 2; }
-.pfila__medio {
-  position: relative;
-  display: block;
-  overflow: hidden;
-  border-radius: 3px;
-  background: #2a130a;
-  aspect-ratio: 16 / 10;
-}
-.pfila__video {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top center;
-  filter: grayscale(1) brightness(.9);
-  transform: scale(1.04);
-  transition: filter .8s ease, transform 1.2s cubic-bezier(.2, .9, .2, 1);
-}
-.pfila:hover .pfila__video,
-.pfila:focus-visible .pfila__video { filter: none; transform: scale(1); }
-/* Caso sin captura: el antes y el después, en letra. */
-.pfila__tipo {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: .08em;
-  background: radial-gradient(90% 70% at 50% 40%, #3a1c0d 0%, #2a130a 70%);
-  font-family: var(--serif);
-  font-weight: 300;
-  font-size: clamp(44px, 6.4vw, 104px);
-  line-height: 1;
-  letter-spacing: -.03em;
-}
-.pfila__tipo s { font-style: italic; color: rgba(231, 226, 218, .32); text-decoration-thickness: 1px; }
-.pfila__tipo b { font-weight: 300; color: var(--rosa); }
-.pfila__info { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
-.pfila__etq {
-  margin: 0 0 14px;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: .22em;
-  line-height: 1.5;
-  text-transform: uppercase;
-  color: rgba(231, 226, 218, .55);
-}
-.pfila__nombre {
-  margin: 0 0 clamp(18px, 2vw, 30px);
-  font-family: var(--serif);
-  font-weight: 300;
-  font-size: clamp(28px, 3vw, 46px);
-  line-height: 1.04;
-  letter-spacing: -.016em;
-  background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
-  transition: background-size .5s cubic-bezier(.2, .9, .2, 1);
-}
-a.pfila:hover .pfila__nombre { background-size: 100% 1px; }
-.pfila__cifra { display: flex; align-items: flex-end; gap: 16px; margin-bottom: 18px; }
-.pfila__cifra b {
-  font-family: var(--serif);
-  font-weight: 300;
-  font-size: clamp(76px, 9.4vw, 150px);
-  line-height: .82;
-  letter-spacing: -.04em;
-  font-variant-numeric: lining-nums tabular-nums;
-}
-.pfila__cifra span {
-  max-width: 20ch;
-  padding-bottom: .5em;
-  font-size: 10.5px;
-  font-weight: 600;
-  letter-spacing: .18em;
-  line-height: 1.5;
-  text-transform: uppercase;
-  color: var(--rosa);
-}
-.pfila__idea {
-  margin-bottom: 18px;
-  font-family: var(--serif);
-  font-style: italic;
-  font-weight: 300;
-  font-size: clamp(26px, 2.9vw, 46px);
-  line-height: 1.06;
-  letter-spacing: -.018em;
-}
-.pfila__frase { max-width: 46ch; font-size: 15px; line-height: 1.55; color: rgba(231, 226, 218, .7); }
-.pfila__datos {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  width: 100%;
-  margin-top: clamp(22px, 2.4vw, 34px);
-  border-top: 1px solid rgba(231, 226, 218, .2);
-}
-.pfila__datos > span { display: flex; flex-direction: column; gap: 5px; padding: 16px 14px 0 0; }
-.pfila__datos > span + span { padding-left: 14px; border-left: 1px solid rgba(231, 226, 218, .2); }
-.pfila__datos b { font-size: 17px; font-weight: 500; line-height: 1.2; letter-spacing: -.01em; }
-.pfila__datos i {
-  font-style: normal;
-  font-size: 10px;
-  letter-spacing: .12em;
-  line-height: 1.5;
-  text-transform: uppercase;
-  color: rgba(231, 226, 218, .5);
-}
-.pfila__ver {
-  margin-top: 28px;
-  padding-bottom: 4px;
-  border-bottom: 1px solid currentColor;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-}
 
-/* El cierre de la sección: las marcas hechas y la llamada. */
-.proyectos-pie {
-  display: grid;
-  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-  gap: clamp(28px, 5vw, 88px);
-  align-items: end;
-  margin-top: clamp(80px, 11vw, 170px);
-  padding-top: clamp(32px, 4vw, 56px);
-  border-top: 1px solid rgba(231, 226, 218, .2);
-}
-.proyectos-marcas__logos {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 28px clamp(32px, 5vw, 72px);
-  margin-top: 10px;
-}
-.pmarca {
-  display: block;
-  height: var(--alto);
-  aspect-ratio: var(--ar);
-  background: var(--beige);
-  opacity: .85;
-  -webkit-mask: var(--logo) center / contain no-repeat;
-          mask: var(--logo) center / contain no-repeat;
-}
 .proyectos-cta { display: flex; flex-direction: column; align-items: flex-start; gap: 24px; }
 .proyectos-cta__txt {
   margin: 0;
@@ -240,9 +84,68 @@ a.pfila:hover .pfila__nombre { background-size: 100% 1px; }
   letter-spacing: -.01em;
 }
 .proyectos .qd-prompt__btn,
+.trabajos .qd-prompt__btn,
 .caso-sig .qd-prompt__btn { background: var(--beige); color: var(--marron); border-color: var(--beige); }
 .proyectos .qd-prompt__btn:hover,
 .caso-sig .qd-prompt__btn:hover { background: transparent; color: var(--beige); }
+
+/* La lista de trabajos: una fila por cliente, sin imágenes. Al señalar una, se llena de crema desde abajo
+   y las demás se apagan. */
+.trabajos { padding-top: clamp(64px, 6.6vw, 104px); padding-bottom: calc(clamp(64px, 6.6vw, 104px) + 32px); }
+.trabajos .proyectos-cab { margin-bottom: clamp(32px, 4vw, 60px); }
+.trabajos .proyectos-titulo { font-size: clamp(48px, 7.6vw, 124px); }
+.tlista { list-style: none; margin: 0; padding: 0; border-top: 1px solid rgba(231, 226, 218, .2); }
+.tlista li { border-bottom: 1px solid rgba(231, 226, 218, .2); }
+.tfila {
+  position: relative;
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1.55fr) minmax(0, 1.6fr) 118px minmax(0, .85fr) 26px;
+  align-items: center;
+  column-gap: 20px;
+  min-height: 82px;
+  padding: 14px 18px 14px 0;
+  color: inherit;
+  overflow: hidden;
+  transition: color .35s ease, padding .5s cubic-bezier(.22, 1, .36, 1), opacity .35s ease;
+}
+.tfila::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--beige);
+  transform: scaleY(0);
+  transform-origin: center bottom;
+  transition: transform .5s cubic-bezier(.22, 1, .36, 1);
+}
+.tfila > * { position: relative; }
+.tfila__num { font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 15px; opacity: .55; }
+.tfila__cliente {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(24px, 2.6vw, 40px);
+  line-height: 1.05;
+  letter-spacing: -.018em;
+}
+.tfila__que { font-size: 15px; line-height: 1.4; color: color-mix(in srgb, currentColor 76%, transparent); }
+.tfila__rama {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.tfila__rama i { width: 6px; height: 6px; border-radius: 50%; background: var(--rosa); transition: background .35s ease; }
+.tfila__dato { font-size: 12.5px; text-align: right; color: color-mix(in srgb, currentColor 62%, transparent); }
+.tfila__fl { font-size: 18px; text-align: right; opacity: .45; transform: translateX(-10px); transition: transform .5s cubic-bezier(.22, 1, .36, 1), opacity .35s ease; }
+.tfila:hover { color: var(--negro); padding-left: 18px; }
+.tfila:hover::before { transform: scaleY(1); }
+.tfila:hover .tfila__rama i { background: var(--negro); }
+.tfila:hover .tfila__fl { opacity: 1; transform: none; }
+.tlista:hover .tfila:not(:hover) { opacity: .34; }
+.trabajos .proyectos-cta { flex-direction: row; align-items: center; justify-content: space-between; gap: 24px; margin-top: clamp(36px, 4.4vw, 64px); }
 
 /* ============ PÁGINA DE PROYECTO ============ */
 .caso-video { display: block; width: 100%; height: 100%; object-fit: cover; }
@@ -528,7 +431,10 @@ a.pfila:hover .pfila__nombre { background-size: 100% 1px; }
 
 /* ============ TÁCTIL: sin hover, color siempre ============ */
 @media (hover: none) {
-  .pfila__video { filter: none; transform: none; }
+  .tfila::before { display: none; }
+  .tfila:hover { color: inherit; }
+  .tlista:hover .tfila:not(:hover) { opacity: 1; }
+  
   .caso-otra__fotos img { filter: none; }
 }
 
@@ -539,9 +445,8 @@ a.pfila:hover .pfila__nombre { background-size: 100% 1px; }
   .caso-cab { padding: 110px 28px 0; }
   .caso-cab__meta { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 28px; }
   .caso-idea, .caso-cifras, .caso-practico, .caso-otra { padding-left: 28px; padding-right: 28px; }
-  .pfila, .pfila:nth-child(even) { grid-template-columns: 1fr; gap: 26px; }
-  .pfila:nth-child(even) .pfila__medio { order: 0; }
-  .proyectos-pie { grid-template-columns: 1fr; align-items: start; }
+
+
   .caso-idea__grid { grid-template-columns: 1fr; gap: 40px; }
   .caso-movil { padding-left: 28px; padding-right: 28px; gap: 48px; }
   .caso-otra__cab { grid-template-columns: 1fr; gap: 24px; }
@@ -567,15 +472,22 @@ a.pfila:hover .pfila__nombre { background-size: 100% 1px; }
 }
 @media (max-width: 700px) {
   .proyectos { padding: 100px 20px 110px; }
+  .trabajos { padding-top: 72px; padding-bottom: 96px; }
+  /* Cada trabajo, en tres líneas: cliente y flecha, qué hicimos, y rama con su dato. */
+  .tfila { grid-template-columns: 30px minmax(0, 1fr) 22px; row-gap: 6px; column-gap: 12px; min-height: 0; padding: 18px 0; }
+  .tfila__num { grid-column: 1; grid-row: 1; }
+  .tfila__cliente { grid-column: 2; grid-row: 1; font-size: 28px; }
+  .tfila__fl { grid-column: 3; grid-row: 1; opacity: .8; transform: none; }
+  .tfila__que { grid-column: 2 / 4; grid-row: 2; font-size: 14.5px; }
+  .tfila__rama { grid-column: 2; grid-row: 3; }
+  .tfila__dato { grid-column: 2 / 4; grid-row: 4; text-align: left; }
+  .tfila:hover { padding-left: 0; }
+  .trabajos .proyectos-cta { flex-direction: column; align-items: flex-start; }
   .proyectos-titulo { font-size: clamp(46px, 14vw, 72px); }
   .proyectos-titulo sup { font-size: 11px; }
   .proyectos-intro__lead { font-size: 20px; }
-  .proyectos-filas { gap: 84px; }
-  /* Los tres datos, uno por línea: en tres columnas no caben. */
-  .pfila__datos { grid-template-columns: 1fr; }
-  .pfila__datos > span { flex-direction: row; align-items: baseline; gap: 14px; padding: 12px 0; }
-  .pfila__datos > span + span { padding-left: 0; border-left: 0; border-top: 1px solid rgba(231, 226, 218, .2); }
-  .pfila__datos b { flex: 0 0 6.6em; font-size: 15px; }
+
+
   .caso-cifras { padding: 80px 20px; }
   .caso-cifra + .caso-cifra { padding-left: 0; border-left: 0; }
 
@@ -603,5 +515,6 @@ a.pfila:hover .pfila__nombre { background-size: 100% 1px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pfila__video, .caso-sig__img, .caso-sig__nombre { transition: none; }
+  .caso-sig__img,
+.caso-sig__nombre { transition: none; }
 }

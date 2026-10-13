@@ -14,20 +14,13 @@ const DICT = {
     'nav.cart.hover': 'Te vamos a caer bien',
 
     // SIDE MENU
-    'side.partida': 'PUNTO DE PARTIDA',
+    'side.difs': 'CÓMO TRABAJAMOS',
     'side.ramas': 'LAS TRES RAMAS',
-    'side.diagnostico': 'EL DIAGNÓSTICO',
-    'side.recorrido': 'EL RECORRIDO',
-    'side.cerca': 'CÓMO TRABAJAMOS',
+    'side.metodo': 'CÓMO SE EMPIEZA',
+    'side.testi': 'LO DICEN ELLOS',
+    'side.preguntas': 'PREGUNTAS',
     'side.ecomm': 'QUEDAMOS',
     'side.aria': 'Navegación lateral',
-
-    // HERO
-    'hero.etq': 'Para la empresa que ha crecido',
-    'hero.titulo': 'Recuperar el control.',
-    'hero.sub': 'Finanzas, tecnología y marca de vuestra empresa, ordenadas.',
-    'hero.pie.izq': 'Primero control. Después crecimiento.',
-    'hero.pie.der': 'Finance · Tech · Brand',
 
     // CHAT GLOBO (FRESA ventas)
     'chat.bubble': '¿Hablamos?',
@@ -42,14 +35,10 @@ const DICT = {
     'chat.limit': 'Mejor seguimos en una llamada, que cunde más. Pulsa «¿Quedamos?» y lo vemos.',
 
     // PROYECTOS
-    'side.proyectos': 'TRABAJO REAL',
+    'side.proyectos': 'TRABAJO HECHO',
     'proy.lead': 'Software, automatizaciones, marcas y webs.',
-    'proy.body': 'Trabajo ya hecho, con sus cifras. Pinchad en un caso para verlo entero.',
+    'proy.body': 'Esto ya está hecho y funcionando. Los que llevan flecha se pueden abrir.',
     'proy.ver': 'Ver caso',
-    'proy.dato.3d': 'Escena propia',
-    'proy.dato.pantallas': 'Pantallas',
-    'proy.dato.anio': 'Año',
-    'proy.identidad': 'Identidad de marca',
     'proy.cta': '¿El siguiente es el vuestro?',
     'proy.cta.btn': 'HAZ CLICK AQUÍ',
     'caso.marca': 'Marca.',
@@ -89,20 +78,13 @@ const DICT = {
     'nav.cart.hover': 'You\'re going to like us',
 
     // SIDE MENU
-    'side.partida': 'STARTING POINT',
+    'side.difs': 'HOW WE WORK',
     'side.ramas': 'THE THREE BRANCHES',
-    'side.diagnostico': 'THE DIAGNOSIS',
-    'side.recorrido': 'THE JOURNEY',
-    'side.cerca': 'HOW WE WORK',
+    'side.metodo': 'HOW IT STARTS',
+    'side.testi': 'IN THEIR WORDS',
+    'side.preguntas': 'QUESTIONS',
     'side.ecomm': 'QUEDAMOS',
     'side.aria': 'Side navigation',
-
-    // HERO
-    'hero.etq': 'For the company that has grown',
-    'hero.titulo': 'Take back control.',
-    'hero.sub': 'Your company’s finance, technology and brand, in order.',
-    'hero.pie.izq': 'Control first. Growth after.',
-    'hero.pie.der': 'Finance · Tech · Brand',
 
     // CHAT GLOBO (FRESA sales)
     'chat.bubble': 'Let\'s talk?',
@@ -117,14 +99,10 @@ const DICT = {
     'chat.limit': 'Let\'s carry on over a call — it works better. Hit "Want to meet?" and we\'ll take it from there.',
 
     // PROYECTOS
-    'side.proyectos': 'REAL WORK',
+    'side.proyectos': 'WORK DONE',
     'proy.lead': 'Software, automations, brands and websites.',
-    'proy.body': 'Work already done, with its figures. Click a case to see it in full.',
+    'proy.body': 'This is already built and running. The ones with an arrow can be opened.',
     'proy.ver': 'View case',
-    'proy.dato.3d': 'Own 3D scene',
-    'proy.dato.pantallas': 'Screens',
-    'proy.dato.anio': 'Year',
-    'proy.identidad': 'Brand identity',
     'proy.cta': 'Is yours next?',
     'proy.cta.btn': 'CLICK HERE',
     'caso.marca': 'Brand.',

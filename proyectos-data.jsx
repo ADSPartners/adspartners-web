@@ -6,8 +6,10 @@
      y la foto de su pieza práctica (practico.foto).
    Un CASO DE SOFTWARE lleva sinVideo: true y solo escritorio.jpg (una captura, 1280x800). En cada idioma:
      etq (rama · sector), cifra { n, t } si tiene una cifra grande, frase, y datos [{ n, t }] (hasta tres).
-   Con sinPagina: true el proyecto solo sale en la home (y con sinImagen: true, sin captura: panel [antes, después]).
    Un idioma puede traer su propio nombre si el del proyecto es una descripción.
+
+   La LISTA de la home es window.TRABAJOS (al final): cliente, rama, qué hicimos y un dato. Con slug,
+   la fila abre la página de ese proyecto; sin él, solo se enseña.
 
    Todo lo que se dice tiene que ser verdad de ese trabajo: nada inventado. */
 window.PROYECTOS = [
@@ -291,31 +293,48 @@ window.PROYECTOS = [
       movil: 'In portrait, each step of the recipe is framed at the top and the text sits below, never on top of it. And the scroll slows down wherever there is something to read.',
     },
   },
+
+];
+
+window.TRABAJOS = [
   {
-    slug: 'impulso-visual',
-    nombre: 'Impulso Visual',
-    sinVideo: true,
-    sinImagen: true,
-    sinPagina: true,
-    es: {
-      etq: 'ads Tech · Artes finales y PLV',
-      idea: 'De días a un clic.',
-      panel: ['Días', 'Un clic'],
-      frase: 'Herramientas de IA a medida para preparar artes finales y presentaciones a cliente.',
-      datos: [
-        { n: 'IA a medida', t: 'qué hicimos' },
-        { n: 'Artes finales', t: 'y presentaciones a cliente' },
-      ],
-    },
-    en: {
-      etq: 'ads Tech · Final artwork and POS',
-      idea: 'From days to one click.',
-      panel: ['Days', 'One click'],
-      frase: 'Custom AI tools to prepare final artwork and client presentations.',
-      datos: [
-        { n: 'Custom AI', t: 'what we did' },
-        { n: 'Final artwork', t: 'and client presentations' },
-      ],
-    },
+    cliente: 'Fundación Jiménez Díaz', slug: 'fundacion-jimenez-diaz', rama: 'Tech',
+    es: { que: 'Software que analiza tejido pulmonar, píxel a píxel', dato: 'Investigación · 2024' },
+    en: { que: 'Software that analyses lung tissue, pixel by pixel', dato: 'Research · 2024' },
+  },
+  {
+    cliente: 'Hostelería', slug: 'gestion-hosteleria', rama: 'Tech',
+    es: { que: 'App que lee las facturas y saca el margen de cada plato', dato: '157 platos · 115 facturas' },
+    en: { cliente: 'Hospitality', que: 'App that reads the invoices and works out the margin of every dish', dato: '157 dishes · 115 invoices' },
+  },
+  {
+    cliente: 'Impulso Visual', rama: 'Tech',
+    es: { que: 'Herramientas de IA para artes finales y presentaciones', dato: 'De días a un clic' },
+    en: { que: 'AI tools for final artwork and client presentations', dato: 'From days to one click' },
+  },
+  {
+    cliente: 'Inversalia', rama: 'Brand',
+    es: { que: 'Marca creada desde cero', dato: 'Inmobiliario' },
+    en: { que: 'Brand built from scratch', dato: 'Real estate' },
+  },
+  {
+    cliente: 'Klink', rama: 'Brand',
+    es: { que: 'Marca creada desde cero' },
+    en: { que: 'Brand built from scratch' },
+  },
+  {
+    cliente: 'Butter Studio', slug: 'butter-studio', rama: 'Brand',
+    es: { que: 'Web con escena 3D propia', dato: 'Cookies · Madrid' },
+    en: { que: 'Website with its own 3D scene', dato: 'Cookies · Madrid' },
+  },
+  {
+    cliente: 'Métele Voltaje', slug: 'metele-voltaje', rama: 'Brand',
+    es: { que: 'Web con escena 3D propia', dato: 'Energía · Teruel' },
+    en: { que: 'Website with its own 3D scene', dato: 'Energy · Teruel' },
+  },
+  {
+    cliente: 'Ava Pastelería', slug: 'ava-pasteleria', rama: 'Brand',
+    es: { que: 'Web con escena 3D propia', dato: 'Pastelería · Madrid' },
+    en: { que: 'Website with its own 3D scene', dato: 'Pastry · Madrid' },
   },
 ];

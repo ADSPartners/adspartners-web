@@ -1,49 +1,82 @@
-/* Secciones de la home: los textos de «Recuperar el control» (ads Finance + ads Tech + ads Brand).
-   JavaScript plano (sin JSX), igual que proyectos-data.jsx. Los pinta secciones.jsx.
-   Salen del deck comercial, casi literales y de vosotros. Lo que va entre {llaves} se pinta en cursiva.
+/* Secciones de la home: los textos de ads Finance + ads Tech + ads Brand.
+   JavaScript plano (sin JSX), igual que proyectos-data.jsx. Los pinta secciones.jsx (y la portada, components.jsx).
+   Los datos salen de la oferta de las tres ramas; la forma de contarlo es la de la web, no la del deck.
+   Lo que va entre {llaves} se pinta en cursiva y en segundo tono.
    Todo lo que se dice tiene que ser verdad: los ejemplos (margen por línea, «olmo») van marcados como ejemplo. */
 window.SECCIONES = {
   es: {
-    partida: {
-      etq: 'El punto de partida',
-      titulo: 'Crecer es una buena noticia. {Hasta que deja de verse lo que pasa dentro.}',
-      cols: [
-        { etq: 'Finance', t: 'Los números', d: 'Las cuentas cuadran. Pero hay una sola cuenta de resultados: no dice qué línea deja margen.' },
-        { etq: 'Tech', t: 'Las horas', d: 'El equipo saca el trabajo. Pero cada pedido y cada factura pasan por las mismas tres personas.' },
-        { etq: 'Brand', t: 'La imagen', d: 'Cada negocio tiene su nombre. Pero desde fuera nadie ve que son de la misma casa.' },
+    portada: {
+      etq: 'Finance · Tech · Brand',
+      fijo: 'Ponemos en orden',
+      rota: ['vuestros números.', 'vuestras horas.', 'vuestra marca.'],
+      sub: 'Finanzas, tecnología y marca. Un solo equipo, dentro de vuestra empresa.',
+      teclea: 'Para empresas que han crecido más deprisa que sus cuentas, sus procesos y su marca.',
+      tarjeta: 'Quién lo lleva',
+      equipo: [
+        { rama: 'ads Finance', quien: 'Daniel de Céspedes' },
+        { rama: 'ads Tech', quien: 'Álvaro Espinosa' },
+        { rama: 'ads Brand', quien: 'Sebastián Lorenzo' },
       ],
-      cierre: 'Estructuramos lo que hace falta para el siguiente tramo.',
+    },
+
+    cinta: ['Margen por línea de negocio', 'Facturas que se leen solas', 'Cuadro de mando', 'Asistentes de IA', 'Arquitectura de marca', 'Control mensual', 'Herramientas a medida', 'Identidad visual', 'Webs'],
+
+    diferencias: {
+      etq: 'Cómo trabajamos',
+      titulo: 'Seis cosas que no vais {a tener que pedirnos.}',
+      lado: 'Vienen de serie, contratéis una rama o las tres.',
+      celdas: [
+        { id: 'dentro', t: 'Que vayamos.', d: 'El Diagnóstico se hace dentro de vuestra empresa. Después, una visita al mes, estéis donde estéis.' },
+        { id: 'persona', t: 'Un solo teléfono.', d: 'Somos tres, pero habláis con una persona. Coordinarnos es cosa nuestra.' },
+        { id: 'fases', t: 'El precio, antes.', d: 'Cada fase empieza con su alcance y su precio cerrados.' },
+        { id: 'una', t: 'Empezar por una.', d: 'Finance, Tech o Brand. Las otras dos, cuando toque.' },
+        { id: 'ritmo', t: 'Que se entienda.', d: 'Cada cambio se explica, se prueba y se ajusta con vuestro equipo.' },
+        { id: 'descuento', t: 'Lo pagado, descontado.', d: 'Si seguís después del Diagnóstico, lo que costó se resta del plan.' },
+      ],
+      piezas: {
+        visita: 'Visita',
+        vosotros: 'Vosotros',
+        referencia: 'Vuestra persona',
+        fase: 'Fase',
+        alcance: 'Alcance',
+        precio: 'Precio',
+        cerrado: 'cerrado',
+        ritmo: ['Se explica', 'Se prueba', 'Se ajusta'],
+        descuento: 'del Diagnóstico, descontado',
+      },
     },
 
     ramas: {
       etq: 'Qué hacemos',
-      titulo: 'Tres especialistas {que trabajan como uno solo.}',
+      titulo: 'Tres ramas. {Un solo equipo.}',
+      lado: 'Empezad por la que más os duela.',
+      lleva: 'Lo lleva',
       lista: [
         {
-          id: 'finance', orden: 'Primero', nombre: 'ads Finance',
-          titulo: 'Saber, cada mes, {dónde estáis.}',
+          id: 'finance', nombre: 'ads Finance',
+          frase: 'Saber qué gana cada línea de negocio. Todos los meses.',
+          chips: ['Diagnóstico financiero', 'Modelo de rentabilidad', 'Cuadro de mando', 'Control mensual'],
           persona: 'Daniel de Céspedes',
-          trayectoria: 'Cinco años al frente de la contabilidad de fondos de inversión.',
-          entrega: ['Diagnóstico financiero', 'Modelo de rentabilidad', 'Cuadro de mando', 'Control mensual'],
+          nota: 'Cinco años llevando la contabilidad de fondos de inversión.',
         },
         {
-          id: 'tech', orden: 'Después', nombre: 'ads Tech',
-          titulo: 'Que la empresa {casi se lleve sola.}',
+          id: 'tech', nombre: 'ads Tech',
+          frase: 'Que lo repetitivo se haga solo y vuestra gente, a lo suyo.',
+          chips: ['Flujos automáticos', 'Asistentes de IA', 'Herramientas a medida'],
           persona: 'Álvaro Espinosa',
-          trayectoria: 'Software a medida e IA para hospitales, clínicas y hostelería.',
-          entrega: ['Flujos automáticos', 'Asistentes de IA', 'Herramientas a medida'],
+          nota: 'Software a medida e IA para hospitales, clínicas y hostelería.',
         },
         {
-          id: 'brand', orden: 'Al final', nombre: 'ads Brand',
-          titulo: 'Un grupo, {una imagen.}',
+          id: 'brand', nombre: 'ads Brand',
+          frase: 'Que todos vuestros negocios se vean de la misma casa.',
+          chips: ['Arquitectura de marca', 'Identidad visual', 'Web'],
           persona: 'Sebastián Lorenzo',
-          trayectoria: 'Marcas creadas desde cero, de la estrategia a la web.',
-          entrega: ['Arquitectura de marca', 'Identidad visual y manual', 'Web y presencia digital'],
+          nota: 'Marcas creadas desde cero, de la estrategia a la web.',
         },
       ],
       finance: {
         cab: 'Margen por línea de negocio',
-        ejemplo: 'Ejemplo ilustrativo',
+        ejemplo: 'Ejemplo',
         filas: [
           { n: 'Tienda', v: 14, nota: 'buen margen' },
           { n: 'Producción', v: 11, nota: 'buen margen' },
@@ -53,9 +86,9 @@ window.SECCIONES = {
         frase: 'Vuestra gestoría registra. {Nosotros interpretamos.}',
       },
       tech: {
-        cab: 'Un flujo automático',
-        ejemplo: 'Por ejemplo',
-        pasos: ['Llega una factura por correo', 'Se lee sola, línea a línea', 'Se registra sin teclear', 'Aparece en el cuadro de mando'],
+        cab: 'Una factura, sin tocarla',
+        ejemplo: 'Ejemplo',
+        pasos: ['Llega por correo', 'Se lee sola, línea a línea', 'Se registra sin teclear', 'Sale en el cuadro de mando'],
         extras: [
           { etq: 'Un asistente de IA', d: 'Un cliente pide por WhatsApp a las once de la noche y el pedido queda apuntado.' },
           { etq: 'Una herramienta a medida', d: 'Un portal donde cada cliente ve sus pedidos y facturas sin llamar a la oficina.' },
@@ -73,69 +106,29 @@ window.SECCIONES = {
       },
     },
 
-    principio: {
-      etq: 'Por qué en este orden',
-      texto: 'No se automatiza lo que no se ha medido, {ni se cuenta hacia fuera lo que todavía no está ordenado por dentro.}',
-    },
-
-    diagnostico: {
-      etq: 'La puerta de entrada · El Diagnóstico',
-      titulo: 'Todo empieza {por mirar bien.}',
-      cifras: [
-        { etq: 'Cuánto dura', n: '3 – 4', u: 'semanas', d: 'Con varios días dentro de vuestra empresa.' },
-        { etq: 'Cuánto cuesta', n: 'Precio', u: 'cerrado', d: 'Finanzas, tecnología y marca, a la vez.' },
-        { etq: 'Si seguís', n: '100 %', u: 'se descuenta', d: 'Lo pagado se resta del plan si decidís seguir.' },
-      ],
-      mapa: {
-        etq: 'Qué os lleváis del Diagnóstico',
-        titulo: 'El mapa {de vuestra empresa.}',
-        filas: [
-          'Cuánto gana de verdad cada línea de negocio.',
-          'Qué procesos se comen las horas y cuáles se pueden automatizar.',
-          'Cómo se ve hoy cada marca del grupo y qué le falta para sumar.',
-          'Un plan por orden de prioridad, con plazos y presupuesto.',
-        ],
-        cierre: 'Es vuestro, {y os sirve aunque decidáis no seguir con nosotros.}',
-      },
-    },
-
-    recorrido: {
-      etq: 'Cómo trabajamos',
-      titulo: 'Un recorrido con orden. {Y a vuestro ritmo.}',
+    metodo: {
+      etq: 'Cómo se empieza',
+      titulo: 'De la primera charla {a tenerlo funcionando.}',
       pasos: [
-        { etq: 'Las tres ramas', t: 'Diagnóstico', n: '3–4 semanas', d: 'dentro de vuestra empresa' },
-        { etq: 'ads Finance', t: 'Orden', n: '30 días', d: 'hasta el primer cierre' },
-        { etq: 'ads Tech', t: 'Sistemas', n: '4–6 semanas', d: 'hasta el primer sistema' },
-        { etq: 'ads Brand', t: 'Imagen', n: '4–12 semanas', d: 'según el proyecto' },
-        { etq: 'Las tres ramas', t: 'Acompañamiento', n: 'Cada mes', d: 'con visita, estéis donde estéis' },
+        { id: 'charla', etq: '45 minutos', t: 'Quedamos', d: 'Online o en persona. Vemos si tiene sentido seguir, sin compromiso.' },
+        { id: 'semanas', etq: '3–4 semanas', t: 'El Diagnóstico', d: 'Varios días dentro de vuestra empresa mirando números, procesos y marca. Con precio cerrado.' },
+        { id: 'mapa', etq: 'Lo que os queda', t: 'El mapa', d: 'Qué gana cada línea, qué se puede automatizar, cómo se ve cada marca y un plan con plazos y presupuesto. Vuestro, sigáis o no.' },
+        { id: 'fases', etq: 'Por fases', t: 'Manos a la obra', d: 'Primer cierre en 30 días. Primer sistema en 4–6 semanas. Marca, en 4–12. Y el Diagnóstico se descuenta.' },
+        { id: 'mes', etq: 'Cada mes', t: 'Seguimos ahí', d: 'Una visita al mes, estéis donde estéis, y la misma persona al teléfono.' },
       ],
-      cierre: 'Podéis empezar por una sola rama {y sumar las demás después.}',
-    },
-
-    cerca: {
-      etq: 'Cómo es trabajar con nosotros',
-      titulo: 'Cerca, de verdad. {Estéis donde estéis.}',
-      celdas: [
-        { id: 'dentro', t: 'Dentro de vuestra empresa', d: 'El Diagnóstico se hace allí. Después vamos cada mes.' },
-        { id: 'persona', t: 'Una persona de referencia', d: 'Un nombre y un teléfono. Coordinarnos es cosa nuestra.' },
-        { id: 'fases', t: 'Por fases y sin sorpresas', d: 'Cada fase empieza con su alcance y su precio cerrados.' },
-        { id: 'ritmo', t: 'A vuestro ritmo', d: 'Cada cambio se explica, se prueba y se ajusta con vuestro equipo.' },
-      ],
-      piezas: {
-        visita: 'Visita',
-        dias: ['L', 'M', 'X', 'J', 'V', 'S', 'D'],
-        vosotros: 'Vosotros',
-        referencia: 'Vuestra persona',
-        fase: 'Fase',
-        alcance: 'Alcance',
-        precio: 'Precio',
-        cerrado: 'cerrado',
-        ritmo: ['Se explica', 'Se prueba', 'Se ajusta'],
+      vis: {
+        charla: { n: '45', u: 'min', modos: ['Online', 'En persona'], pie: 'Sin compromiso' },
+        semanas: { cab: 'Semana', dias: ['L', 'M', 'X', 'J', 'V'], pie: 'Días dentro de vuestra empresa' },
+        mapa: { cab: 'El mapa de vuestra empresa', filas: ['Qué gana cada línea de negocio', 'Qué procesos se pueden automatizar', 'Cómo se ve cada marca del grupo', 'Plan con plazos y presupuesto'], sello: 'Es vuestro' },
+        fases: { filas: [{ n: 'ads Finance', v: '30 días', w: 0.34, d: 'hasta el primer cierre' }, { n: 'ads Tech', v: '4–6 semanas', w: 0.5, d: 'hasta el primer sistema' }, { n: 'ads Brand', v: '4–12 semanas', w: 1, d: 'según el proyecto' }] },
+        mes: { visita: 'Visita' },
       },
     },
 
     testimonios: {
-      etq: 'Lo dice quien ya ha trabajado con nosotros',
+      etq: 'Lo dicen ellos',
+      titulo: 'No lo decimos {nosotros.}',
+      arrastra: 'Arrastra',
       lista: [
         {
           q: 'Pasé de tirarme días haciendo artes finales y presentación para mis clientes a simplemente un clic. Por fin tengo tiempo para hacer mi trabajo bien y no presentaciones.',
@@ -150,91 +143,125 @@ window.SECCIONES = {
           quien: 'Alejandro Bermejo', cargo: 'Fundador y CEO, Inversalia',
         },
       ],
-      anterior: 'Anterior',
-      siguiente: 'Siguiente',
     },
 
+    // Si cambia una pregunta, se cambia también en el JSON-LD de index.html.
     preguntas: {
-      etq: 'Preguntas frecuentes',
-      titulo: 'Lo que se pregunta {antes de empezar.}',
+      etq: 'Antes de quedar',
+      titulo: 'Preguntad, {que para eso estamos.}',
+      chat: 'adsPartners',
+      enLinea: 'en línea',
+      hoy: 'Hoy',
       lista: [
         {
           p: '¿Hay que contratar las tres ramas?',
-          r: 'No. Podéis empezar por una sola rama y sumar las demás después. El orden que recomendamos es Finance, Tech y Brand, porque no se automatiza lo que no se ha medido ni se cuenta hacia fuera lo que todavía no está ordenado por dentro.',
+          r: 'No. Se puede empezar por una y sumar las otras cuando toque. Si nos preguntáis el orden: primero Finance, luego Tech y al final Brand. No tiene sentido automatizar lo que no se ha medido, ni contar fuera lo que dentro sigue desordenado.',
         },
         {
-          p: '¿Qué pasa si después del Diagnóstico no seguimos?',
-          r: 'Nada. El Diagnóstico termina con el mapa de vuestra empresa: cuánto gana cada línea de negocio, qué procesos se comen las horas, cómo se ve cada marca y un plan por orden de prioridad, con plazos y presupuesto. Es vuestro y os sirve aunque no sigáis con nosotros.',
+          p: '¿Y si después del Diagnóstico no seguimos?',
+          r: 'No pasa nada. Os quedáis con el mapa: qué gana cada línea de negocio, qué procesos se comen las horas, cómo se ve cada marca y un plan con plazos y presupuesto. Es vuestro.',
         },
         {
           p: '¿Cuánto cuesta el Diagnóstico?',
-          r: 'Tiene un precio cerrado, que conocéis antes de empezar, y cubre finanzas, tecnología y marca a la vez. Si decidís seguir, lo pagado se descuenta del plan.',
+          r: 'Tiene un precio cerrado y lo sabéis antes de empezar. Cubre finanzas, tecnología y marca a la vez. Si luego seguís, se descuenta entero del plan.',
         },
         {
           p: '¿Trabajáis fuera de Madrid?',
-          r: 'Sí. El Diagnóstico se hace dentro de vuestra empresa, con varios días allí, y después vamos cada mes, estéis donde estéis.',
+          r: 'Sí. El Diagnóstico se hace en vuestra empresa, con varios días allí, y después vamos una vez al mes. Estéis donde estéis.',
         },
         {
           p: '¿Sustituís a nuestra gestoría?',
-          r: 'No. Vuestra gestoría registra; nosotros interpretamos. ads Finance monta el modelo de rentabilidad, el cuadro de mando y el control mensual. La gestión fiscal, la auditoría y el registro contable diario siguen donde están.',
+          r: 'No. La gestoría registra y nosotros interpretamos. Fiscal, auditoría y contabilidad del día a día se quedan donde están.',
         },
         {
           p: '¿Cuánto se tarda en ver algo funcionando?',
-          r: 'El Diagnóstico dura de 3 a 4 semanas. Después, 30 días hasta el primer cierre con ads Finance, de 4 a 6 semanas hasta el primer sistema con ads Tech y de 4 a 12 semanas con ads Brand, según el proyecto.',
+          r: 'El Diagnóstico son 3 o 4 semanas. Después, 30 días hasta el primer cierre con Finance, de 4 a 6 semanas hasta el primer sistema con Tech y de 4 a 12 con Brand, según el proyecto.',
         },
       ],
     },
 
     cierre: {
-      izq: ['Primero', 'control'],
-      der: ['Después', 'crecimiento'],
+      izq: ['Orden', 'por dentro'],
+      der: ['Marca', 'por fuera'],
       etq: 'El siguiente paso',
-      texto: '45 minutos para ver si el Diagnóstico tiene sentido en vuestro caso. {Sin compromiso.}',
+      texto: '45 minutos para ver si encajamos. {Sin compromiso.}',
       btn: 'Proponed día y hora',
     },
   },
 
   en: {
-    partida: {
-      etq: 'The starting point',
-      titulo: 'Growing is good news. {Until you can no longer see what is happening inside.}',
-      cols: [
-        { etq: 'Finance', t: 'The numbers', d: 'The books balance. But there is a single P&L: it does not say which business line makes a margin.' },
-        { etq: 'Tech', t: 'The hours', d: 'The team gets the work out. But every order and every invoice goes through the same three people.' },
-        { etq: 'Brand', t: 'The image', d: 'Each business has its own name. But from the outside nobody sees they belong to the same house.' },
+    portada: {
+      etq: 'Finance · Tech · Brand',
+      fijo: 'We bring order to',
+      rota: ['your numbers.', 'your hours.', 'your brand.'],
+      sub: 'Finance, technology and brand. One team, inside your company.',
+      teclea: 'For companies that have grown faster than their books, their processes and their brand.',
+      tarjeta: 'Who runs it',
+      equipo: [
+        { rama: 'ads Finance', quien: 'Daniel de Céspedes' },
+        { rama: 'ads Tech', quien: 'Álvaro Espinosa' },
+        { rama: 'ads Brand', quien: 'Sebastián Lorenzo' },
       ],
-      cierre: 'We build the structure the next stretch needs.',
+    },
+
+    cinta: ['Margin by business line', 'Invoices that read themselves', 'Dashboard', 'AI assistants', 'Brand architecture', 'Monthly control', 'Custom tools', 'Visual identity', 'Websites'],
+
+    diferencias: {
+      etq: 'How we work',
+      titulo: 'Six things you will not {have to ask us for.}',
+      lado: 'They come as standard, whether you hire one branch or all three.',
+      celdas: [
+        { id: 'dentro', t: 'That we show up.', d: 'The Diagnosis is done inside your company. After that, one visit a month, wherever you are.' },
+        { id: 'persona', t: 'One phone number.', d: 'There are three of us, but you talk to one person. Coordinating is our job.' },
+        { id: 'fases', t: 'The price, first.', d: 'Each phase starts with its scope and its price fixed.' },
+        { id: 'una', t: 'Start with one.', d: 'Finance, Tech or Brand. The other two, when the time comes.' },
+        { id: 'ritmo', t: 'That it makes sense.', d: 'Every change is explained, tested and adjusted with your team.' },
+        { id: 'descuento', t: 'What you paid, deducted.', d: 'If you go on after the Diagnosis, its cost comes off the plan.' },
+      ],
+      piezas: {
+        visita: 'Visit',
+        vosotros: 'You',
+        referencia: 'Your contact',
+        fase: 'Phase',
+        alcance: 'Scope',
+        precio: 'Price',
+        cerrado: 'fixed',
+        ritmo: ['Explained', 'Tested', 'Adjusted'],
+        descuento: 'of the Diagnosis, deducted',
+      },
     },
 
     ramas: {
       etq: 'What we do',
-      titulo: 'Three specialists {working as one.}',
+      titulo: 'Three branches. {One team.}',
+      lado: 'Start with the one that hurts most.',
+      lleva: 'Run by',
       lista: [
         {
-          id: 'finance', orden: 'First', nombre: 'ads Finance',
-          titulo: 'Knowing, every month, {where you stand.}',
+          id: 'finance', nombre: 'ads Finance',
+          frase: 'Knowing what each business line earns. Every month.',
+          chips: ['Financial diagnosis', 'Profitability model', 'Dashboard', 'Monthly control'],
           persona: 'Daniel de Céspedes',
-          trayectoria: 'Five years running the accounting of investment funds.',
-          entrega: ['Financial diagnosis', 'Profitability model', 'Dashboard', 'Monthly control'],
+          nota: 'Five years running the accounting of investment funds.',
         },
         {
-          id: 'tech', orden: 'Then', nombre: 'ads Tech',
-          titulo: 'A company {that almost runs itself.}',
+          id: 'tech', nombre: 'ads Tech',
+          frase: 'The repetitive work runs itself and your people get on with theirs.',
+          chips: ['Automated flows', 'AI assistants', 'Custom tools'],
           persona: 'Álvaro Espinosa',
-          trayectoria: 'Custom software and AI for hospitals, clinics and hospitality.',
-          entrega: ['Automated flows', 'AI assistants', 'Custom tools'],
+          nota: 'Custom software and AI for hospitals, clinics and hospitality.',
         },
         {
-          id: 'brand', orden: 'Last', nombre: 'ads Brand',
-          titulo: 'One group, {one image.}',
+          id: 'brand', nombre: 'ads Brand',
+          frase: 'All your businesses looking like they come from the same house.',
+          chips: ['Brand architecture', 'Visual identity', 'Website'],
           persona: 'Sebastián Lorenzo',
-          trayectoria: 'Brands built from scratch, from strategy to website.',
-          entrega: ['Brand architecture', 'Visual identity and guidelines', 'Website and digital presence'],
+          nota: 'Brands built from scratch, from strategy to website.',
         },
       ],
       finance: {
         cab: 'Margin by business line',
-        ejemplo: 'Illustrative example',
+        ejemplo: 'Example',
         filas: [
           { n: 'Shop', v: 14, nota: 'good margin' },
           { n: 'Production', v: 11, nota: 'good margin' },
@@ -244,9 +271,9 @@ window.SECCIONES = {
         frase: 'Your accountants record. {We interpret.}',
       },
       tech: {
-        cab: 'An automated flow',
-        ejemplo: 'For example',
-        pasos: ['An invoice arrives by email', 'It reads itself, line by line', 'It is filed with no typing', 'It shows up on the dashboard'],
+        cab: 'An invoice, untouched',
+        ejemplo: 'Example',
+        pasos: ['Arrives by email', 'Reads itself, line by line', 'Is filed with no typing', 'Shows on the dashboard'],
         extras: [
           { etq: 'An AI assistant', d: 'A customer orders on WhatsApp at eleven at night and the order is logged.' },
           { etq: 'A custom tool', d: 'A portal where each customer sees their orders and invoices without calling the office.' },
@@ -264,69 +291,29 @@ window.SECCIONES = {
       },
     },
 
-    principio: {
-      etq: 'Why in this order',
-      texto: 'You cannot automate what has not been measured, {nor tell the outside world what is not yet in order on the inside.}',
-    },
-
-    diagnostico: {
-      etq: 'The way in · The Diagnosis',
-      titulo: 'It all starts {with a proper look.}',
-      cifras: [
-        { etq: 'How long', n: '3 – 4', u: 'weeks', d: 'With several days inside your company.' },
-        { etq: 'How much', n: 'Fixed', u: 'price', d: 'Finance, technology and brand, all at once.' },
-        { etq: 'If you go on', n: '100 %', u: 'is deducted', d: 'What you paid comes off the plan if you decide to continue.' },
-      ],
-      mapa: {
-        etq: 'What you take from the Diagnosis',
-        titulo: 'The map {of your company.}',
-        filas: [
-          'How much each business line really earns.',
-          'Which processes eat the hours, and which can be automated.',
-          'How each brand in the group looks today, and what it needs to add up.',
-          'A plan in order of priority, with timings and budget.',
-        ],
-        cierre: 'It is yours, {and it is useful even if you decide not to go on with us.}',
-      },
-    },
-
-    recorrido: {
-      etq: 'How we work',
-      titulo: 'A journey with an order. {At your own pace.}',
+    metodo: {
+      etq: 'How it starts',
+      titulo: 'From the first chat {to having it running.}',
       pasos: [
-        { etq: 'All three branches', t: 'Diagnosis', n: '3–4 weeks', d: 'inside your company' },
-        { etq: 'ads Finance', t: 'Order', n: '30 days', d: 'to the first monthly close' },
-        { etq: 'ads Tech', t: 'Systems', n: '4–6 weeks', d: 'to the first system' },
-        { etq: 'ads Brand', t: 'Image', n: '4–12 weeks', d: 'depending on the project' },
-        { etq: 'All three branches', t: 'Ongoing support', n: 'Every month', d: 'with a visit, wherever you are' },
+        { id: 'charla', etq: '45 minutes', t: 'We meet', d: 'Online or in person. We see whether it makes sense to go on, no strings attached.' },
+        { id: 'semanas', etq: '3–4 weeks', t: 'The Diagnosis', d: 'Several days inside your company looking at numbers, processes and brand. At a fixed price.' },
+        { id: 'mapa', etq: 'What you keep', t: 'The map', d: 'What each line earns, what can be automated, how each brand looks and a plan with timings and budget. Yours, whether you go on or not.' },
+        { id: 'fases', etq: 'In phases', t: 'Getting to work', d: 'First monthly close in 30 days. First system in 4–6 weeks. Brand, in 4–12. And the Diagnosis is deducted.' },
+        { id: 'mes', etq: 'Every month', t: 'We stay', d: 'One visit a month, wherever you are, and the same person on the phone.' },
       ],
-      cierre: 'You can start with a single branch {and add the others later.}',
-    },
-
-    cerca: {
-      etq: 'What working with us is like',
-      titulo: 'Close, for real. {Wherever you are.}',
-      celdas: [
-        { id: 'dentro', t: 'Inside your company', d: 'The Diagnosis happens there. After that, we come every month.' },
-        { id: 'persona', t: 'One point of contact', d: 'One name and one phone number. Coordinating among ourselves is our job.' },
-        { id: 'fases', t: 'In phases, no surprises', d: 'Each phase starts with its scope and its price fixed.' },
-        { id: 'ritmo', t: 'At your own pace', d: 'Every change is explained, tested and adjusted with your team.' },
-      ],
-      piezas: {
-        visita: 'Visit',
-        dias: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
-        vosotros: 'You',
-        referencia: 'Your contact',
-        fase: 'Phase',
-        alcance: 'Scope',
-        precio: 'Price',
-        cerrado: 'fixed',
-        ritmo: ['Explained', 'Tested', 'Adjusted'],
+      vis: {
+        charla: { n: '45', u: 'min', modos: ['Online', 'In person'], pie: 'No strings attached' },
+        semanas: { cab: 'Week', dias: ['M', 'T', 'W', 'T', 'F'], pie: 'Days inside your company' },
+        mapa: { cab: 'The map of your company', filas: ['What each business line earns', 'Which processes can be automated', 'How each brand in the group looks', 'A plan with timings and budget'], sello: 'It is yours' },
+        fases: { filas: [{ n: 'ads Finance', v: '30 days', w: 0.34, d: 'to the first monthly close' }, { n: 'ads Tech', v: '4–6 weeks', w: 0.5, d: 'to the first system' }, { n: 'ads Brand', v: '4–12 weeks', w: 1, d: 'depending on the project' }] },
+        mes: { visita: 'Visit' },
       },
     },
 
     testimonios: {
-      etq: 'From those who have already worked with us',
+      etq: 'In their words',
+      titulo: 'Don’t take {our word for it.}',
+      arrastra: 'Drag',
       lista: [
         {
           q: 'I went from spending days on final artwork and presentations for my clients to a single click. I finally have time to do my job well, not presentations.',
@@ -341,46 +328,47 @@ window.SECCIONES = {
           quien: 'Alejandro Bermejo', cargo: 'Founder & CEO, Inversalia',
         },
       ],
-      anterior: 'Previous',
-      siguiente: 'Next',
     },
 
     preguntas: {
-      etq: 'Frequently asked',
-      titulo: 'What people ask {before starting.}',
+      etq: 'Before we meet',
+      titulo: 'Ask away, {that is what we are here for.}',
+      chat: 'adsPartners',
+      enLinea: 'online',
+      hoy: 'Today',
       lista: [
         {
           p: 'Do we have to hire all three branches?',
-          r: 'No. You can start with a single branch and add the others later. The order we recommend is Finance, Tech and Brand, because you cannot automate what has not been measured, nor tell the outside world what is not yet in order on the inside.',
+          r: 'No. You can start with one and add the others when the time comes. If you ask us about the order: Finance first, then Tech, Brand last. There is no point automating what has not been measured, or telling the outside world what is still a mess inside.',
         },
         {
-          p: 'What if we do not continue after the Diagnosis?',
-          r: 'Nothing. The Diagnosis ends with the map of your company: how much each business line earns, which processes eat the hours, how each brand looks and a plan in order of priority, with timings and budget. It is yours and it is useful even if you do not go on with us.',
+          p: 'What if we do not go on after the Diagnosis?',
+          r: 'Nothing happens. You keep the map: what each business line earns, which processes eat the hours, how each brand looks and a plan with timings and budget. It is yours.',
         },
         {
           p: 'How much does the Diagnosis cost?',
-          r: 'It has a fixed price, which you know before we start, and it covers finance, technology and brand at once. If you decide to continue, what you paid is deducted from the plan.',
+          r: 'It has a fixed price and you know it before we start. It covers finance, technology and brand at once. If you go on, it is deducted in full from the plan.',
         },
         {
           p: 'Do you work outside Madrid?',
-          r: 'Yes. The Diagnosis is done inside your company, with several days there, and after that we come every month, wherever you are.',
+          r: 'Yes. The Diagnosis is done at your company, with several days there, and after that we come once a month. Wherever you are.',
         },
         {
           p: 'Do you replace our accountants?',
-          r: 'No. Your accountants record; we interpret. ads Finance builds the profitability model, the dashboard and the monthly control. Tax filing, auditing and day-to-day bookkeeping stay where they are.',
+          r: 'No. Your accountants record and we interpret. Tax, auditing and day-to-day bookkeeping stay where they are.',
         },
         {
           p: 'How long until we see something working?',
-          r: 'The Diagnosis takes 3 to 4 weeks. After that, 30 days to the first monthly close with ads Finance, 4 to 6 weeks to the first system with ads Tech and 4 to 12 weeks with ads Brand, depending on the project.',
+          r: 'The Diagnosis takes 3 or 4 weeks. After that, 30 days to the first monthly close with Finance, 4 to 6 weeks to the first system with Tech and 4 to 12 with Brand, depending on the project.',
         },
       ],
     },
 
     cierre: {
-      izq: ['Control', 'first'],
-      der: ['Growth', 'after'],
+      izq: ['Order', 'inside'],
+      der: ['Brand', 'outside'],
       etq: 'The next step',
-      texto: '45 minutes to see whether the Diagnosis makes sense in your case. {No strings attached.}',
+      texto: '45 minutes to see if we are a fit. {No strings attached.}',
       btn: 'Suggest a day and time',
     },
   },

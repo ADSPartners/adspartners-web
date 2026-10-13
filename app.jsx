@@ -1,4 +1,4 @@
-/* global React, ReactDOM, I18nProvider, Nav, SideMenu, Hero, PuntoPartida, Ramas, Principio, Diagnostico, Recorrido, Proyectos, Cerca, Testimonios, Preguntas, Cierre, Footer, Quedamos, useReveal, useT, CookieConsent, ChatGlobo */
+/* global React, ReactDOM, I18nProvider, Nav, SideMenu, Portada, Cinta, Diferencias, Ramas, Metodo, Trabajos, Testimonios, Preguntas, Cierre, Footer, Quedamos, useReveal, useT, CookieConsent, ChatGlobo */
 const { useState, useEffect } = React;
 
 function AppInner() {
@@ -8,7 +8,7 @@ function AppInner() {
     const el = document.getElementById('quedamos');
     if (!el) return;
     const y = el.getBoundingClientRect().top + window.scrollY;
-    window.scrollTo({ top: y, behavior: 'smooth' });
+    (window.adsIr || ((y) => window.scrollTo({ top: y, behavior: 'smooth' })))(y);
   };
 
   return (
@@ -16,17 +16,15 @@ function AppInner() {
       <Nav onCartClick={scrollToContact} />
       <SideMenu />
       <div className="scroll-content">
-        <Hero />
-        <PuntoPartida />
+        <Portada />
+        <Cinta />
+        <Diferencias />
         <Ramas />
-        {typeof Principio !== 'undefined' && <Principio />}
-        {typeof Diagnostico !== 'undefined' && <Diagnostico />}
-        {typeof Recorrido !== 'undefined' && <Recorrido />}
-        {typeof Proyectos !== 'undefined' && <Proyectos />}
-        {typeof Cerca !== 'undefined' && <Cerca />}
-        {typeof Testimonios !== 'undefined' && <Testimonios />}
-        {typeof Preguntas !== 'undefined' && <Preguntas />}
-        {typeof Cierre !== 'undefined' && <Cierre />}
+        <Metodo />
+        {typeof Trabajos !== 'undefined' && <Trabajos />}
+        <Testimonios />
+        <Preguntas />
+        <Cierre />
         <Quedamos />
       </div>
       <Footer onCartClick={scrollToContact} />

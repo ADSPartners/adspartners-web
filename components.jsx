@@ -145,12 +145,12 @@ function Nav({ onCartClick }) {
 function SideMenu({ items: itemsProp }) {
   const { t } = useT();
   const items = itemsProp || [
-  { href: '#partida', key: 'side.partida' },
+  { href: '#diferencias', key: 'side.difs' },
   { href: '#ramas', key: 'side.ramas' },
-  { href: '#diagnostico', key: 'side.diagnostico' },
-  { href: '#recorrido', key: 'side.recorrido' },
+  { href: '#metodo', key: 'side.metodo' },
   { href: '#proyectos', key: 'side.proyectos' },
-  { href: '#cerca', key: 'side.cerca' },
+  { href: '#testimonios', key: 'side.testi' },
+  { href: '#preguntas', key: 'side.preguntas' },
   { href: '#quedamos', key: 'side.ecomm' }];
 
 
@@ -202,7 +202,7 @@ function SideMenu({ items: itemsProp }) {
               const el = document.querySelector(it.href);
               if (!el) return;
               e.preventDefault();
-              window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY, behavior: 'smooth' });
+              (window.adsIr || ((y) => window.scrollTo({ top: y, behavior: 'smooth' })))(el.getBoundingClientRect().top + window.scrollY);
             }}>
               <span className="side-menu-dots"></span>
               <span className="side-menu-text">{t(it.key)}</span>
@@ -211,33 +211,6 @@ function SideMenu({ items: itemsProp }) {
         )}
       </ul>
     </aside>);
-
-}
-
-// ============= HERO =============
-function Hero() {
-  const { t, lang } = useT();
-
-  return (
-    <header className="hero" id="top" data-screen-label="Hero" data-nav-theme="dark" data-nav-bar-theme="light" style={{ padding: "140px 65px 15vw" }}>
-      <div className="hero-grain"></div>
-      <div className="hero-intro">
-        <p className="hero-eyebrow">{t('hero.etq')}</p>
-        <h1 className="hero-titulo">
-          {t('hero.titulo').split(' ').map((w, i) =>
-          <React.Fragment key={i}><span><i style={{ '--i': i }}>{w}</i></span>{' '}</React.Fragment>
-          )}
-        </h1>
-        <p className="hero-tagline">{t('hero.sub')}</p>
-      </div>
-      <div className="hero-foot">
-        <p className="hero-tagline-sub">{t('hero.pie.izq')}</p>
-        <div className="hero-stamp">
-          <strong>{t('hero.pie.der')}</strong>
-        </div>
-      </div>
-      <img className="hero-wordmark" src="assets/logos/logotipo_beige.svg" alt="adsPartners" aria-hidden="true" data-parallax="0.05" />
-    </header>);
 
 }
 
@@ -793,4 +766,4 @@ function RevealText({ paras, className }) {
 
 }
 
-Object.assign(window, { Nav, SideMenu, Hero, RevealText, Footer, Quedamos, useReveal });
+Object.assign(window, { Nav, SideMenu, RevealText, Footer, Quedamos, useReveal });

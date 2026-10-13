@@ -1,13 +1,17 @@
-/* global React, useT, RevealText */
+/* global React, useT */
 // ============= SECCIONES DE LA HOME =============
-// Los bloques de «Recuperar el control»: punto de partida, las tres ramas, el principio, el Diagnóstico,
-// el recorrido, cómo es trabajar con nosotros, testimonios, preguntas y cierre.
+// Portada, cinta, las seis tarjetas, las tres ramas, el método, testimonios, preguntas y cierre.
 // Los textos viven en secciones-data.jsx (window.SECCIONES); aquí solo se pintan y se mueven.
+// La lista de trabajos va aparte, en proyectos.jsx.
 const { useState, useEffect, useRef } = React;
 
 // En el prerender del build (jsdom) y con «reducir movimiento» las piezas se pintan en su estado final.
 const SEC_BOT = typeof navigator !== 'undefined' && /jsdom/i.test(navigator.userAgent || '');
 const secQuieto = () => SEC_BOT || !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+const secLimita = (v, a, b) => Math.max(a, Math.min(b, v));
+// Lleva a una altura de la página (con el scroll suave si está cargado).
+const secIr = (y) => { if (window.adsIr) window.adsIr(y); else window.scrollTo({ top: y, behavior: 'smooth' }); };
+const secIrA = (id) => { const el = document.getElementById(id); if (el) secIr(el.getBoundingClientRect().top + window.scrollY); };
 
 function useSec() {
   const { lang } = useT();
@@ -49,6 +53,35 @@ function useVisto(ref, umbral) {
   return visto;
 }
 
+// Paso que avanza solo mientras la pieza se ve (y se queda en el último si no hay movimiento).
+function usePaso(ref, n, ms) {
+  const dentro = useEnVista(ref, 0.4);
+  const [paso, setPaso] = useState(secQuieto() ? n - 1 : 0);
+  useEffect(() => {
+    if (!dentro || secQuieto()) return undefined;
+    const id = setInterval(() => setPaso((p) => (p + 1) % n), ms);
+    return () => clearInterval(id);
+  }, [dentro, n, ms]);
+  return paso;
+}
+
+// Llama a `pintar` en cada cambio de scroll o de tamaño, como mucho una vez por fotograma.
+function useAlBajar(pintar, deps) {
+  useEffect(() => {
+    let raf = 0;
+    const tic = () => { raf = 0; pintar(); };
+    const pedir = () => { if (!raf) raf = requestAnimationFrame(tic); };
+    pintar();
+    window.addEventListener('scroll', pedir, { passive: true });
+    window.addEventListener('resize', pedir);
+    return () => {
+      window.removeEventListener('scroll', pedir);
+      window.removeEventListener('resize', pedir);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, deps || []);
+}
+
 // Número que cuenta hasta su valor cuando `on` pasa a true.
 function Cuenta({ hasta, on, sufijo, dur }) {
   const [v, setV] = useState(secQuieto() ? hasta : 0);
@@ -59,7 +92,7 @@ function Cuenta({ hasta, on, sufijo, dur }) {
     const t0 = performance.now();
     const D = dur || 1200;
     const paso = (now) => {
-      const k = Math.min(1, Math.max(0, (now - t0) / D));
+      const k = secLimita((now - t0) / D, 0, 1);
       setV(Math.round(hasta * (1 - Math.pow(1 - k, 3))));
       if (k < 1) raf = requestAnimationFrame(paso);
     };
@@ -69,43 +102,312 @@ function Cuenta({ hasta, on, sufijo, dur }) {
   return <>{String(v).replace('-', '−')}{sufijo || ''}</>;
 }
 
-// Cabecera de bloque: etiqueta, título en dos tonos y, si lo hay, un apunte al lado.
+// Titular que se rellena al bajar: cada palabra pasa de desenfocada y tenue a nítida.
+function Relleno({ texto, como, className, ventana }) {
+  const ref = useRef(null);
+  const Tag = como || 'h2';
+  useAlBajar(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ps = el.querySelectorAll('.rell__p');
+    if (secQuieto()) { ps.forEach((p) => p.classList.add('is-on')); return; }
+    const r = el.getBoundingClientRect();
+    const vh = window.innerHeight;
+    const n = Math.round(secLimita((vh * 0.94 - r.top) / (vh * (ventana || 0.5)), 0, 1) * ps.length);
+    if (el.__n === n) return;
+    el.__n = n;
+    ps.forEach((p, i) => p.classList.toggle('is-on', i < n));
+  }, [texto]);
+  const palabras = (t) => t.split(/(\s+)/).map((w, i) =>
+    (!w || /^\s+$/.test(w)) ? w : <span className={'rell__p' + (SEC_BOT ? ' is-on' : '')} key={i}>{w}</span>);
+  return (
+    <Tag className={'rell ' + (className || '')} ref={ref}>
+      {String(texto).split(/(\{[^}]*\})/).filter(Boolean).map((t, i) =>
+        t[0] === '{' ? <em key={i}>{palabras(t.slice(1, -1))}</em> : <React.Fragment key={i}>{palabras(t)}</React.Fragment>)}
+    </Tag>
+  );
+}
+
+// Cabecera de bloque: etiqueta, título que se rellena y, si lo hay, un apunte al lado.
 function Cabecera({ etq, titulo, lado }) {
   return (
     <header className={'sec-cab' + (lado ? ' sec-cab--lado' : '')}>
-      <p className="sec-etq reveal">{etq}</p>
-      <h2 className="sec-titulo reveal reveal-delay-1">{secTexto(titulo)}</h2>
+      <p className="sec-etq reveal"><i aria-hidden="true"></i>{etq}</p>
+      <Relleno texto={titulo} className="sec-titulo" />
       {lado ? <p className="sec-lado reveal reveal-delay-2">{lado}</p> : null}
     </header>
   );
 }
 
-// ---------- Punto de partida ----------
-function PuntoPartida() {
-  const d = useSec().partida;
+// ---------- Portada ----------
+// Palabra que rota: entra por abajo y sale por arriba.
+function Rota({ palabras }) {
+  const n = palabras.length;
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    if (secQuieto()) return undefined;
+    const id = setInterval(() => setI((x) => (x + 1) % n), 2600);
+    return () => clearInterval(id);
+  }, [n]);
   return (
-    <section className="partida" id="partida" data-screen-label="Punto de partida" data-nav-theme="dark">
-      <p className="sec-etq sec-etq--rosa reveal">{d.etq}</p>
-      <RevealText className="partida-titulo" paras={[d.titulo]} />
-      <div className="partida-cols">
-        {d.cols.map((c, i) => (
-          <div className={'partida-col reveal reveal-delay-' + (i + 1)} key={c.etq}>
-            <p className="sec-etq sec-etq--rosa">{c.etq}</p>
-            <h3 className="partida-col__t">{c.t}</h3>
-            <p className="partida-col__d">{c.d}</p>
-          </div>
-        ))}
+    <span className="rota">
+      {palabras.map((p, k) => (
+        <span className={'rota__p' + (k === i ? ' is-on' : (k === (i + n - 1) % n ? ' is-sale' : ''))} key={k} aria-hidden={k !== i}>{p}</span>
+      ))}
+    </span>
+  );
+}
+
+// Frase que se escribe sola, letra a letra.
+function Teclea({ texto, espera }) {
+  const [n, setN] = useState(secQuieto() ? texto.length : 0);
+  useEffect(() => {
+    if (secQuieto()) { setN(texto.length); return undefined; }
+    setN(0);
+    let k = 0;
+    let id = setTimeout(function paso() {
+      k++;
+      setN(k);
+      if (k < texto.length) id = setTimeout(paso, 14 + Math.random() * 26);
+    }, espera || 1600);
+    return () => clearTimeout(id);
+  }, [texto]);
+  return (
+    <span className="teclea" aria-label={texto}>
+      <span aria-hidden="true">{texto.slice(0, n)}</span>
+      <i className={'teclea__c' + (n >= texto.length ? ' is-fin' : '')} aria-hidden="true"></i>
+      <span className="teclea__r" aria-hidden="true">{texto.slice(n)}</span>
+    </span>
+  );
+}
+
+// Tarjeta que va pasando quién lleva cada rama.
+function PortadaTarjeta({ d }) {
+  const n = d.equipo.length;
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    if (secQuieto()) return undefined;
+    const id = setInterval(() => setI((x) => (x + 1) % n), 3400);
+    return () => clearInterval(id);
+  }, [n]);
+  return (
+    <button type="button" className="hero-tarjeta" onClick={() => secIrA('ramas')} data-cursor="cta">
+      <span className="hero-tarjeta__punto" aria-hidden="true"></span>
+      <span className="hero-tarjeta__txt">
+        <span className="hero-tarjeta__etq">{d.tarjeta}</span>
+        <span className="hero-tarjeta__pila">
+          {d.equipo.map((x, k) => (
+            <span className={'hero-tarjeta__p' + (k === i ? ' is-on' : '')} key={k} aria-hidden={k !== i}><b>{x.rama}</b>{x.quien}</span>
+          ))}
+        </span>
+      </span>
+      <span className="hero-tarjeta__fl" aria-hidden="true">↓</span>
+    </button>
+  );
+}
+
+function Portada() {
+  const d = useSec().portada;
+  const intro = useRef(null);
+  // El contenido se hunde y se apaga un poco al bajar, mientras el logotipo aguanta.
+  useAlBajar(() => {
+    const el = intro.current;
+    if (!el || secQuieto()) return;
+    const y = window.scrollY;
+    el.style.transform = `translate3d(0, calc(var(--hero-sube, -7vh) + ${Math.min(y * 0.3, 280).toFixed(1)}px), 0)`;
+    el.style.opacity = String(secLimita(1 - y / 640, 0, 1));
+  });
+  return (
+    <header className="hero" id="top" data-screen-label="Hero" data-nav-theme="dark" data-nav-bar-theme="light" style={{ padding: "140px 65px 15vw" }}>
+      <div className="hero-grain"></div>
+      <div className="hero-intro" ref={intro}>
+        <p className="hero-etq"><i aria-hidden="true"></i>{d.etq}</p>
+        <h1 className="hero-titulo"><span className="hero-titulo__fijo">{d.fijo}</span> <Rota palabras={d.rota} /></h1>
+        <p className="hero-tagline">{d.sub}</p>
       </div>
-      <p className="partida-cierre reveal">{d.cierre}</p>
+      <div className="hero-foot">
+        <p className="hero-tagline-sub"><Teclea texto={d.teclea} /></p>
+        <PortadaTarjeta d={d} />
+      </div>
+      <img className="hero-wordmark" src="assets/logos/logotipo_beige.svg" alt="adsPartners" aria-hidden="true" data-parallax="0.05" />
+    </header>
+  );
+}
+
+// ---------- Cinta ----------
+// Lo que hacemos, pasando sin parar. Va más deprisa al bajar y se frena al ponerle el ratón.
+function Cinta() {
+  const items = useSec().cinta;
+  const despl = useRef(null);
+  const pista = useRef(null);
+  useAlBajar(() => {
+    const el = despl.current;
+    const grupo = pista.current && pista.current.firstChild;
+    if (!el || !grupo || secQuieto()) return;
+    const w = grupo.offsetWidth || 1;
+    el.style.transform = `translate3d(${(-((window.scrollY * 0.35) % w)).toFixed(1)}px, 0, 0)`;
+  }, [items.length]);
+  const ritmo = (v) => {
+    const t = pista.current;
+    if (t && t.getAnimations) t.getAnimations().forEach((a) => { if (a.updatePlaybackRate) a.updatePlaybackRate(v); else a.playbackRate = v; });
+  };
+  const grupo = (k) => (
+    <span className="cinta__grupo" aria-hidden={k > 0} key={k}>
+      {items.map((t, i) => <span className="cinta__it" key={i}>{t}<i aria-hidden="true"></i></span>)}
+    </span>
+  );
+  return (
+    <div className="cinta panel" data-nav-theme="light" onPointerEnter={() => ritmo(0.25)} onPointerLeave={() => ritmo(1)}>
+      <div className="cinta__despl" ref={despl}>
+        <div className="cinta__pista" ref={pista}>{[0, 1, 2, 3].map(grupo)}</div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- Seis cosas (tarjetas vivas) ----------
+// Una visita cada mes.
+function PiezaDentro({ x }) {
+  const ref = useRef(null);
+  const { lang } = useT();
+  const paso = usePaso(ref, 14, 480);   // 12 meses + dos tiempos de pausa
+  const meses = Array.from({ length: 12 }, (_, i) =>
+    new Intl.DateTimeFormat(lang === 'en' ? 'en-GB' : 'es-ES', { month: 'short' }).format(new Date(2026, i, 1)).replace('.', ''));
+  return (
+    <div className="pieza pieza-dentro" ref={ref}>
+      <p className="pieza__etq">{x.visita}</p>
+      <ol className="pieza-dentro__meses">
+        {meses.map((m, i) => (
+          <li className={(i <= paso ? 'is-on' : '') + (i === paso ? ' is-ahora' : '')} key={i}><i></i><span>{m}</span></li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
+// Las tres ramas pasan por una sola persona hasta vosotros.
+function PiezaPersona({ x }) {
+  return (
+    <div className="pieza pieza-persona">
+      <ul className="pieza-persona__ramas">
+        <li>Finance</li><li>Tech</li><li>Brand</li>
+      </ul>
+      <svg className="pieza-persona__lineas" viewBox="0 0 100 60" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0,8 C55,8 45,30 100,30" /><path d="M0,30 L100,30" /><path d="M0,52 C55,52 45,30 100,30" />
+      </svg>
+      <span className="pieza-persona__nodo">{x.referencia}</span>
+      <span className="pieza-persona__tramo" aria-hidden="true"></span>
+      <span className="pieza-persona__vos">{x.vosotros}</span>
+    </div>
+  );
+}
+
+// Alcance y precio, cerrados antes de cada fase.
+function PiezaFases({ x }) {
+  const ref = useRef(null);
+  const paso = usePaso(ref, 5, 850);
+  return (
+    <div className="pieza pieza-fases" ref={ref}>
+      {[0, 1, 2].map((i) => (
+        <div className={'pieza-fases__fila' + (i < paso ? ' is-on' : '')} key={i}>
+          <span className="pieza-fases__n">{x.fase} {i + 1}</span>
+          <span className="pieza-fases__chip">{x.alcance}</span>
+          <span className="pieza-fases__chip">{x.precio}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Empezar por una rama: los interruptores se van encendiendo.
+function PiezaUna() {
+  const ref = useRef(null);
+  const paso = usePaso(ref, 5, 950);
+  return (
+    <div className="pieza pieza-una" ref={ref}>
+      {['Finance', 'Tech', 'Brand'].map((r, i) => (
+        <div className={'pieza-una__fila' + (i <= Math.min(paso, 2) && paso < 4 ? ' is-on' : (paso === 4 && i === 0 ? ' is-on' : ''))} key={r}>
+          <span>ads {r}</span><i aria-hidden="true"></i>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Se explica, se prueba, se ajusta.
+function PiezaRitmo({ x }) {
+  const ref = useRef(null);
+  const paso = usePaso(ref, x.ritmo.length, 1500);
+  return (
+    <ol className="pieza pieza-ritmo" ref={ref}>
+      {x.ritmo.map((t, i) => (
+        <li className={i === paso ? 'is-on' : ''} key={i}><span>{String(i + 1).padStart(2, '0')}</span>{t}</li>
+      ))}
+    </ol>
+  );
+}
+
+// El Diagnóstico, descontado entero.
+function PiezaDescuento({ x }) {
+  const ref = useRef(null);
+  const visto = useVisto(ref, 0.5);
+  const on = visto || secQuieto();
+  return (
+    <div className={'pieza pieza-desc' + (on ? ' is-on' : '')} ref={ref}>
+      <p className="pieza-desc__n"><Cuenta hasta={100} on={on} dur={1700} /><small>%</small></p>
+      <p className="pieza-desc__t">{x.descuento}</p>
+      <span className="pieza-desc__barra" aria-hidden="true"><i></i></span>
+    </div>
+  );
+}
+
+function Diferencias() {
+  const d = useSec().diferencias;
+  const piezas = { dentro: PiezaDentro, persona: PiezaPersona, fases: PiezaFases, una: PiezaUna, ritmo: PiezaRitmo, descuento: PiezaDescuento };
+  // La tarjeta bajo el ratón se inclina hacia él y le sigue una luz.
+  const mover = (e) => {
+    const c = e.target.closest && e.target.closest('.celda');
+    if (!c) return;
+    const r = c.getBoundingClientRect();
+    const x = e.clientX - r.left;
+    const y = e.clientY - r.top;
+    c.style.setProperty('--mx', x.toFixed(0) + 'px');
+    c.style.setProperty('--my', y.toFixed(0) + 'px');
+    c.style.setProperty('--rx', ((y / r.height - 0.5) * -5).toFixed(2) + 'deg');
+    c.style.setProperty('--ry', ((x / r.width - 0.5) * 5).toFixed(2) + 'deg');
+  };
+  const salir = (e) => {
+    const c = e.target.closest && e.target.closest('.celda');
+    if (!c || (e.relatedTarget && c.contains(e.relatedTarget))) return;
+    c.style.setProperty('--rx', '0deg');
+    c.style.setProperty('--ry', '0deg');
+  };
+  return (
+    <section className="difs panel" id="diferencias" data-screen-label="Cómo trabajamos" data-nav-theme="light">
+      <Cabecera etq={d.etq} titulo={d.titulo} lado={d.lado} />
+      <div className="difs-rejilla" onMouseMove={mover} onMouseOut={salir}>
+        {d.celdas.map((c, i) => {
+          const Pieza = piezas[c.id];
+          return (
+            <div className={'celda-w celda-w--' + c.id + ' reveal reveal-delay-' + (i % 3 + 1)} key={c.id}>
+              <article className={'celda celda--' + c.id}>
+                <h3 className="celda__t">{c.t}</h3>
+                <p className="celda__d">{c.d}</p>
+                <Pieza x={d.piezas} />
+              </article>
+            </div>
+          );
+        })}
+      </div>
     </section>
   );
 }
 
 // ---------- Las tres ramas ----------
-// ads Finance: el margen de cada línea de negocio, que aparece al llegar.
+// ads Finance: el margen de cada línea de negocio.
 function DemoFinance({ d }) {
   const ref = useRef(null);
-  const visto = useVisto(ref, 0.45);
+  const visto = useVisto(ref, 0.3);
   const on = visto || secQuieto();
   const max = Math.max.apply(null, d.filas.map((f) => Math.abs(f.v)));
   return (
@@ -138,15 +440,8 @@ const SEC_ICONOS = [
 ];
 function DemoTech({ d }) {
   const ref = useRef(null);
-  const dentro = useEnVista(ref, 0.4);
   const n = d.pasos.length;
-  // El paso n es la pausa con todo encendido, antes de volver a empezar.
-  const [paso, setPaso] = useState(secQuieto() ? n : 0);
-  useEffect(() => {
-    if (!dentro || secQuieto()) return undefined;
-    const id = setInterval(() => setPaso((p) => (p + 1) % (n + 2)), 1150);
-    return () => clearInterval(id);
-  }, [dentro, n]);
+  const paso = usePaso(ref, n + 2, 1100);   // los dos últimos tiempos son la pausa con todo encendido
   return (
     <div className="demo demo-tech" ref={ref}>
       <div className="demo__cab">
@@ -164,7 +459,7 @@ function DemoTech({ d }) {
       <div className="demo-tech__extras">
         {d.extras.map((x) => (
           <div className="demo-tech__extra" key={x.etq}>
-            <p className="sec-etq">{x.etq}</p>
+            <p className="demo-tech__etq">{x.etq}</p>
             <p className="demo-tech__d">{x.d}</p>
           </div>
         ))}
@@ -189,12 +484,12 @@ function Olmo({ hoja }) {
 }
 function DemoBrand({ d }) {
   const ref = useRef(null);
-  const dentro = useEnVista(ref, 0.4);
+  const dentro = useEnVista(ref, 0.3);
   const [despues, setDespues] = useState(secQuieto());
   const [tick, setTick] = useState(0);
   useEffect(() => {
     if (!dentro || secQuieto()) return undefined;
-    const id = setTimeout(() => setDespues((x) => !x), despues ? 4200 : 2600);
+    const id = setTimeout(() => setDespues((x) => !x), despues ? 3800 : 2000);
     return () => clearTimeout(id);
   }, [dentro, despues, tick]);
   const ir = (v) => { setDespues(v); setTick((x) => x + 1); };
@@ -233,358 +528,370 @@ function DemoBrand({ d }) {
   );
 }
 
+// Tres filas y un escenario: la fila que se señala enseña su pieza al lado. Si nadie toca, van pasando solas.
 function Ramas() {
   const d = useSec().ramas;
+  const ref = useRef(null);
+  const dentro = useEnVista(ref, 0.25);
+  const n = d.lista.length;
+  const [act, setAct] = useState(0);
+  const [toco, setToco] = useState(false);
+  useEffect(() => {
+    if (toco || !dentro || secQuieto()) return undefined;
+    const id = setTimeout(() => setAct((x) => (x + 1) % n), 7000);
+    return () => clearTimeout(id);
+  }, [act, toco, dentro, n]);
+  const elegir = (i) => { setToco(true); setAct(i); };
   const demos = { finance: DemoFinance, tech: DemoTech, brand: DemoBrand };
   return (
-    <section className="ramas" id="ramas" data-screen-label="Las tres ramas" data-nav-theme="light">
-      <Cabecera etq={d.etq} titulo={d.titulo} />
-      <div className="ramas-pila">
-        {d.lista.map((r, i) => {
-          const Demo = demos[r.id];
-          return (
-            <article className={'rama rama--' + r.id} key={r.id} style={{ '--i': i }}>
-              <header className="rama__cab">
-                <span className="rama__num">{String(i + 1).padStart(2, '0')}</span>
-                <span className="rama__orden">{r.orden} · {r.nombre}</span>
-                <span className="rama__persona">{r.persona}</span>
-              </header>
-              <div className="rama__cuerpo">
-                <div className="rama__texto">
-                  <h3 className="rama__titulo">{secTexto(r.titulo)}</h3>
-                  <p className="rama__trayectoria">{r.trayectoria}</p>
-                  <ul className="rama__entrega">
-                    {r.entrega.map((e, k) => <li key={e}><span>{String(k + 1).padStart(2, '0')}</span>{e}</li>)}
-                  </ul>
-                </div>
-                <div className="rama__demo"><Demo d={d[r.id]} /></div>
+    <section className="ramas panel" id="ramas" data-screen-label="Las tres ramas" data-nav-theme="dark">
+      <Cabecera etq={d.etq} titulo={d.titulo} lado={d.lado} />
+      <div className="ramas-duo" ref={ref} onMouseLeave={() => setToco(false)}>
+        {d.lista.map((r, i) => (
+          <button
+            type="button"
+            className={'rfila' + (i === act ? ' is-on' : '')}
+            style={{ order: i * 2 }}
+            key={r.id}
+            aria-pressed={i === act}
+            onMouseEnter={() => elegir(i)}
+            onFocus={() => elegir(i)}
+            onClick={() => elegir(i)}
+            data-cursor="cta">
+            <span className="rfila__num">(.0{i + 1})</span>
+            <span className="rfila__cuerpo">
+              <span className="rfila__nombre">{r.nombre}</span>
+              <span className="rfila__frase">{r.frase}</span>
+              <span className="rfila__chips">{r.chips.map((c) => <span className="chip" key={c}><i aria-hidden="true"></i>{c}</span>)}</span>
+            </span>
+            <span className="rfila__barra" aria-hidden="true">{i === act && !toco && dentro ? <i key={act}></i> : null}</span>
+          </button>
+        ))}
+        <div className="ramas-escena" style={{ order: act * 2 + 1 }}>
+          {(SEC_BOT ? d.lista : [d.lista[act]]).map((r) => {
+            const D = demos[r.id];
+            return (
+              <div className="ramas-pieza" key={r.id}>
+                <D d={d[r.id]} />
+                <p className="ramas-quien"><span>{d.lleva}</span><b>{r.persona}</b>{r.nota}</p>
               </div>
-            </article>
-          );
-        })}
-        <div className="ramas-cola" aria-hidden="true"></div>
+            );
+          })}
+        </div>
       </div>
     </section>
   );
 }
 
-// ---------- El principio ----------
-function Principio() {
-  const d = useSec().principio;
-  return (
-    <section className="principio" id="principio" data-screen-label="El principio" data-nav-theme="light">
-      <p className="sec-etq reveal">{d.etq}</p>
-      <RevealText className="principio-texto" paras={[d.texto]} />
-    </section>
-  );
-}
-
-// ---------- El Diagnóstico ----------
-// «3–4» o «100 %»: cuenta el último número del texto y deja lo demás como está.
-function CifraViva({ texto, on }) {
-  const m = String(texto).match(/^(.*?)(\d+)(\D*)$/);
-  if (!m) return <>{texto}</>;
-  return <>{m[1]}<Cuenta hasta={parseInt(m[2], 10)} on={on} dur={1300} />{m[3]}</>;
-}
-function Diagnostico() {
-  const d = useSec().diagnostico;
+// ---------- El método ----------
+// Lo que se ve al lado de cada paso.
+function VisCharla({ x }) {
   const ref = useRef(null);
-  const visto = useVisto(ref, 0.4);
-  const on = visto || secQuieto();
+  const visto = useVisto(ref, 0.3);
+  const paso = usePaso(ref, 2, 1700);
   return (
-    <section className="diag" id="diagnostico" data-screen-label="El Diagnóstico" data-nav-theme="light">
-      <Cabecera etq={d.etq} titulo={d.titulo} />
-      <div className="diag-cifras" ref={ref}>
-        {d.cifras.map((c, i) => (
-          <div className={'diag-cifra reveal reveal-delay-' + (i + 1) + (i === 1 ? ' diag-cifra--oscura' : '')} key={c.etq}>
-            <p className="sec-etq">{c.etq}</p>
-            <p className={'diag-cifra__n' + (/[0-9]/.test(c.n) ? '' : ' diag-cifra__n--palabra')}><CifraViva texto={c.n} on={on} /></p>
-            <p className="diag-cifra__u">{c.u}</p>
-            <p className="diag-cifra__d">{c.d}</p>
-          </div>
-        ))}
+    <div className="vis vis-charla" ref={ref}>
+      <p className="vis-charla__n"><Cuenta hasta={parseInt(x.n, 10)} on={visto || secQuieto()} dur={1100} /><small>{x.u}</small></p>
+      <div className="vis-charla__modos">
+        {x.modos.map((m, i) => <span className={i === paso ? 'is-on' : ''} key={m}><i aria-hidden="true"></i>{m}</span>)}
       </div>
-      <div className="diag-mapa">
-        <header className="diag-mapa__cab">
-          <p className="sec-etq reveal">{d.mapa.etq}</p>
-          <h3 className="sec-titulo sec-titulo--2 reveal reveal-delay-1">{secTexto(d.mapa.titulo)}</h3>
-        </header>
-        <ol className="diag-mapa__filas">
-          {d.mapa.filas.map((f, i) => (
-            <li className={'reveal reveal-delay-' + Math.min(4, i + 1)} key={i}>
-              <span>{String(i + 1).padStart(2, '0')}</span>{f}
-            </li>
-          ))}
-        </ol>
-      </div>
-      <p className="sec-banda reveal">{secTexto(d.mapa.cierre)}</p>
-    </section>
-  );
-}
-
-// ---------- El recorrido ----------
-// La línea se dibuja con el scroll y enciende cada parada al pasar. En ordenador va en horizontal; en móvil, en vertical.
-const RECO_ICONOS = [
-  <><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4.5 4.5" /></>,
-  <><path d="M5 20V10M12 20V4M19 20v-7" /></>,
-  <><path d="M4 7h10M18 7h2M4 17h2M10 17h10" /><circle cx="16" cy="7" r="2" /><circle cx="8" cy="17" r="2" /></>,
-  <><path d="M12 3c.6 4.6 3.4 7.4 9 9-5.6 1.6-8.4 4.4-9 9-.6-4.6-3.4-7.4-9-9 5.6-1.6 8.4-4.4 9-9z" /></>,
-  <><circle cx="9" cy="8" r="3" /><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6" /><circle cx="17" cy="9" r="2.3" /><path d="M16 14.2c2.9.2 5 2.6 5 5.8" /></>,
-];
-function Recorrido() {
-  const d = useSec().recorrido;
-  const ref = useRef(null);
-  const n = d.pasos.length;
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return undefined;
-    const paradas = el.querySelectorAll('.reco-paso');
-    const pintar = (p) => {
-      el.style.setProperty('--p', p.toFixed(4));
-      paradas.forEach((x, i) => x.classList.toggle('is-on', p >= i / (n - 1) - 0.002));
-    };
-    if (secQuieto()) { pintar(1); return undefined; }
-    let raf = 0;
-    const medir = () => {
-      raf = 0;
-      const r = el.getBoundingClientRect();
-      const vh = window.innerHeight;
-      const vertical = window.matchMedia('(max-width: 900px)').matches;
-      const p = vertical ? (vh * 0.72 - r.top) / Math.max(1, r.height) : (vh * 0.92 - r.top) / (vh * 0.62);
-      pintar(Math.min(1, Math.max(0, p)));
-    };
-    const pedir = () => { if (!raf) raf = requestAnimationFrame(medir); };
-    medir();
-    window.addEventListener('scroll', pedir, { passive: true });
-    window.addEventListener('resize', pedir);
-    return () => {
-      window.removeEventListener('scroll', pedir);
-      window.removeEventListener('resize', pedir);
-      if (raf) cancelAnimationFrame(raf);
-    };
-  }, [n]);
-  return (
-    <section className="reco" id="recorrido" data-screen-label="El recorrido" data-nav-theme="light">
-      <Cabecera etq={d.etq} titulo={d.titulo} />
-      <ol className="reco-linea" ref={ref} style={{ '--n': n }}>
-        {d.pasos.map((x, i) => (
-          <li className={'reco-paso' + (SEC_BOT ? ' is-on' : '')} key={i}>
-            <span className="reco-paso__nodo"><svg viewBox="0 0 24 24" aria-hidden="true">{RECO_ICONOS[i]}</svg></span>
-            <p className="sec-etq">{x.etq}</p>
-            <h3 className="reco-paso__t">{x.t}</h3>
-            <p className="reco-paso__n">{x.n}</p>
-            <p className="reco-paso__d">{x.d}</p>
-          </li>
-        ))}
-      </ol>
-      <p className="sec-banda reveal">{secTexto(d.cierre)}</p>
-    </section>
-  );
-}
-
-// ---------- Cómo es trabajar con nosotros ----------
-// Paso que avanza solo mientras la pieza se ve (y se queda en el último si no hay movimiento).
-function usePaso(ref, n, ms) {
-  const dentro = useEnVista(ref, 0.4);
-  const [paso, setPaso] = useState(secQuieto() ? n - 1 : 0);
-  useEffect(() => {
-    if (!dentro || secQuieto()) return undefined;
-    const id = setInterval(() => setPaso((p) => (p + 1) % n), ms);
-    return () => clearInterval(id);
-  }, [dentro, n, ms]);
-  return paso;
-}
-
-// Dentro de vuestra empresa: el Diagnóstico y, después, una visita cada mes.
-function PiezaDentro({ x }) {
-  const ref = useRef(null);
-  const { lang } = useT();
-  const paso = usePaso(ref, 14, 520);   // 12 meses + dos tiempos de pausa
-  const meses = Array.from({ length: 12 }, (_, i) =>
-    new Intl.DateTimeFormat(lang === 'en' ? 'en-GB' : 'es-ES', { month: 'short' }).format(new Date(2026, i, 1)).replace('.', ''));
-  return (
-    <div className="pieza pieza-dentro" ref={ref}>
-      <p className="pieza__etq">{x.visita}</p>
-      <ol className="pieza-dentro__meses">
-        {meses.map((m, i) => (
-          <li className={(i <= paso ? 'is-on' : '') + (i === paso ? ' is-ahora' : '')} key={i}><i></i><span>{m}</span></li>
-        ))}
-      </ol>
+      <p className="vis__pie">{x.pie}</p>
     </div>
   );
 }
-
-// Una persona de referencia: las tres ramas pasan por un solo nombre hasta vosotros.
-function PiezaPersona({ x }) {
+// Los días que pasamos dentro, repartidos en las semanas del Diagnóstico (la cuarta, si hace falta).
+const VIS_DIAS = [[0, 1], [0, 2], [1, 0], [1, 3], [2, 1], [2, 2], [3, 4]];
+function VisSemanas({ x }) {
+  const ref = useRef(null);
+  const paso = usePaso(ref, VIS_DIAS.length + 3, 420);
   return (
-    <div className="pieza pieza-persona">
-      <ul className="pieza-persona__ramas">
-        <li>Finance</li><li>Tech</li><li>Brand</li>
+    <div className="vis vis-semanas" ref={ref}>
+      <div className="vis-semanas__cab"><span></span>{x.dias.map((dia, i) => <span key={i}>{dia}</span>)}</div>
+      {[0, 1, 2, 3].map((s) => (
+        <div className={'vis-semanas__fila' + (s === 3 ? ' es-opcional' : '')} key={s}>
+          <span>{x.cab} {s + 1}</span>
+          {x.dias.map((_, dia) => {
+            const k = VIS_DIAS.findIndex((p) => p[0] === s && p[1] === dia);
+            return <i className={k >= 0 && k <= paso ? 'is-on' : ''} key={dia}></i>;
+          })}
+        </div>
+      ))}
+      <p className="vis__pie">{x.pie}</p>
+    </div>
+  );
+}
+function VisMapa({ x }) {
+  const ref = useRef(null);
+  const paso = usePaso(ref, x.filas.length + 3, 700);
+  return (
+    <div className="vis vis-mapa" ref={ref}>
+      <p className="vis-mapa__cab">{x.cab}</p>
+      <ul>
+        {x.filas.map((f, i) => <li className={i <= paso ? 'is-on' : ''} key={i}><i aria-hidden="true"></i>{f}</li>)}
       </ul>
-      <svg className="pieza-persona__lineas" viewBox="0 0 100 60" preserveAspectRatio="none" aria-hidden="true">
-        <path d="M0,8 C55,8 45,30 100,30" /><path d="M0,30 L100,30" /><path d="M0,52 C55,52 45,30 100,30" />
-      </svg>
-      <span className="pieza-persona__nodo">{x.referencia}</span>
-      <span className="pieza-persona__tramo" aria-hidden="true"></span>
-      <span className="pieza-persona__vos">{x.vosotros}</span>
+      <span className={'vis-mapa__sello' + (paso >= x.filas.length ? ' is-on' : '')}>{x.sello}</span>
     </div>
   );
 }
-
-// Por fases y sin sorpresas: cada fase arranca con alcance y precio cerrados.
-function PiezaFases({ x }) {
+function VisFases({ x }) {
   const ref = useRef(null);
-  const paso = usePaso(ref, 5, 900);
+  const visto = useVisto(ref, 0.3);
   return (
-    <div className="pieza pieza-fases" ref={ref}>
-      {[0, 1, 2].map((i) => (
-        <div className={'pieza-fases__fila' + (i < paso ? ' is-on' : '')} key={i}>
-          <span className="pieza-fases__n">{x.fase} {i + 1}</span>
-          <span className="pieza-fases__chip">{x.alcance}</span>
-          <span className="pieza-fases__chip">{x.precio}</span>
-          <span className="pieza-fases__ok">{x.cerrado}</span>
+    <div className={'vis vis-fases' + (visto || secQuieto() ? ' is-on' : '')} ref={ref}>
+      {x.filas.map((f, i) => (
+        <div className="vis-fases__fila" key={f.n} style={{ '--w': f.w, '--i': i }}>
+          <p><b>{f.n}</b><span>{f.v}</span></p>
+          <span className="vis-fases__barra" aria-hidden="true"><i></i></span>
+          <p className="vis-fases__d">{f.d}</p>
         </div>
       ))}
     </div>
   );
 }
-
-// A vuestro ritmo: se explica, se prueba, se ajusta.
-function PiezaRitmo({ x }) {
-  const ref = useRef(null);
-  const paso = usePaso(ref, x.ritmo.length, 1500);
-  return (
-    <ol className="pieza pieza-ritmo" ref={ref}>
-      {x.ritmo.map((t, i) => (
-        <li className={i === paso ? 'is-on' : ''} key={i}><span>{String(i + 1).padStart(2, '0')}</span>{t}</li>
-      ))}
-    </ol>
-  );
+function VisMes({ x }) {
+  return <div className="vis vis-mes"><PiezaDentro x={x} /></div>;
 }
+const VIS = { charla: VisCharla, semanas: VisSemanas, mapa: VisMapa, fases: VisFases, mes: VisMes };
 
-function Cerca() {
-  const d = useSec().cerca;
-  const piezas = { dentro: PiezaDentro, persona: PiezaPersona, fases: PiezaFases, ritmo: PiezaRitmo };
+// En ordenador el bloque se queda fijo y los pasos van pasando: el activo, nítido y en el centro; los demás,
+// pequeños y desenfocados. En móvil (o sin movimiento) es una lista normal, cada paso con su pieza.
+function Metodo() {
+  const d = useSec().metodo;
+  const n = d.pasos.length;
+  const env = useRef(null);
+  const linea = useRef(null);
+  const pila = useRef(null);
+  const [act, setAct] = useState(0);
+  useAlBajar(() => {
+    const e = env.current;
+    if (!e) return;
+    const pasos = e.querySelectorAll('.mpaso');
+    const fijo = !secQuieto() && window.matchMedia('(min-width: 1025px) and (min-height: 640px)').matches;
+    if (!fijo) {
+      if (e.__fijo !== false) {
+        e.__fijo = false;
+        pasos.forEach((S) => { S.style.transform = ''; S.style.opacity = ''; S.style.filter = ''; });
+      }
+      return;
+    }
+    e.__fijo = true;
+    const r = e.getBoundingClientRect();
+    const tramo = r.height - window.innerHeight;
+    if (tramo <= 0) return;
+    const h = secLimita(-r.top / tramo, 0, 1);
+    if (linea.current) linea.current.style.transform = `scaleY(${h.toFixed(4)})`;
+    // Cada paso aguanta un rato quieto (62 % de su tramo) y luego deja sitio al siguiente.
+    const b = secLimita(h, 0, 0.9999) * n;
+    const g = Math.floor(b);
+    const f = b - g;
+    const w = Math.min(n - 1, g + (f <= 0.62 ? 0 : (f - 0.62) / 0.38));
+    const alto = pila.current ? pila.current.clientHeight : 360;
+    pasos.forEach((S, A) => {
+      const k = A - w;
+      const M = Math.abs(k);
+      const F = Math.max(0, (M - 0.18) / 0.82);
+      S.style.transform = `translateY(calc(-50% + ${(k * alto * 0.6).toFixed(1)}px)) scale(${(1 - Math.min(F, 1) * 0.08).toFixed(3)})`;
+      S.style.opacity = M > 1.3 ? '0' : Math.max(0, 1 - F * 0.82).toFixed(3);
+      S.style.filter = `blur(${Math.min(F * 6, 7).toFixed(1)}px)`;
+    });
+    const x = Math.min(n - 1, Math.round(w));
+    if (e.__act !== x) { e.__act = x; setAct(x); }
+  }, [n]);
+  const Vis = VIS[d.pasos[act].id];
   return (
-    <section className="cerca" id="cerca" data-screen-label="Cómo es trabajar con nosotros" data-nav-theme="light">
-      <Cabecera etq={d.etq} titulo={d.titulo} />
-      <div className="cerca-rejilla">
-        {d.celdas.map((c, i) => {
-          const Pieza = piezas[c.id];
-          return (
-            <article className={'celda celda--' + c.id + ' reveal reveal-delay-' + (i % 2 + 1)} key={c.id}>
-              <h3 className="celda__t">{c.t}</h3>
-              <p className="celda__d">{c.d}</p>
-              <Pieza x={d.piezas} />
-            </article>
-          );
-        })}
+    <section className="metodo panel" id="metodo" data-screen-label="Cómo se empieza" data-nav-theme="light">
+      <div className="metodo-env" ref={env} style={{ '--n': n }}>
+        <div className="metodo-pin">
+          <Cabecera etq={d.etq} titulo={d.titulo} />
+          <div className="metodo-duo">
+            <div className="metodo-vis">
+              <span className="metodo-vis__cuenta">{String(act + 1).padStart(2, '0')}<small> / {String(n).padStart(2, '0')}</small></span>
+              <Vis key={d.pasos[act].id} x={d.vis[d.pasos[act].id]} />
+            </div>
+            <div className="metodo-pila" ref={pila}>
+              <span className="metodo-linea" aria-hidden="true"><i ref={linea}></i></span>
+              {d.pasos.map((p, i) => {
+                const V = VIS[p.id];
+                return (
+                  <div className={'mpaso' + (i === act ? ' is-on' : '')} key={p.id}>
+                    <p className="mpaso__etq"><i aria-hidden="true"></i>{String(i + 1).padStart(2, '0')} · {p.etq}</p>
+                    <h3 className="mpaso__t">{p.t}</h3>
+                    <p className="mpaso__d">{p.d}</p>
+                    <div className="mpaso__vis"><V x={d.vis[p.id]} /></div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
 }
 
 // ---------- Testimonios ----------
+// Las citas pasan solas; se pueden arrastrar y se frenan al ponerles el ratón.
 function Testimonios() {
   const d = useSec().testimonios;
-  const ref = useRef(null);
-  const dentro = useEnVista(ref, 0.3);
-  const n = d.lista.length;
-  const [idx, setIdx] = useState(0);
-  const [tick, setTick] = useState(0);
-  const ir = (k) => { setIdx((k + n) % n); setTick((x) => x + 1); };
+  const caja = useRef(null);
+  const pista = useRef(null);
   useEffect(() => {
-    if (!dentro || secQuieto()) return undefined;
-    const id = setTimeout(() => ir(idx + 1), 9000);
-    return () => clearTimeout(id);
-  }, [dentro, idx, tick]);
+    const c = caja.current;
+    const t = pista.current;
+    if (!c || !t || secQuieto()) return undefined;
+    let x = 0;
+    let mitad = 0;
+    let arrastra = false;
+    let x0 = 0;
+    let p0 = 0;
+    let visible = false;
+    let ritmo = 1;
+    let raf = 0;
+    const medir = () => { mitad = t.scrollWidth / 2; };
+    const pintar = () => {
+      if (mitad > 0) { while (x <= -mitad) x += mitad; while (x > 0) x -= mitad; }
+      t.style.transform = `translate3d(${x.toFixed(1)}px, 0, 0)`;
+    };
+    const tic = () => {
+      raf = requestAnimationFrame(tic);
+      if (!visible || arrastra) return;
+      x -= 0.7 * ritmo;
+      pintar();
+    };
+    medir();
+    raf = requestAnimationFrame(tic);
+    const io = new IntersectionObserver((es) => es.forEach((e) => { visible = e.isIntersecting; }));
+    io.observe(c);
+    const abajo = (e) => {
+      arrastra = true; x0 = e.clientX; p0 = x;
+      c.classList.add('is-arrastrando');
+      try { c.setPointerCapture(e.pointerId); } catch (err) {}
+    };
+    const mueve = (e) => { if (arrastra) { x = p0 + (e.clientX - x0); pintar(); } };
+    const arriba = () => { arrastra = false; c.classList.remove('is-arrastrando'); };
+    const entra = () => { ritmo = 0.25; };
+    const sale = () => { ritmo = 1; };
+    window.addEventListener('resize', medir);
+    c.addEventListener('pointerdown', abajo);
+    c.addEventListener('pointermove', mueve);
+    c.addEventListener('pointerup', arriba);
+    c.addEventListener('pointercancel', arriba);
+    c.addEventListener('mouseenter', entra);
+    c.addEventListener('mouseleave', sale);
+    return () => {
+      cancelAnimationFrame(raf);
+      io.disconnect();
+      window.removeEventListener('resize', medir);
+      c.removeEventListener('pointerdown', abajo);
+      c.removeEventListener('pointermove', mueve);
+      c.removeEventListener('pointerup', arriba);
+      c.removeEventListener('pointercancel', arriba);
+      c.removeEventListener('mouseenter', entra);
+      c.removeEventListener('mouseleave', sale);
+    };
+  }, [d.lista.length]);
+  const cita = (x, k, oculta) => (
+    <figure className="cita" key={k} aria-hidden={oculta}>
+      <blockquote>«{x.q}»</blockquote>
+      <figcaption><strong>{x.quien}</strong>{x.cargo}</figcaption>
+    </figure>
+  );
+  // Cuatro tandas: la pista siempre es más ancha que dos pantallas y puede dar la vuelta sin saltos.
+  const tandas = SEC_BOT ? [0] : [0, 1, 2, 3];
   return (
-    <section className="testi" id="testimonios" ref={ref} data-screen-label="Testimonios" data-nav-theme="dark">
-      <div className="testi-lado">
-        <p className="sec-etq sec-etq--rosa reveal">{d.etq}</p>
-        <div className="testi-mando">
-          <span className="testi-cuenta">{String(idx + 1).padStart(2, '0')} / {String(n).padStart(2, '0')}</span>
-          <button type="button" onClick={() => ir(idx - 1)} aria-label={d.anterior} data-cursor="cta">←</button>
-          <button type="button" onClick={() => ir(idx + 1)} aria-label={d.siguiente} data-cursor="cta">→</button>
+    <section className="testi panel" id="testimonios" data-screen-label="Testimonios" data-nav-theme="light">
+      <Cabecera etq={d.etq} titulo={d.titulo} />
+      <div className="testi-caja" ref={caja} data-cursor="ver" data-cursor-label={d.arrastra}>
+        <div className="testi-pista" ref={pista}>
+          {tandas.map((t) => d.lista.map((x, i) => cita(x, t + '-' + i, t > 0)))}
         </div>
-        <div className="testi-barra" aria-hidden="true"><span key={idx + '-' + tick} className={dentro ? 'is-corriendo' : ''}></span></div>
-      </div>
-      <div className="testi-pila">
-        {d.lista.map((x, i) => (
-          <figure className={'testi-cita' + (i === idx ? ' is-activa' : '')} key={i} aria-hidden={i !== idx}>
-            <blockquote>«{x.q}»</blockquote>
-            <figcaption><strong>{x.quien}</strong>{x.cargo}</figcaption>
-          </figure>
-        ))}
       </div>
     </section>
   );
 }
 
 // ---------- Preguntas ----------
+// Un chat: se pulsa una pregunta y la respuesta llega como un mensaje, con sus puntos de «escribiendo».
 function Preguntas() {
   const d = useSec().preguntas;
   const [abierta, setAbierta] = useState(0);
+  const [escribe, setEscribe] = useState(false);
+  const [hora, setHora] = useState('');
+  useEffect(() => {
+    const tic = () => setHora(new Intl.DateTimeFormat('es-ES', { timeZone: 'Europe/Madrid', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date()));
+    tic();
+    const id = setInterval(tic, 30000);
+    return () => clearInterval(id);
+  }, []);
+  useEffect(() => {
+    if (!escribe) return undefined;
+    const id = setTimeout(() => setEscribe(false), 800);
+    return () => clearTimeout(id);
+  }, [escribe, abierta]);
+  const abrir = (i) => {
+    if (i === abierta) { setAbierta(-1); return; }
+    setAbierta(i);
+    if (!secQuieto()) setEscribe(true);
+  };
   return (
-    <section className="preguntas" id="preguntas" data-screen-label="Preguntas" data-nav-theme="light">
+    <section className="preguntas panel" id="preguntas" data-screen-label="Preguntas" data-nav-theme="light">
       <Cabecera etq={d.etq} titulo={d.titulo} />
-      <div className="preguntas-lista">
-        {d.lista.map((x, i) => (
-          <div className={'pregunta reveal' + (i === abierta ? ' is-abierta' : '')} key={i}>
-            <h3>
-              <button type="button" aria-expanded={i === abierta} onClick={() => setAbierta(i === abierta ? -1 : i)} data-cursor="cta">
-                <span>{x.p}</span><i aria-hidden="true"></i>
+      <div className="chat reveal">
+        <div className="chat__cab">
+          <span className="chat__avatar" aria-hidden="true"></span>
+          <b>{d.chat}</b>
+          <span className="chat__linea"><i aria-hidden="true"></i>{d.enLinea}</span>
+          <span className="chat__hora">{d.hoy} {hora}</span>
+        </div>
+        <div className="chat__hilo">
+          {d.lista.map((x, i) => (
+            <div className={'chat__item' + (i === abierta ? ' is-on' : '') + (i === abierta && escribe ? ' is-escribiendo' : '')} key={i}>
+              <button type="button" className="chat__p" aria-expanded={i === abierta} onClick={() => abrir(i)} data-cursor="cta">
+                <i aria-hidden="true"></i><span>{x.p}</span>
               </button>
-            </h3>
-            <div className="pregunta__r"><div><p>{x.r}</p></div></div>
-          </div>
-        ))}
+              <div className="chat__r">
+                <div>
+                  <div className="chat__burbuja">
+                    <span className="chat__puntos" aria-hidden="true"><i></i><i></i><i></i></span>
+                    <p>{x.r}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
 }
 
 // ---------- Cierre ----------
-// Las dos mitades de la frase llegan de los lados y se juntan al bajar (la mecánica del antiguo Win-Win).
+// Las dos mitades de la frase llegan de los lados y se juntan al bajar.
 function Cierre() {
   const d = useSec().cierre;
   const sec = useRef(null);
   const izq = useRef(null);
   const der = useRef(null);
-  useEffect(() => {
+  useAlBajar(() => {
     const s = sec.current;
-    if (!s || secQuieto()) return undefined;
-    let raf = 0;
-    const pintar = () => {
-      raf = 0;
-      const r = s.getBoundingClientRect();
-      const vh = window.innerHeight;
-      // De 0 a 1 desde que el bloque asoma hasta poco después de quedarse fijo.
-      const p = Math.min(1, Math.max(0, (vh * 0.85 - r.top) / (vh * 0.85 + (s.offsetHeight - vh) * 0.55)));
-      const off = ((1 - p) * 58).toFixed(2);
-      const op = Math.min(1, 0.12 + p * 1.5).toFixed(3);
-      if (izq.current) { izq.current.style.transform = `translate3d(${-off}vw,0,0)`; izq.current.style.opacity = op; }
-      if (der.current) { der.current.style.transform = `translate3d(${off}vw,0,0)`; der.current.style.opacity = op; }
-    };
-    const pedir = () => { if (!raf) raf = requestAnimationFrame(pintar); };
-    pintar();
-    window.addEventListener('scroll', pedir, { passive: true });
-    window.addEventListener('resize', pedir);
-    return () => {
-      window.removeEventListener('scroll', pedir);
-      window.removeEventListener('resize', pedir);
-      if (raf) cancelAnimationFrame(raf);
-    };
-  }, []);
+    if (!s || secQuieto()) return;
+    const r = s.getBoundingClientRect();
+    const vh = window.innerHeight;
+    // De 0 a 1 desde que el bloque asoma hasta poco después de quedarse fijo.
+    const p = secLimita((vh * 0.85 - r.top) / (vh * 0.85 + (s.offsetHeight - vh) * 0.55), 0, 1);
+    const off = ((1 - p) * 58).toFixed(2);
+    const op = Math.min(1, 0.12 + p * 1.5).toFixed(3);
+    if (izq.current) { izq.current.style.transform = `translate3d(${-off}vw,0,0)`; izq.current.style.opacity = op; }
+    if (der.current) { der.current.style.transform = `translate3d(${off}vw,0,0)`; der.current.style.opacity = op; }
+  });
   const aQuedamos = () => {
     window.dispatchEvent(new Event('open-quedamos'));
-    const el = document.getElementById('quedamos');
-    if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY, behavior: 'smooth' });
+    secIrA('quedamos');
   };
   const mitad = (x) => x.map((w, i) => <React.Fragment key={i}>{i ? <br /> : null}{w}</React.Fragment>);
   return (
     <>
-      <section className="cierre" id="cierre" ref={sec} data-screen-label="Cierre" data-nav-theme="dark">
+      <section className="cierre panel" id="cierre" ref={sec} data-screen-label="Cierre" data-nav-theme="dark">
         <div className="cierre__pin">
           <p className="cierre__frase">
             <span className="cierre__mitad cierre__mitad--i" ref={izq}>{mitad(d.izq)}</span>{' '}
@@ -593,7 +900,7 @@ function Cierre() {
         </div>
       </section>
       <section className="cierre-pie" data-nav-theme="dark">
-        <p className="sec-etq sec-etq--rosa reveal">{d.etq}</p>
+        <p className="sec-etq sec-etq--rosa reveal"><i aria-hidden="true"></i>{d.etq}</p>
         <p className="cierre-pie__texto reveal reveal-delay-1">{secTexto(d.texto)}</p>
         <button type="button" className="qd-prompt__btn cierre-pie__btn reveal reveal-delay-2" onClick={aQuedamos} data-cursor="cta">[{d.btn}]</button>
       </section>
@@ -602,6 +909,6 @@ function Cierre() {
 }
 
 Object.assign(window, {
-  PuntoPartida, Ramas, Principio, Diagnostico, Recorrido, Cerca, Testimonios, Preguntas, Cierre,
-  Cabecera, secTexto, useEnVista, useVisto, Cuenta, useSec, secQuieto,
+  Portada, Cinta, Diferencias, Ramas, Metodo, Testimonios, Preguntas, Cierre,
+  Cabecera, Relleno, secTexto, secIr, secIrA, useEnVista, useVisto, Cuenta, useSec, secQuieto,
 });
