@@ -252,7 +252,7 @@ const escHtml = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').re
 async function paginasProyectos() {
   const tplFile = join(ROOT, 'proyecto.html');
   if (!existsSync(tplFile)) return [];
-  const proyectos = leerProyectos();
+  const proyectos = leerProyectos().filter((p) => !p.sinPagina);   // los que solo salen en la home
   if (!proyectos.length) return [];
   const tpl = readFileSync(tplFile, 'utf8');
   const srcs = [...tpl.matchAll(/<script\b[^>]*\bsrc="([^"]+)"[^>]*><\/script>/g)].map((m) => m[1]).filter(isLocalJsx);

@@ -1,8 +1,9 @@
-/* global React, ReactDOM, useT, Nav, SideMenu, Footer, RevealText, useReveal, I18nProvider, CookieConsent */
+/* global React, ReactDOM, useT, Nav, SideMenu, Footer, RevealText, useReveal, I18nProvider, CookieConsent, useVisto, Cuenta */
 // ============= PROYECTOS =============
-// La sección "Selected Work" de la home (entre "Lo que hacemos" y "Cómo lo hacemos") y la página
-// de cada proyecto (/proyectos/<slug>/, generada por build.mjs desde proyecto.html).
-// Los datos viven en proyectos-data.jsx (window.PROYECTOS).
+// La sección "Selected Work" de la home (el trabajo real, tras el recorrido) y la página de cada
+// proyecto (/proyectos/<slug>/, generada por build.mjs desde proyecto.html).
+// Los datos viven en proyectos-data.jsx (window.PROYECTOS). Hay webs (con su recorrido en vídeo) y
+// casos de software (una captura, sin vídeo); los que llevan sinPagina solo salen en la home.
 const { useState, useEffect, useRef } = React;
 
 // En el prerender del build (jsdom) no se tocan vídeos ni medidas.
@@ -10,6 +11,12 @@ const PROY_BOT = typeof navigator !== 'undefined' && /jsdom/i.test(navigator.use
 const proyTexto = (p, lang) => p[lang] || p.es;
 const proyNum = (n) => String(n).padStart(2, '0');
 const proyAsset = (slug, f) => `assets/proyectos/${slug}/${f}`;
+const proyConPagina = () => (window.PROYECTOS || []).filter((p) => !p.sinPagina);
+// Marcas hechas por ads Brand: el logo se pinta como máscara, del color del texto.
+const PROY_MARCAS = [
+  { nombre: 'Inversalia', fichero: 'inversalia.png', ar: '720 / 86', alto: '22px' },
+  { nombre: 'Klink', fichero: 'klink.png', ar: '720 / 135', alto: '30px' },
+];
 
 // Transición entre páginas: la misma cortina editorial del cambio de idioma, con el nombre del proyecto.
 function proyIr(e, href, palabra, num) {
@@ -56,29 +63,56 @@ function VideoVivo({ base, className, label }) {
 }
 
 // ---------- Sección de la home ----------
-function ProyectoTile({ p, i, vertical }) {
+// Cada caso es una fila: a un lado lo que se ve y al otro su cifra o su idea, una frase y tres datos.
+function ProyectoMedio({ p, d }) {
+  if (p.sinImagen) {
+    // Sin captura que enseñar: el antes y el después, en letra.
+    return <span className="pfila__tipo" aria-hidden="true"><s>{d.panel[0]}</s><b>{d.panel[1]}</b></span>;
+  }
+  const base = proyAsset(p.slug, 'escritorio');
+  return p.sinVideo
+    ? <img className="pfila__video" src={base + '.jpg'} alt={p.nombre} width="1280" height="800" loading="lazy" decoding="async" />
+    : <VideoVivo base={base} className="pfila__video" label={p.nombre} />;
+}
+
+function ProyectoFila({ p, i }) {
   const { t, lang } = useT();
   const d = proyTexto(p, lang);
-  const base = proyAsset(p.slug, vertical ? 'movil' : 'escritorio');
+  const ref = useRef(null);
+  const visto = useVisto(ref, 0.3);
+  // Las webs no traen datos propios: escena 3D, número de pantallas y año salen de su ficha.
+  const datos = d.datos || [
+    { n: '3D', t: t('proy.dato.3d') },
+    { n: String(p.momentos.length), t: t('proy.dato.pantallas') },
+    { n: p.anio, t: t('proy.dato.anio') },
+  ];
+  const cuerpo = (
+    <>
+      <span className="pfila__medio"><ProyectoMedio p={p} d={d} /></span>
+      <span className="pfila__info">
+        <span className="pfila__etq">({proyNum(i + 1)}) {d.etq || ('ads Brand · ' + d.sector)}</span>
+        <h3 className="pfila__nombre">{d.nombre || p.nombre}</h3>
+        {d.cifra
+          ? <span className="pfila__cifra"><b><Cuenta hasta={parseInt(d.cifra.n, 10)} on={visto} dur={1500} /></b><span>{d.cifra.t}</span></span>
+          : <span className="pfila__idea">{d.idea}</span>}
+        <span className="pfila__frase">{d.frase || d.partida}</span>
+        <span className="pfila__datos">
+          {datos.map((x) => <span key={x.n}><b>{x.n}</b><i>{x.t}</i></span>)}
+        </span>
+        {p.sinPagina ? null : <span className="pfila__ver">{t('proy.ver')} →</span>}
+      </span>
+    </>
+  );
+  if (p.sinPagina) return <div className="pfila reveal" ref={ref}>{cuerpo}</div>;
   return (
     <a
-      className={'ptile reveal' + (vertical ? ' ptile--v' : '')}
-      style={{ '--orden': i }}
+      className="pfila reveal"
+      ref={ref}
       href={`proyectos/${p.slug}/`}
       data-cursor="ver"
       data-cursor-label={t('proy.ver')}
       onClick={(e) => proyIr(e, e.currentTarget.href, p.nombre + '.', '(' + proyNum(i + 1) + ')')}>
-      <span className={'ptile__media' + (vertical ? ' ptile__media--v' : '')}>
-        {vertical
-          ? <span className="ptile__movil"><VideoVivo base={base} className="ptile__video" label={p.nombre} /></span>
-          : <VideoVivo base={base} className="ptile__video" label={p.nombre} />}
-      </span>
-      <span className="ptile__pie">
-        <span className="ptile__num">({proyNum(i + 1)})</span>
-        <h3 className="ptile__nombre">{p.nombre}</h3>
-        <span className="ptile__meta">{d.corto} · {p.anio}</span>
-        <span className="ptile__idea">{d.idea}</span>
-      </span>
+      {cuerpo}
     </a>
   );
 }
@@ -91,11 +125,8 @@ function Proyectos() {
     const el = document.getElementById('quedamos');
     if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY, behavior: 'smooth' });
   };
-  // Dos columnas escalonadas: en la ancha, el recorrido de ordenador; en la estrecha, el del móvil.
-  const colA = lista.map((p, i) => ({ p, i })).filter((x) => x.i % 2 === 0);
-  const colB = lista.map((p, i) => ({ p, i })).filter((x) => x.i % 2 === 1);
   return (
-    <section className="proyectos" id="proyectos" data-screen-label="Proyectos" data-nav-theme="dark">
+    <section className="proyectos" id="proyectos" data-screen-label="Trabajo real" data-nav-theme="dark">
       <header className="proyectos-cab">
         <h2 className="proyectos-titulo reveal">Selected Work<sup>({proyNum(lista.length)})</sup></h2>
         <div className="proyectos-intro reveal reveal-delay-1">
@@ -103,16 +134,21 @@ function Proyectos() {
           <p className="proyectos-intro__body">{t('proy.body')}</p>
         </div>
       </header>
-      <div className="proyectos-rejilla">
-        <div className="proyectos-col proyectos-col--a">
-          {colA.map(({ p, i }) => <ProyectoTile key={p.slug} p={p} i={i} vertical={false} />)}
-        </div>
-        <div className="proyectos-col proyectos-col--b">
-          {colB.map(({ p, i }) => <ProyectoTile key={p.slug} p={p} i={i} vertical={true} />)}
-          <div className="proyectos-cta reveal">
-            <p className="proyectos-cta__txt">{t('proy.cta')}</p>
-            <button type="button" className="qd-prompt__btn" onClick={aQuedamos} data-cursor="cta">[{t('proy.cta.btn')}]</button>
+      <div className="proyectos-filas">
+        {lista.map((p, i) => <ProyectoFila key={p.slug} p={p} i={i} />)}
+      </div>
+      <div className="proyectos-pie">
+        <div className="proyectos-marcas reveal">
+          <p className="pfila__etq">{t('proy.identidad')}</p>
+          <div className="proyectos-marcas__logos">
+            {PROY_MARCAS.map((m) => (
+              <span className="pmarca" key={m.nombre} role="img" aria-label={m.nombre} style={{ '--logo': `url('assets/logos/marcas/${m.fichero}')`, '--ar': m.ar, '--alto': m.alto }}></span>
+            ))}
           </div>
+        </div>
+        <div className="proyectos-cta reveal reveal-delay-1">
+          <p className="proyectos-cta__txt">{t('proy.cta')}</p>
+          <button type="button" className="qd-prompt__btn" onClick={aQuedamos} data-cursor="cta">[{t('proy.cta.btn')}]</button>
         </div>
       </div>
     </section>
@@ -121,7 +157,7 @@ function Proyectos() {
 
 // ---------- Página de un proyecto ----------
 function CasoCabecera({ p, d, i, total }) {
-  const { t } = useT();
+  const { t, lang } = useT();
   return (
     <header className="caso-cab" id="top" data-nav-theme="light">
       <div className="ww-bg" aria-hidden="true"></div>
@@ -130,14 +166,15 @@ function CasoCabecera({ p, d, i, total }) {
           <a className="caso-volver" href="./#proyectos" data-cursor="cta">← Selected Work</a>
           <span className="caso-cab__cuenta">({proyNum(i + 1)}/{proyNum(total)})</span>
         </div>
-        <h1 className="caso-cab__titulo">{p.nombre}.</h1>
+        <h1 className="caso-cab__titulo">{d.nombre || p.nombre}.</h1>
         <p className="caso-cab__idea">{d.idea}</p>
         <dl className="caso-cab__meta">
           <div>
-            <dt><span>(01)</span> {t('caso.marca')}</dt>
+            <dt><span>(01)</span> {t(p.sinVideo ? 'caso.proyecto' : 'caso.marca')}</dt>
             <dd>
               {p.nombre}
               {p.instagram ? <><br /><a href={p.instagram.url} target="_blank" rel="noopener" data-cursor="cta">{p.instagram.usuario} ↗</a></> : null}
+              {p.enlace ? <><br /><a href={p.enlace.url} target="_blank" rel="noopener" data-cursor="cta">{p.enlace[lang] || p.enlace.es} ↗</a></> : null}
             </dd>
           </div>
           <div><dt><span>(02)</span> {t('caso.sector')}</dt><dd>{d.sector}</dd></div>
@@ -146,7 +183,9 @@ function CasoCabecera({ p, d, i, total }) {
         </dl>
       </div>
       <figure className="caso-cab__media reveal">
-        <VideoVivo base={proyAsset(p.slug, 'escritorio')} className="caso-video" label={p.nombre} />
+        {p.sinVideo
+          ? <img className="caso-video" src={proyAsset(p.slug, 'escritorio.jpg')} alt={p.nombre} width="1280" height="800" />
+          : <VideoVivo base={proyAsset(p.slug, 'escritorio')} className="caso-video" label={p.nombre} />}
       </figure>
     </header>
   );
@@ -162,6 +201,25 @@ function CasoIdea({ d }) {
           <p className="caso-idea__partida">{d.partida}</p>
         </div>
         <RevealText className="caso-idea__texto" paras={d.ideaTexto} />
+      </div>
+    </section>
+  );
+}
+
+// En cifras: solo en los casos que las traen (los de software).
+function CasoCifras({ d }) {
+  const { t } = useT();
+  if (!d.cifra && !d.datos) return null;
+  return (
+    <section className="caso-cifras" id="cifras" data-nav-theme="light">
+      <h2 className="caso-h2 reveal">{t(d.cifra ? 'caso.cifras' : 'caso.quehace')}</h2>
+      <div className="caso-cifras__rejilla">
+        {(d.cifra ? [d.cifra] : []).concat(d.datos || []).map((x, k) => (
+          <div className={'caso-cifra reveal reveal-delay-' + Math.min(4, k + 1)} key={x.n}>
+            <span className="caso-cifra__n">{x.n}</span>
+            <span className="caso-cifra__t">{x.t}</span>
+          </div>
+        ))}
       </div>
     </section>
   );
@@ -345,7 +403,7 @@ function CasoSiguiente({ sig, n }) {
         data-cursor-label={t('proy.ver')}
         onClick={(e) => proyIr(e, e.currentTarget.href, sig.nombre + '.', '(' + proyNum(n) + ')')}>
         <span className="caso-sig__etq">{t('caso.siguiente')}</span>
-        <span className="caso-sig__nombre">{sig.nombre}.</span>
+        <span className="caso-sig__nombre">{d.nombre || sig.nombre}.</span>
         <span className="caso-sig__idea">{d.idea}</span>
         <span className="caso-sig__img" style={{ '--img': `url('${proyAsset(sig.slug, 'escritorio.jpg')}')` }} aria-hidden="true"></span>
       </a>
@@ -355,7 +413,7 @@ function CasoSiguiente({ sig, n }) {
 
 function CasoApp() {
   const { lang } = useT();
-  const lista = window.PROYECTOS || [];
+  const lista = proyConPagina();
   const slug = document.body.getAttribute('data-proyecto');
   const i = Math.max(0, lista.findIndex((x) => x.slug === slug));
   const p = lista[i];
@@ -371,13 +429,14 @@ function CasoApp() {
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []);
   const aQuedamos = () => { window.location.href = new URL('#quedamos', document.baseURI).href; };
+  const esWeb = !p.sinVideo;
   const items = [
     { href: '#top', key: 'side.caso.top' },
     { href: '#idea', key: 'side.caso.idea' },
-    { href: '#pantallas', key: 'side.caso.pantallas' },
-    { href: '#movil', key: 'side.caso.movil' },
+    esWeb ? { href: '#pantallas', key: 'side.caso.pantallas' } : { href: '#cifras', key: d.cifra ? 'side.caso.cifras' : 'side.caso.quehace' },
+    esWeb ? { href: '#movil', key: 'side.caso.movil' } : null,
     { href: '#siguiente', key: 'side.caso.siguiente' },
-  ];
+  ].filter(Boolean);
   return (
     <>
       <Nav onCartClick={aQuedamos} />
@@ -385,11 +444,12 @@ function CasoApp() {
       <div className="scroll-content">
         <CasoCabecera p={p} d={d} i={i} total={lista.length} />
         <CasoIdea d={d} />
-        <CasoMomentos p={p} d={d} />
+        <CasoCifras d={d} />
+        {esWeb ? <CasoMomentos p={p} d={d} /> : null}
         <CasoPractico p={p} d={d} />
-        <CasoMovil p={p} d={d} />
+        {esWeb ? <CasoMovil p={p} d={d} /> : null}
         {p.otra && d.otra ? <CasoOtra p={p} d={d} /> : null}
-        <CasoWeb p={p} />
+        {p.webs ? <CasoWeb p={p} /> : null}
         <CasoSiguiente sig={sig} n={((i + 1) % lista.length) + 1} />
       </div>
       <Footer onCartClick={aQuedamos} />

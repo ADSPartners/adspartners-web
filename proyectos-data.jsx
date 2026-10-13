@@ -1,10 +1,65 @@
 /* Proyectos: los datos de la sección "Selected Work" de la home y de cada página /proyectos/<slug>/.
    JavaScript plano (sin JSX): build.mjs también lo lee para generar una página por proyecto.
-   Añadir un proyecto = una entrada aquí + su carpeta assets/proyectos/<slug>/ con:
+
+   Una WEB = una entrada aquí + su carpeta assets/proyectos/<slug>/ con:
      escritorio.mp4/.jpg (recorrido 1280x800), movil.mp4/.jpg (392x852), momento-N.jpg (1280x800)
      y la foto de su pieza práctica (practico.foto).
-   Todo lo que se dice tiene que ser verdad de esa web: nada inventado. */
+   Un CASO DE SOFTWARE lleva sinVideo: true y solo escritorio.jpg (una captura, 1280x800). En cada idioma:
+     etq (rama · sector), cifra { n, t } si tiene una cifra grande, frase, y datos [{ n, t }] (hasta tres).
+   Con sinPagina: true el proyecto solo sale en la home (y con sinImagen: true, sin captura: panel [antes, después]).
+   Un idioma puede traer su propio nombre si el del proyecto es una descripción.
+
+   Todo lo que se dice tiene que ser verdad de ese trabajo: nada inventado. */
 window.PROYECTOS = [
+  {
+    slug: 'gestion-hosteleria',
+    nombre: 'Gestión para hostelería',
+    anio: '2026',
+    sinVideo: true,
+    seo: {
+      titulo: 'Gestión para hostelería: una foto de la factura, el margen de cada plato — adsPartners®',
+      descripcion: 'Aplicación a medida para hostelería, en uso a diario en un bar: lee las facturas de proveedor a partir de una foto y pone a cada uno de los 157 platos de la carta su semáforo de margen.',
+    },
+    es: {
+      etq: 'ads Tech · Hostelería',
+      sector: 'Hostelería',
+      corto: 'Aplicación · Hostelería',
+      idea: 'Una foto de la factura. El margen de cada plato.',
+      hicimos: 'Aplicación a medida: lectura de facturas y margen por plato.',
+      cifra: { n: '157', t: 'platos en la carta, cada uno con su semáforo de margen' },
+      frase: 'Gestión para hostelería, en uso a diario en un bar.',
+      datos: [
+        { n: '115', t: 'facturas de proveedor leídas por la aplicación' },
+        { n: '3 semanas', t: 'aproximadamente, de cero a funcionando' },
+        { n: 'A diario', t: 'en uso en un bar' },
+      ],
+      partida: 'Gestión para hostelería, en uso a diario en un bar.',
+      ideaTexto: [
+        'Se hace una foto a la factura del proveedor y la aplicación la lee sola.',
+        'Con esos precios, cada plato de la carta lleva su semáforo de margen: cuáles tienen buen margen, cuáles van ajustados y cuáles pierden dinero.',
+      ],
+    },
+    en: {
+      nombre: 'Hospitality management app',
+      etq: 'ads Tech · Hospitality',
+      sector: 'Hospitality',
+      corto: 'App · Hospitality',
+      idea: 'A photo of the invoice. The margin of every dish.',
+      hicimos: 'Custom app: invoice reading and margin per dish.',
+      cifra: { n: '157', t: 'dishes on the menu, each with its margin traffic light' },
+      frase: 'Management for hospitality, used every day in a bar.',
+      datos: [
+        { n: '115', t: 'supplier invoices read by the app' },
+        { n: '3 weeks', t: 'roughly, from zero to running' },
+        { n: 'Daily', t: 'in use in a bar' },
+      ],
+      partida: 'Management for hospitality, used every day in a bar.',
+      ideaTexto: [
+        'You take a photo of the supplier invoice and the app reads it on its own.',
+        'With those prices, every dish on the menu gets its margin traffic light: which ones have a good margin, which are tight and which lose money.',
+      ],
+    },
+  },
   {
     slug: 'butter-studio',
     nombre: 'Butter Studio',
@@ -74,6 +129,53 @@ window.PROYECTOS = [
         idea: 'Her brand, told like a magazine.',
         d: 'Less motion, more paper: a typographic cover with her cookies floating, the menu set like a restaurant card with typewriter prices, and each cookie’s ingredients around it. The same «Build your box», designed for mobile first.',
       },
+    },
+  },
+  {
+    slug: 'fundacion-jimenez-diaz',
+    nombre: 'Fundación Jiménez Díaz',
+    anio: '2024',
+    sinVideo: true,
+    enlace: { url: 'https://www.linkedin.com/feed/update/urn:li:activity:7154090784978305024/', es: 'Ver el vídeo en LinkedIn', en: 'Watch the video on LinkedIn' },
+    seo: {
+      titulo: 'Fundación Jiménez Díaz: software de análisis de tejido pulmonar — adsPartners®',
+      descripcion: 'Software de análisis de imagen para el equipo de investigación de Neumomadrid de la Fundación Jiménez Díaz: carga la imagen del tejido pulmonar, separa píxel a píxel el tejido de lo que no lo es y mide cada región.',
+    },
+    es: {
+      etq: 'ads Tech · Investigación biomédica',
+      sector: 'Investigación biomédica · Madrid',
+      corto: 'Software · Investigación',
+      idea: 'Cada píxel de tejido, clasificado y medido.',
+      hicimos: 'Software de análisis de imagen de tejido pulmonar.',
+      frase: 'Desarrollado por Álvaro para el equipo de investigación de Neumomadrid de la Fundación Jiménez Díaz.',
+      datos: [
+        { n: 'Carga', t: 'la imagen del tejido pulmonar y permite editarla' },
+        { n: 'Separa', t: 'píxel a píxel, lo que es tejido de lo que no' },
+        { n: 'Mide', t: 'cada región y exporta los datos' },
+      ],
+      partida: 'Desarrollado por Álvaro para el equipo de investigación de Neumomadrid de la Fundación Jiménez Díaz.',
+      ideaTexto: [
+        'Carga la imagen del tejido pulmonar y permite editarla.',
+        'Separa, píxel a píxel, lo que es tejido de lo que no. Después mide cada región y exporta los datos.',
+      ],
+    },
+    en: {
+      etq: 'ads Tech · Biomedical research',
+      sector: 'Biomedical research · Madrid',
+      corto: 'Software · Research',
+      idea: 'Every pixel of tissue, classified and measured.',
+      hicimos: 'Image-analysis software for lung tissue.',
+      frase: 'Built by Álvaro for the Neumomadrid research team at Fundación Jiménez Díaz.',
+      datos: [
+        { n: 'Loads', t: 'the lung tissue image and lets you edit it' },
+        { n: 'Separates', t: 'pixel by pixel, tissue from non-tissue' },
+        { n: 'Measures', t: 'each region and exports the data' },
+      ],
+      partida: 'Built by Álvaro for the Neumomadrid research team at Fundación Jiménez Díaz.',
+      ideaTexto: [
+        'It loads the lung tissue image and lets you edit it.',
+        'It separates, pixel by pixel, what is tissue from what is not. Then it measures each region and exports the data.',
+      ],
     },
   },
   {
@@ -187,6 +289,33 @@ window.PROYECTOS = [
       ],
       practico: { t: 'Order your cake.', d: 'A short form (what you are celebrating, when, how many people, allergies) that opens WhatsApp with the order already written. Nothing is sent to any server.' },
       movil: 'In portrait, each step of the recipe is framed at the top and the text sits below, never on top of it. And the scroll slows down wherever there is something to read.',
+    },
+  },
+  {
+    slug: 'impulso-visual',
+    nombre: 'Impulso Visual',
+    sinVideo: true,
+    sinImagen: true,
+    sinPagina: true,
+    es: {
+      etq: 'ads Tech · Artes finales y PLV',
+      idea: 'De días a un clic.',
+      panel: ['Días', 'Un clic'],
+      frase: 'Herramientas de IA a medida para preparar artes finales y presentaciones a cliente.',
+      datos: [
+        { n: 'IA a medida', t: 'qué hicimos' },
+        { n: 'Artes finales', t: 'y presentaciones a cliente' },
+      ],
+    },
+    en: {
+      etq: 'ads Tech · Final artwork and POS',
+      idea: 'From days to one click.',
+      panel: ['Days', 'One click'],
+      frase: 'Custom AI tools to prepare final artwork and client presentations.',
+      datos: [
+        { n: 'Custom AI', t: 'what we did' },
+        { n: 'Final artwork', t: 'and client presentations' },
+      ],
     },
   },
 ];

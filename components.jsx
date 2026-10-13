@@ -27,36 +27,6 @@ function useReveal() {
     return () => io.disconnect();
   }, []);
 
-  // ---- Reveal de aparición (una sola vez) solo para Servicios en móvil ----
-  // Aparece al hacer scroll y se queda. No usa la clase global `.reveal`
-  // ni afecta al escritorio: el observador solo se monta en viewport estrecho.
-  useEffect(() => {
-    const mq = window.matchMedia('(max-width: 700px)');
-    let io = null;
-    const start = () => {
-      if (io) return;
-      const els = document.querySelectorAll('.srv-reveal');
-      io = new IntersectionObserver((entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            e.target.classList.add('is-in');
-            io.unobserve(e.target);
-          }
-        });
-      }, { threshold: 0.18, rootMargin: '0px 0px -8% 0px' });
-      els.forEach((el) => io.observe(el));
-    };
-    const stop = () => {
-      if (!io) return;
-      io.disconnect();
-      io = null;
-    };
-    const sync = () => { mq.matches ? start() : stop(); };
-    sync();
-    mq.addEventListener('change', sync);
-    return () => { mq.removeEventListener('change', sync); stop(); };
-  }, []);
-
   // ---- Subtle parallax (depth on scroll, no scroll hijacking) ----
   useEffect(() => {
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -148,8 +118,8 @@ function Nav({ onCartClick }) {
         <span className="nav-logo" role="img" aria-label="adsPartners"></span>
       </a>
       <div className="nav-block nav-tag">
-        <span>{t('nav.tag.creative')}</span>
-        <span>{t('nav.tag.studio')}</span>
+        <span>{t('nav.tag.1')}</span>
+        <span>{t('nav.tag.2')}</span>
       </div>
       <div className="nav-block nav-contact">
         <a href="#" onClick={handleCopyEmail} className="nav-mail" data-cursor="cta">
@@ -175,11 +145,12 @@ function Nav({ onCartClick }) {
 function SideMenu({ items: itemsProp }) {
   const { t } = useT();
   const items = itemsProp || [
-  { href: '#manifiesto', key: 'side.manifesto' },
-  { href: '#growth', key: 'side.studio' },
+  { href: '#partida', key: 'side.partida' },
+  { href: '#ramas', key: 'side.ramas' },
+  { href: '#diagnostico', key: 'side.diagnostico' },
+  { href: '#recorrido', key: 'side.recorrido' },
   { href: '#proyectos', key: 'side.proyectos' },
-  { href: '#trabajo', key: 'side.work' },
-  { href: '#winwin', key: 'side.winwin' },
+  { href: '#cerca', key: 'side.cerca' },
   { href: '#quedamos', key: 'side.ecomm' }];
 
 
@@ -251,193 +222,22 @@ function Hero() {
     <header className="hero" id="top" data-screen-label="Hero" data-nav-theme="dark" data-nav-bar-theme="light" style={{ padding: "140px 65px 15vw" }}>
       <div className="hero-grain"></div>
       <div className="hero-intro">
-        <p className="hero-tagline">
-          <span className="tag-part">{`${t('hero.tagline.part1')} ${t('hero.tagline.part2')}`}</span>
-          <span className="tag-part">{t('hero.tagline.systems')}</span>
-        </p>
+        <p className="hero-eyebrow">{t('hero.etq')}</p>
+        <h1 className="hero-titulo">
+          {t('hero.titulo').split(' ').map((w, i) =>
+          <React.Fragment key={i}><span><i style={{ '--i': i }}>{w}</i></span>{' '}</React.Fragment>
+          )}
+        </h1>
+        <p className="hero-tagline">{t('hero.sub')}</p>
       </div>
       <div className="hero-foot">
-        <p className="hero-tagline-sub">{t('hero.tagline.sub')}</p>
+        <p className="hero-tagline-sub">{t('hero.pie.izq')}</p>
         <div className="hero-stamp">
-          <strong>{t('hero.stamp.notforeveryone')}</strong>
+          <strong>{t('hero.pie.der')}</strong>
         </div>
       </div>
       <img className="hero-wordmark" src="assets/logos/logotipo_beige.svg" alt="adsPartners" aria-hidden="true" data-parallax="0.05" />
     </header>);
-
-}
-
-// ============= MANIFIESTO =============
-function Manifiesto() {
-  const { t, lang } = useT();
-  const textRef = React.useRef(null);
-
-  const p1 = t('mani.p1');
-  const p2 = t('mani.p2');
-  const splitWords = (s) => s.split(/(\s+)/);
-
-  React.useEffect(() => {
-    const container = textRef.current;
-    if (!container) return;
-    const wordEls = container.querySelectorAll('.mani-word');
-    let raf = 0;
-    const onScroll = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        const vh = window.innerHeight;
-        const fullBrightAt = vh * 0.58;
-        const dimAt = vh * 0.95;
-        wordEls.forEach((el) => {
-          const r = el.getBoundingClientRect();
-          const center = r.top + r.height / 2;
-          let p;
-          if (center <= fullBrightAt) p = 1;else
-          if (center >= dimAt) p = 0;else
-          p = 1 - (center - fullBrightAt) / (dimAt - fullBrightAt);
-          el.style.opacity = (0.06 + 0.94 * p).toFixed(3);
-        });
-      });
-    };
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
-      cancelAnimationFrame(raf);
-    };
-  }, [p1, p2]);
-
-  const renderPara = (text, key) =>
-  <p key={key} className="manifesto-text">
-      {splitWords(text).map((w, i) =>
-    /\s+/.test(w) ?
-    <React.Fragment key={i}>{w}</React.Fragment> :
-    <span key={i} className="mani-word">{w}</span>
-    )}
-    </p>;
-
-  return (
-    <section className="section manifesto" id="manifiesto" data-screen-label="Manifiesto" data-nav-theme="dark">
-      <div className="manifesto-grid manifesto-grid--solo">
-        <div className="manifesto-text-wrap" ref={textRef}>
-          {renderPara(p1, 'p1')}
-          {renderPara(p2, 'p2')}
-        </div>
-      </div>
-    </section>);
-
-}
-
-// ============= SERVICES =============
-function ServicesRotator() {
-  const { t } = useT();
-  const N = 3;
-  const [idx, setIdx] = useState(0);
-  const [tick, setTick] = useState(0);
-  const go = (next) => {setIdx((next + N) % N);setTick((x) => x + 1);};
-  useEffect(() => {
-    const id = setTimeout(() => go(idx + 1), 10000);
-    return () => clearTimeout(id);
-  }, [idx, tick]);
-  return (
-    <div className="srv-rotator">
-      <div className="srv-rotator__bar">
-        <span key={idx + '-' + tick} className="srv-rotator__bar-fill"></span>
-      </div>
-      <div className="srv-rotator__nav">
-        <button className="srv-rotator__arrow" onClick={() => go(idx - 1)} aria-label="Anterior" data-cursor="cta">←</button>
-        <button className="srv-rotator__arrow" onClick={() => go(idx + 1)} aria-label="Siguiente" data-cursor="cta">→</button>
-      </div>
-      <div className="srv-rotator__stack">
-        {[0, 1, 2].map((i) =>
-        <div key={i} className={`srv-rotator__text ${i === idx ? 'is-active' : ''}`}>
-          <p className="srv-rotator__title">{t('srv.rot.' + (i + 1) + '.title')}</p>
-          <p className="srv-rotator__body">{t('srv.rot.' + (i + 1) + '.body')}</p>
-        </div>
-        )}
-      </div>
-    </div>);
-
-}
-
-function Services() {
-  const { t } = useT();
-  const items = ['1', '2', '3', '4', '5', '6'];
-  const imgs = {
-    '1': 'analisisdemercado',
-    '2': 'embudodeventa',
-    '3': 'disenoweb',
-    '4': 'lanzamientodecampana',
-    '5': 'lead',
-    '6': 'automatizacionia'
-  };
-  return (
-    <section
-      className="section services"
-      id="growth" data-screen-label="Services" data-nav-theme="light">
-
-      <div className="services-grid">
-        <div className="services-col-left">
-          <ServicesRotator />
-        </div>
-        <div className="services-col-right">
-          <p className="services-eyebrow srv-reveal">{t('srv.eyebrow')}</p>
-          <ul className="services-index">
-            {items.map((n) =>
-            <li className="services-index__row srv-reveal" key={n} data-cursor="cta">
-              <span className="services-index__name">{t('srv.item.' + n)}</span>
-              <span className="services-index__hoverimg" style={{ '--rot': (n % 2 === 0 ? -5 : 5) + 'deg', '--img': `url('assets/services/${imgs[n]}.jpg?v=2')` }} aria-hidden="true"></span>
-              <span className="services-index__arrow" aria-hidden="true">↗</span>
-            </li>
-            )}
-          </ul>
-        </div>
-      </div>
-    </section>);
-
-}
-
-// ============= TEAM =============
-// (Team component is now defined in team-section.jsx)
-
-// ============= WORK MODEL — THE WIN-WIN METHOD =============
-function WorkflowList() {
-  const { t } = useT();
-  const rows = [1, 2, 3, 4];
-  const imgs = { 1: 'descubrimiento', 2: 'estrategia', 3: 'embudo', 4: 'lanzamiento' };
-  return (
-    <div className="wfl">
-      {rows.map((n, i) =>
-      <div key={n} className="wfl-row" style={{ top: (96 + i * 50) + 'px', zIndex: i + 1 }}>
-        <div className="wfl-row__media" aria-hidden="true">
-          <div className="wfl-row__img" style={{ '--img': `url('assets/workflow/${imgs[n]}.jpg?v=2')` }}></div>
-        </div>
-        <div className="wfl-row__num">{String(n).padStart(2, '0')}</div>
-        <h3 className="wfl-row__title">{t('work.wf.' + n + '.title')}</h3>
-        <p className="wfl-row__desc">{t('work.wf.' + n + '.desc')}</p>
-      </div>
-      )}
-      <div className="wfl-tail" aria-hidden="true"></div>
-    </div>);
-
-}
-
-function WorkModel() {
-  const { t } = useT();
-  return (
-    <section className="win-win-wrap" id="trabajo" data-screen-label="Modelo" data-nav-theme="light">
-      <div className="ww-inner">
-
-        <header className="ww-intro">
-          <h2 className="ww-intro__title">Partners Workflow</h2>
-          <p className="ww-intro__sub">{t('work.intro.sub')}</p>
-        </header>
-
-        <WorkflowList />
-
-      </div>
-    </section>);
 
 }
 
@@ -718,14 +518,14 @@ function Quedamos() {
   return (
     <section className={'quedamos' + (revealed ? ' is-revealed-sec' : '')} id="quedamos" data-screen-label="Quedamos" data-nav-theme="light">
       <div className="quedamos__inner">
-        <h2 className="ww-intro__title" style={{ textAlign: 'left', marginBottom: '8px', fontSize: 'clamp(28px, 4vw, 64px)' }}>{lang === 'en' ? 'Ready to begin your next project?' : '¿Empezamos tu próximo proyecto?'}</h2>
+        <h2 className="ww-intro__title" style={{ textAlign: 'left', marginBottom: '8px', fontSize: 'clamp(28px, 4vw, 64px)' }}>{lang === 'en' ? 'Shall we talk about your company?' : '¿Hablamos de vuestra empresa?'}</h2>
         <p className="ww-intro__sub" style={{ textAlign: 'left', maxWidth: '760px' }}>{lang === 'en' ? "We don't hold boring meetings." : 'No hacemos reuniones aburridas.'}</p>
 
         <div className={'qd-grid' + (revealed ? ' is-revealed' : '')}>
           <aside className="qd-side">
-            <p className="qd-side__lead">{lang === 'en' ? 'Collaborating with brands across the world to create work that matters.' : 'Colaboramos con marcas de todo el mundo para crear trabajo que importa.'}</p>
+            <p className="qd-side__lead">{lang === 'en' ? '45 minutes, online or in person. No strings attached.' : '45 minutos, online o en persona. Sin compromiso.'}</p>
             <ul className="qd-side__contact">
-              <li>Based in Madrid / Available Worldwide</li>
+              <li>{lang === 'en' ? 'Madrid · We come to you, wherever you are' : 'Madrid · Vamos donde estéis'}</li>
               <li className="qd-clock"><MadridClock lang={lang} /></li>
               <li><a href="mailto:adsgroup@ads-partners.com" onClick={copyMail} data-cursor="cta">{copied ? (lang === 'en' ? 'Copied!' : '¡Copiado!') : 'adsgroup@ads-partners.com'}</a></li>
               <li><a href="https://wa.me/34633565840" target="_blank" rel="noopener" data-cursor="cta">+34 633 565 840</a></li>
@@ -738,7 +538,7 @@ function Quedamos() {
             }
             {!revealed &&
             <div className="qd-prompt">
-              <p className="qd-prompt__txt">{lang === 'en' ? 'Drop us a message, and we’ll take it from there.' : 'Escríbenos y nosotros nos encargamos del resto.'}</p>
+              <p className="qd-prompt__txt">{lang === 'en' ? 'Drop us a message, and we’ll take it from there.' : 'Escribidnos y nosotros nos encargamos del resto.'}</p>
               <button type="button" className="qd-prompt__btn" onClick={() => setRevealed(true)} data-cursor="cta">
               <span className="qd-prompt__btn-default">[{lang === 'en' ? 'CLICK HERE' : 'HAZ CLICK AQUÍ'}]</span>
               </button>
@@ -937,7 +737,7 @@ function Footer({ onCartClick }) {
 
 }
 
-// ============= WIN-WIN (scroll converge) =============
+// ============= TEXTO QUE SE ENCIENDE AL BAJAR =============
 function RevealText({ paras, className }) {
   const ref = React.useRef(null);
   const splitWords = (s) => s.split(/(\s+)/);
@@ -972,14 +772,20 @@ function RevealText({ paras, className }) {
       cancelAnimationFrame(raf);
     };
   }, [paras.join('|')]);
+  // Lo que va entre {llaves} sale en cursiva (lo usan los títulos de secciones.jsx).
+  const palabras = (text) => splitWords(text).map((w, i) =>
+  /\s+/.test(w) ?
+  <React.Fragment key={i}>{w}</React.Fragment> :
+  <span key={i} className="mani-word">{w}</span>
+  );
   return (
     <div className={className} ref={ref}>
       {paras.map((text, pi) =>
       <p key={pi} className="manifesto-text">
-        {splitWords(text).map((w, i) =>
-        /\s+/.test(w) ?
-        <React.Fragment key={i}>{w}</React.Fragment> :
-        <span key={i} className="mani-word">{w}</span>
+        {text.split(/(\{[^}]*\})/).filter(Boolean).map((trozo, ti) =>
+        trozo[0] === '{' ?
+        <em key={ti}>{palabras(trozo.slice(1, -1))}</em> :
+        <React.Fragment key={ti}>{palabras(trozo)}</React.Fragment>
         )}
       </p>
       )}
@@ -987,93 +793,4 @@ function RevealText({ paras, className }) {
 
 }
 
-function WinWin() {
-  const { t } = useT();
-  const secRef = React.useRef(null);
-  const leftRef = React.useRef(null);
-  const rightRef = React.useRef(null);
-  useEffect(() => {
-    const sec = secRef.current;
-    if (!sec) return;
-    let raf = 0;
-    const onScroll = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        const rect = sec.getBoundingClientRect();
-        const vh = window.innerHeight;
-        const isMobile = window.matchMedia('(max-width: 700px)').matches;
-        if (isMobile) {
-          // En móvil el pin es de altura mínima y se fija al centro (top: 50vh-26px).
-          // La convergencia se basa en la posición en pantalla de la frase: termina
-          // justo cuando se fija en el centro y se mantiene durante el hold/empuje.
-          const rowEl = leftRef.current ? leftRef.current.parentElement : null;
-          const rowTop = rowEl ? rowEl.getBoundingClientRect().top : vh;
-          const enterTop = vh * 0.95, pinnedTop = vh * 0.5 - 26;
-          const pm = Math.min(1, Math.max(0, (enterTop - rowTop) / (enterTop - pinnedTop)));
-          const offm = (1 - pm) * 60;
-          if (leftRef.current) {
-            leftRef.current.style.transform = `translateX(${-offm}vw)`;
-            leftRef.current.style.opacity = Math.min(1, 0.15 + pm * 1.6);
-          }
-          if (rightRef.current) {
-            rightRef.current.style.transform = `translateX(${offm}vw)`;
-            rightRef.current.style.opacity = Math.min(1, 0.15 + pm * 1.6);
-          }
-        } else {
-        const startOffset = vh * 0.8;
-        const span = sec.offsetHeight - vh + startOffset;
-        const scrolled = Math.min(Math.max(startOffset - rect.top, 0), span);
-        const p = span > 0 ? scrolled / span : 1;
-        const off = (1 - p) * 60;
-        if (leftRef.current) {
-          leftRef.current.style.transform = `translateX(${-off}vw)`;
-          leftRef.current.style.opacity = Math.min(1, 0.15 + p * 1.6);
-        }
-        if (rightRef.current) {
-          rightRef.current.style.transform = `translateX(${off}vw)`;
-          rightRef.current.style.opacity = Math.min(1, 0.15 + p * 1.6);
-        }
-        }
-        // Fade out the workflow cards once this section reaches ~mid-screen
-        const wfl = document.querySelector('.wfl');
-        if (wfl) {
-          const wt = rect.top;
-          const vhf = window.innerHeight;
-          const fp = Math.min(1, Math.max(0, (vhf * 0.7 - wt) / (vhf * 0.7)));
-          wfl.style.opacity = String(1 - fp);
-          wfl.style.filter = fp > 0 ? `blur(${(fp * 6).toFixed(2)}px)` : 'none';
-        }
-      });
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
-    onScroll();
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
-      cancelAnimationFrame(raf);
-    };
-  }, []);
-  return (
-    <>
-    <section className="winwin" id="winwin" ref={secRef} data-screen-label="Win-Win" data-nav-theme="dark">
-      <div className="winwin__pin">
-        <div className="winwin__row">
-          <span className="winwin__word winwin__word--l" ref={leftRef} dangerouslySetInnerHTML={{ __html: t('win.left.html') }}></span>
-          <span className="winwin__word winwin__word--r" ref={rightRef} dangerouslySetInnerHTML={{ __html: t('win.right.html') }}></span>
-        </div>
-      </div>
-    </section>
-    <section className="winwin-foot" data-nav-theme="dark">
-      <div className="winwin-foot__cols">
-        <p className="winwin-foot__col">{t('win.col.l')}</p>
-        <p className="winwin-foot__col">{t('win.col.r')}</p>
-      </div>
-      <p className="winwin-foot__note" dangerouslySetInnerHTML={{ __html: t('win.note') }}></p>
-      <RevealText className="winwin-manifesto" paras={[t('win.manifesto.p1'), t('win.manifesto.p2')]} />
-    </section>
-    </>);
-
-}
-
-Object.assign(window, { Nav, SideMenu, Hero, Manifiesto, Services, WorkModel, WinWin, Footer, Quedamos, useReveal });
+Object.assign(window, { Nav, SideMenu, Hero, RevealText, Footer, Quedamos, useReveal });

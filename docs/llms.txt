@@ -1,35 +1,71 @@
 # adsPartners
 
-> Creative Growth Studio para marcas ambiciosas, con base en España. Trabajamos
-> captación, conversión y dirección de marca como un sistema conectado —no como
-> servicios sueltos. Entramos a ordenar el caos y construir el sistema que lleva
-> a las marcas del movimiento al crecimiento.
+> Finanzas, tecnología y marca para la empresa que ha crecido. Tres especialistas
+> que trabajan como uno solo: ads Finance, ads Tech y ads Brand. La promesa es
+> recuperar el control: saber qué línea de negocio deja margen, que el trabajo no
+> dependa de las mismas tres personas y que todos los negocios se vean de la misma casa.
 
-adsPartners (adsPartners® — Growth Studio) es una agencia/estudio de marketing de
-crecimiento formada por tres socios fundadores que están encima de cada proyecto.
-Modelo de trabajo "socios antes que proveedores": no vendemos campañas aisladas,
-construimos el sistema de marca, captación y conversión que escala el negocio.
+adsPartners (ads-partners.com) trabaja con empresas que han crecido, han diversificado
+en varias líneas o sociedades y han perdido la visibilidad de lo que pasa dentro.
+Se puede empezar por una sola rama y sumar las demás después.
 
-## Qué hacemos
-- Análisis de mercado y estrategia
-- Estrategia de embudo de venta (funnels)
-- Diseño web y landing pages
-- VSL (video sales letter) y creatividades
-- Lanzamiento y gestión de campañas (Meta Ads)
-- Captación de leads cualificados
-- Automatización con IA e integración con CRM
-- Dirección de marca e identidad
+## Las tres ramas
+- ads Finance (Daniel de Céspedes): diagnóstico financiero, modelo de rentabilidad,
+  cuadro de mando y control mensual. La gestoría registra; ads Finance interpreta.
+  No sustituye a la gestoría: la gestión fiscal, la auditoría y el registro contable
+  diario siguen donde están.
+- ads Tech (Álvaro Espinosa): flujos automáticos (por ejemplo, facturas que se leen
+  solas y aparecen en el cuadro de mando), asistentes de IA y herramientas a medida.
+- ads Brand (Sebastián Lorenzo): arquitectura de marca, identidad visual y manual,
+  web y presencia digital.
 
-## Para quién
-Negocios que se toman el crecimiento en serio ("Not for everyone"): marcas que
-quieren un sistema conectado de marca + performance, no tácticas sueltas.
+## Cómo se empieza: el Diagnóstico
+- Dura de 3 a 4 semanas, con varios días dentro de la empresa.
+- Precio cerrado, que se conoce antes de empezar; si se continúa, se descuenta del plan.
+- Entrega el mapa de la empresa: cuánto gana de verdad cada línea de negocio, qué
+  procesos se comen las horas y cuáles se pueden automatizar, cómo se ve cada marca
+  del grupo y un plan por orden de prioridad, con plazos y presupuesto.
+- El mapa es del cliente y le sirve aunque decida no seguir.
+
+## El recorrido
+1. Diagnóstico: 3–4 semanas.
+2. Orden (ads Finance): 30 días hasta el primer cierre.
+3. Sistemas (ads Tech): 4–6 semanas hasta el primer sistema.
+4. Imagen (ads Brand): 4–12 semanas, según el proyecto.
+5. Acompañamiento: cada mes, con visita, esté donde esté la empresa.
+
+El orden tiene un motivo: no se automatiza lo que no se ha medido, ni se cuenta
+hacia fuera lo que todavía no está ordenado por dentro.
+
+## Cómo es trabajar con adsPartners
+- El Diagnóstico se hace dentro de la empresa y después hay una visita cada mes.
+- Una persona de referencia: un nombre y un teléfono.
+- Por fases: cada una empieza con su alcance y su precio cerrados.
+- Cada cambio se explica, se prueba y se ajusta con el equipo del cliente.
+
+## Trabajo hecho
+- Gestión para hostelería (ads Tech): aplicación en uso a diario en un bar. Lee las
+  facturas de proveedor a partir de una foto y pone a cada uno de los 157 platos de
+  la carta su semáforo de margen. https://ads-partners.com/proyectos/gestion-hosteleria/
+- Fundación Jiménez Díaz (ads Tech): software de análisis de tejido pulmonar para el
+  equipo de investigación de Neumomadrid. https://ads-partners.com/proyectos/fundacion-jimenez-diaz/
+- Impulso Visual (ads Tech): herramientas de IA a medida para artes finales y
+  presentaciones a cliente.
+- Butter Studio, Métele Voltaje y Ava Pastelería (ads Brand): webs con escena 3D propia.
+  https://ads-partners.com/proyectos/butter-studio/
+  https://ads-partners.com/proyectos/metele-voltaje/
+  https://ads-partners.com/proyectos/ava-pasteleria/
+- Identidad de marca para Inversalia y Klink (ads Brand).
 
 ## Contacto
 - Web: https://ads-partners.com/
+- Primera conversación: 45 minutos, online o en persona, sin compromiso
+  (https://ads-partners.com/#quedamos).
 - Email: adsgroup@ads-partners.com
+- Teléfono: +34 633 56 58 40
 - LinkedIn: https://www.linkedin.com/company/ads-partners-co/
 - Instagram: https://www.instagram.com/adspartners.co
 
 ## Notas
 - Idioma principal: español (ES). También disponible en inglés.
-- Ámbito: España.
+- Ámbito: España. Sede en Madrid; se trabaja dentro de la empresa del cliente.

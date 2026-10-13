@@ -1,4 +1,4 @@
-/* global React, ReactDOM, I18nProvider, Nav, SideMenu, Hero, Manifiesto, Services, Proyectos, WorkModel, WinWin, Footer, Quedamos, useReveal, useT, CookieConsent, ChatGlobo */
+/* global React, ReactDOM, I18nProvider, Nav, SideMenu, Hero, PuntoPartida, Ramas, Principio, Diagnostico, Recorrido, Proyectos, Cerca, Testimonios, Preguntas, Cierre, Footer, Quedamos, useReveal, useT, CookieConsent, ChatGlobo */
 const { useState, useEffect } = React;
 
 function AppInner() {
@@ -17,11 +17,16 @@ function AppInner() {
       <SideMenu />
       <div className="scroll-content">
         <Hero />
-        <Manifiesto />
-        <Services />
+        <PuntoPartida />
+        <Ramas />
+        {typeof Principio !== 'undefined' && <Principio />}
+        {typeof Diagnostico !== 'undefined' && <Diagnostico />}
+        {typeof Recorrido !== 'undefined' && <Recorrido />}
         {typeof Proyectos !== 'undefined' && <Proyectos />}
-        <WorkModel />
-        <WinWin />
+        {typeof Cerca !== 'undefined' && <Cerca />}
+        {typeof Testimonios !== 'undefined' && <Testimonios />}
+        {typeof Preguntas !== 'undefined' && <Preguntas />}
+        {typeof Cierre !== 'undefined' && <Cierre />}
         <Quedamos />
       </div>
       <Footer onCartClick={scrollToContact} />
