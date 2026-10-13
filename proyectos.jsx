@@ -57,14 +57,55 @@ function VideoVivo({ base, className, label }) {
   return <video ref={ref} className={className} muted loop playsInline preload="none" poster={base + '.jpg'} aria-label={label} />;
 }
 
-// ---------- Sección de la home ----------
-// La lista de trabajos (window.TRABAJOS): cliente, qué hicimos y un dato, sin imágenes.
+// ---------- La lista de trabajos ----------
+// Una fila por trabajo (window.TRABAJOS): cliente, qué hicimos y un dato, sin imágenes.
 // Los que tienen página propia llevan flecha y abren su /proyectos/<slug>/.
-function Trabajos() {
+// La usan la home (todos los trabajos) y la página de cada rama (solo los suyos).
+function ListaTrabajos({ lista }) {
   const { t, lang } = useT();
+  const conPagina = proyConPagina();
+  return (
+    <ol className="tlista">
+      {lista.map((x, i) => {
+        const d = x[lang] || x.es;
+        const cliente = d.cliente || x.cliente;
+        const dentro = (
+          <>
+            <span className="tfila__num">({proyNum(i + 1)})</span>
+            <span className="tfila__cliente">{cliente}</span>
+            <span className="tfila__que">{d.que}</span>
+            <span className="tfila__rama"><i aria-hidden="true"></i>ads {x.rama}</span>
+            <span className="tfila__dato">{d.dato || ''}</span>
+            <span className="tfila__fl" aria-hidden="true">{x.slug ? '→' : ''}</span>
+          </>
+        );
+        const n = conPagina.findIndex((y) => y.slug === x.slug) + 1;
+        return (
+          <li className="reveal" key={x.cliente} style={{ transitionDelay: (i % 4) * 70 + 'ms' }}>
+            {x.slug
+              ? (
+                <a
+                  className="tfila tfila--enlace"
+                  href={`proyectos/${x.slug}/`}
+                  data-cursor="ver"
+                  data-cursor-label={t('proy.ver')}
+                  onClick={(e) => proyIr(e, e.currentTarget.href, cliente + '.', '(' + proyNum(n) + ')')}>
+                  {dentro}
+                </a>
+              )
+              : <div className="tfila">{dentro}</div>}
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+// ---------- Sección de la home ----------
+function Trabajos() {
+  const { t } = useT();
   const lista = window.TRABAJOS || [];
   if (!lista.length) return null;
-  const conPagina = proyConPagina();
   const aQuedamos = () => {
     const el = document.getElementById('quedamos');
     if (el) (window.adsIr || ((y) => window.scrollTo({ top: y, behavior: 'smooth' })))(el.getBoundingClientRect().top + window.scrollY);
@@ -78,39 +119,7 @@ function Trabajos() {
           <p className="proyectos-intro__body">{t('proy.body')}</p>
         </div>
       </header>
-      <ol className="tlista">
-        {lista.map((x, i) => {
-          const d = x[lang] || x.es;
-          const cliente = d.cliente || x.cliente;
-          const dentro = (
-            <>
-              <span className="tfila__num">({proyNum(i + 1)})</span>
-              <span className="tfila__cliente">{cliente}</span>
-              <span className="tfila__que">{d.que}</span>
-              <span className="tfila__rama"><i aria-hidden="true"></i>ads {x.rama}</span>
-              <span className="tfila__dato">{d.dato || ''}</span>
-              <span className="tfila__fl" aria-hidden="true">{x.slug ? '→' : ''}</span>
-            </>
-          );
-          const n = conPagina.findIndex((y) => y.slug === x.slug) + 1;
-          return (
-            <li className="reveal" key={x.cliente} style={{ transitionDelay: (i % 4) * 70 + 'ms' }}>
-              {x.slug
-                ? (
-                  <a
-                    className="tfila tfila--enlace"
-                    href={`proyectos/${x.slug}/`}
-                    data-cursor="ver"
-                    data-cursor-label={t('proy.ver')}
-                    onClick={(e) => proyIr(e, e.currentTarget.href, cliente + '.', '(' + proyNum(n) + ')')}>
-                    {dentro}
-                  </a>
-                )
-                : <div className="tfila">{dentro}</div>}
-            </li>
-          );
-        })}
-      </ol>
+      <ListaTrabajos lista={lista} />
       <div className="proyectos-cta reveal">
         <p className="proyectos-cta__txt">{t('proy.cta')}</p>
         <button type="button" className="qd-prompt__btn" onClick={aQuedamos} data-cursor="cta">[{t('proy.cta.btn')}]</button>

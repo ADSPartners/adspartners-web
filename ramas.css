@@ -1,0 +1,331 @@
+/* ============================================================
+   adsPartners · las tres ramas
+   La sección «Qué hacemos» de la home y la página de cada rama (/finance/, /tech/, /brand/). Las pinta ramas.jsx.
+   Tipografía grande y línea fina sobre un cielo que se mueve; aquí no hay tarjetas ni diagramas.
+   Usa los tokens de secciones.css (--sec-x, --sec-y, --radio, --muelle, --linea-*).
+   ============================================================ */
+
+/* ============ EL CIELO ============ */
+/* Dos capas de nubes (ruido de SVG, pintado una vez) que pasan despacio a distinta velocidad, y una luz de
+   amanecer que respira y sigue al ratón. Solo se mueven `transform` y `translate`: no se repinta nada.
+   Va como primer hijo de un bloque con `isolation: isolate`; el resto del bloque se pinta encima. */
+.cielo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  border-radius: inherit;
+  --tesela: max(100vw, 1100px);   /* ancho de una vuelta de nubes: nunca se ve dos veces la misma en pantalla */
+  --nube-oscura: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1600' height='800' viewBox='0 0 1600 800' preserveAspectRatio='none'><filter id='n' x='0' y='0' width='100%25' height='100%25' color-interpolation-filters='sRGB'><feTurbulence type='fractalNoise' baseFrequency='.0021 .0072' numOctaves='4' seed='4' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .36 0 0 0 0 .22 0 0 0 0 .13 2.6 0 0 0 -1.12'/></filter><rect width='1600' height='800' filter='url(%23n)'/></svg>");
+  --nube-clara: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1600' height='800' viewBox='0 0 1600 800' preserveAspectRatio='none'><filter id='n' x='0' y='0' width='100%25' height='100%25' color-interpolation-filters='sRGB'><feTurbulence type='fractalNoise' baseFrequency='.0034 .0105' numOctaves='4' seed='11' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .99 0 0 0 0 .975 0 0 0 0 .95 2.6 0 0 0 -1.16'/></filter><rect width='1600' height='800' filter='url(%23n)'/></svg>");
+}
+.cielo__luz {
+  position: absolute;
+  left: 14%;
+  top: 30%;
+  width: 72%;
+  height: 100%;
+  background: radial-gradient(closest-side, var(--luz-1) 0, var(--luz-2) 32%, var(--luz-3) 62%, transparent 100%);
+  translate: calc((var(--lx, var(--lx0, 50)) - 50) * .86vw) 0;
+  transition: translate 1.8s var(--muelle);
+  animation: cieloRespira 13s ease-in-out infinite alternate;
+}
+@keyframes cieloRespira { from { transform: scale(.94); opacity: .8; } to { transform: scale(1.08); opacity: 1; } }
+.cielo__nubes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(100% + var(--tesela));
+  height: 100%;
+  background-repeat: repeat-x;
+  background-size: var(--tesela) 100%;
+  animation: cieloPasa var(--dura, 150s) linear infinite;
+  transition: translate 1.8s var(--muelle);
+  will-change: transform;
+  /* Las nubes se quedan en la franja del horizonte: arriba el cielo está limpio. */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 34%, #000 86%, transparent 100%);
+          mask-image: linear-gradient(to bottom, transparent 0, #000 34%, #000 86%, transparent 100%);
+}
+@keyframes cieloPasa { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(calc(var(--tesela) * -1), 0, 0); } }
+.cielo__nubes--a { background-image: var(--nube-a); opacity: var(--op-a); --dura: 112s; translate: calc(var(--mx, 0) * -10px) 0; }
+.cielo__nubes--b {
+  background-image: var(--nube-b);
+  background-size: var(--tesela) 128%;
+  background-position: 0 60%;
+  opacity: var(--op-b);
+  --dura: 66s;
+  animation-delay: -24s;
+  translate: calc(var(--mx, 0) * -26px) 0;
+}
+/* Fuera de pantalla (o sin JS) el cielo se queda quieto. */
+.cielo:not(.is-on) .cielo__nubes,
+.cielo:not(.is-on) .cielo__luz { animation-play-state: paused; }
+
+/* Amanecer: cielo crema, nubes tostadas y luz cálida. */
+.cielo--alba {
+  background: linear-gradient(180deg, #F1ECE5 0%, #E9E3DB 42%, #DFD4C6 100%);
+  --luz-1: rgba(255, 252, 247, 1);
+  --luz-2: rgba(255, 244, 232, .7);
+  --luz-3: rgba(245, 203, 215, .26);
+  --nube-a: var(--nube-oscura);
+  --op-a: .36;
+  --nube-b: var(--nube-clara);
+  --op-b: .9;
+}
+/* Noche: el mismo cielo, casi a oscuras. */
+.cielo--noche {
+  background: linear-gradient(180deg, #190900 0%, #1F0D04 50%, #2C1509 100%);
+  --luz-1: rgba(231, 200, 168, .34);
+  --luz-2: rgba(231, 200, 168, .16);
+  --luz-3: rgba(245, 203, 215, .06);
+  --nube-a: var(--nube-clara);
+  --op-a: .13;
+  --nube-b: var(--nube-clara);
+  --op-b: .08;
+}
+
+/* ============ QUÉ HACEMOS (la sección de la home) ============ */
+.ramas {
+  isolation: isolate;
+  background: var(--beige);
+  color: var(--marron);
+  padding: var(--sec-y) var(--sec-x) calc(var(--sec-y) + var(--radio));
+}
+.ramas > :not(.cielo),
+.rama-cab > :not(.cielo),
+.rama-cierre > :not(.cielo) { position: relative; z-index: 1; }
+.rcols {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 1px solid rgba(52, 25, 10, .34);
+}
+.rcol-w { display: flex; }
+.rcol-w + .rcol-w { border-left: 1px solid rgba(52, 25, 10, .16); }
+.rcol {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-height: clamp(300px, 43vh, 440px);
+  padding: 20px clamp(18px, 2.2vw, 34px) 4px;
+  color: inherit;
+  transition: opacity .45s ease;
+}
+.rcol-w:first-child .rcol { padding-left: 0; }
+.rcol__num { font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 17px; opacity: .6; }
+.rcol__nombre {
+  margin-top: auto;
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(56px, 7.6vw, 118px);
+  line-height: .92;
+  letter-spacing: -.035em;
+  transition: transform .7s var(--muelle);
+}
+.rcol__nombre small { display: block; margin-bottom: .22em; font-size: .19em; font-style: italic; letter-spacing: 0; opacity: .62; }
+.rcol__frase { margin-top: 20px; max-width: 27ch; font-size: 15.5px; line-height: 1.45; color: rgba(52, 25, 10, .78); }
+.rcol__ver {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 26px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+}
+.rcol__ver i { font-style: normal; font-size: 16px; letter-spacing: 0; transition: transform .6s var(--muelle); }
+@media (hover: hover) {
+  /* Al señalar una rama, las otras se apagan y su nombre se inclina. */
+  .rcols:hover .rcol { opacity: .36; }
+  .rcols .rcol:hover { opacity: 1; }
+  .rcol:hover .rcol__nombre { transform: translateX(10px); font-style: italic; }
+  .rcol:hover .rcol__ver i { transform: translateX(8px); }
+}
+
+/* ============ PÁGINA DE UNA RAMA ============ */
+/* Cabecera: el nombre, enorme, sobre el cielo */
+.rama-cab {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: clamp(104px, 10vw, 140px) var(--sec-x) calc(clamp(32px, 3.6vw, 52px) + var(--radio));
+  background: var(--beige);
+  color: var(--marron);
+}
+.rama-cab__barra {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+}
+.rama-cab__cuenta { font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 17px; letter-spacing: 0; text-transform: none; opacity: .6; }
+.rama-cab__centro { margin: auto 0; padding: clamp(36px, 5vw, 80px) 0; }
+.rama-cab__centro > * { animation: heroEntra 1s var(--muelle) both; }
+.rama-cab__centro > :nth-child(1) { animation-delay: .5s; }
+.rama-cab__centro > :nth-child(2) { animation-delay: .7s; }
+.rama-cab__titulo {
+  margin: 0;
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(64px, 14vw, 230px);
+  line-height: .88;
+  letter-spacing: -.04em;
+}
+.rama-cab__titulo em { font-style: italic; color: rgba(52, 25, 10, .5); }
+.rama-cab__frase {
+  margin: clamp(20px, 2.4vw, 36px) 0 0;
+  max-width: 24ch;
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(24px, 2.9vw, 44px);
+  line-height: 1.08;
+  letter-spacing: -.018em;
+  text-wrap: balance;
+}
+.rama-cab__meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 32px;
+  margin: 0;
+  padding-top: 22px;
+  border-top: 1px solid rgba(52, 25, 10, .34);
+}
+.rama-cab__meta dt { margin: 0 0 10px; font-family: var(--serif); font-size: 19px; letter-spacing: -.01em; }
+.rama-cab__meta dt span { opacity: .55; }
+.rama-cab__meta dd { margin: 0; max-width: 34ch; font-size: 14px; line-height: 1.55; color: rgba(52, 25, 10, .8); }
+.rama-cab__meta dd b { display: block; font-weight: 600; color: var(--marron); }
+
+/* Qué incluye: una fila por cosa */
+.rama-incluye {
+  background: var(--blanco);
+  color: var(--marron);
+  padding: var(--sec-y) var(--sec-x) calc(var(--sec-y) + var(--radio));
+}
+.rlista { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--marron); }
+.rlista__fila {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr) minmax(0, 1.1fr);
+  column-gap: 24px;
+  align-items: baseline;
+  padding: clamp(20px, 2.3vw, 34px) 0;
+  border-bottom: 1px solid var(--linea-clara);
+}
+.rlista__num { font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 15px; opacity: .55; }
+.rlista__t { margin: 0; font-family: var(--serif); font-weight: 300; font-size: clamp(28px, 3.4vw, 52px); line-height: 1.02; letter-spacing: -.02em; }
+.rlista__d { margin: 0; max-width: 46ch; font-size: 16px; line-height: 1.5; color: rgba(52, 25, 10, .76); }
+.rama-apunte {
+  margin: clamp(28px, 3vw, 44px) 0 0;
+  max-width: 64ch;
+  font-size: 14px;
+  line-height: 1.55;
+  color: color-mix(in srgb, currentColor 68%, transparent);
+}
+
+/* Cómo se empieza: tres pasos, uno al lado del otro */
+.rama-empieza {
+  background: var(--beige);
+  color: var(--marron);
+  padding: var(--sec-y) var(--sec-x) calc(var(--sec-y) + var(--radio));
+}
+.rpasos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(20px, 3vw, 48px);
+}
+.rpaso { padding-top: 22px; border-top: 1px solid var(--marron); }
+.rpaso__etq {
+  margin: 0 0 clamp(32px, 4.6vw, 72px);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: rgba(52, 25, 10, .62);
+}
+.rpaso__t { margin: 0 0 14px; font-family: var(--serif); font-weight: 300; font-size: clamp(30px, 3.4vw, 52px); line-height: 1; letter-spacing: -.02em; }
+.rpaso__d { margin: 0; max-width: 34ch; font-size: 15.5px; line-height: 1.5; color: rgba(52, 25, 10, .76); }
+
+/* Cierre: quedar, y las otras dos ramas */
+.rama-cierre {
+  isolation: isolate;
+  background: var(--negro);
+  color: var(--beige);
+  padding: var(--sec-y) var(--sec-x) calc(var(--sec-y) + 16px);
+}
+.rama-cierre__texto {
+  margin: 0 0 clamp(28px, 3vw, 44px);
+  max-width: 17ch;
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(40px, 6.2vw, 100px);
+  line-height: .98;
+  letter-spacing: -.028em;
+}
+.rama-cierre__texto em { display: block; font-style: italic; color: rgba(231, 226, 218, .55); }
+.rama-cierre .qd-prompt__btn { border-color: var(--beige); background: var(--beige); color: var(--negro); }
+.rama-cierre .qd-prompt__btn:hover { background: transparent; color: var(--beige); }
+.rama-otras { margin-top: clamp(72px, 9vw, 140px); border-bottom: 1px solid var(--linea-oscura); }
+.rama-otras .sec-etq { margin-bottom: 18px; }
+.rama-otra {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr) minmax(0, 1.1fr) 26px;
+  column-gap: 24px;
+  align-items: center;
+  padding: clamp(18px, 2vw, 28px) 0;
+  border-top: 1px solid var(--linea-oscura);
+  color: inherit;
+  transition: padding .5s var(--muelle);
+}
+.rama-otra__num { font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 15px; opacity: .55; }
+.rama-otra__nombre { font-family: var(--serif); font-weight: 300; font-size: clamp(30px, 3.8vw, 58px); line-height: 1; letter-spacing: -.022em; }
+.rama-otra__frase { font-size: 15px; line-height: 1.45; color: rgba(231, 226, 218, .72); }
+.rama-otra__fl { font-size: 18px; text-align: right; opacity: .5; transition: transform .5s var(--muelle), opacity .35s ease; }
+@media (hover: hover) {
+  .rama-otra:hover { padding-left: 14px; }
+  .rama-otra:hover .rama-otra__nombre { font-style: italic; }
+  .rama-otra:hover .rama-otra__fl { opacity: 1; transform: translateX(4px); }
+}
+
+/* ============ SIN MOVIMIENTO ============ */
+@media (prefers-reduced-motion: reduce) {
+  .cielo__nubes, .cielo__luz, .rama-cab__centro > * { animation: none; }
+  .cielo__nubes, .cielo__luz, .rcol, .rcol__nombre, .rama-otra { transition: none; }
+}
+
+/* ============ TABLETA: las ramas, una debajo de otra ============ */
+@media (max-width: 900px) {
+  .rcols { grid-template-columns: 1fr; }
+  .rcol-w + .rcol-w { border-left: 0; border-top: 1px solid rgba(52, 25, 10, .16); }
+  .rcol { min-height: 0; padding: 20px 0 34px; }
+  .rcol__nombre { margin-top: 28px; font-size: clamp(64px, 15vw, 118px); }
+  .rcol__frase { max-width: 34ch; }
+  .rama-cab__meta { grid-template-columns: 1fr; gap: 20px; }
+  .rama-cab__meta dd { max-width: 52ch; }
+  .rpasos { grid-template-columns: 1fr; gap: 36px; }
+  .rpaso__etq { margin-bottom: 24px; }
+  .rpaso__d { max-width: 52ch; }
+}
+
+/* ============ MÓVIL ============ */
+@media (max-width: 700px) {
+  .rcol__nombre { font-size: clamp(64px, 21vw, 96px); }
+  .rama-cab { padding-top: 96px; }
+  .rama-cab__titulo { font-size: clamp(60px, 19vw, 110px); }
+  .rama-cab__frase { font-size: clamp(22px, 6vw, 30px); }
+  .rama-cab__meta dt { font-size: 17px; margin-bottom: 6px; }
+  .rlista__fila { grid-template-columns: 34px minmax(0, 1fr); row-gap: 8px; column-gap: 12px; padding: 22px 0; }
+  .rlista__d { grid-column: 2; font-size: 15px; }
+  .rama-otra { grid-template-columns: 34px minmax(0, 1fr) 22px; row-gap: 6px; column-gap: 12px; }
+  .rama-otra__frase { grid-column: 2 / 4; grid-row: 2; font-size: 14.5px; }
+  .rama-otra__fl { grid-column: 3; grid-row: 1; }
+}

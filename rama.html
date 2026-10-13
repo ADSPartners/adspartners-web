@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Plantilla de las páginas de rama: build.mjs genera /finance/, /tech/ y /brand/ (una por cada id de
+       `orden` en ramas-data.jsx). La <base> hace que todo (css, assets, enlaces) cuelgue de la raíz. -->
+  <base href="../" />
+  <title>{{TITULO}}</title>
+  <meta name="description" content="{{DESCRIPCION}}" />
+  <link rel="canonical" href="https://ads-partners.com/{{SLUG}}/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="adsPartners" />
+  <meta property="og:locale" content="es_ES" />
+  <meta property="og:url" content="https://ads-partners.com/{{SLUG}}/" />
+  <meta property="og:title" content="{{TITULO}}" />
+  <meta property="og:description" content="{{DESCRIPCION}}" />
+  <meta property="og:image" content="https://ads-partners.com/assets/og-adspartners.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="{{TITULO}}" />
+  <meta name="twitter:description" content="{{DESCRIPCION}}" />
+  <meta name="twitter:image" content="https://ads-partners.com/assets/og-adspartners.png" />
+  <script type="application/ld+json">{{JSONLD}}</script>
+
+  <!-- Si se entra por aquí, la home ya no enseña la pantalla de carga en esta sesión. -->
+  <script>try{sessionStorage.setItem('ads_pre','1');}catch(e){}</script>
+  <link rel="preload" href="assets/fonts/AppleGaramond-Light.ttf" as="font" type="font/ttf" crossorigin />
+  <link rel="preload" href="assets/fonts/OpenSauceSans-Regular.ttf" as="font" type="font/ttf" crossorigin />
+  <link rel="stylesheet" href="styles.css?v=2610131834" />
+  <link rel="stylesheet" href="secciones.css?v=2610131834" />
+  <link rel="stylesheet" href="proyectos.css?v=2610131834" />
+  <link rel="stylesheet" href="ramas.css?v=2610131834" />
+  <link rel="stylesheet" href="cookie-consent.css?v=1" />
+  <link rel="stylesheet" href="chat-globo.css?v=1" />
+  <link rel="icon" type="image/svg+xml" href="assets/logos/favicon.svg?v=2" />
+  <link rel="alternate icon" type="image/png" sizes="32x32" href="assets/logos/favicon-32.png?v=2" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/logos/apple-touch-icon.png?v=2" />
+</head>
+<body data-rama="{{SLUG}}">
+  <!-- Se llega con la cortina puesta (la levanta la app al montar; si algo falla, se va sola). -->
+  <script>
+    document.body.classList.add('lang-switching');
+    setTimeout(function () { document.body.classList.remove('lang-switching'); }, 4000);
+  </script>
+
+  <!-- Custom cursor -->
+  <div class="cursor cursor-ring" id="cursorRing"></div>
+  <div class="cursor cursor-dot" id="cursorDot"></div>
+
+  <!-- Cortina de transición (la misma del cambio de idioma) -->
+  <div class="lang-curtain" id="langCurtain" aria-hidden="true">
+    <div class="lang-mark">
+      <span class="lang-mark__num" id="langMarkNum">({{NUM}})</span>
+      <span class="lang-mark__word" id="langMarkWord">{{NOMBRE}}.</span>
+      <span class="lang-mark__rule"></span>
+    </div>
+  </div>
+
+  <div id="root"></div>
+
+  <!-- React + Babel -->
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <script src="cursor.js"></script>
+  <!-- Scroll suave (Lenis, auto-alojado) y window.adsIr -->
+  <script src="vendor/lenis.min.js"></script>
+  <script src="scroll.js"></script>
+
+  <!-- Rama app -->
+  <script type="text/babel" src="i18n.jsx"></script>
+  <script type="text/babel" src="cookie-consent.jsx"></script>
+  <script type="text/babel" src="chat-globo.jsx"></script>
+  <script type="text/babel" src="components.jsx"></script>
+  <script type="text/babel" src="secciones.jsx"></script>
+  <script type="text/babel" src="proyectos-data.jsx"></script>
+  <script type="text/babel" src="proyectos.jsx"></script>
+  <script type="text/babel" src="ramas-data.jsx"></script>
+  <script type="text/babel" src="ramas.jsx"></script>
+</body>
+</html>

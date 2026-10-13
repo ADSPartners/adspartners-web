@@ -40,15 +40,18 @@ que es lo que la colgaba) y se publica en **GitHub Pages** con dominio
 ```
 index.html, aviso-legal.html, cookies.html, privacidad.html, 404.html   ← fuente
 proyecto.html      plantilla de las páginas /proyectos/<slug>/ (el build genera una por proyecto)
+rama.html          plantilla de las páginas /finance/, /tech/ y /brand/ (el build genera una por rama)
 app.jsx            orden de los bloques de la home
-components.jsx     barra, menú lateral, portada, carta «Quedamos» y pie
-secciones.jsx      los bloques de la home (portada, tarjetas, ramas, método, preguntas…)
+components.jsx     barra, menú lateral, carta «Quedamos» y pie
+secciones.jsx      portada, testimonios, preguntas y cierre de la home
 secciones-data.jsx TEXTOS de esos bloques, en español e inglés
+ramas.jsx          la sección «Qué hacemos» de la home, la página de cada rama y el cielo de nubes
+ramas-data.jsx     TEXTOS de las tres ramas (sección de la home y sus páginas), en español e inglés
 proyectos.jsx      lista «Selected Work» y páginas de proyecto
 proyectos-data.jsx TEXTOS y datos de cada proyecto, y la lista de trabajos de la home
 i18n.jsx           textos cortos (barra, menú, portada) y cambio de idioma
 cookie-consent.jsx, chat-globo.jsx, legal*.jsx
-styles.css, secciones.css, proyectos.css, loader.css, legal.css, cookie-consent.css, chat-globo.css
+styles.css, secciones.css, ramas.css, proyectos.css, loader.css, legal.css, cookie-consent.css, chat-globo.css
 cursor.js          cursor propio (compartido por la home y los proyectos)
 scroll.js          scroll suave con Lenis (solo con ratón) y window.adsIr
 assets/            imágenes, vídeos, fuentes, logos
@@ -60,14 +63,14 @@ docs/              SALIDA compilada que sirve GitHub Pages  (generada por el bui
 ## Notas
 
 - **Para cambiar un texto de la home**: casi todos están en `secciones-data.jsx`
-  (lo que va entre `{llaves}` sale en cursiva). Los de los proyectos, en
-  `proyectos-data.jsx`. Si se toca una de las preguntas frecuentes, hay que
+  (lo que va entre `{llaves}` sale en cursiva). Los de las tres ramas y sus páginas,
+  en `ramas-data.jsx`; los de los proyectos, en `proyectos-data.jsx`. Si se toca una de las preguntas frecuentes, hay que
   cambiarla también en el bloque de datos estructurados de `index.html`.
 - **Añadir un trabajo a la lista de la home**: una línea en `window.TRABAJOS`, al final
   de `proyectos-data.jsx`. Si además va a tener página propia: una entrada en
   `window.PROYECTOS` y su carpeta en `assets/proyectos/<slug>/` (lo explica la cabecera).
 - **Pantalla de carga**: solo CSS (`loader.css`); sale una vez por sesión.
 - **Estilos y caché**: al cambiar un `.css`, subir el `?v=` de su enlace en
-  `index.html` y `proyecto.html`.
+  `index.html`, `proyecto.html` y `rama.html`.
 - **Formulario "Quedamos"**: pega la URL del webhook de n8n en `N8N_WEBHOOK_URL`
   (arriba de `components.jsx`). Vacío → cae a `mailto`.

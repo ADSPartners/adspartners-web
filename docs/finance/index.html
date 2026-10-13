@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Plantilla de las páginas de rama: build.mjs genera /finance/, /tech/ y /brand/ (una por cada id de
+       `orden` en ramas-data.jsx). La <base> hace que todo (css, assets, enlaces) cuelgue de la raíz. -->
+  <base href="../" />
+  <title>ads Finance — saber qué gana cada línea de negocio · adsPartners®</title>
+  <meta name="description" content="Diagnóstico financiero, modelo de rentabilidad, cuadro de mando y control mensual para empresas que han crecido. Vuestra gestoría registra; ads Finance interpreta." />
+  <link rel="canonical" href="https://ads-partners.com/finance/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="adsPartners" />
+  <meta property="og:locale" content="es_ES" />
+  <meta property="og:url" content="https://ads-partners.com/finance/" />
+  <meta property="og:title" content="ads Finance — saber qué gana cada línea de negocio · adsPartners®" />
+  <meta property="og:description" content="Diagnóstico financiero, modelo de rentabilidad, cuadro de mando y control mensual para empresas que han crecido. Vuestra gestoría registra; ads Finance interpreta." />
+  <meta property="og:image" content="https://ads-partners.com/assets/og-adspartners.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="ads Finance — saber qué gana cada línea de negocio · adsPartners®" />
+  <meta name="twitter:description" content="Diagnóstico financiero, modelo de rentabilidad, cuadro de mando y control mensual para empresas que han crecido. Vuestra gestoría registra; ads Finance interpreta." />
+  <meta name="twitter:image" content="https://ads-partners.com/assets/og-adspartners.png" />
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Service","name":"ads Finance","description":"Diagnóstico financiero, modelo de rentabilidad, cuadro de mando y control mensual para empresas que han crecido. Vuestra gestoría registra; ads Finance interpreta.","url":"https://ads-partners.com/finance/","serviceType":"Diagnóstico financiero, Modelo de rentabilidad, Cuadro de mando, Control mensual","areaServed":{"@type":"Country","name":"España"},"provider":{"@type":"ProfessionalService","@id":"https://ads-partners.com/#organization","name":"adsPartners","url":"https://ads-partners.com/"}}</script>
+
+  <!-- Si se entra por aquí, la home ya no enseña la pantalla de carga en esta sesión. -->
+  <script>try{sessionStorage.setItem('ads_pre','1');}catch(e){}</script>
+  <link rel="preload" href="assets/fonts/AppleGaramond-Light.ttf" as="font" type="font/ttf" crossorigin />
+  <link rel="preload" href="assets/fonts/OpenSauceSans-Regular.ttf" as="font" type="font/ttf" crossorigin />
+  <link rel="stylesheet" href="styles.css?v=2610131834" />
+  <link rel="stylesheet" href="secciones.css?v=2610131834" />
+  <link rel="stylesheet" href="proyectos.css?v=2610131834" />
+  <link rel="stylesheet" href="ramas.css?v=2610131834" />
+  <link rel="stylesheet" href="cookie-consent.css?v=1" />
+  <link rel="stylesheet" href="chat-globo.css?v=1" />
+  <link rel="icon" type="image/svg+xml" href="assets/logos/favicon.svg?v=2" />
+  <link rel="alternate icon" type="image/png" sizes="32x32" href="assets/logos/favicon-32.png?v=2" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/logos/apple-touch-icon.png?v=2" />
+</head>
+<body data-rama="finance">
+  <!-- Se llega con la cortina puesta (la levanta la app al montar; si algo falla, se va sola). -->
+  <script>
+    document.body.classList.add('lang-switching');
+    setTimeout(function () { document.body.classList.remove('lang-switching'); }, 4000);
+  </script>
+
+  <!-- Custom cursor -->
+  <div class="cursor cursor-ring" id="cursorRing"></div>
+  <div class="cursor cursor-dot" id="cursorDot"></div>
+
+  <!-- Cortina de transición (la misma del cambio de idioma) -->
+  <div class="lang-curtain" id="langCurtain" aria-hidden="true">
+    <div class="lang-mark">
+      <span class="lang-mark__num" id="langMarkNum">(01)</span>
+      <span class="lang-mark__word" id="langMarkWord">ads Finance.</span>
+      <span class="lang-mark__rule"></span>
+    </div>
+  </div>
+
+  <div id="root" data-prerendered="1"><nav class="nav nav--light"><a class="nav-block nav-logo-block" href="#top" aria-label="adsPartners"><span class="nav-logo" role="img" aria-label="adsPartners"></span></a><div class="nav-block nav-tag"><span>Finance · Tech</span><span>Brand</span></div><div class="nav-block nav-contact"><a href="#" class="nav-mail" data-cursor="cta"><span class="nav-mail-default">adsgroup@ads-partners.com</span><span class="nav-mail-copied">Click to copy</span></a><span>Not for everyone</span></div><div class="nav-block nav-cta-group"><button class="nav-lang" aria-label="Change language" data-cursor="cta">EN</button><button class="nav-cart" data-cursor="cta"><span class="nav-cart-text nav-cart-default">¿Quedamos?</span><span class="nav-cart-text nav-cart-hover">Te vamos a caer bien</span></button></div></nav><aside class="side-menu side-menu--light" aria-label="Navegación lateral"><ul class="side-menu-list"><li class="side-menu-item "><a href="#top" data-cursor="cta" style="padding: 0px 0px 0px 4px;"><span class="side-menu-dots"></span><span class="side-menu-text">LA RAMA</span></a></li><li class="side-menu-item "><a href="#incluye" data-cursor="cta" style="padding: 0px 0px 0px 4px;"><span class="side-menu-dots"></span><span class="side-menu-text">QUÉ INCLUYE</span></a></li><li class="side-menu-item "><a href="#empieza" data-cursor="cta" style="padding: 0px 0px 0px 4px;"><span class="side-menu-dots"></span><span class="side-menu-text">CÓMO SE EMPIEZA</span></a></li><li class="side-menu-item active"><a href="#siguiente" data-cursor="cta" style="padding: 0px 0px 0px 4px;"><span class="side-menu-dots"></span><span class="side-menu-text">QUEDAMOS</span></a></li></ul></aside><div class="scroll-content"><header class="rama-cab" id="top" data-nav-theme="light"><div class="cielo cielo--alba" style="--lx0: 20;" aria-hidden="true"><span class="cielo__luz"></span><span class="cielo__nubes cielo__nubes--a"></span><span class="cielo__nubes cielo__nubes--b"></span></div><div class="rama-cab__barra"><a class="caso-volver" href="./#ramas" data-cursor="cta">← adsPartners</a><span class="rama-cab__cuenta">(01/03)</span></div><div class="rama-cab__centro"><h1 class="rama-cab__titulo"><em>ads</em> Finance.</h1><p class="rama-cab__frase">Saber qué gana cada línea de negocio. Todos los meses.</p></div><dl class="rama-cab__meta"><div><dt><span>(01)</span> Lo lleva</dt><dd><b>Daniel de Céspedes</b>Cinco años llevando la contabilidad de fondos de inversión.</dd></div><div><dt><span>(02)</span> Primer resultado</dt><dd>30 días hasta el primer cierre.</dd></div><div><dt><span>(03)</span> Se contrata</dt><dd>Sola o junto a las otras dos ramas.</dd></div></dl></header><section class="rama-incluye panel" id="incluye" data-nav-theme="light"><header class="sec-cab"><p class="sec-etq reveal visible">Qué incluye</p><h2 class="rell sec-titulo"><span class="rell__p is-on">Vuestra</span> <span class="rell__p is-on">gestoría</span> <span class="rell__p is-on">registra.</span> <em><span class="rell__p is-on">Nosotros</span> <span class="rell__p is-on">interpretamos.</span></em></h2></header><ol class="rlista"><li class="rlista__fila reveal visible" style="transition-delay: 0ms;"><span class="rlista__num">(01)</span><h3 class="rlista__t">Diagnóstico financiero</h3><p class="rlista__d">Dónde se gana y dónde se pierde dinero hoy, con vuestros propios números.</p></li><li class="rlista__fila reveal visible" style="transition-delay: 70ms;"><span class="rlista__num">(02)</span><h3 class="rlista__t">Modelo de rentabilidad</h3><p class="rlista__d">El margen de cada línea de negocio, calculado igual todos los meses.</p></li><li class="rlista__fila reveal visible" style="transition-delay: 140ms;"><span class="rlista__num">(03)</span><h3 class="rlista__t">Cuadro de mando</h3><p class="rlista__d">Lo importante en una pantalla, sin tener que pedirle un Excel a nadie.</p></li><li class="rlista__fila reveal visible" style="transition-delay: 210ms;"><span class="rlista__num">(04)</span><h3 class="rlista__t">Control mensual</h3><p class="rlista__d">Cierre cada mes, y lo repasamos con vosotros en la visita.</p></li></ol><p class="rama-apunte reveal visible">No sustituimos a la gestoría: fiscal, auditoría y contabilidad del día a día se quedan donde están.</p></section><section class="rama-empieza panel" id="empieza" data-nav-theme="light"><header class="sec-cab"><p class="sec-etq reveal visible">Cómo se empieza</p><h2 class="rell sec-titulo"><span class="rell__p is-on">De</span> <span class="rell__p is-on">la</span> <span class="rell__p is-on">primera</span> <span class="rell__p is-on">charla</span> <em><span class="rell__p is-on">a</span> <span class="rell__p is-on">tenerlo</span> <span class="rell__p is-on">funcionando.</span></em></h2></header><ol class="rpasos"><li class="rpaso reveal reveal-delay-1 visible"><p class="rpaso__etq">01 · 45 minutos</p><h3 class="rpaso__t">Quedamos</h3><p class="rpaso__d">Online o en persona. Vemos si tiene sentido seguir, sin compromiso.</p></li><li class="rpaso reveal reveal-delay-2 visible"><p class="rpaso__etq">02 · 3–4 semanas</p><h3 class="rpaso__t">El Diagnóstico</h3><p class="rpaso__d">Varios días dentro de vuestra empresa mirando números, procesos y marca. Con precio cerrado, y el mapa que sale es vuestro, sigáis o no.</p></li><li class="rpaso reveal reveal-delay-3 visible"><p class="rpaso__etq">03 · 30 días</p><h3 class="rpaso__t">El primer cierre</h3><p class="rpaso__d">El primer mes cerrado, con el margen de cada línea a la vista. A partir de ahí, todos los meses.</p></li></ol><p class="rama-apunte reveal visible">Después, una visita al mes y la misma persona al teléfono. Cada fase empieza con su alcance y su precio cerrados, y lo que costó el Diagnóstico se descuenta.</p></section><section class="rama-cierre panel" id="siguiente" data-nav-theme="dark"><div class="cielo cielo--noche" aria-hidden="true"><span class="cielo__luz"></span><span class="cielo__nubes cielo__nubes--a"></span><span class="cielo__nubes cielo__nubes--b"></span></div><p class="sec-etq reveal visible">El siguiente paso</p><p class="rama-cierre__texto reveal reveal-delay-1 visible">45 minutos para ver si encajamos. <em>Sin compromiso.</em></p><button type="button" class="qd-prompt__btn reveal reveal-delay-2 visible" data-cursor="cta">[Proponed día y hora]</button><nav class="rama-otras" aria-label="Las otras dos ramas"><p class="sec-etq">Las otras dos ramas</p><a class="rama-otra" href="tech/" data-cursor="ver" data-cursor-label="Ver"><span class="rama-otra__num">(02)</span><span class="rama-otra__nombre">ads Tech</span><span class="rama-otra__frase">Que lo repetitivo se haga solo y vuestra gente, a lo suyo.</span><span class="rama-otra__fl" aria-hidden="true">→</span></a><a class="rama-otra" href="brand/" data-cursor="ver" data-cursor-label="Ver"><span class="rama-otra__num">(03)</span><span class="rama-otra__nombre">ads Brand</span><span class="rama-otra__frase">Que todos vuestros negocios se vean de la misma casa.</span><span class="rama-otra__fl" aria-hidden="true">→</span></a></nav></section></div><footer class="foot" data-screen-label="Footer" data-nav-theme="light"><div class="foot__panel"><div class="foot__cols"><div class="foot__col"><h4><span class="foot__num">(01)</span> Comunicación.</h4><ul><li><a href="mailto:adsgroup@ads-partners.com" data-cursor="cta">adsgroup@ads-partners.com</a></li><li><a href="https://wa.me/34633565840" target="_blank" rel="noopener">+34 633 565 840</a></li><li><a href="https://www.instagram.com/adspartners.co?igsh=a2R0enBqMng3cXdr&amp;utm_source=qr" target="_blank" rel="noopener">Instagram ↗</a></li><li><a href="https://www.tiktok.com/@adspartners.co?_r=1&amp;_t=ZN-97KyiYqMAhq" target="_blank" rel="noopener">TikTok ↗</a></li><li><a href="https://youtube.com/@ads-partners?si=M7j50qTGzCwHU-7d" target="_blank" rel="noopener">YouTube ↗</a></li><li><a href="https://www.linkedin.com/company/ads-partners-co/" target="_blank" rel="noopener">LinkedIn ↗</a></li></ul></div><div class="foot__col"><h4><span class="foot__num">(02)</span> Legal y cosas de esas.</h4><ul><li><a href="cookies.html">Cookies</a></li><li><a href="privacidad.html">Privacidad</a></li><li><a href="aviso-legal.html">Aviso legal</a></li><li><a href="#" data-cursor="cta">Configurar cookies</a></li></ul></div><div class="foot__col foot__col--news"><h4><span class="foot__num">(03)</span> Únete a nuestro grupo de terapia.</h4><p class="foot__newsnote">No te preocupes. No hacemos emails aburridos.</p><form class="foot__news"><input class="foot__newsinput" type="email" placeholder="Email" aria-label="Email" data-cursor="text"><button type="submit" class="foot__newsbtn" data-cursor="cta">Únete</button></form></div></div><div class="foot__legal"><span>© 2026 adsPartners®</span><span>Todos los derechos reservados</span><span>27032025-NSLQHPMLP-1M</span></div></div><div class="foot__brand" aria-hidden="true"><img src="assets/logos/logotipo_marron.svg" alt=""></div></footer><div class="cg-root"><button type="button" class="cg-bubble" data-cursor="cta" aria-label="¿Hablamos?"><span class="cg-bubble-dot"></span><img class="cg-bubble-logo" src="assets/logos/fresa-wordmark.webp" alt="FRESA"></button></div></div>
+
+<script src="cursor.js"></script>
+  <!-- Scroll suave (Lenis, auto-alojado) y window.adsIr -->
+  <script src="vendor/lenis.min.js"></script>
+  <script src="scroll.js"></script>
+
+  <!-- Rama app -->
+  <script src="vendor/react.production.min.js"></script>
+  <script src="vendor/react-dom.production.min.js"></script>
+  <script src="bundle.rama.e4662f1a.js"></script>
+</body>
+</html>

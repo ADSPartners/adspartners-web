@@ -14,9 +14,10 @@ const DICT = {
     'nav.cart.hover': 'Te vamos a caer bien',
 
     // SIDE MENU
-    'side.difs': 'CÓMO TRABAJAMOS',
     'side.ramas': 'LAS TRES RAMAS',
-    'side.metodo': 'CÓMO SE EMPIEZA',
+    'side.rama.top': 'LA RAMA',
+    'side.rama.incluye': 'QUÉ INCLUYE',
+    'side.rama.empieza': 'CÓMO SE EMPIEZA',
     'side.testi': 'LO DICEN ELLOS',
     'side.preguntas': 'PREGUNTAS',
     'side.ecomm': 'QUEDAMOS',
@@ -78,9 +79,10 @@ const DICT = {
     'nav.cart.hover': 'You\'re going to like us',
 
     // SIDE MENU
-    'side.difs': 'HOW WE WORK',
     'side.ramas': 'THE THREE BRANCHES',
-    'side.metodo': 'HOW IT STARTS',
+    'side.rama.top': 'THE BRANCH',
+    'side.rama.incluye': 'WHAT IS INCLUDED',
+    'side.rama.empieza': 'HOW IT STARTS',
     'side.testi': 'IN THEIR WORDS',
     'side.preguntas': 'QUESTIONS',
     'side.ecomm': 'QUEDAMOS',

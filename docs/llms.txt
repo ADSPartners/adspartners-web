@@ -13,11 +13,12 @@ Se puede empezar por una sola rama y sumar las demás después.
 - ads Finance (Daniel de Céspedes): diagnóstico financiero, modelo de rentabilidad,
   cuadro de mando y control mensual. La gestoría registra; ads Finance interpreta.
   No sustituye a la gestoría: la gestión fiscal, la auditoría y el registro contable
-  diario siguen donde están.
+  diario siguen donde están. https://ads-partners.com/finance/
 - ads Tech (Álvaro Espinosa): flujos automáticos (por ejemplo, facturas que se leen
   solas y aparecen en el cuadro de mando), asistentes de IA y herramientas a medida.
+  https://ads-partners.com/tech/
 - ads Brand (Sebastián Lorenzo): arquitectura de marca, identidad visual y manual,
-  web y presencia digital.
+  web y presencia digital. https://ads-partners.com/brand/
 
 ## Cómo se empieza: el Diagnóstico
 - Dura de 3 a 4 semanas, con varios días dentro de la empresa.

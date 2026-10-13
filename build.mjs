@@ -38,6 +38,7 @@ const SKIP_ROOT = new Set([
   'node_modules', '.git', '.github', 'dist', 'docs', 'build.mjs', 'package.json',
   'package-lock.json', 'pnpm-lock.yaml', '.gitignore', 'README.md',
   'proyecto.html',   // plantilla: se publica una por proyecto en /proyectos/<slug>/
+  'rama.html',       // plantilla: se publica una por rama en /finance/, /tech/ y /brand/
 ]);
 
 // React de producción auto-alojado; reemplaza a las versiones dev de unpkg.
@@ -291,8 +292,66 @@ async function paginasProyectos() {
   return hechas;
 }
 
-// Añade al sitemap publicado las URLs de proyecto que no estén ya.
-function sitemapProyectos(paginas) {
+// ---------- Páginas de rama ----------
+// ramas-data.jsx es JS plano (window.RAMAS): `orden` dice qué páginas hay y `es.<id>.seo`, su título y descripción.
+function leerRamas() {
+  const file = join(ROOT, 'ramas-data.jsx');
+  if (!existsSync(file)) return null;
+  try {
+    const sandbox = { window: {} };
+    vm.runInNewContext(readFileSync(file, 'utf8'), sandbox);
+    const R = sandbox.window.RAMAS;
+    return R && Array.isArray(R.orden) && R.es ? R : null;
+  } catch (e) {
+    console.warn(`  ! ramas-data.jsx no se pudo leer (${e.message}). Sin páginas de rama.`);
+    return null;
+  }
+}
+
+// Una página por rama: /<id>/index.html desde la plantilla rama.html.
+async function paginasRamas() {
+  const tplFile = join(ROOT, 'rama.html');
+  const R = leerRamas();
+  if (!R || !existsSync(tplFile)) return [];
+  const tpl = readFileSync(tplFile, 'utf8');
+  const srcs = [...tpl.matchAll(/<script\b[^>]*\bsrc="([^"]+)"[^>]*><\/script>/g)].map((m) => m[1]).filter(isLocalJsx);
+  const bundleName = await compileBundle(srcs, 'rama');
+  const hechas = [];
+  R.orden.forEach((id, i) => {
+    const r = R.es[id];
+    if (!r) return;
+    const url = `https://ads-partners.com/${id}/`;
+    const seo = r.seo || {};
+    const titulo = seo.titulo || `${r.nombre} — adsPartners®`;
+    const descripcion = seo.descripcion || r.frase;
+    const jsonld = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'Service',
+      name: r.nombre,
+      description: descripcion,
+      url,
+      serviceType: (r.incluye || []).map((x) => x.t).join(', '),
+      areaServed: { '@type': 'Country', name: 'España' },
+      provider: { '@type': 'ProfessionalService', '@id': 'https://ads-partners.com/#organization', name: 'adsPartners', url: 'https://ads-partners.com/' },
+    }).replace(/</g, '\\u003c');
+    const html = tpl
+      .replaceAll('{{SLUG}}', id)
+      .replaceAll('{{TITULO}}', escHtml(titulo))
+      .replaceAll('{{DESCRIPCION}}', escHtml(descripcion))
+      .replaceAll('{{NOMBRE}}', escHtml(r.nombre))
+      .replaceAll('{{NUM}}', String(i + 1).padStart(2, '0'))
+      .replaceAll('{{JSONLD}}', jsonld);
+    const rel = `${id}/index.html`;
+    mkdirSync(join(DIST, id), { recursive: true });
+    writeFileSync(join(DIST, rel), transformHtml(html, bundleName));
+    hechas.push({ rel, url, bundleName });
+  });
+  console.log(`  · ${hechas.length} páginas de rama: ${hechas.map((h) => '/' + h.rel.replace(/index\.html$/, '')).join('  ')}`);
+  return hechas;
+}
+
+// Añade al sitemap publicado las URLs (de rama o de proyecto) que no estén ya.
+function sitemapAnadir(paginas, prioridad) {
   const file = join(DIST, 'sitemap.xml');
   if (!paginas.length || !existsSync(file)) return;
   let xml = readFileSync(file, 'utf8');
@@ -300,7 +359,7 @@ function sitemapProyectos(paginas) {
     .map((p) => `  <url>
     <loc>${p.url}</loc>
     <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <priority>${prioridad}</priority>
   </url>
 `);
   if (!nuevas.length) return;
@@ -330,14 +389,19 @@ async function main() {
   console.log('Copiando estáticos (css, loader, assets, vendor, CNAME)…');
   copyStatic();
 
-  console.log('Generando las páginas de proyecto…');
+  console.log('Generando las páginas de rama y de proyecto…');
+  const ramas = await paginasRamas();
+  sitemapAnadir(ramas, '0.8');
   const paginas = await paginasProyectos();
-  sitemapProyectos(paginas);
+  sitemapAnadir(paginas, '0.6');
 
   // Pre-render de la home y de cada proyecto (best-effort; necesita docs/vendor/ ya copiado).
   if (indexBundle) {
     console.log('Pre-renderizando la home para bots sin JS (crawlers de IA + Google)…');
     await prerenderIndex(indexBundle);
+  }
+  for (const pg of ramas) {
+    await prerender(pg.rel, pg.bundleName, pg.url, /ads (Finance|Tech|Brand)/);
   }
   for (const pg of paginas) {
     await prerender(pg.rel, pg.bundleName, pg.url, /Selected Work|Pantalla a pantalla|adsPartners/i);

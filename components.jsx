@@ -145,9 +145,7 @@ function Nav({ onCartClick }) {
 function SideMenu({ items: itemsProp }) {
   const { t } = useT();
   const items = itemsProp || [
-  { href: '#diferencias', key: 'side.difs' },
   { href: '#ramas', key: 'side.ramas' },
-  { href: '#metodo', key: 'side.metodo' },
   { href: '#proyectos', key: 'side.proyectos' },
   { href: '#testimonios', key: 'side.testi' },
   { href: '#preguntas', key: 'side.preguntas' },
