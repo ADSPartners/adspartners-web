@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Plantilla de las páginas de proyecto: build.mjs genera /proyectos/<slug>/index.html por cada
+       entrada de proyectos-data.jsx. La <base> hace que todo (css, assets, enlaces) cuelgue de la raíz. -->
+  <base href="../../" />
+  <title>{{TITULO}}</title>
+  <meta name="description" content="{{DESCRIPCION}}" />
+  <link rel="canonical" href="https://ads-partners.com/proyectos/{{SLUG}}/" />
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="adsPartners" />
+  <meta property="og:locale" content="es_ES" />
+  <meta property="og:url" content="https://ads-partners.com/proyectos/{{SLUG}}/" />
+  <meta property="og:title" content="{{TITULO}}" />
+  <meta property="og:description" content="{{DESCRIPCION}}" />
+  <meta property="og:image" content="https://ads-partners.com/assets/proyectos/{{SLUG}}/escritorio.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="{{TITULO}}" />
+  <meta name="twitter:description" content="{{DESCRIPCION}}" />
+  <meta name="twitter:image" content="https://ads-partners.com/assets/proyectos/{{SLUG}}/escritorio.jpg" />
+  <script type="application/ld+json">{{JSONLD}}</script>
+
+  <link rel="stylesheet" href="styles.css?v=189" />
+  <link rel="stylesheet" href="proyectos.css?v=1" />
+  <link rel="stylesheet" href="cookie-consent.css?v=1" />
+  <link rel="icon" type="image/svg+xml" href="assets/logos/favicon.svg?v=2" />
+  <link rel="alternate icon" type="image/png" sizes="32x32" href="assets/logos/favicon-32.png?v=2" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/logos/apple-touch-icon.png?v=2" />
+</head>
+<body data-proyecto="{{SLUG}}">
+  <!-- Se llega con la cortina puesta (la levanta la app al montar; si algo falla, se va sola). -->
+  <script>
+    document.body.classList.add('lang-switching');
+    setTimeout(function () { document.body.classList.remove('lang-switching'); }, 4000);
+  </script>
+
+  <!-- Custom cursor -->
+  <div class="cursor cursor-ring" id="cursorRing"></div>
+  <div class="cursor cursor-dot" id="cursorDot"></div>
+
+  <!-- Cortina de transición (la misma del cambio de idioma) -->
+  <div class="lang-curtain" id="langCurtain" aria-hidden="true">
+    <div class="lang-mark">
+      <span class="lang-mark__num" id="langMarkNum">({{NUM}})</span>
+      <span class="lang-mark__word" id="langMarkWord">{{NOMBRE}}.</span>
+      <span class="lang-mark__rule"></span>
+    </div>
+  </div>
+
+  <div id="root"></div>
+
+  <!-- Filtro de ondas de la foto que respira -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <filter id="heroWaves" x="-15%" y="-15%" width="130%" height="130%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.006 0.010" numOctaves="2" seed="7" result="noise">
+        <animate attributeName="baseFrequency" dur="20s" values="0.006 0.010;0.011 0.015;0.006 0.010" repeatCount="indefinite" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1"></animate>
+      </feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="26" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+    </filter>
+  </svg>
+
+  <!-- React + Babel -->
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <script src="cursor.js"></script>
+
+  <!-- Proyecto app -->
+  <script type="text/babel" src="i18n.jsx"></script>
+  <script type="text/babel" src="cookie-consent.jsx"></script>
+  <script type="text/babel" src="components.jsx"></script>
+  <script type="text/babel" src="proyectos-data.jsx"></script>
+  <script type="text/babel" src="proyectos.jsx"></script>
+</body>
+</html>

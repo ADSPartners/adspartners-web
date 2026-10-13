@@ -1,0 +1,517 @@
+/* ============================================================
+   PROYECTOS — sección "Selected Work" de la home y páginas /proyectos/<slug>/
+   Usa los tokens, fuentes y piezas de styles.css (qd-prompt__btn, ww-bg,
+   manifesto-text, reveal, lang-curtain). Aquí solo lo nuevo.
+   ============================================================ */
+
+/* ---------- Cursor "Ver caso" ---------- */
+.cursor-ring::after {
+  content: attr(data-label);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--sans);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--marron);
+  opacity: 0;
+  transition: opacity .18s ease;
+}
+body.cursor-ver .cursor-ring { width: 96px; height: 96px; background: var(--rosa); border-color: transparent; opacity: 1; }
+body.cursor-ver .cursor-ring::after { opacity: 1; transition-delay: .12s; }
+body.cursor-ver .cursor-dot { opacity: 0; }
+
+/* ============ SECCIÓN DE LA HOME ============ */
+.proyectos {
+  position: relative;
+  background: var(--negro);
+  color: var(--beige);
+  padding: 150px 40px 170px;
+  overflow: hidden;
+}
+.proyectos-cab {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 34%);
+  gap: 64px;
+  align-items: end;
+  margin-bottom: clamp(70px, 9vw, 140px);
+}
+.proyectos-titulo {
+  margin: 0;
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(54px, 9.4vw, 156px);
+  line-height: .9;
+  letter-spacing: -.03em;
+  white-space: nowrap;
+}
+.proyectos-titulo sup {
+  position: relative;
+  top: .95em;
+  margin-left: .55em;
+  vertical-align: top;
+  font-family: var(--sans);
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: .14em;
+  opacity: .55;
+}
+.proyectos-intro__lead {
+  margin: 0;
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(20px, 1.9vw, 28px);
+  line-height: 1.25;
+  letter-spacing: -.01em;
+}
+.proyectos-intro__body {
+  margin: 16px 0 0;
+  max-width: 44ch;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: rgba(231, 226, 218, .7);
+}
+
+/* Rejilla escalonada: columna ancha (recorridos de ordenador) y estrecha (móvil). */
+.proyectos-rejilla { display: flex; align-items: flex-start; gap: 4.5%; }
+.proyectos-col { display: flex; flex-direction: column; min-width: 0; }
+.proyectos-col--a { width: 58%; gap: 16vh; }
+.proyectos-col--b { width: 33%; margin-left: auto; padding-top: 30vh; gap: 16vh; }
+.proyectos-col--a > .ptile:nth-child(2n) { margin-left: 24%; }
+
+.ptile { display: block; color: inherit; }
+.ptile__media {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: 3px;
+  background: #2a130a;
+  aspect-ratio: 16 / 10;
+}
+.ptile__media--v {
+  aspect-ratio: 4 / 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(90% 70% at 50% 40%, #3a1c0d 0%, #2a130a 70%);
+}
+.ptile__movil {
+  position: relative;
+  display: block;
+  height: 86%;
+  aspect-ratio: 392 / 852;
+  border-radius: 24px;
+  overflow: hidden;
+  background: #000;
+  box-shadow: 0 0 0 1px rgba(231, 226, 218, .14);
+}
+.ptile__video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  filter: grayscale(1) brightness(.9);
+  transform: scale(1.04);
+  transition: filter .8s ease, transform 1.2s cubic-bezier(.2, .9, .2, 1);
+}
+.ptile:hover .ptile__video,
+.ptile:focus-visible .ptile__video { filter: none; transform: scale(1); }
+.ptile__pie {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: baseline;
+  column-gap: 14px;
+  row-gap: 6px;
+  margin-top: 18px;
+}
+.ptile__num { font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 16px; opacity: .5; }
+.ptile__nombre {
+  margin: 0;
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(26px, 2.5vw, 40px);
+  line-height: 1.05;
+  letter-spacing: -.012em;
+  justify-self: start;
+  background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+  transition: background-size .5s cubic-bezier(.2, .9, .2, 1);
+}
+.ptile:hover .ptile__nombre { background-size: 100% 1px; }
+.ptile__meta {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: .5;
+}
+.ptile__idea {
+  grid-column: 2 / 4;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 18px;
+  line-height: 1.35;
+  color: rgba(231, 226, 218, .55);
+}
+.proyectos-cta { display: flex; flex-direction: column; align-items: flex-start; gap: 24px; }
+.proyectos-cta__txt {
+  margin: 0;
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(26px, 2.6vw, 40px);
+  line-height: 1.12;
+  letter-spacing: -.01em;
+}
+.proyectos .qd-prompt__btn,
+.caso-sig .qd-prompt__btn { background: var(--beige); color: var(--marron); border-color: var(--beige); }
+.proyectos .qd-prompt__btn:hover,
+.caso-sig .qd-prompt__btn:hover { background: transparent; color: var(--beige); }
+
+/* ============ PÁGINA DE PROYECTO ============ */
+.caso-video { display: block; width: 100%; height: 100%; object-fit: cover; }
+.caso-h2 {
+  margin: 0 0 22px;
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(34px, 4.4vw, 68px);
+  line-height: 1.02;
+  letter-spacing: -.02em;
+}
+.caso-p { margin: 0; max-width: 46ch; font-size: 15px; line-height: 1.6; color: rgba(52, 25, 11, .8); }
+
+/* Cabecera */
+.caso-cab {
+  position: relative;
+  background: var(--blanco);
+  color: var(--marron);
+  padding: 124px 40px 0;
+  overflow: hidden;
+}
+.caso-cab__in { position: relative; z-index: 2; }
+.caso-cab__barra {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: clamp(40px, 6vw, 96px);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+}
+.caso-volver { border-bottom: 1px solid currentColor; padding-bottom: 2px; transition: opacity .25s ease; }
+.caso-volver:hover { opacity: .6; }
+.caso-cab__cuenta { font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 17px; letter-spacing: 0; text-transform: none; opacity: .6; }
+.caso-cab__titulo {
+  margin: 0;
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(58px, 11vw, 190px);
+  line-height: .92;
+  letter-spacing: -.03em;
+}
+.caso-cab__idea {
+  margin: clamp(14px, 1.6vw, 26px) 0 0;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(22px, 2.4vw, 38px);
+  line-height: 1.2;
+  color: rgba(52, 25, 11, .62);
+}
+.caso-cab__meta {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 32px;
+  margin: clamp(50px, 7vw, 110px) 0 0;
+  padding-top: 22px;
+  border-top: 1px solid rgba(52, 25, 11, .16);
+}
+.caso-cab__meta dt { margin: 0 0 10px; font-family: var(--serif); font-size: 19px; letter-spacing: -.01em; }
+.caso-cab__meta dt span { opacity: .55; }
+.caso-cab__meta dd { margin: 0; font-size: 14px; line-height: 1.55; color: rgba(52, 25, 11, .78); }
+.caso-cab__meta a { color: var(--marron); border-bottom: 1px solid currentColor; }
+.caso-cab__media {
+  position: relative;
+  z-index: 2;
+  margin: clamp(50px, 6vw, 90px) 0 0;
+  aspect-ratio: 16 / 10;
+  border-radius: 3px 3px 0 0;
+  overflow: hidden;
+  background: #e7e0d6;
+}
+
+/* Punto de partida + la idea */
+.caso-idea { background: var(--negro); color: var(--beige); padding: clamp(110px, 12vw, 190px) 40px clamp(110px, 12vw, 170px); }
+.caso-idea__grid { display: grid; grid-template-columns: minmax(0, 28%) minmax(0, 1fr); gap: 64px; align-items: start; }
+.caso-idea__etq { margin: 0 0 14px; font-family: var(--serif); font-size: 19px; opacity: .55; }
+.caso-idea__partida { margin: 0; max-width: 36ch; font-size: 15px; line-height: 1.6; color: rgba(231, 226, 218, .78); }
+.caso-idea__texto { display: flex; flex-direction: column; gap: clamp(22px, 2.4vw, 40px); }
+.caso-idea__texto .manifesto-text {
+  text-align: justify;
+  text-indent: 2.2em;
+  -webkit-hyphens: auto;
+          hyphens: auto;
+  font-size: clamp(26px, 3vw, 48px);
+}
+
+/* Pantalla a pantalla */
+.caso-momentos { position: relative; background: var(--blanco); color: var(--marron); }
+.caso-momentos__pin {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(20px, 3vh, 40px);
+  padding: 96px 0 40px;
+}
+.caso-momentos__cab { display: flex; align-items: baseline; gap: 28px; padding: 0 40px; }
+.caso-momentos__titulo { margin: 0; font-family: var(--serif); font-weight: 300; font-size: clamp(34px, 4.4vw, 68px); line-height: 1; letter-spacing: -.02em; }
+.caso-momentos__sub { margin: 0; font-family: var(--serif); font-style: italic; font-weight: 300; font-size: clamp(16px, 1.4vw, 20px); color: rgba(52, 25, 11, .6); }
+.caso-momentos__cuenta { margin-left: auto; font-size: 12px; font-weight: 500; letter-spacing: .2em; font-variant-numeric: tabular-nums; }
+.caso-momentos__pista { display: flex; gap: clamp(24px, 3vw, 48px); padding: 0 40px; will-change: transform; }
+.caso-momento { flex: 0 0 auto; width: min(84vh, 58vw); margin: 0; }
+.caso-momento img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border-radius: 3px;
+  background: #e7e0d6;
+}
+.caso-momento figcaption {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  column-gap: 8px;
+  row-gap: 4px;
+  max-width: 540px;
+  margin-top: 16px;
+}
+.caso-momento__num { grid-row: 1 / 3; font-weight: 500; font-size: 18px; font-variant-numeric: tabular-nums; }
+.caso-momento__t { font-weight: 500; font-size: 18px; letter-spacing: -.01em; }
+.caso-momento__d { font-size: 14px; line-height: 1.5; color: rgba(52, 25, 11, .75); }
+.caso-momentos__barra { height: 2px; margin: 0 40px; background: rgba(52, 25, 11, .14); }
+.caso-momentos__barra span { display: block; height: 100%; background: var(--marron); transform-origin: left; transform: scaleX(0); }
+
+/* La pieza práctica */
+.caso-practico {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: 64px;
+  align-items: center;
+  padding: clamp(100px, 11vw, 170px) 40px;
+  background: var(--beige);
+  color: var(--marron);
+}
+.caso-practico__foto { margin: 0; }
+.caso-practico__foto img { display: block; width: 100%; height: auto; border-radius: 3px; }
+
+/* En el móvil */
+.caso-movil {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 80px;
+  align-items: center;
+  padding: clamp(100px, 11vw, 170px) clamp(40px, 9vw, 150px);
+  background: var(--marron-deep);
+  color: var(--beige);
+}
+.caso-movil .caso-p { color: rgba(231, 226, 218, .78); }
+.caso-telefono {
+  width: clamp(230px, 22vw, 320px);
+  aspect-ratio: 392 / 852;
+  border-radius: 30px;
+  overflow: hidden;
+  background: #000;
+  box-shadow: 0 0 0 1px rgba(231, 226, 218, .16), 0 40px 80px -30px rgba(0, 0, 0, .6);
+}
+.caso-telefono--claro { box-shadow: 0 0 0 1px rgba(52, 25, 11, .14), 0 40px 80px -40px rgba(52, 25, 11, .45); }
+
+/* Otra propuesta (solo si el proyecto la tiene) */
+.caso-otra { padding: clamp(100px, 11vw, 170px) 40px; background: var(--blanco); color: var(--marron); }
+.caso-otra__cab { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 38%); gap: 64px; align-items: end; margin-bottom: clamp(50px, 6vw, 90px); }
+.caso-otra__idea { margin: 0; font-family: var(--serif); font-style: italic; font-weight: 300; font-size: clamp(20px, 2vw, 30px); color: rgba(52, 25, 11, .62); }
+.caso-otra__medios { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: clamp(24px, 3vw, 48px); align-items: end; }
+.caso-otra__video { margin: 0; aspect-ratio: 16 / 10; border-radius: 3px; overflow: hidden; background: #e7e0d6; }
+.caso-otra__fotos { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-top: clamp(24px, 3vw, 48px); }
+.caso-otra__fotos img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border-radius: 3px;
+  filter: grayscale(1);
+  transition: filter .6s ease;
+}
+.caso-otra__fotos img:hover { filter: none; }
+.caso-enlace {
+  display: inline-block;
+  margin-top: 36px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid currentColor;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  transition: opacity .25s ease;
+}
+.caso-enlace:hover { opacity: .55; }
+
+/* Ábrela */
+.caso-web { padding: clamp(110px, 12vw, 180px) 25px; background: var(--beige); color: var(--marron); text-align: center; }
+.caso-web__txt { margin: 0; font-family: var(--serif); font-weight: 300; font-size: clamp(40px, 6.5vw, 104px); line-height: 1; letter-spacing: -.025em; }
+.caso-web__sub { margin: 20px 0 36px; font-family: var(--serif); font-weight: 300; font-size: clamp(16px, 1.4vw, 19px); color: rgba(52, 25, 11, .65); }
+.caso-web__botones { display: flex; justify-content: center; flex-wrap: wrap; gap: 14px; }
+
+/* Siguiente proyecto: cierra el contenido y deja ver el pie */
+.caso-sig {
+  background: var(--negro);
+  color: var(--beige);
+  border-bottom-left-radius: 28px;
+  border-bottom-right-radius: 28px;
+  overflow: hidden;
+}
+.caso-sig__enlace {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 78vh;
+  padding: 120px 40px;
+}
+.caso-sig__etq { position: relative; z-index: 2; font-size: 11px; font-weight: 500; letter-spacing: .22em; text-transform: uppercase; opacity: .6; }
+.caso-sig__nombre {
+  position: relative;
+  z-index: 2;
+  margin-top: 18px;
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(56px, 10vw, 170px);
+  line-height: .92;
+  letter-spacing: -.03em;
+  transition: transform .6s cubic-bezier(.2, .9, .2, 1);
+}
+.caso-sig__idea {
+  position: relative;
+  z-index: 2;
+  margin-top: 16px;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(18px, 1.8vw, 26px);
+  color: rgba(231, 226, 218, .6);
+}
+.caso-sig__img {
+  position: absolute;
+  right: 40px;
+  top: 50%;
+  z-index: 1;
+  width: min(38vw, 560px);
+  aspect-ratio: 16 / 10;
+  border-radius: 3px;
+  background: var(--img, none) center / cover no-repeat, #2a130a;
+  opacity: .35;
+  filter: grayscale(1);
+  transform: translateY(-50%) rotate(-4deg) scale(.96);
+  transition: opacity .5s ease, filter .6s ease, transform .6s cubic-bezier(.22, .8, .2, 1);
+}
+.caso-sig__enlace:hover .caso-sig__img { opacity: 1; filter: none; transform: translateY(-50%) rotate(-2deg) scale(1); }
+.caso-sig__enlace:hover .caso-sig__nombre { transform: translateX(16px); }
+
+/* El menú lateral de puntos ocupa ~80 px a la izquierda mientras se ve (>760 px): el contenido nuevo arranca después. */
+@media (min-width: 761px) {
+  .proyectos, .caso-cab, .caso-idea, .caso-practico, .caso-otra { padding-left: 104px; }
+  .caso-momentos__cab, .caso-momentos__pista { padding-left: 104px; }
+  .caso-momentos__barra { margin-left: 104px; }
+  .caso-sig__enlace { padding-left: 104px; }
+}
+
+/* ============ TÁCTIL: sin hover, color siempre ============ */
+@media (hover: none) {
+  .ptile__video { filter: none; transform: none; }
+  .caso-otra__fotos img { filter: none; }
+}
+
+/* ============ TABLETA ============ */
+@media (max-width: 1024px) {
+  .proyectos { padding: 120px 28px 140px; }
+  .proyectos-cab { grid-template-columns: 1fr; gap: 28px; }
+  .caso-cab { padding: 110px 28px 0; }
+  .caso-cab__meta { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 28px; }
+  .caso-idea, .caso-practico, .caso-otra { padding-left: 28px; padding-right: 28px; }
+  .caso-idea__grid { grid-template-columns: 1fr; gap: 40px; }
+  .caso-movil { padding-left: 28px; padding-right: 28px; gap: 48px; }
+  .caso-otra__cab { grid-template-columns: 1fr; gap: 24px; }
+}
+
+/* ============ MÓVIL ============ */
+@media (max-width: 760px) {
+  .caso-momentos__pin { position: static; height: auto; padding: 90px 0 70px; gap: 22px; }
+  .caso-momentos__cab { flex-wrap: wrap; row-gap: 10px; padding: 0 20px; }
+  .caso-momentos__cuenta { margin-left: 0; width: 100%; }
+  .caso-momentos__pista {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 0 20px;
+    gap: 14px;
+    transform: none !important;
+  }
+  .caso-momentos__pista::-webkit-scrollbar { display: none; }
+  .caso-momento { width: 84vw; scroll-snap-align: center; }
+  .caso-momentos__barra { display: none; }
+}
+@media (max-width: 700px) {
+  .proyectos { padding: 100px 20px 110px; }
+  .proyectos-titulo { font-size: clamp(46px, 14vw, 72px); }
+  .proyectos-titulo sup { font-size: 11px; }
+  .proyectos-intro__lead { font-size: 20px; }
+  .proyectos-rejilla { flex-direction: column; gap: 72px; }
+  .proyectos-col { display: contents; }
+  .ptile { order: var(--orden, 0); width: 100%; }
+  .proyectos-col--a > .ptile:nth-child(2n) { margin-left: 0; }
+  .ptile--v { width: 82%; margin-left: auto; }
+  .proyectos-cta { order: 99; margin-top: 8px; }
+  .ptile__pie { grid-template-columns: auto minmax(0, 1fr); }
+  .ptile__meta { grid-column: 2; grid-row: 2; white-space: normal; }
+  .ptile__idea { grid-column: 2; grid-row: 3; font-size: 17px; }
+  .ptile__nombre { font-size: 30px; }
+
+  .caso-cab { padding: 96px 20px 0; }
+  .caso-cab__barra { margin-bottom: 44px; }
+  .caso-cab__titulo { font-size: clamp(46px, 14vw, 72px); }
+  .caso-cab__meta { gap: 24px 20px; margin-top: 44px; }
+  .caso-cab__meta dt { font-size: 17px; }
+  .caso-cab__meta dd { font-size: 13px; }
+  .caso-cab__media { margin-top: 40px; }
+  .caso-idea { padding: 90px 20px; }
+  .caso-idea__texto .manifesto-text { text-align: left; text-indent: 0; font-size: clamp(22px, 5.8vw, 30px); line-height: 1.18; }
+  .caso-practico { grid-template-columns: 1fr; gap: 36px; padding: 80px 20px; }
+  .caso-movil { grid-template-columns: 1fr; gap: 44px; padding: 90px 20px; justify-items: center; }
+  .caso-movil__texto { justify-self: stretch; }
+  .caso-telefono { width: min(72vw, 300px); }
+  .caso-otra { padding: 80px 20px; }
+  .caso-otra__medios { grid-template-columns: 1fr; justify-items: center; }
+  .caso-otra__video { width: 100%; }
+  .caso-otra__fotos { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .caso-web { padding: 90px 20px; }
+  .caso-sig__enlace { min-height: 0; padding: 90px 20px 100px; }
+  .caso-sig__img { position: relative; right: auto; top: auto; width: 100%; margin-top: 32px; opacity: 1; filter: none; transform: none; }
+  .caso-sig__enlace:hover .caso-sig__img { transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ptile__video, .caso-sig__img, .caso-sig__nombre { transition: none; }
+}

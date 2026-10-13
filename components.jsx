@@ -172,11 +172,12 @@ function Nav({ onCartClick }) {
 }
 
 // ============= SIDE MENU =============
-function SideMenu() {
+function SideMenu({ items: itemsProp }) {
   const { t } = useT();
-  const items = [
+  const items = itemsProp || [
   { href: '#manifiesto', key: 'side.manifesto' },
   { href: '#growth', key: 'side.studio' },
+  { href: '#proyectos', key: 'side.proyectos' },
   { href: '#trabajo', key: 'side.work' },
   { href: '#winwin', key: 'side.winwin' },
   { href: '#quedamos', key: 'side.ecomm' }];
@@ -225,7 +226,13 @@ function SideMenu() {
       <ul className="side-menu-list">
         {items.map((it, i) =>
         <li key={it.href} className={`side-menu-item ${i === active ? 'active' : ''}`}>
-            <a href={it.href} data-cursor="cta" style={{ padding: "0px 0px 0px 4px" }}>
+            <a href={it.href} data-cursor="cta" style={{ padding: "0px 0px 0px 4px" }} onClick={(e) => {
+              // Scroll dentro de la página: las de proyecto llevan <base>, y un "#ancla" iría a la home.
+              const el = document.querySelector(it.href);
+              if (!el) return;
+              e.preventDefault();
+              window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY, behavior: 'smooth' });
+            }}>
               <span className="side-menu-dots"></span>
               <span className="side-menu-text">{t(it.key)}</span>
             </a>

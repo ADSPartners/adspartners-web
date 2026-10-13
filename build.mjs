@@ -20,9 +20,10 @@ import babel from '@babel/core';
 import { JSDOM, VirtualConsole } from 'jsdom';
 import { createHash } from 'node:crypto';
 import {
-  cpSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync,
+  cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync,
 } from 'node:fs';
 import { join } from 'node:path';
+import vm from 'node:vm';
 
 const ROOT = import.meta.dirname;
 // Salida en /docs porque GitHub Pages (deploy clásico desde rama, sin Actions)
@@ -36,6 +37,7 @@ const PAGES = ['index.html', 'aviso-legal.html', 'cookies.html', 'privacidad.htm
 const SKIP_ROOT = new Set([
   'node_modules', '.git', '.github', 'dist', 'docs', 'build.mjs', 'package.json',
   'package-lock.json', 'pnpm-lock.yaml', '.gitignore', 'README.md',
+  'proyecto.html',   // plantilla: se publica una por proyecto en /proyectos/<slug>/
 ]);
 
 // React de producción auto-alojado; reemplaza a las versiones dev de unpkg.
@@ -140,15 +142,15 @@ function copyStatic() {
 // (la app usa createRoot().render(), que reemplaza el contenido; no hay hidratación
 // ni riesgo de mismatch). Es BEST-EFFORT: si algo falla, se avisa y se publica sin
 // prerender (el resto de mejoras SEO se despliega igual).
-async function prerenderIndex(bundleName) {
-  const htmlFile = join(DIST, 'index.html');
+async function prerender(rel, bundleName, url, reOk) {
+  const htmlFile = join(DIST, rel);
   const html = readFileSync(htmlFile, 'utf8');
   try {
     const virtualConsole = new VirtualConsole(); // silencia el ruido de scripts inline
     const dom = new JSDOM(html, {
       runScripts: 'dangerously',   // deja correr los inline (define window.IMG, etc.)
       pretendToBeVisual: true,     // aporta requestAnimationFrame
-      url: 'https://ads-partners.com/',
+      url,
       virtualConsole,
     });
     const { window } = dom;
@@ -204,7 +206,7 @@ async function prerenderIndex(bundleName) {
 
     // Guarda: el snapshot debe ser sustancial y contener copy esperado. Si no, no se
     // inyecta (mejor sin prerender que con un root a medias).
-    const ok = inner.length > 4000 && /Growth|Manifiesto|Quedamos|adsPartners/i.test(inner);
+    const ok = inner.length > 4000 && reOk.test(inner);
     if (!ok) {
       console.warn(`  ! Prerender omitido: snapshot insuficiente (${inner.length} chars). Se publica sin prerender.`);
       window.close();
@@ -219,12 +221,91 @@ async function prerenderIndex(bundleName) {
     const injected = html.replace('<div id="root"></div>', `<div id="root" data-prerendered="1">${inner}</div>`);
     writeFileSync(htmlFile, injected);
     window.close();
-    console.log(`  · Prerender OK: ${(inner.length / 1024).toFixed(1)} KB de HTML horneado en #root`);
+    console.log(`  · Prerender OK (${rel}): ${(inner.length / 1024).toFixed(1)} KB de HTML horneado en #root`);
     return true;
   } catch (e) {
     console.warn(`  ! Prerender falló (${e && e.message ? e.message : e}). Se publica sin prerender.`);
     return false;
   }
+}
+
+const prerenderIndex = (bundleName) =>
+  prerender('index.html', bundleName, 'https://ads-partners.com/', /Growth|Manifiesto|Quedamos|adsPartners/i);
+
+// ---------- Páginas de proyecto ----------
+// proyectos-data.jsx es JS plano (window.PROYECTOS): se evalúa aquí para saber qué páginas generar.
+function leerProyectos() {
+  const file = join(ROOT, 'proyectos-data.jsx');
+  if (!existsSync(file)) return [];
+  try {
+    const sandbox = { window: {} };
+    vm.runInNewContext(readFileSync(file, 'utf8'), sandbox);
+    return Array.isArray(sandbox.window.PROYECTOS) ? sandbox.window.PROYECTOS : [];
+  } catch (e) {
+    console.warn(`  ! proyectos-data.jsx no se pudo leer (${e.message}). Sin páginas de proyecto.`);
+    return [];
+  }
+}
+const escHtml = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+// Una página por proyecto: /proyectos/<slug>/index.html desde la plantilla proyecto.html.
+async function paginasProyectos() {
+  const tplFile = join(ROOT, 'proyecto.html');
+  if (!existsSync(tplFile)) return [];
+  const proyectos = leerProyectos();
+  if (!proyectos.length) return [];
+  const tpl = readFileSync(tplFile, 'utf8');
+  const srcs = [...tpl.matchAll(/<script\b[^>]*\bsrc="([^"]+)"[^>]*><\/script>/g)].map((m) => m[1]).filter(isLocalJsx);
+  const bundleName = await compileBundle(srcs, 'proyecto');
+  const hechas = [];
+  proyectos.forEach((p, i) => {
+    const url = `https://ads-partners.com/proyectos/${p.slug}/`;
+    const seo = p.seo || {};
+    const titulo = seo.titulo || `${p.nombre} — adsPartners®`;
+    const descripcion = seo.descripcion || ((p.es && p.es.idea) || p.nombre);
+    const jsonld = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'CreativeWork',
+      name: p.nombre,
+      headline: titulo,
+      description: descripcion,
+      url,
+      image: `https://ads-partners.com/assets/proyectos/${p.slug}/escritorio.jpg`,
+      dateCreated: p.anio,
+      inLanguage: 'es',
+      creator: { '@type': 'ProfessionalService', '@id': 'https://ads-partners.com/#organization', name: 'adsPartners' },
+    }).replace(/</g, '\\u003c');
+    const html = tpl
+      .replaceAll('{{SLUG}}', p.slug)
+      .replaceAll('{{TITULO}}', escHtml(titulo))
+      .replaceAll('{{DESCRIPCION}}', escHtml(descripcion))
+      .replaceAll('{{NOMBRE}}', escHtml(p.nombre))
+      .replaceAll('{{NUM}}', String(i + 1).padStart(2, '0'))
+      .replaceAll('{{JSONLD}}', jsonld);
+    const rel = `proyectos/${p.slug}/index.html`;
+    mkdirSync(join(DIST, 'proyectos', p.slug), { recursive: true });
+    writeFileSync(join(DIST, rel), transformHtml(html, bundleName));
+    hechas.push({ rel, url, bundleName });
+  });
+  console.log(`  · ${hechas.length} páginas de proyecto: ${hechas.map((h) => '/' + h.rel.replace(/index\.html$/, '')).join('  ')}`);
+  return hechas;
+}
+
+// Añade al sitemap publicado las URLs de proyecto que no estén ya.
+function sitemapProyectos(paginas) {
+  const file = join(DIST, 'sitemap.xml');
+  if (!paginas.length || !existsSync(file)) return;
+  let xml = readFileSync(file, 'utf8');
+  const nuevas = paginas.filter((p) => !xml.includes(`<loc>${p.url}</loc>`))
+    .map((p) => `  <url>
+    <loc>${p.url}</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+`);
+  if (!nuevas.length) return;
+  xml = xml.replace('</urlset>', nuevas.join('') + '</urlset>');
+  writeFileSync(file, xml);
 }
 
 async function main() {
@@ -249,10 +330,17 @@ async function main() {
   console.log('Copiando estáticos (css, loader, assets, vendor, CNAME)…');
   copyStatic();
 
-  // Pre-render de la home (best-effort; necesita docs/vendor/ ya copiado).
+  console.log('Generando las páginas de proyecto…');
+  const paginas = await paginasProyectos();
+  sitemapProyectos(paginas);
+
+  // Pre-render de la home y de cada proyecto (best-effort; necesita docs/vendor/ ya copiado).
   if (indexBundle) {
     console.log('Pre-renderizando la home para bots sin JS (crawlers de IA + Google)…');
     await prerenderIndex(indexBundle);
+  }
+  for (const pg of paginas) {
+    await prerender(pg.rel, pg.bundleName, pg.url, /Selected Work|Pantalla a pantalla|adsPartners/i);
   }
 
   // Resumen de peso.

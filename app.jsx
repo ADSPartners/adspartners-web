@@ -1,4 +1,4 @@
-/* global React, ReactDOM, I18nProvider, Nav, SideMenu, Hero, Manifiesto, Services, WorkModel, WinWin, Footer, Quedamos, useReveal, useT, CookieConsent, ChatGlobo */
+/* global React, ReactDOM, I18nProvider, Nav, SideMenu, Hero, Manifiesto, Services, Proyectos, WorkModel, WinWin, Footer, Quedamos, useReveal, useT, CookieConsent, ChatGlobo */
 const { useState, useEffect } = React;
 
 function AppInner() {
@@ -19,6 +19,7 @@ function AppInner() {
         <Hero />
         <Manifiesto />
         <Services />
+        {typeof Proyectos !== 'undefined' && <Proyectos />}
         <WorkModel />
         <WinWin />
         <Quedamos />
