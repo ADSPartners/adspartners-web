@@ -295,6 +295,257 @@ html:not([data-pre]) { --pre: .6s; }   /* primera visita: el contenido espera a 
 .cierre-pie__texto em { display: block; font-style: italic; color: rgba(231, 226, 218, .55); }
 .cierre-pie .qd-prompt__btn { border-color: var(--beige); background: var(--beige); color: var(--negro); }
 
+/* ============ PASTILLA ============ */
+/* Etiqueta pequeña con un punto rosa: lo que incluye una rama, un dato corto. */
+.pastilla {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px 6px 10px;
+  border: 1px solid rgba(52, 25, 10, .2);
+  border-radius: 999px;
+  background: rgba(245, 243, 241, .55);
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: .01em;
+  color: var(--marron);
+  white-space: nowrap;
+  transition: border-color .35s ease;
+}
+.pastilla::before {
+  content: '';
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--rosa);
+  box-shadow: 0 0 0 1px rgba(52, 25, 10, .3);
+}
+
+/* ============ SIN LETRA PEQUEÑA ============ */
+/* Cinco tarjetas con una pieza viva cada una. El estado por defecto es el FINAL (así sale en el prerender y
+   con «reducir movimiento»); .is-espera lo esconde hasta que la tarjeta asoma y .is-on lo anima una vez. */
+.porque {
+  background: var(--blanco);
+  color: var(--marron);
+  padding: var(--sec-y) var(--sec-x) calc(var(--sec-y) + var(--radio));
+}
+.pq-rejilla { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 14px; }
+.pq-tar {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 30px;
+  min-height: 380px;
+  padding: clamp(22px, 2.2vw, 30px);
+  border: 1px solid rgba(52, 25, 10, .08);
+  border-radius: 22px;
+  background: #FBFAF8;
+  box-shadow: 0 22px 44px -34px rgba(52, 25, 10, .4);
+  overflow: hidden;
+}
+.pq-tar--persona { grid-column: span 5; }
+.pq-tar--precio { grid-column: span 4; }
+.pq-tar--visita { grid-column: span 3; }
+.pq-tar--descuento { grid-column: span 5; }
+.pq-tar--solo { grid-column: span 7; }
+.pq-tar__t { margin: 0; font-family: var(--serif); font-weight: 300; font-size: clamp(26px, 2.25vw, 34px); line-height: 1.02; letter-spacing: -.02em; }
+.pq-tar__d { margin: 12px 0 0; max-width: 38ch; font-size: 14.5px; line-height: 1.5; color: rgba(52, 25, 10, .72); }
+.pq-tar__vivo { position: relative; }
+@keyframes pqSube { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes pqLlega { from { opacity: 0; transform: translateY(12px) scale(.92); } to { opacity: 1; transform: none; } }
+@keyframes pqAparece { from { opacity: 0; } to { opacity: 1; } }
+
+/* --- Una persona: el mensaje que llega --- */
+.pq-chat { display: grid; padding: 14px 16px 18px; border-radius: 18px; background: #F1ECE5; }
+.pq-chat__cab { grid-row: 1; display: flex; align-items: center; gap: 10px; padding-bottom: 12px; border-bottom: 1px solid rgba(52, 25, 10, .1); font-size: 13px; }
+.pq-av {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--marron);
+  color: var(--beige);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: .04em;
+}
+.pq-chat__linea { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: rgba(52, 25, 10, .6); }
+.pq-chat__linea i { width: 7px; height: 7px; border-radius: 50%; background: #5d9c6f; }
+.pq-chat__escribe,
+.pq-chat__msg { grid-row: 2; grid-column: 1; margin-top: 14px; }
+.pq-chat__escribe {
+  align-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 15px;
+  color: rgba(52, 25, 10, .6);
+  opacity: 0;
+}
+.pq-chat__escribe span { display: inline-flex; gap: 4px; }
+.pq-chat__escribe i { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+.pq-chat__escribe i:nth-child(2) { animation-delay: .15s !important; }
+.pq-chat__escribe i:nth-child(3) { animation-delay: .3s !important; }
+.pq-chat__msg {
+  justify-self: start;
+  max-width: 94%;
+  padding: 14px 17px 10px;
+  border-radius: 18px 18px 18px 6px;
+  background: var(--negro);
+  color: var(--beige);
+  transform-origin: left bottom;
+}
+.pq-chat__msg p { margin: 0; font-size: 14.5px; line-height: 1.5; }
+.pq-chat__hora { display: block; margin-top: 6px; text-align: right; font-size: 10.5px; letter-spacing: .04em; color: rgba(231, 226, 218, .55); }
+.pq-tar.is-espera .pq-chat__msg { opacity: 0; }
+.pq-tar.is-on .pq-chat__escribe { animation: pqEscribe 1.5s ease .2s both; }
+.pq-tar.is-on .pq-chat__escribe i { animation: chatBota 1s ease-in-out 2; }
+.pq-tar.is-on .pq-chat__msg { animation: pqLlega .7s var(--muelle) 1.55s both; }
+.pq-tar.is-on .pq-chat__hora { animation: pqAparece .4s ease 2.4s both; }
+@keyframes pqEscribe { 0% { opacity: 0; transform: translateY(6px); } 15%, 82% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+
+/* --- Precio cerrado: el presupuesto y el sello --- */
+.pq-doc {
+  position: relative;
+  padding: 18px 18px 16px;
+  border: 1px solid rgba(52, 25, 10, .1);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 16px 30px -24px rgba(52, 25, 10, .45);
+  transform: rotate(-1.2deg);
+}
+.pq-doc__t { margin: 0 0 14px; font-size: 10.5px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; }
+.pq-raya { display: block; height: 6px; margin-bottom: 7px; border-radius: 3px; background: rgba(52, 25, 10, .09); }
+.pq-raya--corta { width: 58%; }
+.pq-doc__lista { display: grid; gap: 8px; margin: 14px 0 0; padding: 0; list-style: none; }
+.pq-doc__lista li { display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px dashed rgba(52, 25, 10, .16); font-size: 13.5px; }
+.pq-doc__lista i {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--marron);
+  color: var(--beige);
+  font-size: 11px;
+  font-style: normal;
+}
+.pq-sello {
+  position: absolute;
+  top: 26px;
+  right: 16px;
+  padding: 7px 14px;
+  border: 1.5px solid var(--marron);
+  border-radius: 8px;
+  background: var(--rosa);
+  color: var(--marron);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  transform: rotate(-9deg);
+  box-shadow: 0 8px 18px -10px rgba(52, 25, 10, .55);
+}
+.pq-tar.is-espera .pq-doc__lista i { transform: scale(0); }
+.pq-tar.is-espera .pq-sello { opacity: 0; }
+.pq-tar.is-on .pq-doc__lista i { animation: pqCheck .45s var(--muelle) calc(.35s + var(--k) * .28s) both; }
+.pq-tar.is-on .pq-sello { animation: pqSello .55s cubic-bezier(.3, 1.6, .5, 1) 1.45s both; }
+@keyframes pqCheck { from { transform: scale(0); } to { transform: scale(1); } }
+@keyframes pqSello { from { opacity: 0; transform: rotate(-22deg) scale(1.9); } to { opacity: 1; transform: rotate(-9deg) scale(1); } }
+
+/* --- Una visita al mes: el calendario --- */
+.pq-cal { padding: 14px 14px 12px; border: 1px solid rgba(52, 25, 10, .1); border-radius: 14px; background: #fff; }
+.pq-cal__mes { margin: 0 0 10px; font-family: var(--serif); font-weight: 300; font-size: 21px; text-transform: capitalize; }
+.pq-cal__mes span { opacity: .5; }
+.pq-cal__rejilla { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); row-gap: 2px; text-align: center; font-size: 11.5px; font-variant-numeric: tabular-nums; }
+.pq-cal__rejilla b { padding-bottom: 4px; font-size: 9.5px; font-weight: 600; letter-spacing: .1em; opacity: .5; }
+.pq-cal__rejilla span { position: relative; padding: 4px 0; line-height: 1.4; }
+.pq-cal__rejilla .is-visita { isolation: isolate; font-weight: 700; }
+.is-visita svg { position: absolute; left: 50%; top: 50%; z-index: -1; width: 28px; height: 28px; overflow: visible; transform: translate(-50%, -50%) rotate(-90deg); }
+.is-visita circle { fill: var(--rosa); stroke: var(--marron); stroke-width: 1.5; stroke-dasharray: 1; stroke-dashoffset: 0; }
+.pq-cal__evento { display: flex; align-items: center; gap: 7px; margin: 10px 0 0; font-size: 11.5px; font-weight: 500; }
+.pq-cal__evento i { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--rosa); box-shadow: 0 0 0 1px var(--marron); }
+.pq-tar.is-espera .is-visita circle { stroke-dashoffset: 1; fill-opacity: 0; }
+.pq-tar.is-espera .pq-cal__evento { opacity: 0; }
+.pq-tar.is-on .is-visita circle { animation: pqRodea 1s var(--muelle) .45s both; }
+.pq-tar.is-on .pq-cal__evento { animation: pqSube .5s var(--muelle) 1.3s both; }
+@keyframes pqRodea { 0% { stroke-dashoffset: 1; fill-opacity: 0; } 60% { fill-opacity: 0; } 100% { stroke-dashoffset: 0; fill-opacity: 1; } }
+
+/* --- El Diagnóstico se descuenta: la factura --- */
+.pq-fact { display: grid; gap: 14px; padding: 22px 18px 18px; border: 1px solid rgba(52, 25, 10, .1); border-radius: 14px; background: #fff; }
+.pq-fact__l { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: end; gap: 10px; font-size: 14px; }
+.pq-fact__puntos { height: 1px; margin-bottom: 5px; border-bottom: 1px dotted rgba(52, 25, 10, .3); }
+.pq-fact__importe { width: 86px; height: 10px; margin-bottom: 3px; }
+.pq-fact__importe i { display: block; width: 100%; height: 100%; border-radius: 5px; background: rgba(52, 25, 10, .18); transform-origin: right center; }
+.pq-fact__l--0 { color: rgba(52, 25, 10, .5); }
+.pq-fact__l--0::after { content: ''; position: absolute; left: 0; right: 0; top: 55%; height: 1.5px; background: var(--marron); transform-origin: left center; }
+.pq-fact__l--2 { padding-top: 14px; border-top: 1px solid rgba(52, 25, 10, .2); font-weight: 600; }
+.pq-fact__l--2 .pq-fact__importe i { background: var(--marron); transform: scaleX(.64); }
+.pq-fact__marca {
+  position: absolute;
+  top: -16px;
+  right: -4px;
+  padding: 3px 9px;
+  border: 1px solid rgba(52, 25, 10, .3);
+  border-radius: 999px;
+  background: var(--rosa);
+  color: var(--marron);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  transform: rotate(-4deg);
+}
+.pq-tar.is-espera .pq-fact__l--0 { color: var(--marron); }
+.pq-tar.is-espera .pq-fact__l--0::after { transform: scaleX(0); }
+.pq-tar.is-espera .pq-fact__marca { opacity: 0; }
+.pq-tar.is-espera .pq-fact__l--2 .pq-fact__importe i { transform: none; }
+.pq-tar.is-on .pq-fact__l--0 { animation: pqApaga .5s ease .7s both; }
+.pq-tar.is-on .pq-fact__l--0::after { animation: pqTacha .6s var(--muelle) .5s both; }
+.pq-tar.is-on .pq-fact__marca { animation: pqMarca .5s cubic-bezier(.3, 1.6, .5, 1) 1.05s both; }
+.pq-tar.is-on .pq-fact__l--2 .pq-fact__importe i { animation: pqAcorta .9s var(--muelle) 1.35s both; }
+@keyframes pqApaga { from { color: var(--marron); } to { color: rgba(52, 25, 10, .5); } }
+@keyframes pqTacha { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes pqMarca { from { opacity: 0; transform: rotate(-4deg) scale(1.5); } to { opacity: 1; transform: rotate(-4deg) scale(1); } }
+@keyframes pqAcorta { from { transform: none; } to { transform: scaleX(.64); } }
+
+/* --- Lo repetitivo, solo: el contador (tarjeta oscura) --- */
+.pq-tar--solo { flex-direction: row; align-items: stretch; gap: clamp(24px, 3vw, 48px); background: var(--negro); color: var(--beige); border-color: transparent; }
+.pq-tar--solo .pq-tar__texto { flex: 1 1 44%; display: flex; flex-direction: column; }
+.pq-tar--solo .pq-tar__d { color: rgba(231, 226, 218, .72); }
+.pq-tar--solo .pq-tar__vivo { flex: 1 1 56%; display: flex; align-items: flex-end; }
+.pq-tar__ver {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 24px;
+  color: inherit;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+}
+.pq-tar__ver i { font-style: normal; font-size: 15px; letter-spacing: 0; transition: transform .5s var(--muelle); }
+.pq-tar__ver:hover i { transform: translateX(6px); }
+.pq-cuenta { width: 100%; }
+.pq-cuenta__n { margin: 0; font-family: var(--serif); font-weight: 300; font-size: clamp(96px, 10.5vw, 172px); line-height: .8; letter-spacing: -.05em; font-variant-numeric: tabular-nums; }
+.pq-cuenta__u { margin: 12px 0 20px; font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 23px; color: rgba(231, 226, 218, .7); }
+.pq-cuenta__barra { display: block; height: 3px; border-radius: 2px; background: rgba(231, 226, 218, .14); overflow: hidden; }
+.pq-cuenta__barra i { display: block; height: 100%; background: var(--rosa); transform-origin: left center; }
+.pq-cuenta__extra { display: flex; align-items: center; gap: 10px; margin: 16px 0 0; font-size: 13.5px; color: rgba(231, 226, 218, .72); }
+.pq-semaforo { display: inline-flex; gap: 4px; }
+.pq-semaforo i { width: 8px; height: 8px; border-radius: 50%; background: #7FA886; }
+.pq-semaforo i:nth-child(2) { background: #D6AE63; }
+.pq-semaforo i:nth-child(3) { background: #D9827A; }
+
 /* ============ SIN MOVIMIENTO ============ */
 @media (prefers-reduced-motion: reduce) {
   .hero-intro > *, .chat__puntos i { animation: none; }
@@ -304,6 +555,9 @@ html:not([data-pre]) { --pre: .6s; }   /* primera visita: el contenido espera a 
 /* ============ TABLETA ============ */
 @media (max-width: 1024px) {
   .sec-cab--lado { grid-template-columns: 1fr; row-gap: 18px; }
+  .pq-rejilla { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .pq-tar--persona, .pq-tar--descuento, .pq-tar--solo { grid-column: span 6; }
+  .pq-tar--precio, .pq-tar--visita { grid-column: span 3; }
   .testi-rejilla { grid-template-columns: 1fr; gap: 40px; }
   .preguntas { grid-template-columns: 1fr; }
   .preguntas .sec-cab { position: static; margin-bottom: clamp(24px, 4vw, 44px); }
@@ -323,4 +577,9 @@ html:not([data-pre]) { --pre: .6s; }   /* primera visita: el contenido espera a 
   .cierre { height: 170vh; }
   .cierre__frase { grid-template-columns: 1fr; gap: 1.5vw; padding: 0 var(--sec-x); font-size: 13vw; }
   .cierre__mitad--i { text-align: left; }
+  .pq-rejilla { grid-template-columns: 1fr; gap: 12px; }
+  .pq-tar--persona, .pq-tar--precio, .pq-tar--visita, .pq-tar--descuento, .pq-tar--solo { grid-column: auto; }
+  .pq-tar { min-height: 0; gap: 26px; border-radius: 20px; }
+  .pq-tar--solo { flex-direction: column; }
+  .pq-tar--solo .pq-tar__ver { padding-top: 16px; }
 }

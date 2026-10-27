@@ -1,7 +1,7 @@
 /* ============================================================
    adsPartners · las tres ramas
    La sección «Qué hacemos» de la home y la página de cada rama (/finance/, /tech/, /brand/). Las pinta ramas.jsx.
-   Tipografía grande y línea fina sobre un cielo que se mueve; aquí no hay tarjetas ni diagramas.
+   Tipografía grande y línea fina sobre un cielo que se mueve.
    Usa los tokens de secciones.css (--sec-x, --sec-y, --radio, --muelle, --linea-*).
    ============================================================ */
 
@@ -95,53 +95,54 @@
 .ramas > :not(.cielo),
 .rama-cab > :not(.cielo),
 .rama-cierre > :not(.cielo) { position: relative; z-index: 1; }
-.rcols {
+/* Una fila por rama: número, nombre, frase con pastillas, plazo del primer resultado y flecha. */
+.rfilas { margin: 0; padding: 0; list-style: none; border-top: 1px solid rgba(52, 25, 10, .34); }
+.rfila-w { border-bottom: 1px solid rgba(52, 25, 10, .16); }
+.rfila {
+  position: relative;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  border-top: 1px solid rgba(52, 25, 10, .34);
-}
-.rcol-w { display: flex; }
-.rcol-w + .rcol-w { border-left: 1px solid rgba(52, 25, 10, .16); }
-.rcol {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  min-height: clamp(300px, 43vh, 440px);
-  padding: 20px clamp(18px, 2.2vw, 34px) 4px;
+  grid-template-columns: 58px minmax(0, 1fr) minmax(0, 1.3fr) 140px 28px;
+  align-items: center;
+  column-gap: clamp(16px, 2vw, 32px);
+  padding: clamp(26px, 3vw, 40px) 0;
   color: inherit;
   transition: opacity .45s ease;
 }
-.rcol-w:first-child .rcol { padding-left: 0; }
-.rcol__num { font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 17px; opacity: .6; }
-.rcol__nombre {
-  margin-top: auto;
+/* La luz de la fila señalada: un velo claro que se abre desde el centro. */
+.rfila::before {
+  content: '';
+  position: absolute;
+  inset: 0 calc(var(--sec-x) * -.35);
+  z-index: -1;
+  border-radius: 20px;
+  background: rgba(250, 248, 245, .5);
+  opacity: 0;
+  transform: scaleY(.6);
+  transition: opacity .45s ease, transform .7s var(--muelle);
+}
+.rfila__num { font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 17px; opacity: .6; }
+.rfila__nombre {
   font-family: var(--serif);
   font-weight: 300;
-  font-size: clamp(56px, 7.6vw, 118px);
+  font-size: clamp(50px, 5.8vw, 96px);
   line-height: .92;
   letter-spacing: -.035em;
   transition: transform .7s var(--muelle);
 }
-.rcol__nombre small { display: block; margin-bottom: .22em; font-size: .19em; font-style: italic; letter-spacing: 0; opacity: .62; }
-.rcol__frase { margin-top: 20px; max-width: 27ch; font-size: 15.5px; line-height: 1.45; color: rgba(52, 25, 10, .78); }
-.rcol__ver {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 26px;
-  font-size: 10.5px;
-  font-weight: 600;
-  letter-spacing: .2em;
-  text-transform: uppercase;
-}
-.rcol__ver i { font-style: normal; font-size: 16px; letter-spacing: 0; transition: transform .6s var(--muelle); }
+.rfila__nombre small { display: block; margin-bottom: .2em; font-size: .22em; font-style: italic; letter-spacing: 0; opacity: .62; }
+.rfila__cuerpo { display: flex; flex-direction: column; gap: 16px; }
+.rfila__frase { max-width: 40ch; font-size: 16px; line-height: 1.45; color: rgba(52, 25, 10, .82); }
+.rfila__pastillas { display: flex; flex-wrap: wrap; gap: 8px; }
+.rfila__plazo { display: flex; flex-direction: column; gap: 6px; font-family: var(--serif); font-weight: 300; font-size: 27px; line-height: 1; letter-spacing: -.01em; white-space: nowrap; }
+.rfila__plazo small { font-family: var(--sans); font-size: 10px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; opacity: .6; }
+.rfila__fl { justify-self: end; font-size: 20px; transition: transform .6s var(--muelle); }
 @media (hover: hover) {
-  /* Al señalar una rama, las otras se apagan y su nombre se inclina. */
-  .rcols:hover .rcol { opacity: .36; }
-  .rcols .rcol:hover { opacity: 1; }
-  .rcol:hover .rcol__nombre { transform: translateX(10px); font-style: italic; }
-  .rcol:hover .rcol__ver i { transform: translateX(8px); }
+  .rfilas:hover .rfila { opacity: .38; }
+  .rfilas .rfila:hover { opacity: 1; }
+  .rfila:hover::before { opacity: 1; transform: none; }
+  .rfila:hover .rfila__nombre { transform: translateX(10px); font-style: italic; }
+  .rfila:hover .rfila__fl { transform: translateX(8px); }
+  .rfila:hover .pastilla { border-color: rgba(52, 25, 10, .4); }
 }
 
 /* ============ PÁGINA DE UNA RAMA ============ */
@@ -299,16 +300,17 @@
 /* ============ SIN MOVIMIENTO ============ */
 @media (prefers-reduced-motion: reduce) {
   .cielo__nubes, .cielo__luz, .rama-cab__centro > * { animation: none; }
-  .cielo__nubes, .cielo__luz, .rcol, .rcol__nombre, .rama-otra { transition: none; }
+  .cielo__nubes, .cielo__luz, .rfila, .rfila::before, .rfila__nombre, .rama-otra { transition: none; }
 }
 
 /* ============ TABLETA: las ramas, una debajo de otra ============ */
 @media (max-width: 900px) {
-  .rcols { grid-template-columns: 1fr; }
-  .rcol-w + .rcol-w { border-left: 0; border-top: 1px solid rgba(52, 25, 10, .16); }
-  .rcol { min-height: 0; padding: 20px 0 34px; }
-  .rcol__nombre { margin-top: 28px; font-size: clamp(64px, 15vw, 118px); }
-  .rcol__frase { max-width: 34ch; }
+  .rfila { grid-template-columns: 40px minmax(0, 1fr) 24px; row-gap: 18px; align-items: start; }
+  .rfila__num { padding-top: .5em; }
+  .rfila__cuerpo, .rfila__plazo { grid-column: 2 / 4; }
+  .rfila__fl { grid-column: 3; grid-row: 1; align-self: center; }
+  .rfila__plazo { flex-direction: row; align-items: baseline; gap: 12px; font-size: 22px; }
+  .rfila__nombre { font-size: clamp(56px, 13vw, 96px); }
   .rama-cab__meta { grid-template-columns: 1fr; gap: 20px; }
   .rama-cab__meta dd { max-width: 52ch; }
   .rpasos { grid-template-columns: 1fr; gap: 36px; }
@@ -318,7 +320,8 @@
 
 /* ============ MÓVIL ============ */
 @media (max-width: 700px) {
-  .rcol__nombre { font-size: clamp(64px, 21vw, 96px); }
+  .rfila__nombre { font-size: clamp(54px, 17vw, 84px); }
+  .rfila__frase { font-size: 15px; }
   .rama-cab { padding-top: 96px; }
   .rama-cab__titulo { font-size: clamp(60px, 19vw, 110px); }
   .rama-cab__frase { font-size: clamp(22px, 6vw, 30px); }

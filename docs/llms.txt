@@ -10,7 +10,7 @@ en varias líneas o sociedades y han perdido la visibilidad de lo que pasa dentr
 Se puede empezar por una sola rama y sumar las demás después.
 
 ## Las tres ramas
-- ads Finance (Daniel de Céspedes): diagnóstico financiero, modelo de rentabilidad,
+- ads Finance: diagnóstico financiero, modelo de rentabilidad,
   cuadro de mando y control mensual. La gestoría registra; ads Finance interpreta.
   No sustituye a la gestoría: la gestión fiscal, la auditoría y el registro contable
   diario siguen donde están. https://ads-partners.com/finance/

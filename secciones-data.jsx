@@ -1,4 +1,4 @@
-/* Secciones de la home: portada, testimonios, preguntas y cierre.
+/* Secciones de la home: portada, «sin letra pequeña», testimonios, preguntas y cierre.
    JavaScript plano (sin JSX), igual que proyectos-data.jsx. Los pinta secciones.jsx.
    Las tres ramas (la sección de la home y sus páginas) tienen sus textos en ramas-data.jsx.
    Los datos salen de la oferta de las tres ramas; la forma de contarlo es la de la web, no la del deck.
@@ -11,6 +11,43 @@ window.SECCIONES = {
       sub: 'Finanzas, tecnología y marca. Un solo equipo, dentro de vuestra empresa.',
       pie: 'Para empresas que han crecido más deprisa que sus cuentas, sus procesos y su marca.',
       ramas: 'Finance · Tech · Brand',
+    },
+
+    // «Sin letra pequeña»: cinco tarjetas, cada una con una pieza que se mueve una vez al entrar.
+    // Todo sale de la oferta (precio cerrado por fase, Diagnóstico descontable, visita mensual) o de un trabajo
+    // real (hostelería). El mensaje del chat es un ejemplo de cómo se habla, no un dato.
+    porque: {
+      etq: 'Sin letra pequeña',
+      titulo: 'Lo que prometemos {y cómo se ve.}',
+      lado: 'Precio cerrado, una persona al otro lado y nada que no podáis comprobar.',
+      persona: {
+        t: 'Una persona, no un ticket.',
+        d: 'Escribís y os contesta Álvaro, que es quien lleva vuestra cuenta. Sin centralitas ni formularios.',
+        quien: 'Álvaro', iniciales: 'ÁE', enLinea: 'en línea', escribiendo: 'escribiendo',
+        msg: 'El flujo de facturas ya está funcionando. ¿Lo repasamos el jueves en la visita?',
+        hora: '10:24', visto: 'Visto',
+      },
+      precio: {
+        t: 'Precio cerrado antes de empezar.',
+        d: 'Cada fase arranca con su alcance y su precio por escrito. Lo que se firma es lo que se paga.',
+        doc: 'Propuesta · Fase 1', lineas: ['Alcance', 'Plazo', 'Precio'], sello: 'Cerrado',
+      },
+      visita: {
+        t: 'Una visita al mes.',
+        d: 'Una vez al mes vamos a vuestra empresa a repasarlo todo en persona. Estéis donde estéis.',
+        evento: 'Visita adsPartners', dias: ['L', 'M', 'X', 'J', 'V', 'S', 'D'], locale: 'es-ES',
+      },
+      descuento: {
+        t: 'El Diagnóstico se descuenta.',
+        d: 'Si seguís, lo que costó se descuenta entero del plan. Y si no, el mapa que sale es vuestro.',
+        lineas: ['Diagnóstico', 'Plan', 'Total'], marca: 'descontado',
+      },
+      solo: {
+        t: 'Lo repetitivo, solo.',
+        d: 'En un bar, una aplicación lee cada factura de proveedor a partir de una foto y saca el margen de cada plato. Nadie teclea.',
+        n: 115, unidad: 'facturas leídas solas', extra: '157 platos con su semáforo de margen',
+        ver: 'Ver el caso', caso: 'Gestión para hostelería.',
+      },
     },
 
     testimonios: {
@@ -83,6 +120,40 @@ window.SECCIONES = {
       sub: 'Finance, technology and brand. One team, inside your company.',
       pie: 'For companies that have grown faster than their books, their processes and their brand.',
       ramas: 'Finance · Tech · Brand',
+    },
+
+    porque: {
+      etq: 'No small print',
+      titulo: 'What we promise {and what it looks like.}',
+      lado: 'A fixed price, one person on the other end and nothing you cannot check.',
+      persona: {
+        t: 'A person, not a ticket.',
+        d: 'You write and Álvaro answers: he is the one running your account. No switchboards, no forms.',
+        quien: 'Álvaro', iniciales: 'ÁE', enLinea: 'online', escribiendo: 'typing',
+        msg: 'The invoice flow is up and running. Shall we go through it on Thursday at the visit?',
+        hora: '10:24', visto: 'Seen',
+      },
+      precio: {
+        t: 'A fixed price before we start.',
+        d: 'Every phase starts with its scope and its price in writing. What you sign is what you pay.',
+        doc: 'Proposal · Phase 1', lineas: ['Scope', 'Timing', 'Price'], sello: 'Fixed',
+      },
+      visita: {
+        t: 'One visit a month.',
+        d: 'Once a month we come to your company to go through everything in person. Wherever you are.',
+        evento: 'adsPartners visit', dias: ['M', 'T', 'W', 'T', 'F', 'S', 'S'], locale: 'en-GB',
+      },
+      descuento: {
+        t: 'The Diagnosis is deducted.',
+        d: 'If you go on, its cost is deducted in full from the plan. And if not, the map that comes out is yours.',
+        lineas: ['Diagnosis', 'Plan', 'Total'], marca: 'deducted',
+      },
+      solo: {
+        t: 'The repetitive work, on its own.',
+        d: 'In a bar, an app reads every supplier invoice from a photo and works out the margin of every dish. Nobody types.',
+        n: 115, unidad: 'invoices read on their own', extra: '157 dishes with their margin traffic light',
+        ver: 'See the case', caso: 'Hospitality management app.',
+      },
     },
 
     testimonios: {

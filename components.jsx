@@ -76,12 +76,15 @@ function LangToggle() {
 }
 
 // ============= NAV =============
+// Barra: arriba del todo ocupa el ancho; al bajar se recoge en una píldora con fondo de cristal, para no pisar
+// nunca lo que pasa por debajo. «Qué hacemos» despliega las tres ramas (solo donde está cargado ramas-data.jsx).
 function Nav({ onCartClick }) {
-  const { t } = useT();
-  const [copied, setCopied] = useState(false);
+  const { t, lang } = useT();
   const [theme, setTheme] = useState('dark');
+  const [recogida, setRecogida] = useState(false);
+  const [abierta, setAbierta] = useState(false);
   useEffect(() => {
-    const probeY = 28; // sample just under the top edge, where the nav sits
+    const probeY = 34; // sample just under the top edge, where the nav sits
     const onScroll = () => {
       const themed = document.querySelectorAll('[data-nav-theme]');
       let current = 'dark';
@@ -97,6 +100,7 @@ function Nav({ onCartClick }) {
         current = foot.getAttribute('data-nav-bar-theme') || foot.getAttribute('data-nav-theme') || current;
       }
       setTheme(current);
+      setRecogida(window.scrollY > 40);
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll, { passive: true });
@@ -106,37 +110,56 @@ function Nav({ onCartClick }) {
       window.removeEventListener('resize', onScroll);
     };
   }, []);
-  const handleCopyEmail = (e) => {
+  const R = window.RAMAS ? (window.RAMAS[lang] || window.RAMAS.es) : null;
+  const orden = (R && window.RAMAS.orden) || [];
+  // Dentro de la página, scroll suave; si el bloque no está (páginas de rama o de proyecto), el enlace lleva a la home.
+  const ir = (e, id) => {
+    setAbierta(false);
+    const el = document.getElementById(id);
+    if (!el) return;
     e.preventDefault();
-    navigator.clipboard?.writeText('adsgroup@ads-partners.com');
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1800);
+    (window.adsIr || ((y) => window.scrollTo({ top: y, behavior: 'smooth' })))(el.getBoundingClientRect().top + window.scrollY);
   };
+  const salir = (e) => { if (!e.currentTarget.contains(e.relatedTarget)) setAbierta(false); };
   return (
-    <nav className={`nav nav--${theme}`}>
-      <a className="nav-block nav-logo-block" href="#top" aria-label="adsPartners">
-        <span className="nav-logo" role="img" aria-label="adsPartners"></span>
-      </a>
-      <div className="nav-block nav-tag">
-        <span>{t('nav.tag.1')}</span>
-        <span>{t('nav.tag.2')}</span>
-      </div>
-      <div className="nav-block nav-contact">
-        <a href="#" onClick={handleCopyEmail} className="nav-mail" data-cursor="cta">
-          <span className="nav-mail-default">adsgroup@ads-partners.com</span>
-          <span className="nav-mail-copied">{copied ? t('nav.mail.copied') : t('nav.mail.copy')}</span>
+    <nav className={`nav nav--${theme}${recogida ? ' nav--recogida' : ''}${abierta ? ' nav--abierta' : ''}`}
+      onMouseLeave={() => setAbierta(false)} onBlur={salir} onKeyDown={(e) => { if (e.key === 'Escape') setAbierta(false); }}>
+      <div className="nav-pildora">
+        <a className="nav-block nav-logo-block" href="./#top" aria-label="adsPartners" onClick={(e) => { if (!document.querySelector('base')) ir(e, 'top'); }}>
+          <span className="nav-logo" role="img" aria-label="adsPartners"></span>
         </a>
-        <span>{t('nav.based')}</span>
+        <ul className="nav-links">
+          <li onMouseEnter={() => R && setAbierta(true)} onFocus={() => R && setAbierta(true)}>
+            <a href="./#ramas" onClick={(e) => ir(e, 'ramas')} data-cursor="cta" aria-haspopup={R ? 'true' : undefined} aria-expanded={R ? abierta : undefined}>
+              {t('nav.quehacemos')}{R ? <i className="nav-links__fl" aria-hidden="true">↓</i> : null}
+            </a>
+          </li>
+          <li><a href="./#proyectos" onClick={(e) => ir(e, 'proyectos')} data-cursor="cta">{t('nav.trabajo')}</a></li>
+          <li><a href="./#preguntas" onClick={(e) => ir(e, 'preguntas')} data-cursor="cta">{t('nav.preguntas')}</a></li>
+        </ul>
+        <div className="nav-block nav-cta-group">
+          <LangToggle />
+          <button className="nav-cart" onClick={onCartClick} data-cursor="cta">
+            <span className="nav-cart-text nav-cart-default">
+              {t('nav.cart.default')}
+            </span>
+            <span className="nav-cart-text nav-cart-hover">{t('nav.cart.hover')}</span>
+          </button>
+        </div>
       </div>
-      <div className="nav-block nav-cta-group">
-        <LangToggle />
-        <button className="nav-cart" onClick={onCartClick} data-cursor="cta">
-          <span className="nav-cart-text nav-cart-default">
-            {t('nav.cart.default')}
-          </span>
-          <span className="nav-cart-text nav-cart-hover">{t('nav.cart.hover')}</span>
-        </button>
-      </div>
+      {R ? (
+        <div className="nav-panel" aria-hidden={!abierta}>
+          {orden.map((id, i) => (
+            <a className="nav-panel__rama" href={id + '/'} key={id} tabIndex={abierta ? 0 : -1} data-cursor="cta"
+              onClick={(e) => { setAbierta(false); if (window.ramaIr) window.ramaIr(e, R[id], i); }}>
+              <span className="nav-panel__num">{'(0' + (i + 1) + ')'}</span>
+              <span className="nav-panel__nombre"><em>ads</em> {R[id].corto}</span>
+              <span className="nav-panel__frase">{R[id].frase}</span>
+              <span className="nav-panel__fl" aria-hidden="true">→</span>
+            </a>
+          ))}
+        </div>
+      ) : null}
     </nav>);
 
 }
@@ -145,6 +168,7 @@ function Nav({ onCartClick }) {
 function SideMenu({ items: itemsProp }) {
   const { t } = useT();
   const items = itemsProp || [
+  { href: '#porque', key: 'side.porque' },
   { href: '#ramas', key: 'side.ramas' },
   { href: '#proyectos', key: 'side.proyectos' },
   { href: '#testimonios', key: 'side.testi' },

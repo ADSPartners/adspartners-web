@@ -5,15 +5,14 @@ const { useState: useStateI18n, useEffect: useEffectI18n, useContext, createCont
 const DICT = {
   es: {
     // NAV
-    'nav.tag.1': 'Finance · Tech',
-    'nav.tag.2': 'Brand',
-    'nav.mail.copy': 'Click to copy',
-    'nav.mail.copied': 'Copiado ✓',
-    'nav.based': 'Not for everyone',
+    'nav.quehacemos': 'Qué hacemos',
+    'nav.trabajo': 'Trabajo hecho',
+    'nav.preguntas': 'Preguntas',
     'nav.cart.default': '¿Quedamos?',
     'nav.cart.hover': 'Te vamos a caer bien',
 
     // SIDE MENU
+    'side.porque': 'SIN LETRA PEQUEÑA',
     'side.ramas': 'LAS TRES RAMAS',
     'side.rama.top': 'LA RAMA',
     'side.rama.incluye': 'QUÉ INCLUYE',
@@ -70,15 +69,14 @@ const DICT = {
   },
   en: {
     // NAV
-    'nav.tag.1': 'Finance · Tech',
-    'nav.tag.2': 'Brand',
-    'nav.mail.copy': 'Click to copy',
-    'nav.mail.copied': 'Copied ✓',
-    'nav.based': 'Not for everyone',
+    'nav.quehacemos': 'What we do',
+    'nav.trabajo': 'Work done',
+    'nav.preguntas': 'Questions',
     'nav.cart.default': 'Want to meet?',
     'nav.cart.hover': 'You\'re going to like us',
 
     // SIDE MENU
+    'side.porque': 'NO SMALL PRINT',
     'side.ramas': 'THE THREE BRANCHES',
     'side.rama.top': 'THE BRANCH',
     'side.rama.incluye': 'WHAT IS INCLUDED',

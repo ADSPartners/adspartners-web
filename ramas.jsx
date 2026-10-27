@@ -1,6 +1,6 @@
 /* global React, ReactDOM, useT, Nav, SideMenu, Footer, useReveal, I18nProvider, CookieConsent, ChatGlobo, Cabecera, secTexto, secQuieto, proyIr, ListaTrabajos */
 // ============= LAS TRES RAMAS =============
-// La sección «Qué hacemos» de la home (tres columnas sobre un cielo que se mueve) y la página de cada rama
+// La sección «Qué hacemos» de la home (una fila por rama sobre un cielo que se mueve) y la página de cada rama
 // (/finance/, /tech/, /brand/, generadas por build.mjs desde rama.html). Los textos viven en ramas-data.jsx.
 // Todo es tipografía y línea fina: aquí no hay tarjetas ni diagramas.
 const { useEffect, useRef } = React;
@@ -62,6 +62,8 @@ function Cielo({ tono, luz }) {
 const ramaIr = (e, r, i) => proyIr(e, e.currentTarget.href, r.nombre + '.', ramasNum(i));
 
 // ---------- Sección de la home ----------
+// Una fila por rama: número, nombre, su frase con lo que incluye en pastillas, y cuánto tarda el primer resultado.
+// Al señalar una fila, las otras se apagan y su nombre se inclina.
 function Ramas() {
   const { lang } = useT();
   const R = ramasDatos(lang);
@@ -70,21 +72,30 @@ function Ramas() {
     <section className="ramas panel" id="ramas" data-screen-label="Las tres ramas" data-nav-theme="light">
       <Cielo />
       <Cabecera etq={R.home.etq} titulo={R.home.titulo} lado={R.home.lado} />
-      <div className="rcols">
+      <ol className="rfilas">
         {ramasOrden().map((id, i) => {
           const r = R[id];
           return (
-            <div className={'rcol-w reveal reveal-delay-' + (i + 1)} key={id}>
-              <a className="rcol" href={id + '/'} data-cursor="ver" data-cursor-label={R.home.ver} onClick={(e) => ramaIr(e, r, i)}>
-                <span className="rcol__num">{ramasNum(i)}</span>
-                <span className="rcol__nombre"><small>ads</small>{r.corto}</span>
-                <span className="rcol__frase">{r.frase}</span>
-                <span className="rcol__ver">{R.home.ver} {r.nombre}<i aria-hidden="true">→</i></span>
+            <li className="rfila-w reveal" key={id} style={{ transitionDelay: i * 90 + 'ms' }}>
+              <a className="rfila" href={id + '/'} data-cursor="ver" data-cursor-label={R.home.ver} onClick={(e) => ramaIr(e, r, i)}>
+                <span className="rfila__num">{ramasNum(i)}</span>
+                <span className="rfila__nombre"><small>ads</small>{r.corto}</span>
+                <span className="rfila__cuerpo">
+                  <span className="rfila__frase">{r.frase}</span>
+                  <span className="rfila__pastillas">
+                    {r.incluye.map((x) => <span className="pastilla" key={x.t}>{x.t}</span>)}
+                  </span>
+                </span>
+                <span className="rfila__plazo">
+                  <small>{R.pagina.plazo}</small>
+                  {r.paso.etq}
+                </span>
+                <span className="rfila__fl" aria-hidden="true">→</span>
               </a>
-            </div>
+            </li>
           );
         })}
-      </div>
+      </ol>
     </section>
   );
 }
@@ -226,7 +237,7 @@ function RamaApp() {
   );
 }
 
-Object.assign(window, { Ramas, Cielo });
+Object.assign(window, { Ramas, Cielo, ramaIr });
 
 // Solo se monta en las páginas de rama (su <body> lleva data-rama); en la home monta app.jsx.
 (function montarRama() {

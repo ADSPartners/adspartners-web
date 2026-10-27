@@ -1,11 +1,12 @@
 /* global React, useT */
 // ============= SECCIONES DE LA HOME =============
-// Portada, testimonios, preguntas y cierre, y las piezas que comparten todos los bloques (cabecera, titular
+// Portada, «sin letra pequeña», testimonios, preguntas y cierre, y las piezas que comparten todos los bloques (cabecera, titular
 // que se rellena). Los textos viven en secciones-data.jsx (window.SECCIONES); aquí solo se pintan y se mueven.
 // Las tres ramas van en ramas.jsx y la lista de trabajos, en proyectos.jsx.
 //
 // Regla de movimiento: una sola cosa moviéndose por pantalla. Solo se mueve sola la palabra de la portada
-// (y el cielo de las ramas, al fondo); lo demás responde al scroll, al ratón o a un clic.
+// (y el cielo de las ramas, al fondo); lo demás responde al scroll, al ratón o a un clic. Las tarjetas de
+// «sin letra pequeña» se animan una sola vez al entrar y se quedan quietas.
 const { useState, useEffect, useRef } = React;
 
 // En el prerender del build (jsdom) y con «reducir movimiento» las piezas se pintan en su estado final.
@@ -128,6 +129,200 @@ function Portada() {
   );
 }
 
+// ---------- Sin letra pequeña ----------
+// Cinco tarjetas, cada una con una pieza que cuenta su promesa. Cada pieza se mueve UNA vez, al entrar en
+// pantalla, y se queda quieta: no hay nada en bucle. Sin JavaScript, en el prerender y con «reducir
+// movimiento», se pinta directamente el estado final (el CSS por defecto es el final; .is-espera lo esconde).
+
+// 'espera' hasta que la tarjeta asoma, 'on' mientras se anima y 'fin' si no hay que animar.
+function useUnaVez(ref) {
+  const [estado, setEstado] = useState(SEC_BOT ? 'fin' : 'espera');
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+    if (secQuieto() || !('IntersectionObserver' in window)) { setEstado('fin'); return undefined; }
+    const io = new IntersectionObserver((es) => {
+      if (es.some((e) => e.isIntersecting)) { setEstado('on'); io.disconnect(); }
+    }, { threshold: 0.45 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  return estado;
+}
+
+function PqTarjeta({ id, x, children, pie }) {
+  const ref = useRef(null);
+  const estado = useUnaVez(ref);
+  return (
+    <article className={'pq-tar pq-tar--' + id + (estado === 'espera' ? ' is-espera' : estado === 'on' ? ' is-on' : '')} ref={ref}>
+      <div className="pq-tar__texto">
+        <h3 className="pq-tar__t">{x.t}</h3>
+        <p className="pq-tar__d">{x.d}</p>
+        {pie || null}
+      </div>
+      <div className="pq-tar__vivo" aria-hidden="true">{children(estado)}</div>
+    </article>
+  );
+}
+
+// Un mensaje que llega: «escribiendo…» y, después, la burbuja.
+function PqPersona({ x }) {
+  return (
+    <PqTarjeta id="persona" x={x}>
+      {() => (
+        <div className="pq-chat">
+          <div className="pq-chat__cab">
+            <span className="pq-av">{x.iniciales}</span>
+            <b>{x.quien}</b>
+            <span className="pq-chat__linea"><i></i>{x.enLinea}</span>
+          </div>
+          <div className="pq-chat__escribe">{x.escribiendo}<span><i></i><i></i><i></i></span></div>
+          <div className="pq-chat__msg">
+            <p>{x.msg}</p>
+            <span className="pq-chat__hora">{x.hora} · {x.visto} ✓✓</span>
+          </div>
+        </div>
+      )}
+    </PqTarjeta>
+  );
+}
+
+// Un presupuesto: se marcan alcance, plazo y precio, y le cae el sello.
+function PqPrecio({ x }) {
+  return (
+    <PqTarjeta id="precio" x={x}>
+      {() => (
+        <div className="pq-doc">
+          <p className="pq-doc__t">{x.doc}</p>
+          <span className="pq-raya"></span>
+          <span className="pq-raya pq-raya--corta"></span>
+          <ul className="pq-doc__lista">
+            {x.lineas.map((l, k) => <li key={l} style={{ '--k': k }}><span>{l}</span><i>✓</i></li>)}
+          </ul>
+          <span className="pq-sello">{x.sello}</span>
+        </div>
+      )}
+    </PqTarjeta>
+  );
+}
+
+// El calendario de este mes, con la visita rodeada.
+function PqVisita({ x }) {
+  const hoy = new Date();
+  const anio = hoy.getFullYear();
+  const mes = hoy.getMonth();
+  const hueco = (new Date(anio, mes, 1).getDay() + 6) % 7;    // la semana empieza en lunes
+  const total = new Date(anio, mes + 1, 0).getDate();
+  // La visita: el primer jueves a partir del día 8.
+  let dia = 8;
+  while (new Date(anio, mes, dia).getDay() !== 4) dia += 1;
+  const nombreMes = new Intl.DateTimeFormat(x.locale, { month: 'long' }).format(hoy);
+  const corto = new Intl.DateTimeFormat(x.locale, { weekday: 'short' }).format(new Date(anio, mes, dia)).replace('.', '');
+  const nombreDia = corto.charAt(0).toUpperCase() + corto.slice(1);
+  const celdas = [];
+  for (let k = 0; k < hueco; k += 1) celdas.push(<span key={'h' + k}></span>);
+  for (let d = 1; d <= total; d += 1) {
+    celdas.push(
+      <span key={d} className={d === dia ? 'is-visita' : undefined}>
+        {d}
+        {d === dia ? <svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="17" pathLength="1" /></svg> : null}
+      </span>,
+    );
+  }
+  return (
+    <PqTarjeta id="visita" x={x}>
+      {() => (
+        <div className="pq-cal">
+          <p className="pq-cal__mes">{nombreMes} <span>{anio}</span></p>
+          <div className="pq-cal__rejilla">
+            {x.dias.map((d, k) => <b key={k}>{d}</b>)}
+            {celdas}
+          </div>
+          <p className="pq-cal__evento"><i></i>{nombreDia} {dia} · {x.evento}</p>
+        </div>
+      )}
+    </PqTarjeta>
+  );
+}
+
+// Una factura: la línea del Diagnóstico se tacha y el total se queda más corto.
+function PqDescuento({ x }) {
+  return (
+    <PqTarjeta id="descuento" x={x}>
+      {() => (
+        <div className="pq-fact">
+          {x.lineas.map((l, k) => (
+            <div className={'pq-fact__l pq-fact__l--' + k} key={l}>
+              <span>{l}</span>
+              <span className="pq-fact__puntos"></span>
+              <span className="pq-fact__importe"><i></i></span>
+              {k === 0 ? <span className="pq-fact__marca">{x.marca}</span> : null}
+            </div>
+          ))}
+        </div>
+      )}
+    </PqTarjeta>
+  );
+}
+
+// Un contador de facturas leídas solas, con el dato real del trabajo de hostelería.
+function PqSolo({ x }) {
+  const pie = (
+    <a className="pq-tar__ver" href="proyectos/gestion-hosteleria/" data-cursor="cta"
+      onClick={(e) => { if (window.proyIr) window.proyIr(e, e.currentTarget.href, x.caso, '(02)'); }}>
+      {x.ver} <i aria-hidden="true">→</i>
+    </a>
+  );
+  return (
+    <PqTarjeta id="solo" x={x} pie={pie}>
+      {(estado) => <PqCuenta x={x} estado={estado} />}
+    </PqTarjeta>
+  );
+}
+
+function PqCuenta({ x, estado }) {
+  const [n, setN] = useState(estado === 'espera' ? 0 : x.n);
+  useEffect(() => {
+    if (estado === 'fin') { setN(x.n); return undefined; }
+    if (estado !== 'on') return undefined;
+    let raf = 0;
+    const t0 = performance.now();
+    const dura = 1700;
+    const paso = (t) => {
+      const p = Math.min(1, Math.max(0, (t - t0) / dura));
+      setN(Math.round(x.n * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) raf = requestAnimationFrame(paso);
+    };
+    raf = requestAnimationFrame(paso);
+    return () => cancelAnimationFrame(raf);
+  }, [estado, x.n]);
+  return (
+    <div className="pq-cuenta">
+      <p className="pq-cuenta__n">{n}</p>
+      <p className="pq-cuenta__u">{x.unidad}</p>
+      <span className="pq-cuenta__barra"><i style={{ transform: 'scaleX(' + (n / x.n).toFixed(3) + ')' }}></i></span>
+      <p className="pq-cuenta__extra"><span className="pq-semaforo"><i></i><i></i><i></i></span>{x.extra}</p>
+    </div>
+  );
+}
+
+function PorQue() {
+  const d = useSec().porque;
+  if (!d) return null;
+  return (
+    <section className="porque panel" id="porque" data-screen-label="Sin letra pequeña" data-nav-theme="light">
+      <Cabecera etq={d.etq} titulo={d.titulo} lado={d.lado} />
+      <div className="pq-rejilla">
+        <PqPersona x={d.persona} />
+        <PqPrecio x={d.precio} />
+        <PqVisita x={d.visita} />
+        <PqDescuento x={d.descuento} />
+        <PqSolo x={d.solo} />
+      </div>
+    </section>
+  );
+}
+
 // ---------- Testimonios ----------
 function Testimonios() {
   const d = useSec().testimonios;
@@ -245,6 +440,6 @@ function Cierre() {
 }
 
 Object.assign(window, {
-  Portada, Testimonios, Preguntas, Cierre,
+  Portada, PorQue, Testimonios, Preguntas, Cierre,
   Cabecera, Relleno, secTexto, secIr, secIrA, useSec, secQuieto,
 });

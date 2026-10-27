@@ -94,25 +94,49 @@ body.cursor-cta .cursor-dot { background: currentColor; }
 }
 
 /* ============ NAV ============ */
+/* Barra: arriba del todo ocupa el ancho; al bajar (.nav--recogida) se recoge en una píldora de cristal
+   centrada, para no pisar nunca lo que pasa por debajo. El tono (.nav--dark / .nav--light) lo decide el
+   bloque que pasa por debajo (data-nav-theme). «Qué hacemos» abre .nav-panel con las tres ramas. */
 .nav {
   position: fixed;
-  top: 6px; left: 8px; right: 8px;
+  top: 8px; left: 0; right: 0;
   z-index: 100;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  padding: 8px 14px;
   pointer-events: none;
   font-size: 11px;
   letter-spacing: .04em;
   color: var(--marron);
-  height: 44px;
   isolation: isolate;
   transition: color .45s ease;
+  --nav-ancho: calc(100vw - 16px);
+  --nav-muelle: cubic-bezier(.22, 1, .36, 1);
 }
-.nav--dark { color: var(--beige); }
-.nav--light { color: var(--marron); }
+.nav--dark { color: var(--beige); --cristal: rgba(31, 13, 4, .62); --cristal-borde: rgba(231, 226, 218, .14); --cristal-luz: rgba(231, 226, 218, .07); }
+.nav--light { color: var(--marron); --cristal: rgba(245, 243, 241, .7); --cristal-borde: rgba(52, 25, 10, .1); --cristal-luz: rgba(255, 255, 255, .55); }
+.nav--recogida { --nav-ancho: min(940px, calc(100vw - 24px)); }
+.nav-pildora {
+  pointer-events: auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 24px;
+  width: var(--nav-ancho);
+  height: 50px;
+  padding: 0 8px 0 16px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  transition: width .8s var(--nav-muelle), background-color .45s ease, border-color .45s ease, box-shadow .45s ease;
+}
+.nav--recogida .nav-pildora,
+.nav-panel {
+  background: var(--cristal);
+  border-color: var(--cristal-borde);
+  -webkit-backdrop-filter: blur(18px) saturate(1.3);
+          backdrop-filter: blur(18px) saturate(1.3);
+}
+.nav--recogida .nav-pildora { box-shadow: 0 14px 34px -18px rgba(25, 9, 0, .45); }
 .nav-logo { transition: background-color .45s ease; }
 .nav-block { pointer-events: auto; display: flex; flex-direction: column; justify-content: center; line-height: 1.4; min-width: 0; }
 .nav-logo-block {
@@ -129,37 +153,94 @@ body.cursor-cta .cursor-dot { background: currentColor; }
   transition: background-color .45s ease;
   opacity: 1;
 }
-.nav-tag, .nav-contact {
-  justify-self: center;
-  align-items: flex-start;
-  text-align: left;
-}
-.nav-tag span { letter-spacing: .08em; text-transform: uppercase; opacity: .85; font-size: 10.5px; }
-.nav-contact { font-size: 10.5px; letter-spacing: .03em; min-width: 0; overflow: hidden; }
-.nav-contact .nav-mail, .nav-contact span:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.nav-contact span:last-child { text-transform: uppercase; opacity: .7; margin-top: 1px; font-size: 10.5px; }
-.nav-mail {
+
+/* Enlaces del centro */
+.nav-links { display: flex; gap: clamp(18px, 2.4vw, 32px); margin: 0; padding: 0; list-style: none; }
+.nav-links a {
   position: relative;
-  display: inline-block;
-  align-self: flex-start;
-  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 0;
   color: inherit;
-  border-bottom: 1px solid currentColor;
-  padding-bottom: 1px;
-  overflow: hidden;
-  height: 1.4em;
-  font-size: 11.5px;
+  text-decoration: none;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: .8;
+  transition: opacity .25s ease;
 }
-.nav-mail-default, .nav-mail-copied {
-  display: block;
-  transition: transform .35s cubic-bezier(.7,0,.3,1);
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 2px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform .35s cubic-bezier(.2, .8, .2, 1);
 }
-.nav-mail-copied {
-  position: absolute; top: 100%; left: 0;
-  font-family: var(--serif); font-style: italic; font-weight: 300;
+.nav-links a:hover, .nav-links a:focus-visible, .nav--abierta .nav-links li:first-child a { opacity: 1; }
+.nav-links a:hover::after, .nav-links a:focus-visible::after { transform: scaleX(1); }
+.nav-links__fl { font-style: normal; font-size: 10px; letter-spacing: 0; transition: transform .5s var(--nav-muelle); }
+.nav--abierta .nav-links__fl { transform: rotate(180deg); }
+
+/* El desplegable de «Qué hacemos» */
+.nav-panel {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  width: min(940px, calc(100vw - 24px));
+  margin-top: 8px;
+  padding: 6px;
+  border: 1px solid var(--cristal-borde);
+  border-radius: 24px;
+  box-shadow: 0 26px 50px -26px rgba(25, 9, 0, .55);
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(-10px) scale(.985);
+  transform-origin: top center;
+  transition: opacity .25s ease, transform .5s var(--nav-muelle), visibility 0s linear .25s;
 }
-.nav-mail:hover .nav-mail-default { transform: translateY(-100%); }
-.nav-mail:hover .nav-mail-copied { transform: translateY(-100%); }
+.nav--abierta .nav-panel {
+  pointer-events: auto;
+  visibility: visible;
+  opacity: 1;
+  transform: none;
+  transition: opacity .3s ease, transform .6s var(--nav-muelle), visibility 0s;
+}
+.nav-panel__rama {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-content: start;
+  padding: 16px 18px 20px;
+  border-radius: 18px;
+  color: inherit;
+  text-decoration: none;
+  letter-spacing: 0;
+  transition: background-color .3s ease;
+}
+.nav-panel__rama:hover, .nav-panel__rama:focus-visible { background: var(--cristal-luz); outline: none; }
+.nav-panel__num { font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 15px; opacity: .6; }
+.nav-panel__fl { justify-self: end; font-size: 15px; transition: transform .5s var(--nav-muelle); }
+.nav-panel__rama:hover .nav-panel__fl { transform: translateX(5px); }
+.nav-panel__nombre {
+  grid-column: 1 / -1;
+  margin: 18px 0 8px;
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: 34px;
+  line-height: 1;
+  letter-spacing: -.02em;
+  transition: transform .6s var(--nav-muelle);
+}
+.nav-panel__nombre em { font-size: .5em; opacity: .62; }
+.nav-panel__rama:hover .nav-panel__nombre { transform: translateX(6px); font-style: italic; }
+.nav-panel__frase { grid-column: 1 / -1; max-width: 27ch; font-size: 13px; line-height: 1.4; opacity: .78; }
 
 .nav-cart {
   position: relative;
@@ -175,11 +256,15 @@ body.cursor-cta .cursor-dot { background: currentColor; }
   overflow: hidden;
   cursor: none;
   display: flex; align-items: center; justify-content: center;
-  height: 30px;
+  height: 34px;
   width: 200px;
   flex-shrink: 0;
-  transition: background .35s ease, color .35s ease;
+  transition: background .35s ease, color .35s ease, border-color .35s ease;
 }
+/* En la píldora, el botón va relleno y algo más corto. */
+.nav--recogida .nav-cart { width: 168px; }
+.nav--recogida.nav--light .nav-cart { background: var(--marron); border-color: var(--marron); color: var(--beige); }
+.nav--recogida.nav--dark .nav-cart { background: var(--beige); border-color: var(--beige); color: var(--marron); }
 .nav-cart-text {
   position: absolute;
   left: 0; right: 0;
@@ -206,12 +291,9 @@ body.cursor-cta .cursor-dot { background: currentColor; }
   100% { transform: scale(3.6); opacity: 0; }
 }
 
-@media (max-width: 1000px) {
-  .nav { grid-template-columns: 1fr auto auto; gap: 16px; padding: 14px 18px; }
-  .nav-tag, .nav-contact { display: none; }
-}
-@media (max-width: 700px) {
-  .nav { padding: 12px 16px; }
+@media (max-width: 900px) {
+  .nav-links, .nav-panel { display: none; }
+  .nav-pildora { grid-template-columns: 1fr auto; }
 }
 @media (max-width: 480px) {
   .nav-cart { width: 180px; padding: 0 12px; }
@@ -1509,7 +1591,6 @@ body.lang-switched-in .lang-mark {
 
 /* ---------- MÓVIL PEQUEÑO (≤380px) ---------- */
 @media (max-width: 380px) {
-  .nav { padding: 10px 14px; height: 64px; }
   .nav-cart { width: 156px; height: 32px; padding: 0 10px; font-size: 9px; }
   .nav-cart-text { font-size: 9px; gap: 10px; }
   .nav-logo { height: 22px; }

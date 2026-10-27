@@ -1,4 +1,4 @@
-/* global React, ReactDOM, I18nProvider, Nav, SideMenu, Portada, Ramas, Trabajos, Testimonios, Preguntas, Cierre, Footer, Quedamos, useReveal, useT, CookieConsent, ChatGlobo */
+/* global React, ReactDOM, I18nProvider, Nav, SideMenu, Portada, PorQue, Ramas, Trabajos, Testimonios, Preguntas, Cierre, Footer, Quedamos, useReveal, useT, CookieConsent, ChatGlobo */
 const { useState, useEffect } = React;
 
 function AppInner() {
@@ -17,6 +17,7 @@ function AppInner() {
       <SideMenu />
       <div className="scroll-content">
         <Portada />
+        <PorQue />
         <Ramas />
         {typeof Trabajos !== 'undefined' && <Trabajos />}
         <Testimonios />

@@ -40,8 +40,8 @@ window.RAMAS = {
       corto: 'Finance',
       frase: 'Saber qué gana cada línea de negocio. Todos los meses.',
       idea: 'Vuestra gestoría registra. {Nosotros interpretamos.}',
-      persona: 'Daniel de Céspedes',
-      nota: 'Cinco años llevando la contabilidad de fondos de inversión.',
+      persona: 'Álvaro Espinosa',
+      nota: 'Vuestro contacto. Los números los analiza un financiero con cinco años llevando la contabilidad de fondos de inversión.',
       plazo: '30 días hasta el primer cierre.',
       incluye: [
         { t: 'Diagnóstico financiero', d: 'Dónde se gana y dónde se pierde dinero hoy, con vuestros propios números.' },
@@ -130,8 +130,8 @@ window.RAMAS = {
       corto: 'Finance',
       frase: 'Knowing what each business line earns. Every month.',
       idea: 'Your accountants record. {We interpret.}',
-      persona: 'Daniel de Céspedes',
-      nota: 'Five years running the accounting of investment funds.',
+      persona: 'Álvaro Espinosa',
+      nota: 'Your contact. The numbers are analysed by a finance specialist with five years running the accounting of investment funds.',
       plazo: '30 days to the first monthly close.',
       incluye: [
         { t: 'Financial diagnosis', d: 'Where money is made and lost today, with your own numbers.' },
