@@ -99,33 +99,6 @@ function ListaTrabajos({ lista }) {
   );
 }
 
-// ---------- Sección de la home ----------
-function Trabajos() {
-  const { t } = useT();
-  const lista = window.TRABAJOS || [];
-  if (!lista.length) return null;
-  const aQuedamos = () => {
-    const el = document.getElementById('quedamos');
-    if (el) (window.adsIr || ((y) => window.scrollTo({ top: y, behavior: 'smooth' })))(el.getBoundingClientRect().top + window.scrollY);
-  };
-  return (
-    <section className="proyectos trabajos panel" id="proyectos" data-screen-label="Trabajo hecho" data-nav-theme="dark">
-      <header className="proyectos-cab">
-        <h2 className="proyectos-titulo reveal">Selected Work<sup>({proyNum(lista.length)})</sup></h2>
-        <div className="proyectos-intro reveal reveal-delay-1">
-          <p className="proyectos-intro__lead">{t('proy.lead')}</p>
-          <p className="proyectos-intro__body">{t('proy.body')}</p>
-        </div>
-      </header>
-      <ListaTrabajos lista={lista} />
-      <div className="proyectos-cta reveal">
-        <p className="proyectos-cta__txt">{t('proy.cta')}</p>
-        <button type="button" className="qd-prompt__btn con-flecha" onClick={aQuedamos} data-cursor="cta">[{t('proy.cta.btn')}]<span className="flecha-m" aria-hidden="true"></span></button>
-      </div>
-    </section>
-  );
-}
-
 // ---------- Página de un proyecto ----------
 function CasoCabecera({ p, d, i, total }) {
   const { t, lang } = useT();

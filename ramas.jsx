@@ -1,7 +1,7 @@
 /* global React, ReactDOM, useT, Nav, SideMenu, Footer, useReveal, I18nProvider, CookieConsent, ChatGlobo, Cabecera, secTexto, secQuieto, proyIr, ListaTrabajos */
 // ============= LAS TRES RAMAS =============
-// La sección «Qué hacemos» de la home (una fila por rama sobre un cielo que se mueve) y la página de cada rama
-// (/finance/, /tech/, /brand/, generadas por build.mjs desde rama.html). Los textos viven en ramas-data.jsx.
+// La página de cada rama (/finance/, /tech/, /brand/, generadas por build.mjs desde rama.html). Los textos viven en
+// ramas-data.jsx.
 // Todo es tipografía y línea fina: aquí no hay tarjetas ni diagramas.
 const { useEffect, useRef } = React;
 
@@ -60,65 +60,6 @@ function Cielo({ tono, luz }) {
 
 // Abre la página de una rama con la cortina (la misma del cambio de idioma y de los proyectos).
 const ramaIr = (e, r, i) => proyIr(e, e.currentTarget.href, r.nombre + '.', ramasNum(i));
-
-// ---------- Sección de la home ----------
-// Una fila por rama: número, nombre, su frase con lo que incluye en pastillas, y cuánto tarda el primer resultado.
-// Al señalar una fila (solo esa: las demás no se tocan), le sale delante el signo de la rama, las pastillas se
-// rellenan una detrás de otra y la flecha del círculo empuja. Todo con la misma curva y a la vez.
-
-// El signo de cada rama: barras (Finance), nodos que se conectan (Tech) y «Aa» (Brand).
-function RamaSigno({ id }) {
-  if (id === 'finance') {
-    return (
-      <svg viewBox="0 0 40 28"><rect x="6" y="16" width="7" height="8" rx="1.5" /><rect x="16.5" y="10" width="7" height="14" rx="1.5" /><rect x="27" y="3" width="7" height="21" rx="1.5" /></svg>
-    );
-  }
-  if (id === 'tech') {
-    return (
-      <svg viewBox="0 0 40 28"><path d="M7 16 20 7l13 13" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /><circle cx="7" cy="16" r="3.4" /><circle cx="20" cy="7" r="3.4" /><circle cx="33" cy="20" r="3.4" /></svg>
-    );
-  }
-  return <svg viewBox="0 0 40 28"><text x="20" y="21" textAnchor="middle">Aa</text></svg>;
-}
-
-function Ramas() {
-  const { lang } = useT();
-  const R = ramasDatos(lang);
-  if (!R.home) return null;
-  return (
-    <section className="ramas panel" id="ramas" data-screen-label="Las tres ramas" data-nav-theme="light">
-      <Cielo />
-      <Cabecera etq={R.home.etq} titulo={R.home.titulo} lado={R.home.lado} />
-      <ol className="rfilas">
-        {ramasOrden().map((id, i) => {
-          const r = R[id];
-          return (
-            <li className="rfila-w reveal" key={id} style={{ transitionDelay: i * 90 + 'ms' }}>
-              <a className="rfila con-flecha" href={id + '/'} onClick={(e) => ramaIr(e, r, i)}>
-                <span className="rfila__titulo">
-                  <span className="rfila__num">{ramasNum(i)}</span>
-                  <span className="rfila__signo" aria-hidden="true"><RamaSigno id={id} /></span>
-                  <span className="rfila__nombre"><small>ads</small>{r.corto}</span>
-                </span>
-                <span className="rfila__cuerpo">
-                  <span className="rfila__frase">{r.frase}</span>
-                  <span className="rfila__pastillas">
-                    {r.incluye.map((x) => <span className="pastilla" key={x.t}>{x.t}</span>)}
-                  </span>
-                </span>
-                <span className="rfila__plazo">
-                  <small>{R.pagina.plazo}</small>
-                  {r.paso.etq}
-                </span>
-                <span className="rfila__ir" aria-hidden="true"><span className="flecha-m"></span></span>
-              </a>
-            </li>
-          );
-        })}
-      </ol>
-    </section>
-  );
-}
 
 // ---------- Página de una rama ----------
 function RamaCabecera({ r, p, i }) {
@@ -257,7 +198,7 @@ function RamaApp() {
   );
 }
 
-Object.assign(window, { Ramas, Cielo, ramaIr });
+Object.assign(window, { Cielo, ramaIr });
 
 // Solo se monta en las páginas de rama (su <body> lleva data-rama); en la home monta app.jsx.
 (function montarRama() {

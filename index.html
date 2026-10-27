@@ -110,40 +110,21 @@
   }
   </script>
 
-  <!-- La pantalla de carga solo sale en la primera página de la sesión. -->
-  <script>try{if(sessionStorage.getItem('ads_pre'))document.documentElement.setAttribute('data-pre','visto');else sessionStorage.setItem('ads_pre','1');}catch(e){}</script>
-  <link rel="preload" href="assets/fonts/AppleGaramond-Light.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="assets/fonts/AppleGaramond.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="assets/fonts/OpenSauceSans-SemiBold.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="assets/fonts/OpenSauceSans-Regular.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="preload" href="assets/hero/Fondo-Hero_adsPartners.webp" as="image" type="image/webp" fetchpriority="high" />
-  <link rel="preload" href="assets/logos/logotipo_beige.svg" as="image" />
-  <link rel="stylesheet" href="styles.css?v=2610271500" />
-  <link rel="stylesheet" href="secciones.css?v=2610271500" />
-  <link rel="stylesheet" href="proyectos.css?v=2610271500" />
-  <link rel="stylesheet" href="ramas.css?v=2610271500" />
-  <link rel="stylesheet" href="loader.css?v=2610271500" />
-  <link rel="stylesheet" href="cookie-consent.css?v=1" />
-  <link rel="stylesheet" href="chat-globo.css?v=1" />
+  <link rel="stylesheet" href="inicio.css" />
+  <link rel="stylesheet" href="cookie-consent.css" />
+  <link rel="stylesheet" href="chat-globo.css" />
   <link rel="icon" type="image/svg+xml" href="assets/logos/favicon.svg?v=2" />
   <link rel="alternate icon" type="image/png" sizes="32x32" href="assets/logos/favicon-32.png?v=2" />
   <link rel="apple-touch-icon" sizes="180x180" href="assets/logos/apple-touch-icon.png?v=2" />
-
 </head>
 <body>
-  <!-- Pantalla de carga: marca y cortina (solo CSS, ver loader.css) -->
-  <div id="ads-loader" aria-hidden="true">
-    <img class="adsl-marca" src="assets/logos/logotipo_beige.svg" alt="" />
-    <span class="adsl-linea"></span>
-    <span class="adsl-ramas">Finance · Tech · Brand</span>
-  </div>
-
-  <!-- Custom cursor -->
-  <div class="cursor cursor-ring" id="cursorRing"></div>
-  <div class="cursor cursor-dot" id="cursorDot"></div>
-
-  <!-- Lang switch curtain -->
+  <!-- Cortina del cambio de idioma (la mueve i18n.jsx) -->
   <div class="lang-curtain" id="langCurtain" aria-hidden="true">
     <div class="lang-mark">
-      <span class="lang-mark__num" id="langMarkNum">/02</span>
+      <span class="lang-mark__num" id="langMarkNum">/ ES</span>
       <span class="lang-mark__word" id="langMarkWord">Español.</span>
       <span class="lang-mark__rule"></span>
     </div>
@@ -151,39 +132,21 @@
 
   <div id="root"></div>
 
-  <!-- Hero animated wave/displacement filter -->
-  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-    <filter id="heroWaves" x="-15%" y="-15%" width="130%" height="130%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.006 0.010" numOctaves="2" seed="7" result="noise">
-        <animate attributeName="baseFrequency" dur="20s" values="0.006 0.010;0.011 0.015;0.006 0.010" repeatCount="indefinite" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1"></animate>
-      </feTurbulence>
-      <feDisplacementMap in="SourceGraphic" in2="noise" scale="26" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
-    </filter>
-  </svg>
-
-  <!-- React + Babel -->
+  <!-- React + Babel (solo para abrir la fuente sin compilar; el build los cambia por React de producción) -->
   <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 
-  <!-- Cursor logic (compartido con las páginas de proyecto) -->
-  <script src="cursor.js"></script>
   <!-- Scroll suave (Lenis, auto-alojado) y window.adsIr -->
   <script src="vendor/lenis.min.js"></script>
   <script src="scroll.js"></script>
 
-  <!-- App scripts -->
+  <!-- La home: textos (inicio-data.jsx) y página (inicio.jsx), más cookies, chat de FRESA y cambio de idioma -->
   <script src="legal-content.jsx"></script>
   <script type="text/babel" src="i18n.jsx"></script>
   <script type="text/babel" src="cookie-consent.jsx"></script>
   <script type="text/babel" src="chat-globo.jsx"></script>
-  <script type="text/babel" src="components.jsx"></script>
-  <script type="text/babel" src="secciones-data.jsx"></script>
-  <script type="text/babel" src="secciones.jsx"></script>
-  <script type="text/babel" src="proyectos-data.jsx"></script>
-  <script type="text/babel" src="proyectos.jsx"></script>
-  <script type="text/babel" src="ramas-data.jsx"></script>
-  <script type="text/babel" src="ramas.jsx"></script>
-  <script type="text/babel" src="app.jsx"></script>
+  <script type="text/babel" src="inicio-data.jsx"></script>
+  <script type="text/babel" src="inicio.jsx"></script>
 </body>
 </html>
