@@ -63,7 +63,24 @@ const ramaIr = (e, r, i) => proyIr(e, e.currentTarget.href, r.nombre + '.', rama
 
 // ---------- Sección de la home ----------
 // Una fila por rama: número, nombre, su frase con lo que incluye en pastillas, y cuánto tarda el primer resultado.
-// Al señalar una fila, las otras se apagan y su nombre se inclina.
+// Al señalar una fila (solo esa: las demás no se tocan), le sale delante el signo de la rama, las pastillas se
+// rellenan una detrás de otra y la flecha del círculo empuja. Todo con la misma curva y a la vez.
+
+// El signo de cada rama: barras (Finance), nodos que se conectan (Tech) y «Aa» (Brand).
+function RamaSigno({ id }) {
+  if (id === 'finance') {
+    return (
+      <svg viewBox="0 0 40 28"><rect x="6" y="16" width="7" height="8" rx="1.5" /><rect x="16.5" y="10" width="7" height="14" rx="1.5" /><rect x="27" y="3" width="7" height="21" rx="1.5" /></svg>
+    );
+  }
+  if (id === 'tech') {
+    return (
+      <svg viewBox="0 0 40 28"><path d="M7 16 20 7l13 13" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /><circle cx="7" cy="16" r="3.4" /><circle cx="20" cy="7" r="3.4" /><circle cx="33" cy="20" r="3.4" /></svg>
+    );
+  }
+  return <svg viewBox="0 0 40 28"><text x="20" y="21" textAnchor="middle">Aa</text></svg>;
+}
+
 function Ramas() {
   const { lang } = useT();
   const R = ramasDatos(lang);
@@ -77,9 +94,12 @@ function Ramas() {
           const r = R[id];
           return (
             <li className="rfila-w reveal" key={id} style={{ transitionDelay: i * 90 + 'ms' }}>
-              <a className="rfila" href={id + '/'} data-cursor="ver" data-cursor-label={R.home.ver} onClick={(e) => ramaIr(e, r, i)}>
-                <span className="rfila__num">{ramasNum(i)}</span>
-                <span className="rfila__nombre"><small>ads</small>{r.corto}</span>
+              <a className="rfila con-flecha" href={id + '/'} onClick={(e) => ramaIr(e, r, i)}>
+                <span className="rfila__titulo">
+                  <span className="rfila__num">{ramasNum(i)}</span>
+                  <span className="rfila__signo" aria-hidden="true"><RamaSigno id={id} /></span>
+                  <span className="rfila__nombre"><small>ads</small>{r.corto}</span>
+                </span>
                 <span className="rfila__cuerpo">
                   <span className="rfila__frase">{r.frase}</span>
                   <span className="rfila__pastillas">
@@ -90,7 +110,7 @@ function Ramas() {
                   <small>{R.pagina.plazo}</small>
                   {r.paso.etq}
                 </span>
-                <span className="rfila__fl" aria-hidden="true">→</span>
+                <span className="rfila__ir" aria-hidden="true"><span className="flecha-m"></span></span>
               </a>
             </li>
           );

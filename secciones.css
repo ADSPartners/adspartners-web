@@ -309,6 +309,7 @@ html:not([data-pre]) { --pre: .6s; }   /* primera visita: el contenido espera a 
 .pq-tar__t { margin: 0; font-family: var(--serif); font-weight: 300; font-size: clamp(26px, 2.25vw, 34px); line-height: 1.02; letter-spacing: -.02em; }
 .pq-tar__d { margin: 12px 0 0; max-width: 38ch; font-size: 14.5px; line-height: 1.5; color: rgba(52, 25, 10, .72); }
 .pq-tar__vivo { position: relative; }
+.pq-tar { transition: transform .5s var(--muelle), box-shadow .5s var(--muelle), border-color .4s ease; }
 @keyframes pqSube { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 @keyframes pqLlega { from { opacity: 0; transform: translateY(12px) scale(.92); } to { opacity: 1; transform: none; } }
 @keyframes pqAparece { from { opacity: 0; } to { opacity: 1; } }
@@ -488,8 +489,6 @@ html:not([data-pre]) { --pre: .6s; }   /* primera visita: el contenido espera a 
   letter-spacing: .2em;
   text-transform: uppercase;
 }
-.pq-tar__ver i { font-style: normal; font-size: 15px; letter-spacing: 0; transition: transform .5s var(--muelle); }
-.pq-tar__ver:hover i { transform: translateX(6px); }
 .pq-cuenta { width: 100%; }
 .pq-cuenta__n { margin: 0; font-family: var(--serif); font-weight: 300; font-size: clamp(96px, 10.5vw, 172px); line-height: .8; letter-spacing: -.05em; font-variant-numeric: tabular-nums; }
 .pq-cuenta__u { margin: 12px 0 20px; font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 23px; color: rgba(231, 226, 218, .7); }
@@ -501,10 +500,55 @@ html:not([data-pre]) { --pre: .6s; }   /* primera visita: el contenido espera a 
 .pq-semaforo i:nth-child(2) { background: #D6AE63; }
 .pq-semaforo i:nth-child(3) { background: #D9827A; }
 
+/* ============ HOVER DE «SIN LETRA PEQUEÑA» ============ */
+/* La tarjeta señalada sube un poco y su pieza reacciona; las demás no se tocan. */
+.pq-chat__msg, .pq-doc, .pq-cal__evento, .pq-fact__marca, .pq-chat__hora { transition: transform .5s var(--muelle), color .35s ease; }
+.pq-chat__linea i { position: relative; }
+.pq-chat__linea i::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: #5d9c6f; opacity: 0; }
+@media (hover: hover) {
+  .pq-tar:hover { transform: translateY(-6px); border-color: rgba(52, 25, 10, .14); box-shadow: 0 34px 60px -38px rgba(52, 25, 10, .55); }
+  .pq-tar--solo:hover { box-shadow: 0 34px 60px -30px rgba(25, 9, 0, .7); }
+  /* Persona: el mensaje se levanta, el «visto» se pone rosa y el punto verde hace «ping». */
+  .pq-tar--persona:hover .pq-chat__msg { transform: translateY(-3px); }
+  .pq-tar--persona:hover .pq-chat__hora { color: var(--rosa); }
+  .pq-tar--persona:hover .pq-chat__linea i::after { animation: pqPing 1.4s ease-out infinite; }
+  /* Precio: el presupuesto se endereza y el sello vuelve a caer. */
+  .pq-tar--precio:hover .pq-doc { transform: rotate(0deg) translateY(-4px); }
+  .pq-tar--precio:not(.is-on):hover .pq-sello { animation: pqSelloOtra .55s cubic-bezier(.3, 1.6, .5, 1) both; }
+  /* Visita: el círculo del día se vuelve a dibujar. */
+  .pq-tar--visita:not(.is-on):hover .is-visita circle { animation: pqRodea .9s var(--muelle) both; }
+  .pq-tar--visita:hover .pq-cal__evento { transform: translateX(4px); }
+  /* Descuento: la etiqueta «descontado» se vuelve a estampar. */
+  .pq-tar--descuento:not(.is-on):hover .pq-fact__marca { animation: pqMarca .5s cubic-bezier(.3, 1.6, .5, 1) both; }
+}
+@keyframes pqPing { 0% { transform: scale(1); opacity: .7; } 100% { transform: scale(3.2); opacity: 0; } }
+@keyframes pqSelloOtra { 0% { transform: rotate(-16deg) scale(1.35); } 100% { transform: rotate(-9deg) scale(1); } }
+
+/* ============ HOVER DE LOS TESTIMONIOS ============ */
+/* Quietos, como le gustan: solo la línea de arriba se dibuja más gruesa de izquierda a derecha. */
+.cita { position: relative; }
+.cita::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--marron);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform .7s var(--muelle);
+}
+@media (hover: hover) {
+  .cita:hover::before { transform: scaleX(1); }
+}
+
 /* ============ SIN MOVIMIENTO ============ */
 @media (prefers-reduced-motion: reduce) {
   .hero-intro > *, .preguntas__giro svg { animation: none; }
-  .rell__p, .rota__p, .preguntas__giro { transition: none; }
+  .rell__p, .rota__p, .preguntas__giro, .pq-tar, .cita::before { transition: none; }
+  .pq-tar:hover { transform: none; }
+  .pq-tar:hover .pq-sello, .pq-tar:hover .is-visita circle, .pq-tar:hover .pq-fact__marca, .pq-chat__linea i::after { animation: none !important; }
 }
 
 /* ============ TABLETA ============ */

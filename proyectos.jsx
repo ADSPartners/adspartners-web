@@ -76,7 +76,7 @@ function ListaTrabajos({ lista }) {
             <span className="tfila__que">{d.que}</span>
             <span className="tfila__rama"><i aria-hidden="true"></i>ads {x.rama}</span>
             <span className="tfila__dato">{d.dato || ''}</span>
-            <span className="tfila__fl" aria-hidden="true">{x.slug ? '→' : ''}</span>
+            <span className="tfila__fl" aria-hidden="true">{x.slug ? <span className="tfila__ir"><span className="flecha-m"></span></span> : null}</span>
           </>
         );
         const n = conPagina.findIndex((y) => y.slug === x.slug) + 1;
@@ -85,10 +85,8 @@ function ListaTrabajos({ lista }) {
             {x.slug
               ? (
                 <a
-                  className="tfila tfila--enlace"
+                  className="tfila tfila--enlace con-flecha"
                   href={`proyectos/${x.slug}/`}
-                  data-cursor="ver"
-                  data-cursor-label={t('proy.ver')}
                   onClick={(e) => proyIr(e, e.currentTarget.href, cliente + '.', '(' + proyNum(n) + ')')}>
                   {dentro}
                 </a>
@@ -122,7 +120,7 @@ function Trabajos() {
       <ListaTrabajos lista={lista} />
       <div className="proyectos-cta reveal">
         <p className="proyectos-cta__txt">{t('proy.cta')}</p>
-        <button type="button" className="qd-prompt__btn" onClick={aQuedamos} data-cursor="cta">[{t('proy.cta.btn')}]</button>
+        <button type="button" className="qd-prompt__btn con-flecha" onClick={aQuedamos} data-cursor="cta">[{t('proy.cta.btn')}]<span className="flecha-m" aria-hidden="true"></span></button>
       </div>
     </section>
   );

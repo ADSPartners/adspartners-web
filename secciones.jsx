@@ -141,20 +141,26 @@ function useUnaVez(ref) {
     const el = ref.current;
     if (!el) return undefined;
     if (secQuieto() || !('IntersectionObserver' in window)) { setEstado('fin'); return undefined; }
+    let fin = 0;
     const io = new IntersectionObserver((es) => {
-      if (es.some((e) => e.isIntersecting)) { setEstado('on'); io.disconnect(); }
+      if (es.some((e) => e.isIntersecting)) {
+        setEstado('on');
+        io.disconnect();
+        fin = setTimeout(() => setEstado('fin'), 3200);
+      }
     }, { threshold: 0.45 });
     io.observe(el);
-    return () => io.disconnect();
+    return () => { io.disconnect(); clearTimeout(fin); };
   }, []);
   return estado;
 }
 
-function PqTarjeta({ id, x, children, pie }) {
+function PqTarjeta({ id, x, children, pie, alEntrar }) {
   const ref = useRef(null);
   const estado = useUnaVez(ref);
   return (
-    <article className={'pq-tar pq-tar--' + id + (estado === 'espera' ? ' is-espera' : estado === 'on' ? ' is-on' : '')} ref={ref}>
+    <article className={'pq-tar pq-tar--' + id + (estado === 'espera' ? ' is-espera' : estado === 'on' ? ' is-on' : '')} ref={ref}
+      onMouseEnter={alEntrar ? () => alEntrar(estado) : undefined}>
       <div className="pq-tar__texto">
         <h3 className="pq-tar__t">{x.t}</h3>
         <p className="pq-tar__d">{x.d}</p>
@@ -268,26 +274,29 @@ function PqDescuento({ x }) {
 // Un contador de facturas leídas solas, con el dato real del trabajo de hostelería.
 function PqSolo({ x }) {
   const pie = (
-    <a className="pq-tar__ver" href="proyectos/gestion-hosteleria/" data-cursor="cta"
+    <a className="pq-tar__ver con-flecha" href="proyectos/gestion-hosteleria/" data-cursor="cta"
       onClick={(e) => { if (window.proyIr) window.proyIr(e, e.currentTarget.href, x.caso, '(02)'); }}>
-      {x.ver} <i aria-hidden="true">→</i>
+      {x.ver} <span className="flecha-m" aria-hidden="true"></span>
     </a>
   );
+  const [vuelta, setVuelta] = useState(0);
+  const alEntrar = (estado) => { if (estado === 'fin' && !secQuieto()) setVuelta((v) => v + 1); };
   return (
-    <PqTarjeta id="solo" x={x} pie={pie}>
-      {(estado) => <PqCuenta x={x} estado={estado} />}
+    <PqTarjeta id="solo" x={x} pie={pie} alEntrar={alEntrar}>
+      {(estado) => <PqCuenta x={x} estado={estado} vuelta={vuelta} />}
     </PqTarjeta>
   );
 }
 
-function PqCuenta({ x, estado }) {
+function PqCuenta({ x, estado, vuelta }) {
   const [n, setN] = useState(estado === 'espera' ? 0 : x.n);
   useEffect(() => {
-    if (estado === 'fin') { setN(x.n); return undefined; }
-    if (estado !== 'on') return undefined;
+    const otra = estado === 'fin' && vuelta > 0;
+    if (estado === 'fin' && !otra) { setN(x.n); return undefined; }
+    if (estado !== 'on' && !otra) return undefined;
     let raf = 0;
     const t0 = performance.now();
-    const dura = 1700;
+    const dura = otra ? 1100 : 1700;
     const paso = (t) => {
       const p = Math.min(1, Math.max(0, (t - t0) / dura));
       setN(Math.round(x.n * (1 - Math.pow(1 - p, 3))));
@@ -295,7 +304,7 @@ function PqCuenta({ x, estado }) {
     };
     raf = requestAnimationFrame(paso);
     return () => cancelAnimationFrame(raf);
-  }, [estado, x.n]);
+  }, [estado, vuelta, x.n]);
   return (
     <div className="pq-cuenta">
       <p className="pq-cuenta__n">{n}</p>
@@ -416,7 +425,7 @@ function Cierre() {
       <section className="cierre-pie" data-nav-theme="dark">
         <p className="sec-etq reveal">{d.etq}</p>
         <p className="cierre-pie__texto reveal reveal-delay-1">{secTexto(d.texto)}</p>
-        <button type="button" className="qd-prompt__btn cierre-pie__btn reveal reveal-delay-2" onClick={aQuedamos} data-cursor="cta">[{d.btn}]</button>
+        <button type="button" className="qd-prompt__btn cierre-pie__btn con-flecha reveal reveal-delay-2" onClick={aQuedamos} data-cursor="cta">[{d.btn}]<span className="flecha-m" aria-hidden="true"></span></button>
       </section>
     </>
   );

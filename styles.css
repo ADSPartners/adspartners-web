@@ -239,7 +239,7 @@ body.cursor-cta .cursor-dot { background: currentColor; }
   transition: transform .6s var(--nav-muelle);
 }
 .nav-panel__nombre em { font-size: .5em; opacity: .62; }
-.nav-panel__rama:hover .nav-panel__nombre { transform: translateX(6px); font-style: italic; }
+.nav-panel__rama:hover .nav-panel__nombre { transform: translateX(6px); }
 .nav-panel__frase { grid-column: 1 / -1; max-width: 27ch; font-size: 13px; line-height: 1.4; opacity: .78; }
 
 .nav-cart {
@@ -929,9 +929,62 @@ body.lang-switched-in .lang-mark {
   color: var(--beige);
   background: var(--marron);
   cursor: none;
-  transition: background .35s ease, color .35s ease;
+  gap: 12px;
+  transition: background .35s ease, color .35s ease, transform .45s cubic-bezier(.22, 1, .36, 1);
 }
 .qd-prompt__btn:hover { background: transparent; color: var(--marron); }
+@media (hover: hover) {
+  .qd-prompt__btn:hover { transform: scale(1.03); }
+}
+
+/* ============ FLECHA QUE EMPUJA ============ */
+/* El vocabulario de hover de la web (lo mismo que hace Ícaro en sus botones): un punto que, al señalar el
+   elemento que lo lleva (.con-flecha), se encoge y deja paso a una flecha que empuja hacia delante. */
+.flecha-m {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: 8px;
+  height: 1em;
+  vertical-align: middle;
+  transition: width .55s cubic-bezier(.22, 1, .36, 1);
+}
+.flecha-m::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  margin-top: -3.5px;
+  border-radius: 50%;
+  background: var(--flecha-punto, currentColor);
+  transition: transform .4s cubic-bezier(.22, 1, .36, 1), opacity .3s ease;
+}
+.flecha-m::after {
+  content: '→';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0;
+  opacity: 0;
+  transform: translate(-8px, -52%) scale(.6);
+  transition: transform .45s cubic-bezier(.22, 1, .36, 1), opacity .3s ease;
+}
+@media (hover: hover) {
+  .con-flecha:hover .flecha-m { width: 20px; }
+  .con-flecha:hover .flecha-m::before { transform: scale(.15); opacity: 0; }
+  .con-flecha:hover .flecha-m::after { opacity: 1; transform: translate(0, -52%); animation: flechaEmpujaM 1.1s ease-in-out .45s infinite; }
+}
+@keyframes flechaEmpujaM { 0%, 100% { transform: translate(0, -52%); } 50% { transform: translate(4px, -52%); } }
+.qd-prompt__btn .flecha-m { --flecha-punto: var(--rosa); }
+@media (prefers-reduced-motion: reduce) {
+  .con-flecha:hover .flecha-m::after { animation: none; }
+}
 
 /* Close button (revealed) */
 .qd-close {
@@ -1417,8 +1470,31 @@ body.lang-switched-in .lang-mark {
   color: var(--marron);
 }
 .foot__col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; padding: 0; margin: 0; }
-.foot__col ul a { font-size: 14px; opacity: .7; transition: opacity .2s, color .2s; color: var(--marron); }
-.foot__col ul a:hover { opacity: 1; color: var(--marron); text-decoration: underline; text-underline-offset: 3px; }
+.foot__col ul a {
+  position: relative;
+  display: inline-block;
+  font-size: 14px;
+  opacity: .7;
+  color: var(--marron);
+  transition: opacity .3s ease, transform .45s cubic-bezier(.22, 1, .36, 1);
+}
+/* Al señalar un enlace del pie, avanza un poco y le sale un punto rosa que hace «ping». */
+.foot__col ul a::before {
+  content: '';
+  position: absolute;
+  left: -14px;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin-top: -3px;
+  border-radius: 50%;
+  background: var(--rosa);
+  box-shadow: 0 0 0 1px rgba(52, 25, 10, .35);
+  transform: scale(0);
+  transition: transform .35s cubic-bezier(.22, 1, .36, 1);
+}
+.foot__col ul a:hover { opacity: 1; color: var(--marron); transform: translateX(14px); }
+.foot__col ul a:hover::before { transform: scale(1); }
 .foot__newsnote {
   margin: 0 0 18px;
   font-size: 14px;

@@ -7,7 +7,7 @@
 
 /* ============ EL CIELO ============ */
 /* Dos capas de nubes (ruido de SVG, pintado una vez) que pasan despacio a distinta velocidad, y una luz de
-   amanecer que respira y sigue al ratón. Solo se mueven `transform` y `translate`: no se repinta nada.
+   amanecer que respira y sigue al ratón (las nubes no: así, al señalar algo, se mueve menos a la vez). Solo se mueven `transform` y `translate`: no se repinta nada.
    Va como primer hijo de un bloque con `isolation: isolate`; el resto del bloque se pinta encima. */
 .cielo {
   position: absolute;
@@ -41,14 +41,13 @@
   background-repeat: repeat-x;
   background-size: var(--tesela) 100%;
   animation: cieloPasa var(--dura, 150s) linear infinite;
-  transition: translate 1.8s var(--muelle);
   will-change: transform;
   /* Las nubes se quedan en la franja del horizonte: arriba el cielo está limpio. */
   -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 34%, #000 86%, transparent 100%);
           mask-image: linear-gradient(to bottom, transparent 0, #000 34%, #000 86%, transparent 100%);
 }
 @keyframes cieloPasa { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(calc(var(--tesela) * -1), 0, 0); } }
-.cielo__nubes--a { background-image: var(--nube-a); opacity: var(--op-a); --dura: 112s; translate: calc(var(--mx, 0) * -10px) 0; }
+.cielo__nubes--a { background-image: var(--nube-a); opacity: var(--op-a); --dura: 112s; }
 .cielo__nubes--b {
   background-image: var(--nube-b);
   background-size: var(--tesela) 128%;
@@ -56,7 +55,6 @@
   opacity: var(--op-b);
   --dura: 66s;
   animation-delay: -24s;
-  translate: calc(var(--mx, 0) * -26px) 0;
 }
 /* Fuera de pantalla (o sin JS) el cielo se queda quieto. */
 .cielo:not(.is-on) .cielo__nubes,
@@ -95,54 +93,83 @@
 .ramas > :not(.cielo),
 .rama-cab > :not(.cielo),
 .rama-cierre > :not(.cielo) { position: relative; z-index: 1; }
-/* Una fila por rama: número, nombre, frase con pastillas, plazo del primer resultado y flecha. */
+/* Una fila por rama. Al señalar una (solo esa), aparece y crece su signo delante del nombre, las pastillas se
+   rellenan una detrás de otra y la flecha del círculo empuja. Todo con la misma curva y duraciones parecidas,
+   para que se mueva como una sola pieza. */
 .rfilas { margin: 0; padding: 0; list-style: none; border-top: 1px solid rgba(52, 25, 10, .34); }
 .rfila-w { border-bottom: 1px solid rgba(52, 25, 10, .16); }
 .rfila {
   position: relative;
   display: grid;
-  grid-template-columns: 58px minmax(0, 1fr) minmax(0, 1.3fr) 140px 28px;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.2fr) 140px 46px;
   align-items: center;
   column-gap: clamp(16px, 2vw, 32px);
   padding: clamp(26px, 3vw, 40px) 0;
   color: inherit;
-  transition: opacity .45s ease;
 }
-/* La luz de la fila señalada: un velo claro que se abre desde el centro. */
 .rfila::before {
   content: '';
   position: absolute;
   inset: 0 calc(var(--sec-x) * -.35);
   z-index: -1;
-  border-radius: 20px;
+  border-radius: 22px;
   background: rgba(250, 248, 245, .5);
   opacity: 0;
-  transform: scaleY(.6);
-  transition: opacity .45s ease, transform .7s var(--muelle);
+  transition: opacity .45s ease;
 }
-.rfila__num { font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 17px; opacity: .6; }
+.rfila__titulo { display: flex; align-items: center; min-width: 0; }
+.rfila__num { flex: none; width: 58px; font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 17px; opacity: .6; }
+.rfila__signo {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 0;
+  height: 62px;
+  margin-right: 0;
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--marron);
+  color: var(--rosa);
+  opacity: 0;
+  transition: width .55s var(--muelle), margin-right .55s var(--muelle), opacity .35s ease;
+}
+.rfila__signo svg { width: 46px; height: auto; fill: currentColor; transform: scale(.6); transition: transform .55s var(--muelle) .05s; }
+.rfila__signo text { font-family: var(--serif); font-style: italic; font-size: 22px; }
 .rfila__nombre {
   font-family: var(--serif);
   font-weight: 300;
-  font-size: clamp(50px, 5.8vw, 96px);
+  font-size: clamp(48px, 5.4vw, 88px);
   line-height: .92;
   letter-spacing: -.035em;
-  transition: transform .7s var(--muelle);
+  white-space: nowrap;
 }
-.rfila__nombre small { display: block; margin-bottom: .2em; font-size: .22em; font-style: italic; letter-spacing: 0; opacity: .62; }
+.rfila__nombre small { display: block; margin-bottom: .2em; font-size: .22em; font-style: italic; letter-spacing: 0; opacity: .62; transition: opacity .35s ease; }
 .rfila__cuerpo { display: flex; flex-direction: column; gap: 16px; }
 .rfila__frase { max-width: 40ch; font-size: 16px; line-height: 1.45; color: rgba(52, 25, 10, .82); }
 .rfila__pastillas { display: flex; flex-wrap: wrap; gap: 8px; }
+.rfila .pastilla { transition: background .35s ease, color .35s ease, border-color .35s ease; }
 .rfila__plazo { display: flex; flex-direction: column; gap: 6px; font-family: var(--serif); font-weight: 300; font-size: 27px; line-height: 1; letter-spacing: -.01em; white-space: nowrap; }
 .rfila__plazo small { font-family: var(--sans); font-size: 10px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; opacity: .6; }
-.rfila__fl { justify-self: end; font-size: 20px; transition: transform .6s var(--muelle); }
+.rfila__ir {
+  justify-self: end;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid rgba(52, 25, 10, .3);
+  border-radius: 50%;
+  transition: background .35s ease, border-color .35s ease, color .35s ease, transform .5s var(--muelle);
+}
 @media (hover: hover) {
-  .rfilas:hover .rfila { opacity: .38; }
-  .rfilas .rfila:hover { opacity: 1; }
-  .rfila:hover::before { opacity: 1; transform: none; }
-  .rfila:hover .rfila__nombre { transform: translateX(10px); font-style: italic; }
-  .rfila:hover .rfila__fl { transform: translateX(8px); }
-  .rfila:hover .pastilla { border-color: rgba(52, 25, 10, .4); }
+  .rfila:hover::before { opacity: 1; }
+  .rfila:hover .rfila__signo { width: 84px; margin-right: 22px; opacity: 1; }
+  .rfila:hover .rfila__signo svg { transform: none; }
+  .rfila:hover .rfila__nombre small { opacity: 1; }
+  .rfila:hover .pastilla { background: var(--marron); border-color: var(--marron); color: var(--beige); }
+  .rfila:hover .pastilla:nth-child(2) { transition-delay: .04s; }
+  .rfila:hover .pastilla:nth-child(3) { transition-delay: .08s; }
+  .rfila:hover .pastilla:nth-child(4) { transition-delay: .12s; }
+  .rfila:hover .rfila__ir { background: var(--marron); border-color: var(--marron); color: var(--beige); transform: scale(1.08); }
 }
 
 /* ============ PÁGINA DE UNA RAMA ============ */
@@ -300,15 +327,15 @@
 /* ============ SIN MOVIMIENTO ============ */
 @media (prefers-reduced-motion: reduce) {
   .cielo__nubes, .cielo__luz, .rama-cab__centro > * { animation: none; }
-  .cielo__nubes, .cielo__luz, .rfila, .rfila::before, .rfila__nombre, .rama-otra { transition: none; }
+  .cielo__nubes, .cielo__luz, .rfila::before, .rfila__signo, .rfila__signo svg, .rfila .pastilla, .rfila__ir, .rama-otra { transition: none; }
 }
 
 /* ============ TABLETA: las ramas, una debajo de otra ============ */
 @media (max-width: 900px) {
-  .rfila { grid-template-columns: 40px minmax(0, 1fr) 24px; row-gap: 18px; align-items: start; }
-  .rfila__num { padding-top: .5em; }
-  .rfila__cuerpo, .rfila__plazo { grid-column: 2 / 4; }
-  .rfila__fl { grid-column: 3; grid-row: 1; align-self: center; }
+  .rfila { grid-template-columns: minmax(0, 1fr) 40px; row-gap: 18px; align-items: start; }
+  .rfila__num { width: 40px; align-self: flex-start; padding-top: .5em; }
+  .rfila__cuerpo, .rfila__plazo { grid-column: 1 / -1; padding-left: 40px; }
+  .rfila__ir { grid-column: 2; grid-row: 1; align-self: center; width: 40px; height: 40px; }
   .rfila__plazo { flex-direction: row; align-items: baseline; gap: 12px; font-size: 22px; }
   .rfila__nombre { font-size: clamp(56px, 13vw, 96px); }
   .rama-cab__meta { grid-template-columns: 1fr; gap: 20px; }

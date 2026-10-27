@@ -567,8 +567,9 @@ function Quedamos() {
             {!revealed &&
             <div className="qd-prompt">
               <p className="qd-prompt__txt">{lang === 'en' ? 'Drop us a message, and we’ll take it from there.' : 'Escribidnos y nosotros nos encargamos del resto.'}</p>
-              <button type="button" className="qd-prompt__btn" onClick={() => setRevealed(true)} data-cursor="cta">
+              <button type="button" className="qd-prompt__btn con-flecha" onClick={() => setRevealed(true)} data-cursor="cta">
               <span className="qd-prompt__btn-default">[{lang === 'en' ? 'CLICK HERE' : 'HAZ CLICK AQUÍ'}]</span>
+              <span className="flecha-m" aria-hidden="true"></span>
               </button>
             </div>
             }

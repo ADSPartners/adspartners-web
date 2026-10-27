@@ -89,8 +89,8 @@ body.cursor-ver .cursor-dot { opacity: 0; }
 .proyectos .qd-prompt__btn:hover,
 .caso-sig .qd-prompt__btn:hover { background: transparent; color: var(--beige); }
 
-/* La lista de trabajos: una fila por cliente, sin imágenes. Al señalar una, se llena de crema desde abajo
-   y las demás se apagan. */
+/* La lista de trabajos: una fila por cliente, sin imágenes. Al señalar una que tiene página, el cliente avanza
+   y se tiñe de rosa, el punto de la rama hace «ping» y la flecha empuja. Las demás no se tocan. */
 .proyectos.trabajos { padding: var(--sec-y) var(--sec-x) calc(var(--sec-y) + var(--radio)); }   /* los márgenes del resto de la home */
 .trabajos .proyectos-cab { margin-bottom: clamp(36px, 4.6vw, 72px); }
 .trabajos .proyectos-titulo { font-size: clamp(48px, 7.6vw, 124px); }
@@ -99,27 +99,26 @@ body.cursor-ver .cursor-dot { opacity: 0; }
 .tfila {
   position: relative;
   display: grid;
-  grid-template-columns: 54px minmax(0, 1.55fr) minmax(0, 1.6fr) 118px minmax(0, .85fr) 26px;
+  grid-template-columns: 54px minmax(0, 1.55fr) minmax(0, 1.6fr) 118px minmax(0, .85fr) 40px;
   align-items: center;
   column-gap: 20px;
   min-height: 82px;
   padding: 14px 18px 14px 0;
   color: inherit;
-  overflow: hidden;
-  transition: color .35s ease, padding .5s cubic-bezier(.22, 1, .36, 1), opacity .35s ease;
 }
 .tfila::before {
   content: '';
   position: absolute;
-  inset: 0;
-  background: var(--beige);
-  transform: scaleY(0);
-  transform-origin: center bottom;
-  transition: transform .5s cubic-bezier(.22, 1, .36, 1);
+  inset: 0 calc(var(--sec-x) * -.3);
+  border-radius: 18px;
+  background: rgba(231, 226, 218, .06);
+  opacity: 0;
+  transition: opacity .4s ease;
 }
 .tfila > * { position: relative; }
 .tfila__num { font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 15px; opacity: .55; }
 .tfila__cliente {
+  transition: transform .5s cubic-bezier(.22, 1, .36, 1), color .35s ease;
   font-family: var(--serif);
   font-weight: 300;
   font-size: clamp(24px, 2.6vw, 40px);
@@ -137,14 +136,27 @@ body.cursor-ver .cursor-dot { opacity: 0; }
   text-transform: uppercase;
   white-space: nowrap;
 }
-.tfila__rama i { width: 6px; height: 6px; border-radius: 50%; background: var(--rosa); transition: background .35s ease; }
+.tfila__rama i { position: relative; width: 6px; height: 6px; border-radius: 50%; background: var(--rosa); }
+.tfila__rama i::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: var(--rosa); opacity: 0; }
 .tfila__dato { font-size: 12.5px; text-align: right; color: color-mix(in srgb, currentColor 62%, transparent); }
-.tfila__fl { font-size: 18px; text-align: right; opacity: .45; transform: translateX(-10px); transition: transform .5s cubic-bezier(.22, 1, .36, 1), opacity .35s ease; }
-.tfila:hover { color: var(--negro); padding-left: 18px; }
-.tfila:hover::before { transform: scaleY(1); }
-.tfila:hover .tfila__rama i { background: var(--negro); }
-.tfila:hover .tfila__fl { opacity: 1; transform: none; }
-.tlista:hover .tfila:not(:hover) { opacity: .34; }
+.tfila__fl { display: flex; justify-content: flex-end; }
+.tfila__ir {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(231, 226, 218, .3);
+  border-radius: 50%;
+  color: var(--beige);
+  transition: background .35s ease, border-color .35s ease, color .35s ease, transform .5s cubic-bezier(.22, 1, .36, 1);
+}
+@media (hover: hover) {
+  .tfila--enlace:hover::before { opacity: 1; }
+  .tfila--enlace:hover .tfila__cliente { transform: translateX(12px); color: var(--rosa); }
+  .tfila--enlace:hover .tfila__rama i::after { animation: tPing 1.4s ease-out infinite; }
+  .tfila--enlace:hover .tfila__ir { background: var(--beige); border-color: var(--beige); color: var(--negro); transform: scale(1.08); }
+}
+@keyframes tPing { 0% { transform: scale(1); opacity: .8; } 100% { transform: scale(3.4); opacity: 0; } }
 .trabajos .proyectos-cta { flex-direction: row; align-items: center; justify-content: space-between; gap: 24px; margin-top: clamp(36px, 4.4vw, 64px); }
 
 /* ============ PÁGINA DE PROYECTO ============ */
@@ -432,8 +444,6 @@ body.cursor-ver .cursor-dot { opacity: 0; }
 /* ============ TÁCTIL: sin hover, color siempre ============ */
 @media (hover: none) {
   .tfila::before { display: none; }
-  .tfila:hover { color: inherit; }
-  .tlista:hover .tfila:not(:hover) { opacity: 1; }
   
   .caso-otra__fotos img { filter: none; }
 }
@@ -473,14 +483,14 @@ body.cursor-ver .cursor-dot { opacity: 0; }
 @media (max-width: 700px) {
   .proyectos { padding: 100px 20px 110px; }
   /* Cada trabajo, en tres líneas: cliente y flecha, qué hicimos, y rama con su dato. */
-  .tfila { grid-template-columns: 30px minmax(0, 1fr) 22px; row-gap: 6px; column-gap: 12px; min-height: 0; padding: 18px 0; }
+  .tfila { grid-template-columns: 30px minmax(0, 1fr) 34px; row-gap: 6px; column-gap: 12px; min-height: 0; padding: 18px 0; }
   .tfila__num { grid-column: 1; grid-row: 1; }
   .tfila__cliente { grid-column: 2; grid-row: 1; font-size: 28px; }
-  .tfila__fl { grid-column: 3; grid-row: 1; opacity: .8; transform: none; }
+  .tfila__fl { grid-column: 3; grid-row: 1; }
+  .tfila__ir { width: 32px; height: 32px; }
   .tfila__que { grid-column: 2 / 4; grid-row: 2; font-size: 14.5px; }
   .tfila__rama { grid-column: 2; grid-row: 3; }
   .tfila__dato { grid-column: 2 / 4; grid-row: 4; text-align: left; }
-  .tfila:hover { padding-left: 0; }
   .trabajos .proyectos-cta { flex-direction: column; align-items: flex-start; }
   .proyectos-titulo { font-size: clamp(46px, 14vw, 72px); }
   .proyectos-titulo sup { font-size: 11px; }
