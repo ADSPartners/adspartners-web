@@ -14,7 +14,10 @@
   var mx = window.innerWidth / 2, my = window.innerHeight / 2;
   var rx = mx, ry = my;
   var dx = mx, dy = my;
-  window.addEventListener('mousemove', function (e) { mx = e.clientX; my = e.clientY; });
+  // El bucle solo corre mientras el cursor se está moviendo; quieto, no gasta nada.
+  var enMarcha = false;
+  function pedir() { if (!enMarcha) { enMarcha = true; requestAnimationFrame(tick); } }
+  window.addEventListener('mousemove', function (e) { mx = e.clientX; my = e.clientY; pedir(); });
 
   // Detect the background theme directly under the cursor so it can use
   // exact corporate colours (no blend-mode tricks).
@@ -40,12 +43,21 @@
     ry += (my - ry) * 0.18;
     dx += (mx - dx) * 0.55;
     dy += (my - dy) * 0.55;
+    // Ya ha llegado: se clava en su sitio y el bucle se para hasta el próximo movimiento.
+    var llego = Math.abs(mx - rx) < 0.1 && Math.abs(my - ry) < 0.1 && Math.abs(mx - dx) < 0.1 && Math.abs(my - dy) < 0.1;
+    if (llego) { rx = dx = mx; ry = dy = my; }
     ring.style.transform = 'translate(' + rx + 'px, ' + ry + 'px) translate(-50%, -50%)';
     dot.style.transform = 'translate(' + dx + 'px, ' + dy + 'px) translate(-50%, -50%)';
-    if (!now || now - lastThemeCheck > 100) { lastThemeCheck = now || 0; updateCursorTheme(); }
+    if (llego || now - lastThemeCheck > 100) { lastThemeCheck = now; updateCursorTheme(); }
+    if (llego) { enMarcha = false; return; }
     requestAnimationFrame(tick);
   }
-  tick();
+  pedir();
+  // Al bajar con el ratón quieto cambia lo que hay debajo: se revisa el tema, como mucho cada 100 ms.
+  var temaPendiente = 0;
+  window.addEventListener('scroll', function () {
+    if (!temaPendiente) temaPendiente = setTimeout(function () { temaPendiente = 0; updateCursorTheme(); }, 100);
+  }, { passive: true });
 
   // Hover behavior - delegated
   document.addEventListener('mouseover', function (e) {

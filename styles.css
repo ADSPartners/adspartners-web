@@ -1,14 +1,14 @@
 /* ============ FONTS ============ */
-@font-face { font-family: 'Open Sauce'; src: url('assets/fonts/OpenSauceSans-Light.ttf') format('truetype'); font-weight: 300; font-style: normal; font-display: swap; }
-@font-face { font-family: 'Open Sauce'; src: url('assets/fonts/OpenSauceSans-Regular.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
-@font-face { font-family: 'Open Sauce'; src: url('assets/fonts/OpenSauceSans-Medium.ttf') format('truetype'); font-weight: 500; font-style: normal; font-display: swap; }
-@font-face { font-family: 'Open Sauce'; src: url('assets/fonts/OpenSauceSans-SemiBold.ttf') format('truetype'); font-weight: 600; font-style: normal; font-display: swap; }
-@font-face { font-family: 'Open Sauce'; src: url('assets/fonts/OpenSauceSans-Bold.ttf') format('truetype'); font-weight: 700; font-style: normal; font-display: swap; }
-@font-face { font-family: 'Apple Garamond'; src: url('assets/fonts/AppleGaramond.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
-@font-face { font-family: 'Apple Garamond'; src: url('assets/fonts/AppleGaramond-Italic.ttf') format('truetype'); font-weight: 400; font-style: italic; font-display: swap; }
-@font-face { font-family: 'Apple Garamond'; src: url('assets/fonts/AppleGaramond-Light.ttf') format('truetype'); font-weight: 300; font-style: normal; font-display: swap; }
-@font-face { font-family: 'Apple Garamond'; src: url('assets/fonts/AppleGaramond-Bold.ttf') format('truetype'); font-weight: 700; font-style: normal; font-display: swap; }
-@font-face { font-family: 'Quetine'; src: url('assets/fonts/Quetine.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Open Sauce'; src: url('assets/fonts/OpenSauceSans-Light.woff2') format('woff2'), url('assets/fonts/OpenSauceSans-Light.ttf') format('truetype'); font-weight: 300; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Open Sauce'; src: url('assets/fonts/OpenSauceSans-Regular.woff2') format('woff2'), url('assets/fonts/OpenSauceSans-Regular.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Open Sauce'; src: url('assets/fonts/OpenSauceSans-Medium.woff2') format('woff2'), url('assets/fonts/OpenSauceSans-Medium.ttf') format('truetype'); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Open Sauce'; src: url('assets/fonts/OpenSauceSans-SemiBold.woff2') format('woff2'), url('assets/fonts/OpenSauceSans-SemiBold.ttf') format('truetype'); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Open Sauce'; src: url('assets/fonts/OpenSauceSans-Bold.woff2') format('woff2'), url('assets/fonts/OpenSauceSans-Bold.ttf') format('truetype'); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Apple Garamond'; src: url('assets/fonts/AppleGaramond.woff2') format('woff2'), url('assets/fonts/AppleGaramond.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Apple Garamond'; src: url('assets/fonts/AppleGaramond-Italic.woff2') format('woff2'), url('assets/fonts/AppleGaramond-Italic.ttf') format('truetype'); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Apple Garamond'; src: url('assets/fonts/AppleGaramond-Light.woff2') format('woff2'), url('assets/fonts/AppleGaramond-Light.ttf') format('truetype'); font-weight: 300; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Apple Garamond'; src: url('assets/fonts/AppleGaramond-Bold.woff2') format('woff2'), url('assets/fonts/AppleGaramond-Bold.ttf') format('truetype'); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Quetine'; src: url('assets/fonts/Quetine.woff2') format('woff2'), url('assets/fonts/Quetine.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
 
 /* ============ TOKENS ============ */
 :root {
@@ -608,7 +608,7 @@ body.lang-switched-in .lang-mark {
   z-index: 0;
   background:
     linear-gradient(rgba(25, 9, 0, .05), rgba(25, 9, 0, .05)),
-    url('assets/hero/Fondo-Hero_adsPartners.jpg?v=3') center / cover no-repeat;
+    url('assets/hero/Fondo-Hero_adsPartners.webp') center / cover no-repeat;
   transform-origin: 50% 46%;
   filter: url(#heroWaves);
   animation: heroBreathe 26s ease-in-out infinite alternate;
@@ -643,6 +643,9 @@ body.lang-switched-in .lang-mark {
   90%  { background-position: -22px -34px; }
   100% { background-position: 34px -10px; }
 }
+/* Fuera de pantalla, la portada y la cabecera de proyecto dejan de animarse (las marca useReveal con .is-fuera). */
+.hero.is-fuera::before, .hero.is-fuera .hero-grain,
+.ww-bg.is-fuera::before, .ww-bg.is-fuera::after { animation-play-state: paused; }
 @media (prefers-reduced-motion: reduce) {
   .hero::before, .hero-grain { animation: none; }
   .hero::before { filter: none; }
@@ -766,7 +769,7 @@ body.lang-switched-in .lang-mark {
   inset: -7%;
   background:
     linear-gradient(rgba(245, 243, 241, .7), rgba(245, 243, 241, .7)),
-    url('assets/hero/Fondo-Hero_adsPartners.jpg?v=3') center / cover no-repeat;
+    url('assets/hero/Fondo-Hero_adsPartners.webp') center / cover no-repeat;
   transform-origin: 50% 46%;
   filter: url(#heroWaves);
   animation: heroBreathe 26s ease-in-out infinite alternate;

@@ -56,6 +56,32 @@ function useReveal() {
       if (raf) cancelAnimationFrame(raf);
     };
   }, []);
+
+  // ---- Fondos animados fuera de pantalla: en pausa ----
+  // El filtro de ondas (#heroWaves, SVG animado) y el grano de la portada y de la cabecera de proyecto
+  // se repintan en cada fotograma aunque ya no se vean. Fuera de pantalla llevan .is-fuera (CSS los
+  // pausa) y, si no se ve ninguno, se para también la animación del SVG.
+  useEffect(() => {
+    const capas = Array.from(document.querySelectorAll('.hero, .ww-bg'));
+    const filtro = document.getElementById('heroWaves');
+    const svg = filtro && filtro.ownerSVGElement;
+    if (!capas.length || !('IntersectionObserver' in window)) return undefined;
+    const vistas = new Set();
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        e.target.classList.toggle('is-fuera', !e.isIntersecting);
+        if (e.isIntersecting) vistas.add(e.target); else vistas.delete(e.target);
+      });
+      if (svg && svg.pauseAnimations) {
+        if (vistas.size) svg.unpauseAnimations(); else svg.pauseAnimations();
+      }
+    });
+    capas.forEach((el) => io.observe(el));
+    return () => {
+      io.disconnect();
+      if (svg && svg.unpauseAnimations) svg.unpauseAnimations();
+    };
+  }, []);
 }
 
 // ============= LANG TOGGLE =============
@@ -66,7 +92,7 @@ function LangToggle() {
     <button
       className="nav-lang"
       onClick={() => setLang(next)}
-      aria-label="Change language"
+      aria-label={next === 'en' ? 'EN · English' : 'ES · Español'}
       data-cursor="cta"
       disabled={transitioning}>
       
@@ -102,12 +128,16 @@ function Nav({ onCartClick }) {
       setTheme(current);
       setRecogida(window.scrollY > 40);
     };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll, { passive: true });
+    // Como mucho una vez por fotograma: el scroll dispara más eventos que fotogramas.
+    let raf = 0;
+    const pedir = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; onScroll(); }); };
+    window.addEventListener('scroll', pedir, { passive: true });
+    window.addEventListener('resize', pedir, { passive: true });
     onScroll();
     return () => {
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
+      window.removeEventListener('scroll', pedir);
+      window.removeEventListener('resize', pedir);
+      if (raf) cancelAnimationFrame(raf);
     };
   }, []);
   const R = window.RAMAS ? (window.RAMAS[lang] || window.RAMAS.es) : null;
@@ -206,12 +236,15 @@ function SideMenu({ items: itemsProp }) {
       }
       setTheme(current);
     };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll, { passive: true });
+    let raf = 0;
+    const pedir = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; onScroll(); }); };
+    window.addEventListener('scroll', pedir, { passive: true });
+    window.addEventListener('resize', pedir, { passive: true });
     onScroll();
     return () => {
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
+      window.removeEventListener('scroll', pedir);
+      window.removeEventListener('resize', pedir);
+      if (raf) cancelAnimationFrame(raf);
     };
   }, []);
   return (

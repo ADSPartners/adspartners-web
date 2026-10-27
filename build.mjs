@@ -15,7 +15,7 @@
 // La lista de scripts y su ORDEN se leen del propio HTML, no se hardcodean: si
 // añades o quitas un <script src="algo.jsx"> en un .html, el build se adapta.
 
-import { transform as esbuildMinify } from 'esbuild';
+import { transform as esbuildMinify, transformSync as esbuildSync } from 'esbuild';
 import babel from '@babel/core';
 import { JSDOM, VirtualConsole } from 'jsdom';
 import { createHash } from 'node:crypto';
@@ -103,6 +103,25 @@ async function compileBundle(srcs, stem) {
   return name;
 }
 
+// Hojas de estilo: las locales de cada página se juntan en UNA, minificada y con huella en el nombre
+// (estilos.<huella>.css). Una petición en vez de siete, y la caché se renueva sola cuando cambia el CSS:
+// ya no hace falta subir a mano el ?v= de cada <link>. Se respeta el orden de los <link> del HTML.
+const cssCache = new Map();
+const esExterna = (href) => /^(https?:)?\/\//.test(href);
+
+function unirCss(hrefs) {
+  const key = hrefs.join('|');
+  if (cssCache.has(key)) return cssCache.get(key);
+  const fuente = hrefs.map((h) => readFileSync(join(ROOT, h), 'utf8')).join('\n');
+  const { code, warnings } = esbuildSync(fuente, { loader: 'css', minify: true, legalComments: 'none' });
+  for (const w of warnings) console.warn(`  ! css: ${w.text}`);
+  const name = `estilos.${sha8(code)}.css`;
+  writeFileSync(join(DIST, name), code);
+  cssCache.set(key, name);
+  console.log(`  · ${name}  (${(code.length / 1024).toFixed(1)} KB)  ← ${hrefs.join(' + ')}`);
+  return name;
+}
+
 function transformHtml(html, bundleName) {
   // 1) Fuera los 3 scripts de unpkg (react dev, react-dom dev, @babel/standalone).
   html = html.replace(/[ \t]*<script\b[^>]*\bsrc="https?:\/\/unpkg\.com[^"]*"[^>]*><\/script>\s*\n?/g, '');
@@ -121,6 +140,21 @@ function transformHtml(html, bundleName) {
     }
     return '';
   });
+
+  // 4) Las hojas de estilo locales, juntas en una sola (ver unirCss). El primer <link> local se cambia
+  //    por el de la hoja unida y los demás se quitan; los externos se quedan como están.
+  const reHoja = /[ \t]*<link\b[^>]*\brel="stylesheet"[^>]*\bhref="([^"]+)"[^>]*>\s*\n?/g;
+  const hojas = [...html.matchAll(reHoja)].map((m) => m[1]).filter((h) => !esExterna(h)).map((h) => h.split('?')[0]);
+  if (hojas.length) {
+    const nombre = unirCss(hojas);
+    let puesta = false;
+    html = html.replace(reHoja, (m, href) => {
+      if (esExterna(href)) return m;
+      if (puesta) return '';
+      puesta = true;
+      return `  <link rel="stylesheet" href="${nombre}" />\n`;
+    });
+  }
   return html;
 }
 

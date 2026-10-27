@@ -29,14 +29,20 @@
 .cg-bubble:hover { background: var(--marron-soft, #4a2614); }
 
 .cg-bubble-dot {
+  position: relative; isolation: isolate;
   flex: none; width: 9px; height: 9px; border-radius: 50%;
   background: var(--rosa);
-  box-shadow: 0 0 0 0 color-mix(in srgb, var(--rosa) 70%, transparent);
+}
+/* El latido es un anillo que crece y se apaga: solo transform y opacity, sin repintar en cada fotograma
+   (antes se animaba un box-shadow). Crece hasta 7 px por cada lado: 23/9 = 2.56. */
+.cg-bubble-dot::after {
+  content: ''; position: absolute; inset: 0; border-radius: inherit;
+  background: color-mix(in srgb, var(--rosa) 55%, transparent);
   animation: cg-pulse 2.4s ease-in-out infinite;
 }
 @keyframes cg-pulse {
-  0%,100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--rosa) 55%, transparent); }
-  50%     { box-shadow: 0 0 0 7px color-mix(in srgb, var(--rosa) 0%, transparent); }
+  0%,100% { transform: scale(1); opacity: 1; }
+  50%     { transform: scale(2.56); opacity: 0; }
 }
 
 /* wordmark FRESA dentro de la burbuja */

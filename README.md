@@ -70,7 +70,11 @@ docs/              SALIDA compilada que sirve GitHub Pages  (generada por el bui
   de `proyectos-data.jsx`. Si además va a tener página propia: una entrada en
   `window.PROYECTOS` y su carpeta en `assets/proyectos/<slug>/` (lo explica la cabecera).
 - **Pantalla de carga**: solo CSS (`loader.css`); sale una vez por sesión.
-- **Estilos y caché**: al cambiar un `.css`, subir el `?v=` de su enlace en
-  `index.html`, `proyecto.html` y `rama.html`.
+- **Estilos y caché**: el build junta los `.css` de cada página en uno solo, minificado y con huella en
+  el nombre (`estilos.<huella>.css`). Al cambiar un `.css` ya no hace falta tocar el `?v=` de los enlaces.
+- **Fuentes**: se sirven en `.woff2` (los `.ttf` se quedan de reserva en el `@font-face`). Una fuente
+  nueva se convierte con fontTools: `TTFont('x.ttf')`, `flavor = 'woff2'`, `save('x.woff2')`.
+- **Rendimiento**: la portada y la cabecera de proyecto pausan sus fondos animados fuera de pantalla
+  (`useReveal` en `components.jsx`, clase `.is-fuera`), y el cursor propio solo corre mientras se mueve.
 - **Formulario "Quedamos"**: pega la URL del webhook de n8n en `N8N_WEBHOOK_URL`
   (arriba de `components.jsx`). Vacío → cae a `mailto`.
