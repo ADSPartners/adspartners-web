@@ -69,39 +69,10 @@ window.SECCIONES = {
       ],
     },
 
-    // Si cambia una pregunta, se cambia también en el JSON-LD de index.html.
+    // Franja fina: el titular y una flecha que señala el chat de FRESA. Las preguntas se le hacen a FRESA.
     preguntas: {
-      etq: 'Antes de quedar',
       titulo: 'Preguntad, {que para eso estamos.}',
-      chat: 'adsPartners',
-      enLinea: 'en línea',
-      hoy: 'Hoy',
-      lista: [
-        {
-          p: '¿Hay que contratar las tres ramas?',
-          r: 'No. Se puede empezar por una y sumar las otras cuando toque. Si nos preguntáis el orden: primero Finance, luego Tech y al final Brand. No tiene sentido automatizar lo que no se ha medido, ni contar fuera lo que dentro sigue desordenado.',
-        },
-        {
-          p: '¿Y si después del Diagnóstico no seguimos?',
-          r: 'No pasa nada. Os quedáis con el mapa: qué gana cada línea de negocio, qué procesos se comen las horas, cómo se ve cada marca y un plan con plazos y presupuesto. Es vuestro.',
-        },
-        {
-          p: '¿Cuánto cuesta el Diagnóstico?',
-          r: 'Tiene un precio cerrado y lo sabéis antes de empezar. Cubre finanzas, tecnología y marca a la vez. Si luego seguís, se descuenta entero del plan.',
-        },
-        {
-          p: '¿Trabajáis fuera de Madrid?',
-          r: 'Sí. El Diagnóstico se hace en vuestra empresa, con varios días allí, y después vamos una vez al mes. Estéis donde estéis.',
-        },
-        {
-          p: '¿Sustituís a nuestra gestoría?',
-          r: 'No. La gestoría registra y nosotros interpretamos. Fiscal, auditoría y contabilidad del día a día se quedan donde están.',
-        },
-        {
-          p: '¿Cuánto se tarda en ver algo funcionando?',
-          r: 'El Diagnóstico son 3 o 4 semanas. Después, 30 días hasta el primer cierre con Finance, de 4 a 6 semanas hasta el primer sistema con Tech y de 4 a 12 con Brand, según el proyecto.',
-        },
-      ],
+      abrir: 'Abrir el chat con FRESA',
     },
 
     cierre: {
@@ -176,37 +147,8 @@ window.SECCIONES = {
     },
 
     preguntas: {
-      etq: 'Before we meet',
       titulo: 'Ask away, {that is what we are here for.}',
-      chat: 'adsPartners',
-      enLinea: 'online',
-      hoy: 'Today',
-      lista: [
-        {
-          p: 'Do we have to hire all three branches?',
-          r: 'No. You can start with one and add the others when the time comes. If you ask us about the order: Finance first, then Tech, Brand last. There is no point automating what has not been measured, or telling the outside world what is still a mess inside.',
-        },
-        {
-          p: 'What if we do not go on after the Diagnosis?',
-          r: 'Nothing happens. You keep the map: what each business line earns, which processes eat the hours, how each brand looks and a plan with timings and budget. It is yours.',
-        },
-        {
-          p: 'How much does the Diagnosis cost?',
-          r: 'It has a fixed price and you know it before we start. It covers finance, technology and brand at once. If you go on, it is deducted in full from the plan.',
-        },
-        {
-          p: 'Do you work outside Madrid?',
-          r: 'Yes. The Diagnosis is done at your company, with several days there, and after that we come once a month. Wherever you are.',
-        },
-        {
-          p: 'Do you replace our accountants?',
-          r: 'No. Your accountants record and we interpret. Tax, auditing and day-to-day bookkeeping stay where they are.',
-        },
-        {
-          p: 'How long until we see something working?',
-          r: 'The Diagnosis takes 3 or 4 weeks. After that, 30 days to the first monthly close with Finance, 4 to 6 weeks to the first system with Tech and 4 to 12 with Brand, depending on the project.',
-        },
-      ],
+      abrir: 'Open the chat with FRESA',
     },
 
     cierre: {

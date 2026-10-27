@@ -64,8 +64,8 @@ docs/              SALIDA compilada que sirve GitHub Pages  (generada por el bui
 
 - **Para cambiar un texto de la home**: casi todos están en `secciones-data.jsx`
   (lo que va entre `{llaves}` sale en cursiva). Los de las tres ramas y sus páginas,
-  en `ramas-data.jsx`; los de los proyectos, en `proyectos-data.jsx`. Si se toca una de las preguntas frecuentes, hay que
-  cambiarla también en el bloque de datos estructurados de `index.html`.
+  en `ramas-data.jsx`; los de los proyectos, en `proyectos-data.jsx`. Las preguntas frecuentes ya no se pintan en la
+  página: la franja «Preguntad» señala el chat de FRESA, que es quien las contesta.
 - **Añadir un trabajo a la lista de la home**: una línea en `window.TRABAJOS`, al final
   de `proyectos-data.jsx`. Si además va a tener página propia: una entrada en
   `window.PROYECTOS` y su carpeta en `assets/proyectos/<slug>/` (lo explica la cabecera).

@@ -342,56 +342,39 @@ function Testimonios() {
 }
 
 // ---------- Preguntas ----------
-// Un chat: se pulsa una pregunta y la respuesta llega como un mensaje, con sus puntos de «escribiendo».
+// Una franja fina: el titular y una flecha que señala el globo de FRESA (fijo, abajo a la derecha) y lo sigue al
+// bajar. Las preguntas se le hacen a FRESA: aquí no se pinta ningún chat. Pulsar la flecha abre el chat.
 function Preguntas() {
   const d = useSec().preguntas;
-  const [abierta, setAbierta] = useState(0);
-  const [escribe, setEscribe] = useState(false);
-  const [hora, setHora] = useState('');
-  useEffect(() => {
-    const tic = () => setHora(new Intl.DateTimeFormat('es-ES', { timeZone: 'Europe/Madrid', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date()));
-    tic();
-    const id = setInterval(tic, 30000);
-    return () => clearInterval(id);
-  }, []);
-  useEffect(() => {
-    if (!escribe) return undefined;
-    const id = setTimeout(() => setEscribe(false), 800);
-    return () => clearTimeout(id);
-  }, [escribe, abierta]);
-  const abrir = (i) => {
-    if (i === abierta) { setAbierta(-1); return; }
-    setAbierta(i);
-    if (!secQuieto()) setEscribe(true);
+  const sec = useRef(null);
+  const flecha = useRef(null);
+  useAlBajar(() => {
+    const s = sec.current;
+    const f = flecha.current;
+    if (!s || !f) return;
+    const r = s.getBoundingClientRect();
+    const vista = r.bottom > 0 && r.top < window.innerHeight;
+    s.classList.toggle('is-vista', vista && !secQuieto());
+    if (!vista) return;
+    const globo = document.querySelector('.cg-bubble');
+    const g = globo && globo.getBoundingClientRect();
+    if (!g || !g.width) return;
+    const a = f.getBoundingClientRect();
+    const ang = Math.atan2(g.top + g.height / 2 - (a.top + a.height / 2), g.left + g.width / 2 - (a.left + a.width / 2));
+    f.style.setProperty('--ang', (ang * 180 / Math.PI).toFixed(1) + 'deg');
+  });
+  const abrir = () => {
+    const globo = document.querySelector('.cg-bubble');
+    if (globo) globo.click();
   };
   return (
-    <section className="preguntas panel" id="preguntas" data-screen-label="Preguntas" data-nav-theme="light">
-      <Cabecera etq={d.etq} titulo={d.titulo} />
-      <div className="chat reveal">
-        <div className="chat__cab">
-          <span className="chat__avatar" aria-hidden="true"></span>
-          <b>{d.chat}</b>
-          <span className="chat__linea"><i aria-hidden="true"></i>{d.enLinea}</span>
-          <span className="chat__hora">{d.hoy} {hora}</span>
-        </div>
-        <div className="chat__hilo">
-          {d.lista.map((x, i) => (
-            <div className={'chat__item' + (i === abierta ? ' is-on' : '') + (i === abierta && escribe ? ' is-escribiendo' : '')} key={i}>
-              <button type="button" className="chat__p" aria-expanded={i === abierta} onClick={() => abrir(i)} data-cursor="cta">
-                <i aria-hidden="true"></i><span>{x.p}</span>
-              </button>
-              <div className="chat__r">
-                <div>
-                  <div className="chat__burbuja">
-                    <span className="chat__puntos" aria-hidden="true"><i></i><i></i><i></i></span>
-                    <p>{x.r}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+    <section className="preguntas panel" id="preguntas" ref={sec} data-screen-label="Preguntas" data-nav-theme="light">
+      <Relleno texto={d.titulo} className="preguntas__titulo" ventana={0.3} />
+      <button type="button" className="preguntas__flecha" ref={flecha} onClick={abrir} aria-label={d.abrir} data-cursor="cta">
+        <span className="preguntas__giro">
+          <svg viewBox="0 0 120 24" aria-hidden="true"><path d="M2 12h114M103 2.5l13 9.5-13 9.5" /></svg>
+        </span>
+      </button>
     </section>
   );
 }
