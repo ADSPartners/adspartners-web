@@ -2,6 +2,7 @@
 // - Música: cuatro acordes que se suceden despacio (Fa maj9, La m7, Re m9, Si♭ maj7♯11), con colchón de
 //   cuerdas suaves, un bajo y notas sueltas de piano que nunca se repiten igual, todo en una sala con eco.
 // - El pincel suena a agua: un vaivén grave y burbujas que suben, más cuanto más rápido se mueve el ratón.
+// - Las gotas de la portada caen al agua con un «plic» y su eco.
 // - Efectos (entrar, gota, mantener y soltar) en la misma tonalidad que la música.
 // Solo suena si se eligió en el umbral o en Ajustes, y se calla al cambiar de pestaña.
 
@@ -290,6 +291,34 @@ export function tic(volumen = 1) {
   if (t - ultimaGota < 0.07) return;
   ultimaGota = t;
   burbuja(0.5 + (Math.random() - 0.5) * 0.4, 0.8 * volumen, t);
+}
+
+// Gota que cae al agua (las ondas de la portada): un «plic» que sube, un golpe grave debajo y su eco
+export function gota(x = 0.5, fuerza = 1) {
+  if (!activo || !ctx) return;
+  const t = ctx.currentTime + 0.01;
+  const f0 = 700 + Math.random() * 500;
+  const o = ctx.createOscillator(); o.type = 'sine';
+  o.frequency.setValueAtTime(f0, t);
+  o.frequency.exponentialRampToValueAtTime(f0 * 2.2, t + 0.06);
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(0.03 * fuerza, t + 0.005);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.14);
+  const ob = ctx.createOscillator(); ob.type = 'sine';
+  ob.frequency.setValueAtTime(220, t);
+  ob.frequency.exponentialRampToValueAtTime(110, t + 0.08);
+  const gb = ctx.createGain();
+  gb.gain.setValueAtTime(0.0001, t);
+  gb.gain.exponentialRampToValueAtTime(0.04 * fuerza, t + 0.004);
+  gb.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
+  const p = panner((x - 0.5) * 1.2);
+  o.connect(g).connect(p);
+  ob.connect(gb).connect(p);
+  p.connect(busEfectos);
+  p.connect(eco.entrada);
+  o.start(t); o.stop(t + 0.16);
+  ob.start(t); ob.stop(t + 0.14);
 }
 
 // Nota suelta afinada con la música (para ir marcando cosas, como las casillas)

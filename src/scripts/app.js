@@ -1,19 +1,12 @@
-// Arranque de la home: scroll suave, ajustes, sonido, cursor, umbral, secciones y la portada en WebGL.
+// Arranque de la home: scroll suave, ajustes, sonido, cursor, umbral y la portada en WebGL.
 // La portada se carga aparte (import dinámico) para que el texto y el umbral no esperen al WebGL.
 import '@fontsource/geist-mono/400.css';
 import Lenis from 'lenis';
 import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { SplitText } from 'gsap/SplitText';
 import { ajustes, alCambiar, montarPanel } from './ajustes.js';
 import * as sonido from './sonido.js';
 import { crearCursor } from './cursor.js';
 import { montarUmbral } from './umbral.js';
-import { montarSecciones } from './secciones.js';
-import { montarTrabajo } from './trabajo.js';
-import { montarLente } from './lente.js';
-
-gsap.registerPlugin(ScrollTrigger, SplitText);
 
 export async function arrancar() {
   const html = document.documentElement;
@@ -24,7 +17,6 @@ export async function arrancar() {
   let lenis = null;
   if (!reducido) {
     lenis = new Lenis({ autoRaf: false, lerp: 0.1, smoothWheel: true });
-    lenis.on('scroll', ScrollTrigger.update);
     gsap.ticker.add((t) => lenis.raf(t * 1000));
     gsap.ticker.lagSmoothing(0);
     if (enUmbral) lenis.stop();
@@ -74,12 +66,9 @@ export async function arrancar() {
     }
   }
 
-  // Gota de agua al pasar por botones, enlaces y servicios
+  // Gota de agua al pasar por botones y enlaces
   document.querySelectorAll('[data-sonido-hover]').forEach((a) => a.addEventListener('pointerenter', () => sonido.tic(0.7)));
-
-  montarSecciones({ reducido });
-  montarTrabajo({ cursor, reducido });
-  montarLente({ reducido });
+  montarImanes(reducido);
 
   try {
     const { crearPortada } = await import('./gl/portada.js');
@@ -89,6 +78,18 @@ export async function arrancar() {
   }
   resolverListo(portada);
   if (!enUmbral || entrado) portada.activarCursor?.();
+}
+
+// Imanes: el botón se acerca un poco al ratón cuando está cerca, y vuelve con un pequeño rebote
+function montarImanes(reducido) {
+  if (reducido || !matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+  document.querySelectorAll('[data-iman]').forEach((b) => {
+    b.addEventListener('pointermove', (e) => {
+      const r = b.getBoundingClientRect();
+      gsap.to(b, { x: (e.clientX - (r.left + r.width / 2)) * 0.3, y: (e.clientY - (r.top + r.height / 2)) * 0.35, duration: 0.5, ease: 'power3.out' });
+    });
+    b.addEventListener('pointerleave', () => gsap.to(b, { x: 0, y: 0, duration: 0.9, ease: 'elastic.out(1, 0.45)' }));
+  });
 }
 
 // La barra se esconde al bajar (pasada la portada) y vuelve al subir

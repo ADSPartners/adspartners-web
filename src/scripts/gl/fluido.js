@@ -85,6 +85,33 @@ uniform sampler2D uTexture; uniform float value;
 void main () { gl_FragColor = value * texture2D(uTexture, vUv); }`,
 };
 
+// Textura de media precisión en la que se puede pintar (la usan el fluido y las ondas)
+export function objetivo(renderer, w, h) {
+  const gl = renderer.gl;
+  const rt = new RenderTarget(gl, {
+    width: w, height: h, type: gl.HALF_FLOAT, format: gl.RGBA, internalFormat: gl.RGBA16F,
+    minFilter: gl.LINEAR, magFilter: gl.LINEAR, wrapS: gl.CLAMP_TO_EDGE, wrapT: gl.CLAMP_TO_EDGE, depth: false,
+  });
+  renderer.bindFramebuffer(rt);
+  const ok = gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE;
+  if (ok) {
+    // WebKit no siempre entrega la textura a cero: si trae basura (NaN), el fluido la arrastra y la portada sale negra
+    const antes = gl.getParameter(gl.COLOR_CLEAR_VALUE);
+    gl.clearColor(0, 0, 0, 0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.clearColor(antes[0], antes[1], antes[2], antes[3]);
+  }
+  renderer.bindFramebuffer();
+  if (!ok) throw new Error('FBO de media precisión incompleto');
+  return rt;
+}
+
+export function soltar(gl, rt) {
+  if (!rt) return;
+  gl.deleteFramebuffer(rt.buffer);
+  rt.textures.forEach((t) => gl.deleteTexture(t.texture));
+}
+
 export class Fluido {
   constructor(renderer, { sim = 128, tinte = 512, iteraciones = 18, curl = 20, disipVel = 0.35, disipTinte = 0.9 } = {}) {
     if (!renderer.isWebgl2) throw new Error('sin WebGL2');
@@ -113,25 +140,7 @@ export class Fluido {
     this.redimensionar(renderer.gl.canvas.width / Math.max(1, renderer.gl.canvas.height));
   }
 
-  _rt(w, h) {
-    const gl = this.gl;
-    const rt = new RenderTarget(gl, {
-      width: w, height: h, type: gl.HALF_FLOAT, format: gl.RGBA, internalFormat: gl.RGBA16F,
-      minFilter: gl.LINEAR, magFilter: gl.LINEAR, wrapS: gl.CLAMP_TO_EDGE, wrapT: gl.CLAMP_TO_EDGE, depth: false,
-    });
-    this.renderer.bindFramebuffer(rt);
-    const ok = gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE;
-    if (ok) {
-      // WebKit no siempre entrega la textura a cero: si trae basura (NaN), el fluido la arrastra y la portada sale negra
-      const antes = gl.getParameter(gl.COLOR_CLEAR_VALUE);
-      gl.clearColor(0, 0, 0, 0);
-      gl.clear(gl.COLOR_BUFFER_BIT);
-      gl.clearColor(antes[0], antes[1], antes[2], antes[3]);
-    }
-    this.renderer.bindFramebuffer();
-    if (!ok) throw new Error('FBO de media precisión incompleto');
-    return rt;
-  }
+  _rt(w, h) { return objetivo(this.renderer, w, h); }
 
   _doble(w, h) {
     let a = this._rt(w, h), b = this._rt(w, h);
@@ -139,8 +148,7 @@ export class Fluido {
   }
 
   _liberar() {
-    const gl = this.gl;
-    const fuera = (rt) => { if (!rt) return; gl.deleteFramebuffer(rt.buffer); rt.textures.forEach((t) => gl.deleteTexture(t.texture)); };
+    const fuera = (rt) => soltar(this.gl, rt);
     [this.vel, this.tinteFbo, this.presion].forEach((d) => { if (d) { fuera(d.read); fuera(d.write); } });
     fuera(this.div); fuera(this.rot);
   }

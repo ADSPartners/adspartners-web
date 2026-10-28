@@ -31,7 +31,7 @@ const base = import.meta.env.BASE_URL;
       </div>
     </div>
 
-    <a class="cab__hablemos" href="#contacto" data-sonido-hover data-iman>Hablemos</a>
+    <a class="cab__hablemos" href="mailto:adsgroup@ads-partners.com" data-sonido-hover data-iman>Hablemos</a>
   </div>
 </header>
 
@@ -52,10 +52,8 @@ const base = import.meta.env.BASE_URL;
     opacity: 0; transition: opacity .5s var(--curva), background .5s var(--curva);
   }
   .cab--fondo::before { opacity: 1; }
-  :global(html.cab-clara) .cab::before { background: linear-gradient(var(--crema) 30%, rgba(231, 226, 218, 0)); }
   .cab--fuera { transform: translateY(-110%); opacity: 0; }
   .cab--fuera:focus-within { transform: none; opacity: 1; }
-  :global(html.cab-clara) .cab { color: var(--tinta); }
   .cab__logo { width: 132px; color: currentColor; }
   .cab__logo :global(svg) { width: 100%; height: auto; }
   .cab__dcha { display: flex; align-items: center; gap: 22px; }
@@ -89,8 +87,6 @@ const base = import.meta.env.BASE_URL;
     transition: background-color .4s var(--curva), color .4s var(--curva), border-color .4s var(--curva);
   }
   .cab__hablemos:hover, .cab__hablemos:focus-visible { background: var(--crema); color: var(--tinta); border-color: var(--crema); }
-  :global(html.cab-clara) .cab__hablemos:hover,
-  :global(html.cab-clara) .cab__hablemos:focus-visible { background: var(--tinta); color: var(--crema); border-color: var(--tinta); }
 
   @media (max-width: 700px) {
     .cab__logo { width: 104px; }

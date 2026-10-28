@@ -27,26 +27,17 @@ src/components/
   Umbral.astro          pantalla previa: carga con humor, barra de 1 px, entrar con o sin sonido
   Cabecera.astro        barra fija: logotipo, Ajustes (sonido, movimiento, calidad) y Hablemos
   Portada.astro         portada: canvas del pincel, título real en el DOM (lo repinta el WebGL) y textos
-  Idea.astro            la frase que se enciende palabra a palabra, con sus dos notas al margen
-  Hacemos.astro         «Marca» (Garamond) y «máquina» (mono): los dos oficios y sus servicios
-  Trabajo.astro         los proyectos: la vista sigue al cursor y, al mantener pulsado, se abre por dentro
-  PorQue.astro          capítulo claro: las cuatro razones
-  ParaQuien.astro       «Te servimos si»: casillas que se marcan al bajar, y la llamada a hablar
-  Pie.astro             pie del prototipo
   Cursor.astro          el cursor-mensaje (isotipo + anillo + frase)
   Marca.astro           isotipo y logotipo en línea, con el color del texto
 src/scripts/
-  app.js                arranque: Lenis, GSAP, ajustes, sonido, cursor, umbral, secciones y la portada
-  secciones.js          el movimiento de las secciones de texto
-  trabajo.js            la vista de «Trabajo», el «mantener» y el generador del «dentro» de cada proyecto
-  lente.js              la lente: los titulares en contorno bajo el ratón, y los botones con imán
-  gl/portada.js         el shader que mezcla marca y máquina, el pincel, el piloto automático y «mantener»
+  app.js                arranque: Lenis, GSAP, ajustes, sonido, cursor, umbral, imán del botón y la portada
+  gl/portada.js         el shader que mezcla marca y máquina, el pincel, las gotas y «mantener»
   gl/fluido.js          la simulación de fluido en GPU (la máscara del pincel)
+  gl/ondas.js           las ondas de agua en GPU (las gotas que caen cuando el ratón está quieto)
   gl/capas.js           lo que se pinta en 2D: foto, título, anatomía del tipo, el código que lo pinta y el degradado
   sonido.js             música generativa, agua del pincel y efectos, todo con Web Audio (no hay ficheros de audio)
   cursor.js, umbral.js, ajustes.js, titulo.js
 src/styles/global.css   colores, tipos y curvas de la casa
-src/data/trabajos.js    los proyectos de «Trabajo», con su trozo de código real
 public/assets/          fuentes, logos, imagen de portada y material de los proyectos
 ```
 
@@ -57,6 +48,6 @@ chat de FRESA) hasta que la v5 tenga esas piezas, y entonces se borran.
 ## Reglas de la casa
 
 - Garamond = la marca, Open Sauce = la interfaz, Geist Mono = la máquina.
-- Una sola cosa se mueve sola por pantalla (el fluido). Lo demás responde al ratón, al scroll o al pulsar.
+- Una sola cosa se mueve sola por pantalla (las ondas, cuando nadie toca nada). Lo demás responde al ratón, al scroll o al pulsar.
 - La capa máquina enseña lo que construye lo que se ve: código real y valores medidos, no datos de proyectos.
 - Sin WebGL, o con «movimiento reducido», la portada sigue funcionando: título en el DOM y foto de fondo.

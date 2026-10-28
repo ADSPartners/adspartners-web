@@ -1,21 +1,24 @@
 // La portada en WebGL: capa de marca (foto en clave de noche + «adsPartners» en Garamond) y, bajo el pincel,
 // la capa máquina (curvas de nivel y tramado mono sacados de la luz de la foto, rejilla, anatomía del título y código).
-// - Ratón: escribe velocidad en el fluido; el tinte es la máscara. Quieto 2,5 s, el pincel se mueve solo.
+// - Ratón: escribe velocidad en el fluido; el tinte es la máscara.
+// - Quieto 2,5 s (o en el móvil sin tocar), caen gotas: sus anillos de agua refractan la foto y abren la máquina en las crestas.
 // - Mantener pulsado: un anillo se abre desde el puntero y enseña la máquina entera.
-// - Movimiento reducido o sin fluido: la máscara es un círculo pegado al puntero, sin estela ni piloto automático.
+// - Movimiento reducido o sin fluido: la máscara es un círculo pegado al puntero, sin estela ni gotas.
 import { Renderer, Program, Mesh, Triangle, Texture } from 'ogl';
 import { gsap } from 'gsap';
 import { Fluido } from './fluido.js';
+import { Ondas } from './ondas.js';
 import { lienzo, pintarFoto, medirTitulo, pintarTitulo, pintarMaquina, pintarGlifos } from './capas.js';
 import * as sonido from '../sonido.js';
 import { ajustarTitulo } from '../titulo.js';
 
 const NIVELES = {
-  alta: { sim: 128, tinte: 640, iteraciones: 18, dpr: 1.5, curl: 6, disipVel: 0.8, disipTinte: 1.1 },
-  baja: { sim: 64, tinte: 320, iteraciones: 8, dpr: 1, curl: 6, disipVel: 0.8, disipTinte: 1.1 },
+  alta: { sim: 128, tinte: 640, iteraciones: 18, dpr: 1.5, curl: 6, disipVel: 0.8, disipTinte: 1.1, ondas: 200 },
+  baja: { sim: 64, tinte: 320, iteraciones: 8, dpr: 1, curl: 6, disipVel: 0.8, disipTinte: 1.1, ondas: 128 },
 };
 const GLIFOS = ' .·:-=+10#@';
 const FUERZA = 2600;
+const GOTA = { fuerza: 0.6, radio: 0.05 };
 
 const VERT = /* glsl */ `#version 300 es
 in vec2 position; in vec2 uv; out vec2 vUv;
@@ -25,10 +28,10 @@ const FRAG = /* glsl */ `#version 300 es
 precision highp float;
 in vec2 vUv; out vec4 color;
 uniform sampler2D tFoto; uniform sampler2D tTitulo; uniform sampler2D tMaquina;
-uniform sampler2D tTinte; uniform sampler2D tVel; uniform sampler2D tGlifos; uniform sampler2D tHud;
+uniform sampler2D tTinte; uniform sampler2D tVel; uniform sampler2D tGlifos; uniform sampler2D tOndas;
 uniform vec2 uRes; uniform float uDpr; uniform float uTime; uniform float uCelda; uniform float uGlifosN;
 uniform float uRevelado; uniform vec2 uHold; uniform vec2 uPuntero; uniform float uCirculo;
-uniform float uUsaFluido; uniform float uIntro; uniform float uLuz; uniform float uMarca; uniform vec4 uHud; uniform float uHudA;
+uniform float uUsaFluido; uniform float uIntro; uniform float uLuz; uniform float uMarca; uniform float uUsaOndas; uniform vec2 uOndasTexel;
 uniform vec3 cNoche; uniform vec3 cCrema; uniform vec3 cRosa;
 
 float luma (vec3 c) { return dot(c, vec3(0.299, 0.587, 0.114)); }
@@ -47,17 +50,24 @@ void main () {
   if (isnan(vel.x) || isnan(vel.y) || isinf(vel.x) || isinf(vel.y)) vel = vec2(0.0);
   if (isnan(tinte) || isinf(tinte)) tinte = 0.0;
   vel = clamp(vel, vec2(-2000.0), vec2(2000.0));
+  // Ondas: la altura del agua y su pendiente
+  float h = 0.0; vec2 pend = vec2(0.0);
+  if (uUsaOndas > 0.5) {
+    vec2 e = uOndasTexel;
+    h = texture(tOndas, uv).r;
+    pend = vec2(texture(tOndas, uv + vec2(e.x, 0.0)).r - texture(tOndas, uv - vec2(e.x, 0.0)).r,
+                texture(tOndas, uv + vec2(0.0, e.y)).r - texture(tOndas, uv - vec2(0.0, e.y)).r);
+    if (isnan(h) || isinf(h) || isnan(pend.x) || isnan(pend.y) || isinf(pend.x) || isinf(pend.y)) { h = 0.0; pend = vec2(0.0); }
+    pend = clamp(pend, vec2(-1.0), vec2(1.0));
+  }
 
-  // Máscara: tinte del fluido, círculo (sin fluido) y anillo de «mantener»
+  // Máscara: tinte del fluido, crestas de las ondas, círculo (sin fluido) y anillo de «mantener»
   float circ = uCirculo * (1.0 - smoothstep(0.1, 0.125, length((uv - uPuntero) * asp)));
   float n = ruido(uv * 7.0 + uTime * 0.25) * 0.06;
   float r = uRevelado * 1.9;
   float anillo = step(0.001, uRevelado) * (1.0 - smoothstep(r - 0.015, r, length((uv - uHold) * asp) + n * uRevelado));
-  float m = max(max(tinte, circ), anillo);
-  // Ventana del marcador en vivo: un rectángulo pegado al ratón que deja ver la máquina
-  vec2 hp = (uv - uHud.xy) / uHud.zw;
-  vec2 hb = smoothstep(vec2(0.0), vec2(0.06), hp) * smoothstep(vec2(1.0), vec2(0.94), hp);
-  m = max(m, uHudA * hb.x * hb.y);
+  float cresta = smoothstep(0.035, 0.07, h);
+  float m = max(max(max(tinte, cresta), circ), anillo);
   // Carga: el color sube de abajo arriba como un escáner; por encima del frente, todo es máquina
   float frente = uMarca * 1.25 - 0.12;
   float barrido = step(uMarca, 0.999) * smoothstep(frente - 0.012, frente + 0.012, uv.y + n * 0.25);
@@ -65,8 +75,8 @@ void main () {
   float mascara = smoothstep(0.24, 0.3, m);
   float borde = smoothstep(0.17, 0.23, m) - smoothstep(0.28, 0.34, m);
 
-  // MARCA: la foto en clave de noche, viñeta y el título; el fluido la desplaza un poco
-  vec2 uvM = uv - vel * 0.00008;
+  // MARCA: la foto en clave de noche, viñeta y el título; el fluido la desplaza un poco y el agua la refracta
+  vec2 uvM = uv - vel * 0.00008 - pend * 0.1;
   vec3 foto = texture(tFoto, uvM).rgb;
   vec3 marca = pow(foto, vec3(1.3)) * 0.68 * vec3(1.03, 0.99, 0.94);
   float vig = smoothstep(1.3, 0.3, length((uv - vec2(0.5, 0.56)) * vec2(1.15, 1.0)));
@@ -75,12 +85,13 @@ void main () {
   marca = mix(marca, cCrema, tit.a);
 
   // MÁQUINA: curvas de nivel y tramado mono de la luz de la foto, rejilla y la capa dibujada
-  vec3 f = texture(tFoto, uv).rgb; float l = luma(f);
+  vec2 uvQ = uv - pend * 0.05;
+  vec3 f = texture(tFoto, uvQ).rgb; float l = luma(f);
   float b = l * 16.0; float fw = fwidth(b);
   float iso = 1.0 - smoothstep(0.0, fw * 1.4, abs(fract(b + 0.5) - 0.5));
   vec2 px = uv * uRes;
   vec2 cel = floor(px / uCelda);
-  float lc = luma(texture(tFoto, (cel + 0.5) * uCelda / uRes).rgb);
+  float lc = luma(texture(tFoto, (cel + 0.5) * uCelda / uRes - pend * 0.05).rgb);
   float idx = floor(clamp(lc, 0.0, 0.999) * uGlifosN);
   vec2 den = fract(px / uCelda);
   float glifo = texture(tGlifos, vec2((idx + den.x) / uGlifosN, den.y)).r;
@@ -90,13 +101,13 @@ void main () {
   maq = mix(maq, cCrema, rej * 0.06);
   maq = mix(maq, cCrema, glifo * (0.08 + lc * 0.34) * uLuz);
   maq = mix(maq, cCrema, iso * (0.2 + l * 0.38) * uLuz);
-  vec4 cap = texture(tMaquina, uv);
+  vec4 cap = texture(tMaquina, uvQ);
   maq = mix(maq, cap.rgb, cap.a);
-  // Marcador en vivo, pegado al ratón (solo se ve dentro del pincel)
-  if (hp.x >= 0.0 && hp.y >= 0.0 && hp.x <= 1.0 && hp.y <= 1.0) { vec4 hud = texture(tHud, hp); maq = mix(maq, hud.rgb, hud.a); }
 
   vec3 col = mix(marca, maq, mascara);
   col = mix(col, cRosa, clamp(borde, 0.0, 1.0) * 0.4);
+  // Brillo del agua: la luz entra desde arriba a la izquierda
+  col += cCrema * clamp(dot(pend, vec2(-0.6, 0.8)) * 14.0, 0.0, 1.0) * 0.22;
   float escaner = step(0.001, uMarca) * step(uMarca, 0.999) * (1.0 - smoothstep(0.0, 0.004, abs(uv.y + n * 0.25 - frente)));
   col = mix(col, cRosa, escaner * 0.9);
   col += (hash(px + fract(uTime * 7.0) * 91.0) - 0.5) * 0.04;
@@ -140,10 +151,6 @@ export async function crearPortada({ cursor, reducido, calidad = 'auto' }) {
 
   const capas = { foto: null, titulo: null, maquina: null };
   const texturas = { foto: tex(lienzo(1, 1)), titulo: tex(lienzo(1, 1)), maquina: tex(lienzo(1, 1)), glifos: tex(pintarGlifos(GLIFOS)) };
-  // Marcador en vivo: un lienzo pequeño que se repinta diez veces por segundo con la posición, la velocidad y los fps
-  const HUD = { w: 210, h: 86 };
-  const hud = lienzo(HUD.w * renderer.dpr, HUD.h * renderer.dpr);
-  texturas.hud = tex(hud);
   const enUmbral = html.classList.contains('en-umbral') && !reducido;
 
   function pintarCapas() {
@@ -159,12 +166,14 @@ export async function crearPortada({ cursor, reducido, calidad = 'auto' }) {
   }
   pintarCapas();
 
-  let fluido = null;
+  let fluido = null, ondas = null;
   const crearFluido = () => {
     if (fluido) fluido._liberar();
-    fluido = null;
+    if (ondas) ondas._liberar();
+    fluido = null; ondas = null;
     if (reducido) return;
     try { fluido = new Fluido(renderer, NIVELES[nivel]); } catch (e) { fluido = null; }
+    try { ondas = new Ondas(renderer, { lado: NIVELES[nivel].ondas }); } catch (e) { ondas = null; }
   };
   crearFluido();
 
@@ -175,7 +184,7 @@ export async function crearPortada({ cursor, reducido, calidad = 'auto' }) {
     uCelda: { value: (esMovil() ? 8 : 9) * renderer.dpr }, uGlifosN: { value: GLIFOS.length },
     uRevelado: { value: 0 }, uHold: { value: [0.5, 0.5] }, uPuntero: { value: [-2, -2] }, uCirculo: { value: 0 },
     uUsaFluido: { value: 0 }, uIntro: { value: 0 },
-    tHud: { value: texturas.hud }, uHud: { value: [-2, -2, 0.1, 0.1] }, uHudA: { value: 0 },
+    tOndas: { value: texturas.foto }, uUsaOndas: { value: 0 }, uOndasTexel: { value: [0, 0] },
     uLuz: { value: enUmbral ? 0 : 1 }, uMarca: { value: enUmbral ? 0 : 1 },
     cNoche: { value: hex('#120D0A') }, cCrema: { value: hex('#E7E2DA') }, cRosa: { value: hex('#F5CBD7') },
   };
@@ -183,7 +192,7 @@ export async function crearPortada({ cursor, reducido, calidad = 'auto' }) {
 
   // --- Puntero -------------------------------------------------------------
   const p = { x: -1, y: -1, px: -1, py: -1, dentro: false, movido: false, quieto: 0, recorrido: 0 };
-  const piloto = { t: Math.random() * 10, x: 0.5, y: 0.55, activo: false };
+  const lluvia = { espera: 0, n: 0 };
   let velocidadSonido = 0;
 
   function mover(cx, cy) {
@@ -266,26 +275,6 @@ export async function crearPortada({ cursor, reducido, calidad = 'auto' }) {
   new IntersectionObserver(([en]) => { visible = en.isIntersecting; }).observe(sec);
   let tAnterior = performance.now();
   const medida = { n: 0, suma: 0, hecha: calidad !== 'auto' };
-  const tiempos = [];
-  let ultimoHud = 0;
-  function pintarHud(ahora) {
-    if (ahora - ultimoHud < 100) return;
-    ultimoHud = ahora;
-    const media = tiempos.length ? tiempos.reduce((a, b) => a + b, 0) / tiempos.length : 1 / 60;
-    const d = renderer.dpr, ctx = hud.getContext('2d');
-    ctx.clearRect(0, 0, hud.width, hud.height);
-    ctx.font = `400 ${10.5 * d}px "Geist Mono", ui-monospace, monospace`;
-    ctx.textBaseline = 'alphabetic';
-    const filas = [
-      ['// en vivo', 'rgba(245,203,215,.9)'],
-      [`x ${Math.round(p.x)} · y ${Math.round(p.y)}`, 'rgba(231,226,218,.85)'],
-      [`velocidad ${velocidadSonido.toFixed(2).replace('.', ',')}`, 'rgba(231,226,218,.85)'],
-      [`${(media * 1000).toFixed(1).replace('.', ',')} ms · ${Math.round(1 / media)} fps`, 'rgba(231,226,218,.6)'],
-    ];
-    ctx.strokeStyle = 'rgba(231,226,218,.35)'; ctx.lineWidth = d; ctx.strokeRect(d * 0.5, d * 0.5, hud.width - d, hud.height - d);
-    filas.forEach(([t, c], i) => { ctx.fillStyle = c; ctx.fillText(t, 12 * d, (22 + i * 16) * d); });
-    texturas.hud.needsUpdate = true;
-  }
 
   gsap.ticker.add(() => {
     const ahora = performance.now();
@@ -312,22 +301,25 @@ export async function crearPortada({ cursor, reducido, calidad = 'auto' }) {
         const dist01 = Math.hypot(dx / W, dy / H);
         fluido.splat(p.x / W, 1 - p.y / H, (dx / W) * FUERZA * (W / H), (-dy / H) * FUERZA, Math.min(0.9, 0.35 + dist01 * 12), 0.0032);
       }
-      piloto.activo = false;
+      lluvia.n = 0; lluvia.espera = 0;
     } else {
       velocidadSonido *= Math.exp(-dt * 8);
     }
 
-    // Piloto automático: quieto 2,5 s (o en móvil sin tocar), el pincel dibuja solo
-    if (fluido && !hold.activo && p.quieto > 2.5) {
-      const antes = [piloto.x, piloto.y];
-      piloto.t += dt * 0.55;
-      piloto.x = 0.5 + 0.32 * Math.sin(piloto.t * 0.9) + 0.07 * Math.sin(piloto.t * 2.3);
-      piloto.y = 0.5 + 0.2 * Math.sin(piloto.t * 1.27 + 1.3);
-      if (piloto.activo) {
-        const ddx = piloto.x - antes[0], ddy = piloto.y - antes[1];
-        fluido.splat(piloto.x, piloto.y, ddx * FUERZA * (W / H), ddy * FUERZA, 0.42, 0.0026);
+    // Quieto 2,5 s (o en móvil sin tocar), caen gotas: la primera donde se paró el ratón y después al azar.
+    // Con el tiempo caen más espaciadas, como una lluvia que se acaba
+    if (ondas && !hold.activo && p.quieto > 2.5 && u.uMarca.value >= 1) {
+      lluvia.espera -= dt;
+      if (lluvia.espera <= 0) {
+        const primera = lluvia.n === 0 && p.dentro && p.x >= 0;
+        const gx = primera ? p.x / W : 0.1 + Math.random() * 0.8;
+        const gy = primera ? 1 - p.y / H : 0.15 + Math.random() * 0.7;
+        const fuerza = 0.75 + Math.random() * 0.25;
+        ondas.gota(gx, gy, fuerza * GOTA.fuerza, GOTA.radio * (0.8 + Math.random() * 0.4));
+        sonido.gota(gx, fuerza);
+        lluvia.n++;
+        lluvia.espera = p.quieto < 22 ? 1.2 + Math.random() * 1.4 : 2.8 + Math.random() * 2.6;
       }
-      piloto.activo = true;
     }
 
     // Sin fluido: círculo pegado al puntero
@@ -342,14 +334,11 @@ export async function crearPortada({ cursor, reducido, calidad = 'auto' }) {
     } else {
       u.uUsaFluido.value = 0;
     }
-    tiempos.push(dt); if (tiempos.length > 30) tiempos.shift();
-    // El marcador sigue al ratón mientras se mueve (a su izquierda si no cabe a la derecha) y se apaga quieto
-    const moviendo = p.dentro && p.x >= 0 && p.quieto < 1.2 && !html.classList.contains('en-umbral');
-    u.uHudA.value += ((moviendo ? 1 : 0) - u.uHudA.value) * (1 - Math.exp(-6 * dt));
-    if (p.x >= 0) {
-      const hx = p.x + 28 + HUD.w > W ? p.x - 28 - HUD.w : p.x + 28;
-      u.uHud.value = [hx / W, 1 - (p.y + 24 + HUD.h) / H, HUD.w / W, HUD.h / H];
-      if (u.uHudA.value > 0.01) pintarHud(ahora);
+    if (ondas) {
+      ondas.paso(dt);
+      u.tOndas.value = ondas.altura; u.uOndasTexel.value = ondas.texel; u.uUsaOndas.value = 1;
+    } else {
+      u.uUsaOndas.value = 0;
     }
     renderer.render({ scene: malla, sort: false, frustumCull: false });
     sonido.pincel(velocidadSonido, p.x / W, dt, u.uRevelado.value);
@@ -387,6 +376,7 @@ export async function crearPortada({ cursor, reducido, calidad = 'auto' }) {
     u.uCelda.value = (esMovil() ? 8 : 9) * renderer.dpr;
     pintarCapas();
     if (fluido) fluido.redimensionar(gl.canvas.width / gl.canvas.height);
+    if (ondas) ondas.redimensionar(gl.canvas.width / gl.canvas.height);
   }
   let espera = null;
   let anchoPrevio = innerWidth;
