@@ -139,13 +139,6 @@ function panner(v) {
   const p = ctx.createStereoPanner(); p.pan.value = v; return p;
 }
 
-// Baja la música mientras alguien habla (FRESA) y la devuelve después
-export function atenuarMusica(si) {
-  if (!ctx || !busMusica) return;
-  busMusica.gain.cancelScheduledValues(ctx.currentTime);
-  busMusica.gain.setTargetAtTime(si ? 0.14 : 0.5, ctx.currentTime, 0.35);
-}
-
 // --- Música -----------------------------------------------------------------
 let siguienteAcorde = 0;
 let indice = 0;

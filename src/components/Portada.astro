@@ -1,19 +1,13 @@
 ---
-// Portada. El texto es el mismo en las tres ideas; cambia lo que hay detrás:
-// - pincel: foto + «adsPartners» repintado en WebGL y, bajo el pincel, la capa máquina (el DOM queda transparente).
-// - objeto: nada detrás; el isotipo de cristal vive en el canvas fijo de toda la página.
-// - fresa:  un orbe en WebGL (FRESA) detrás del título.
-// El título siempre es texto real del DOM: lo leen buscadores y lectores aunque no se vea.
-interface Props { concepto: 'pincel' | 'objeto' | 'fresa' }
-const { concepto } = Astro.props;
+// Portada: la capa de marca (foto + «adsPartners» en Garamond) y, bajo el pincel, la capa máquina.
+// El título es texto real del DOM: el WebGL lo vuelve a pintar encima y el DOM se queda transparente
+// (sigue siendo seleccionable y lo leen buscadores y lectores). Sin WebGL, se ve el DOM tal cual.
 const base = import.meta.env.BASE_URL;
 ---
-<section class={`portada portada--${concepto}`} id="portada" data-cursor={concepto === 'fresa' ? undefined : 'portada'} aria-labelledby="portada-titulo"
-  style={concepto === 'pincel' ? `--foto: url('${base}assets/hero/Fondo-Hero_adsPartners.webp')` : undefined}
-  data-fresa="Esto es adsPartners. Mantén pulsado y te lo cuento."
-  data-fresa-voz="Hola. Soy FRESA, la inteligencia artificial de adsPartners. Somos un estudio de marca y tecnología de Madrid. Diseñamos cómo se ve tu empresa y construimos lo que la hace funcionar por dentro. Por fuera, marca. Por dentro, máquina.">
-  {concepto === 'pincel' && <div class="portada__fondo" aria-hidden="true"></div>}
-  {concepto !== 'objeto' && <canvas class="portada__gl" data-gl aria-hidden="true"></canvas>}
+<section class="portada" id="portada" data-cursor="portada" aria-labelledby="portada-titulo"
+  style={`--foto: url('${base}assets/hero/Fondo-Hero_adsPartners.webp')`}>
+  <div class="portada__fondo" aria-hidden="true"></div>
+  <canvas class="portada__gl" data-gl aria-hidden="true"></canvas>
 
   <div class="portada__arriba" data-entra>
     <p class="portada__etq mono">( Estudio de marca y tecnología · Madrid )</p>
@@ -28,7 +22,7 @@ const base = import.meta.env.BASE_URL;
     <span class="portada__trozo" data-trozo>ads<i class="portada__base" aria-hidden="true"></i></span><span class="portada__trozo" data-trozo>Partners<i class="portada__base" aria-hidden="true"></i></span>
   </h1>
 
-  <p class="portada__pista mono" aria-hidden="true">{concepto === 'pincel' ? 'Desliza el dedo: debajo está la máquina' : 'Mantén pulsado para ver más'}</p>
+  <p class="portada__pista mono" aria-hidden="true">Desliza el dedo: debajo está la máquina</p>
 </section>
 
 <style>
@@ -87,5 +81,4 @@ const base = import.meta.env.BASE_URL;
   }
   @media (hover: hover) and (pointer: fine) { .portada__pista { display: none !important; } }
   :global(html.en-umbral) .portada__pista { visibility: hidden; }
-  .portada--fresa .portada__pista { display: none !important; }
 </style>

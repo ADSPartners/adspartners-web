@@ -1,5 +1,5 @@
-// Arranque de la home: scroll suave, ajustes, sonido, cursor, umbral, secciones y la portada de cada idea.
-// La portada se carga aparte (import dinámico): la versión del pincel no descarga three.js ni la de FRESA.
+// Arranque de la home: scroll suave, ajustes, sonido, cursor, umbral, secciones y la portada en WebGL.
+// La portada se carga aparte (import dinámico) para que el texto y el umbral no esperen al WebGL.
 import '@fontsource/geist-mono/400.css';
 import Lenis from 'lenis';
 import { gsap } from 'gsap';
@@ -10,19 +10,11 @@ import * as sonido from './sonido.js';
 import { crearCursor } from './cursor.js';
 import { montarUmbral } from './umbral.js';
 import { montarSecciones } from './secciones.js';
-import { ajustarTitulo } from './titulo.js';
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
-const PORTADAS = {
-  pincel: () => import('./gl/portada.js').then((m) => m.crearPortada),
-  objeto: () => import('./conceptos/objeto.js').then((m) => m.crearObjeto),
-  fresa: () => import('./conceptos/fresa.js').then((m) => m.crearFresa),
-};
-
 export async function arrancar() {
   const html = document.documentElement;
-  const concepto = window.ADS_CONCEPTO || 'pincel';
   const reducido = ajustes.movimiento === 'reducido';
   const enUmbral = html.classList.contains('en-umbral');
 
@@ -44,8 +36,7 @@ export async function arrancar() {
     if (clave === 'calidad') portada.calidad(valor);
   });
 
-  // FRESA trae su propio cursor; las otras dos ideas usan el cursor-mensaje
-  const cursor = concepto === 'fresa' ? { activar() {}, volarDesde() {}, decir() {}, progreso() {}, pulsando() {} } : crearCursor({ reducido });
+  const cursor = crearCursor({ reducido });
   montarCabecera(lenis);
   const entran = [...document.querySelectorAll('[data-entra]')];
   if (enUmbral && !reducido) gsap.set(entran, { opacity: 0, y: 24 });
@@ -85,16 +76,10 @@ export async function arrancar() {
   document.querySelectorAll('[data-sonido-hover]').forEach((a) => a.addEventListener('pointerenter', () => sonido.tic(0.7)));
 
   montarSecciones({ reducido });
-  if (concepto !== 'pincel') {
-    const h1 = document.querySelector('[data-titulo]');
-    document.fonts.ready.then(() => ajustarTitulo(h1));
-    let anchoPrevio = innerWidth;
-    window.addEventListener('resize', () => { if (innerWidth !== anchoPrevio) { anchoPrevio = innerWidth; ajustarTitulo(h1); } });
-  }
 
   try {
-    const crear = await PORTADAS[concepto]();
-    portada = await crear({ cursor, reducido, calidad: ajustes.calidad, lenis });
+    const { crearPortada } = await import('./gl/portada.js');
+    portada = await crearPortada({ cursor, reducido, calidad: ajustes.calidad });
   } catch (e) {
     console.warn('Portada sin efectos:', e);
   }

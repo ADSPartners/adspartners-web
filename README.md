@@ -9,40 +9,35 @@ Web estática hecha con **Astro**. Compila a **`docs/`**, que es lo que sirve **
 npm install            # la primera vez
 npm run dev            # http://localhost:4321 con recarga en caliente
 npm run build          # compila la web real a docs/
-npm run build:prueba          # idea «pincel» para preview.ads-partners.com/ads-v5/
-npm run build:prueba-objeto   # idea «objeto» para /ads-1v5/
-npm run build:prueba-fresa    # idea «FRESA» para /ads-2v5/
+npm run build:prueba   # compila para la copia de prueba (preview.ads-partners.com/ads-v5/)
 ```
 
-Cada `build:prueba*` deja en `docs/` esa idea con su ruta; se sube con
+`build:prueba` deja en `docs/` la web con la ruta de la copia de prueba; se sube con
 `python portfolio/staging_ads.py C:/Users/alvar/adspartners-web-proyectos <carpeta>` (desde `webs-negocios`).
 Antes de subir `docs/` a `main`, **siempre** `npm run build` (sin `:prueba`), o la web real saldría con
-la ruta de la copia de prueba. `ADS_CONCEPTO` elige la idea (por defecto, `pincel`).
+la ruta de la copia de prueba.
 
 ## Qué fichero es qué
 
 ```
 astro.config.mjs        salida a docs/ y ruta base (ADS_BASE=<carpeta> para la copia de prueba)
-src/pages/index.astro   la home: orden de los bloques y qué idea de portada lleva (ADS_CONCEPTO)
+src/pages/index.astro   la home: orden de los bloques
 src/layouts/Base.astro  <head>, metas, fuentes precargadas y el script que decide si sale el umbral
 src/components/
   Umbral.astro          pantalla previa: carga con humor, barra de 1 px, entrar con o sin sonido
   Cabecera.astro        barra fija: logotipo, Ajustes (sonido, movimiento, calidad) y Hablemos
-  Portada.astro         portada (la misma en las tres ideas; cambia lo que hay detrás)
+  Portada.astro         portada: canvas del pincel, título real en el DOM (lo repinta el WebGL) y textos
   Idea.astro            la frase que se enciende palabra a palabra, con sus dos notas al margen
   Hacemos.astro         «Marca» (Garamond) y «máquina» (mono): los dos oficios y sus servicios
   PorQue.astro          capítulo claro: las cuatro razones
   ParaQuien.astro       «Te servimos si»: casillas que se marcan al bajar, y la llamada a hablar
   Pie.astro             pie del prototipo
-  Cursor.astro          el cursor-mensaje (isotipo + anillo + frase), ideas «pincel» y «objeto»
-  CursorFresa.astro     FRESA junto al ratón (idea «FRESA»); los mensajes salen de los data-fresa del HTML
+  Cursor.astro          el cursor-mensaje (isotipo + anillo + frase)
   Marca.astro           isotipo y logotipo en línea, con el color del texto
 src/scripts/
-  app.js                arranque: Lenis, GSAP, ajustes, sonido, cursor, umbral, secciones y la portada de cada idea
+  app.js                arranque: Lenis, GSAP, ajustes, sonido, cursor, umbral, secciones y la portada
   secciones.js          el movimiento de las secciones de texto
-  gl/portada.js         idea «pincel»: el shader que mezcla marca y máquina, el piloto automático y «mantener»
-  conceptos/objeto.js   idea «objeto»: el isotipo en cristal (three.js) que cambia en cada sección
-  conceptos/fresa.js    idea «FRESA»: el orbe, el globo junto al ratón y la lectura en voz alta
+  gl/portada.js         el shader que mezcla marca y máquina, el pincel, el piloto automático y «mantener»
   gl/fluido.js          la simulación de fluido en GPU (la máscara del pincel)
   gl/capas.js           lo que se pinta en 2D: foto, título, anatomía del tipo, el código que lo pinta y el degradado
   sonido.js             música generativa, agua del pincel y efectos, todo con Web Audio (no hay ficheros de audio)

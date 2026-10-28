@@ -63,15 +63,3 @@ html.en-umbral body { overflow: hidden; }
   html.cursor-propio [data-cursor] a,
   html.cursor-propio [data-cursor] button { cursor: none; }
 }
-
-/* Idea «objeto»: el isotipo vive en un canvas fijo detrás de todo, así que las secciones son transparentes
-   y es la propia escena la que pasa de noche a crema en los capítulos claros */
-html[data-concepto="objeto"] { --fondo-seccion: transparent; --fondo-claro: transparent; }
-html[data-concepto="objeto"] .portada { z-index: 1; }
-html[data-concepto="objeto"] body { background: var(--noche); }
-html[data-concepto="objeto"] .porque__lista,
-html[data-concepto="objeto"] .quien__lista { padding-right: 24vw; }
-@media (max-width: 760px) {
-  html[data-concepto="objeto"] .porque__lista,
-  html[data-concepto="objeto"] .quien__lista { padding-right: 0; }
-}
