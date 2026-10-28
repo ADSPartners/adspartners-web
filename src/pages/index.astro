@@ -1,0 +1,26 @@
+---
+import Base from '../layouts/Base.astro';
+import Umbral from '../components/Umbral.astro';
+import Cabecera from '../components/Cabecera.astro';
+import Portada from '../components/Portada.astro';
+import Manifiesto from '../components/Manifiesto.astro';
+import Cursor from '../components/Cursor.astro';
+const base = import.meta.env.BASE_URL;
+---
+<Base
+  titulo="adsPartners® · Marca por fuera. Máquina por dentro."
+  descripcion="Brand y tecnología desde Madrid: marcas y webs con una idea propia, y sistemas que trabajan solos (automatización, IA y software a medida)."
+>
+  <Umbral />
+  <Cabecera />
+  <main>
+    <Portada />
+    <Manifiesto />
+  </main>
+  <Cursor />
+  <script define:vars={{ base }} is:inline>window.ADS_BASE = base;</script>
+  <script>
+    import { arrancar } from '../scripts/app.js';
+    arrancar();
+  </script>
+</Base>

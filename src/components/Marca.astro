@@ -1,0 +1,16 @@
+---
+// El isotipo o el logotipo de ads, en línea y con el color del texto (currentColor).
+import isoRaw from '../../public/assets/logos/isotipo_marron.svg?raw';
+import logoRaw from '../../public/assets/logos/logotipo_beige.svg?raw';
+
+interface Props { tipo?: 'iso' | 'logo'; class?: string; etiqueta?: string }
+const { tipo = 'iso', class: clase = '', etiqueta } = Astro.props;
+
+const limpia = (s: string) => s
+  .replace(/<\?xml[^>]*>/, '')
+  .replace(/\sid="[^"]*"/g, '')
+  .replace(/fill="#[0-9a-f]{3,6}"/gi, 'fill="currentColor"')
+  .replace('<svg', `<svg class="${clase}" ${etiqueta ? `role="img" aria-label="${etiqueta}"` : 'aria-hidden="true"'} focusable="false"`);
+const svg = limpia(tipo === 'iso' ? isoRaw : logoRaw);
+---
+<Fragment set:html={svg} />

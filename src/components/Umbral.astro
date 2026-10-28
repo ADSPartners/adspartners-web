@@ -1,0 +1,72 @@
+---
+// La pantalla previa: carga con humor, barra de 1 px y la elección del sonido.
+// La portada ya respira detrás (el velo deja ver el fluido). Sale una vez por sesión.
+import Marca from './Marca.astro';
+---
+<div class="umbral" id="umbral" role="dialog" aria-modal="true" aria-label="Entrada a adsPartners">
+  <div class="umbral__velo" aria-hidden="true"></div>
+  <button class="umbral__saltar mono" type="button" data-entrar="sin">Saltar</button>
+
+  <div class="umbral__centro">
+    <span class="umbral__iso" data-umbral-iso><Marca tipo="iso" /></span>
+    <div class="umbral__barra" aria-hidden="true"><span data-umbral-barra></span></div>
+    <p class="umbral__frase mono" aria-live="polite"><span data-umbral-frase>Encendiendo la máquina…</span></p>
+  </div>
+
+  <div class="umbral__entradas" data-umbral-entradas>
+    <button class="umbral__con" type="button" data-entrar="con">
+      <span class="umbral__con-t">Entrar con sonido</span>
+      <span class="umbral__ondas" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+    </button>
+    <button class="umbral__sin mono" type="button" data-entrar="sin">Entrar sin sonido</button>
+  </div>
+
+  <p class="umbral__pie mono" aria-hidden="true">Mejor con cascos · Mueve el ratón</p>
+</div>
+
+<style>
+  .umbral {
+    position: fixed; inset: 0; z-index: 50;
+    display: grid; place-items: center;
+    color: var(--crema);
+  }
+  html:not(.en-umbral) .umbral { display: none; }
+  .umbral__velo { position: absolute; inset: 0; background: rgba(18, 13, 10, .8); }
+  .umbral__centro { position: relative; display: grid; justify-items: center; gap: 22px; transform: translateY(-4vh); }
+  .umbral__iso { width: 44px; color: var(--crema); }
+  .umbral__iso :global(svg) { width: 100%; height: auto; }
+  .umbral__barra { width: 160px; height: 1px; background: var(--linea); overflow: hidden; }
+  .umbral__barra span { display: block; height: 100%; background: var(--crema); transform-origin: left; transform: scaleX(0); }
+  .umbral__frase { margin: 0; min-height: 1.4em; color: var(--crema-2); overflow: hidden; }
+  .umbral__frase span { display: inline-block; }
+
+  .umbral__entradas {
+    position: absolute; left: 0; right: 0; bottom: 14vh;
+    display: grid; justify-items: center; gap: 18px;
+    opacity: 0; visibility: hidden;
+  }
+  .umbral__con {
+    display: inline-flex; align-items: center; gap: 14px;
+    font-family: var(--serif); font-size: clamp(26px, 2.6vw, 38px); font-weight: 300; letter-spacing: -.01em;
+    padding: 8px 4px;
+  }
+  .umbral__con-t { background: linear-gradient(currentColor, currentColor) left bottom / 0 1px no-repeat; transition: background-size .6s var(--curva); }
+  .umbral__con:hover .umbral__con-t, .umbral__con:focus-visible .umbral__con-t { background-size: 100% 1px; }
+  .umbral__ondas { display: inline-flex; align-items: center; gap: 3px; height: 18px; }
+  .umbral__ondas i { width: 2px; height: 100%; background: var(--rosa); transform: scaleY(.25); animation: onda 1.1s ease-in-out infinite; }
+  .umbral__ondas i:nth-child(2) { animation-delay: .15s; } .umbral__ondas i:nth-child(3) { animation-delay: .3s; }
+  .umbral__ondas i:nth-child(4) { animation-delay: .45s; } .umbral__ondas i:nth-child(5) { animation-delay: .6s; }
+  @keyframes onda { 0%, 100% { transform: scaleY(.25); } 50% { transform: scaleY(1); } }
+  .umbral__sin { color: var(--crema-3); padding: 6px; transition: color .3s; }
+  .umbral__sin:hover, .umbral__sin:focus-visible { color: var(--crema); }
+
+  .umbral__saltar { position: absolute; bottom: var(--margen); right: var(--margen); color: var(--crema-3); padding: 6px; transition: color .3s; }
+  .umbral__saltar:hover, .umbral__saltar:focus-visible { color: var(--crema); }
+  .umbral__pie { position: absolute; bottom: var(--margen); margin: 0; color: var(--crema-3); }
+
+  :global(html.mov-reducido) .umbral__ondas i { animation: none; transform: scaleY(.6); }
+  @media (max-width: 700px) {
+    .umbral__entradas { bottom: 12vh; }
+    .umbral__pie { display: none; }
+  }
+</style>

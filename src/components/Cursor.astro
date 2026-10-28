@@ -1,0 +1,38 @@
+---
+// El cursor-mensaje: el isotipo de ads con un anillo y una frase que te dice qué hacer.
+// Solo vive en las zonas con data-cursor y solo con ratón; fuera, vuelve el cursor normal.
+import Marca from './Marca.astro';
+---
+<div class="cursor" data-cursor-el aria-hidden="true">
+  <div class="cursor__cuerpo" data-cursor-cuerpo>
+    <svg class="cursor__aro" viewBox="0 0 64 64">
+      <circle class="cursor__pista" cx="32" cy="32" r="29" />
+      <circle class="cursor__progreso" cx="32" cy="32" r="29" pathLength="1" data-cursor-progreso />
+    </svg>
+    <span class="cursor__iso"><Marca tipo="iso" /></span>
+  </div>
+  <span class="cursor__texto mono"><span data-cursor-texto></span></span>
+</div>
+
+<style>
+  .cursor {
+    position: fixed; top: 0; left: 0; z-index: 60;
+    pointer-events: none;
+    opacity: 0; transition: opacity .35s var(--curva);
+    will-change: transform;
+  }
+  :global(html.cursor-visible) .cursor { opacity: 1; }
+  .cursor__cuerpo { position: absolute; left: -24px; top: -24px; width: 48px; height: 48px; display: grid; place-items: center; }
+  .cursor__aro { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); overflow: visible; }
+  .cursor__pista { fill: none; stroke: rgba(231, 226, 218, .32); stroke-width: 1; vector-effect: non-scaling-stroke; transition: stroke .3s; }
+  .cursor__progreso { fill: none; stroke: var(--rosa); stroke-width: 1.5; vector-effect: non-scaling-stroke; stroke-dasharray: 1; stroke-dashoffset: 1; }
+  .cursor__iso { width: 20px; color: var(--crema); transition: transform .5s var(--curva); }
+  .cursor__iso :global(svg) { width: 100%; height: auto; }
+  .cursor__texto {
+    position: absolute; left: 34px; top: -7px;
+    white-space: nowrap; color: var(--crema);
+    overflow: hidden; display: block; line-height: 14px; height: 14px;
+  }
+  .cursor__texto span { display: block; }
+  :global(html.cursor-pulsando) .cursor__iso { transform: scale(.82); }
+</style>

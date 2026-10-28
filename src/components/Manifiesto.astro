@@ -1,0 +1,31 @@
+---
+// Lo que sigue a la portada en el prototipo. En la Fase 2, cada trabajo de este párrafo será un cue
+// con su clip (como Pegassi). Todo lo que dice sale de los proyectos reales (proyectos-data.jsx).
+---
+<section class="manif" id="manifiesto" aria-label="Qué hacemos">
+  <p class="manif__etq mono">( Lo que hacemos )</p>
+  <p class="manif__texto" data-lineas>
+    Hacemos dos cosas. <em>Por fuera,</em> marcas y webs con una idea propia: una pastelería donde la tarta se hace
+    mientras bajas, unas cookies que se tuestan con el scroll. <em>Por dentro,</em> sistemas que trabajan solos:
+    un bar que sabe el margen de sus 157 platos leyendo 115 facturas, un software que mide tejido pulmonar píxel a
+    píxel para la Fundación Jiménez Díaz.
+  </p>
+  <p class="manif__nota mono">Prototipo de dirección · 28-oct-2026 · Aquí seguirán Qué hacemos, Trabajo, Equipo y Contacto</p>
+</section>
+
+<style>
+  .manif {
+    position: relative; z-index: 1;
+    background: var(--noche);
+    padding: clamp(110px, 16vh, 200px) var(--margen) clamp(90px, 14vh, 160px);
+  }
+  .manif__etq { margin: 0 0 34px; color: var(--crema-3); }
+  .manif__texto {
+    margin: 0; max-width: 21ch;
+    font-family: var(--serif); font-weight: 300;
+    font-size: clamp(36px, 5.6vw, 92px); line-height: 1.02; letter-spacing: -.022em;
+  }
+  .manif__texto em { font-style: italic; font-weight: 400; color: var(--rosa); }
+  .manif__nota { margin: clamp(80px, 12vh, 140px) 0 0; color: var(--crema-3); }
+  @media (min-width: 1100px) { .manif__texto { max-width: 24ch; } }
+</style>

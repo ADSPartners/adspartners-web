@@ -1,0 +1,113 @@
+---
+// Barra fija: logotipo, ajustes (sonido, movimiento, calidad), contacto y el cubo que gira con el scroll.
+// Las caras de Álvaro y Sebas son monogramas hasta que Sebas las dibuje.
+import Marca from './Marca.astro';
+const base = import.meta.env.BASE_URL;
+---
+<header class="cab" data-cab>
+  <a class="cab__logo" href={base} aria-label="adsPartners, inicio"><Marca tipo="logo" /></a>
+
+  <div class="cab__dcha">
+    <div class="cab__ajustes">
+      <button class="cab__btn mono" type="button" aria-expanded="false" aria-controls="ajustes" data-ajustes-btn>
+        <span class="cab__sonido" data-sonido-ind aria-hidden="true"><i></i><i></i><i></i></span>Ajustes
+      </button>
+      <div class="ajustes" id="ajustes" hidden data-ajustes>
+        <fieldset>
+          <legend class="mono">Sonido</legend>
+          <label><input type="radio" name="sonido" value="si" /> Sí</label>
+          <label><input type="radio" name="sonido" value="no" /> No</label>
+        </fieldset>
+        <fieldset>
+          <legend class="mono">Movimiento</legend>
+          <label><input type="radio" name="movimiento" value="completo" /> Completo</label>
+          <label><input type="radio" name="movimiento" value="reducido" /> Reducido</label>
+        </fieldset>
+        <fieldset>
+          <legend class="mono">Calidad</legend>
+          <label><input type="radio" name="calidad" value="auto" /> Auto</label>
+          <label><input type="radio" name="calidad" value="alta" /> Alta</label>
+          <label><input type="radio" name="calidad" value="baja" /> Baja</label>
+        </fieldset>
+      </div>
+    </div>
+
+    <a class="cab__hablemos" href="mailto:adsgroup@ads-partners.com?subject=Hablemos" data-sonido-hover>Hablemos</a>
+
+    <div class="cubo" aria-hidden="true">
+      <div class="cubo__giro" data-cubo>
+        <span class="cubo__cara cubo__cara--1"><Marca tipo="iso" /></span>
+        <span class="cubo__cara cubo__cara--2">Á</span>
+        <span class="cubo__cara cubo__cara--3">S</span>
+        <span class="cubo__cara cubo__cara--4">®</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<style>
+  .cab {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 30;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: var(--margen);
+    pointer-events: none;
+    transition: transform .7s var(--curva), opacity .5s var(--curva);
+  }
+  .cab > * { pointer-events: auto; }
+  .cab--fuera { transform: translateY(-110%); opacity: 0; }
+  .cab--fuera:focus-within { transform: none; opacity: 1; }
+  .cab__logo { width: 132px; color: var(--crema); }
+  .cab__logo :global(svg) { width: 100%; height: auto; }
+  .cab__dcha { display: flex; align-items: center; gap: 22px; }
+
+  .cab__btn { display: inline-flex; align-items: center; gap: 8px; color: var(--crema-2); padding: 6px 0; transition: color .3s; }
+  .cab__btn:hover, .cab__btn[aria-expanded="true"] { color: var(--crema); }
+  .cab__sonido { display: inline-flex; align-items: flex-end; gap: 2px; height: 10px; }
+  .cab__sonido i { width: 2px; height: 100%; background: currentColor; transform-origin: bottom; transform: scaleY(.3); transition: transform .4s var(--curva); }
+  :global(html.sonido-on) .cab__sonido i { animation: barras 1s ease-in-out infinite; }
+  :global(html.sonido-on) .cab__sonido i:nth-child(2) { animation-delay: .2s; }
+  :global(html.sonido-on) .cab__sonido i:nth-child(3) { animation-delay: .4s; }
+  @keyframes barras { 0%, 100% { transform: scaleY(.3); } 50% { transform: scaleY(1); } }
+
+  .cab__ajustes { position: relative; }
+  .ajustes {
+    position: absolute; top: calc(100% + 12px); right: 0;
+    display: grid; gap: 14px; padding: 18px 20px; min-width: 220px;
+    background: rgba(27, 20, 16, .94); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--linea); border-radius: 3px;
+  }
+  .ajustes[hidden] { display: none; }
+  .ajustes fieldset { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 14px; }
+  .ajustes legend { color: var(--crema-3); padding: 0; margin-bottom: 6px; width: 100%; }
+  .ajustes label { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
+  .ajustes input { accent-color: var(--rosa); margin: 0; }
+
+  .cab__hablemos {
+    font-size: 13px; letter-spacing: .01em; padding: 9px 16px;
+    border: 1px solid var(--crema-3); border-radius: 99px;
+    transition: background-color .4s var(--curva), color .4s var(--curva), border-color .4s var(--curva);
+  }
+  .cab__hablemos:hover, .cab__hablemos:focus-visible { background: var(--crema); color: var(--tinta); border-color: var(--crema); }
+
+  /* El cubo: cuatro caras, gira con la rueda y encaja a 90° */
+  .cubo { width: 34px; height: 34px; perspective: 600px; }
+  .cubo__giro { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transform: translateZ(-17px) rotateX(0deg); }
+  .cubo__cara {
+    position: absolute; inset: 0; display: grid; place-items: center;
+    background: var(--noche-2); border: 1px solid var(--linea);
+    font-family: var(--serif); font-style: italic; font-size: 20px; line-height: 1; color: var(--crema);
+    backface-visibility: hidden;
+  }
+  .cubo__cara :global(svg) { width: 22px; height: auto; }
+  .cubo__cara--1 { transform: rotateX(0deg) translateZ(17px); }
+  .cubo__cara--2 { transform: rotateX(-90deg) translateZ(17px); }
+  .cubo__cara--3 { transform: rotateX(-180deg) translateZ(17px); }
+  .cubo__cara--4 { transform: rotateX(-270deg) translateZ(17px); color: var(--rosa); }
+
+  @media (max-width: 700px) {
+    .cab__logo { width: 104px; }
+    .cab__dcha { gap: 14px; }
+    .cab__btn { font-size: 0; gap: 0; }
+    .cab__hablemos { font-size: 12px; padding: 8px 13px; }
+  }
+</style>
