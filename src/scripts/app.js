@@ -1,4 +1,5 @@
-// Arranque de la home: scroll suave, ajustes, sonido, cursor, portada WebGL, cubo, umbral y entradas de texto.
+// Arranque de la home: scroll suave, ajustes, sonido, cursor, umbral, secciones y la portada de cada idea.
+// La portada se carga aparte (import dinámico): la versión del pincel no descarga three.js ni la de FRESA.
 import '@fontsource/geist-mono/400.css';
 import Lenis from 'lenis';
 import { gsap } from 'gsap';
@@ -7,14 +8,21 @@ import { SplitText } from 'gsap/SplitText';
 import { ajustes, alCambiar, montarPanel } from './ajustes.js';
 import * as sonido from './sonido.js';
 import { crearCursor } from './cursor.js';
-import { crearPortada } from './gl/portada.js';
-import { crearCubo } from './cubo.js';
 import { montarUmbral } from './umbral.js';
+import { montarSecciones } from './secciones.js';
+import { ajustarTitulo } from './titulo.js';
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
+const PORTADAS = {
+  pincel: () => import('./gl/portada.js').then((m) => m.crearPortada),
+  objeto: () => import('./conceptos/objeto.js').then((m) => m.crearObjeto),
+  fresa: () => import('./conceptos/fresa.js').then((m) => m.crearFresa),
+};
+
 export async function arrancar() {
   const html = document.documentElement;
+  const concepto = window.ADS_CONCEPTO || 'pincel';
   const reducido = ajustes.movimiento === 'reducido';
   const enUmbral = html.classList.contains('en-umbral');
 
@@ -28,6 +36,7 @@ export async function arrancar() {
     if (enUmbral) lenis.stop();
   }
 
+  let portada = { entrar() {}, calidad() {}, activarCursor() {} };
   montarPanel();
   alCambiar((clave, valor) => {
     if (clave === 'sonido') (valor === 'si' ? sonido.encender() : sonido.apagar());
@@ -35,15 +44,14 @@ export async function arrancar() {
     if (clave === 'calidad') portada.calidad(valor);
   });
 
-  const cursor = crearCursor({ reducido });
+  // FRESA trae su propio cursor; las otras dos ideas usan el cursor-mensaje
+  const cursor = concepto === 'fresa' ? { activar() {}, volarDesde() {}, decir() {}, progreso() {}, pulsando() {} } : crearCursor({ reducido });
   montarCabecera(lenis);
-  crearCubo({ lenis, reducido });
   const entran = [...document.querySelectorAll('[data-entra]')];
   if (enUmbral && !reducido) gsap.set(entran, { opacity: 0, y: 24 });
 
   let resolverListo;
   const listo = new Promise((ok) => { resolverListo = ok; });
-  let portada = { entrar() {}, calidad() {}, activarCursor() {} };
   let entrado = false;
 
   montarUmbral({
@@ -73,12 +81,23 @@ export async function arrancar() {
     }
   }
 
-  // Tic suave en botones y enlaces marcados
+  // Gota de agua al pasar por botones, enlaces y servicios
   document.querySelectorAll('[data-sonido-hover]').forEach((a) => a.addEventListener('pointerenter', () => sonido.tic(0.7)));
 
-  montarLineas(reducido);
+  montarSecciones({ reducido });
+  if (concepto !== 'pincel') {
+    const h1 = document.querySelector('[data-titulo]');
+    document.fonts.ready.then(() => ajustarTitulo(h1));
+    let anchoPrevio = innerWidth;
+    window.addEventListener('resize', () => { if (innerWidth !== anchoPrevio) { anchoPrevio = innerWidth; ajustarTitulo(h1); } });
+  }
 
-  portada = await crearPortada({ cursor, reducido, calidad: ajustes.calidad });
+  try {
+    const crear = await PORTADAS[concepto]();
+    portada = await crear({ cursor, reducido, calidad: ajustes.calidad, lenis });
+  } catch (e) {
+    console.warn('Portada sin efectos:', e);
+  }
   resolverListo(true);
   if (!enUmbral || entrado) portada.activarCursor?.();
 }
@@ -90,29 +109,11 @@ function montarCabecera(lenis) {
   let ultimo = window.scrollY;
   const mirar = (y) => {
     const bajando = y > ultimo + 2, subiendo = y < ultimo - 2;
+    cab.classList.toggle('cab--fondo', y > innerHeight * 0.8);
     if (bajando && y > innerHeight * 0.6) cab.classList.add('cab--fuera');
     else if (subiendo || y < innerHeight * 0.6) cab.classList.remove('cab--fuera');
     ultimo = y;
   };
   if (lenis) lenis.on('scroll', (l) => mirar(l.scroll));
   else window.addEventListener('scroll', () => mirar(window.scrollY), { passive: true });
-}
-
-// Textos largos: entran por líneas enmascaradas al llegar, con un tic por línea
-function montarLineas(reducido) {
-  if (reducido) return;
-  document.fonts.ready.then(() => {
-    document.querySelectorAll('[data-lineas]').forEach((el) => {
-      SplitText.create(el, {
-        type: 'lines', mask: 'lines', autoSplit: true,
-        onSplit(self) {
-          return gsap.from(self.lines, {
-            yPercent: 105, duration: 1.1, ease: 'power3.out', stagger: 0.09,
-            scrollTrigger: { trigger: el, start: 'top 82%', once: true },
-            onStart() { self.lines.forEach((_, i) => setTimeout(() => sonido.tic(0.5), i * 90)); },
-          });
-        },
-      });
-    });
-  });
 }

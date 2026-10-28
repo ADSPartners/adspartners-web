@@ -1,9 +1,9 @@
 // Las capas de la portada, pintadas en canvas 2D y subidas como texturas:
 // - foto:    la imagen de marca a sangre (cover). De su luz salen las curvas de nivel y el tramado de la máquina.
 // - titulo:  «adsPartners» en Garamond, en el sitio exacto del h1 del DOM (lo mide del propio DOM).
-// - maquina: la anatomía del título (contorno, cajas, líneas guía), código con datos reales y la medida de luz.
+// - maquina: la anatomía del título (contorno, cajas, líneas guía), el código que lo pinta y el degradado medido.
 // - glifos:  atlas de caracteres mono para el tramado.
-// Todo lo que se escribe en la máquina es verdad: sale de los proyectos (proyectos-data.jsx).
+// Todo lo que se escribe en la máquina construye lo que se ve: valores medidos del DOM y de la foto, y el shader real.
 
 export const CREMA = '#E7E2DA';
 const ROSA = '#F5CBD7';
@@ -16,7 +16,7 @@ export function lienzo(w, h) {
 }
 
 export function pintarFoto(c, img) {
-  const ctx = c.getContext('2d');
+  const ctx = c.getContext('2d', { willReadFrequently: true });
   const s = Math.max(c.width / img.naturalWidth, c.height / img.naturalHeight);
   const w = img.naturalWidth * s, h = img.naturalHeight * s;
   // Un poco de desenfoque: la foto ya es suave y así las curvas de nivel salen sin escalones
@@ -109,35 +109,75 @@ export function pintarMaquina(c, trozos, dpr, { foto, movil }) {
     }
   }
 
-  // Código con datos reales de los proyectos
-  const cx = movil ? px(18) : px(32);
-  const cy = movil ? H * 0.43 : H * 0.53;
-  const filas = [
-    ['// por dentro', '', ''],
-    ['factura.pdf', 'leer()', '115 facturas'],
-    ['plato', 'margen()', '157 platos'],
-    ['tejido.png', 'medir()', 'píxel a píxel'],
-    ['scroll', 'hornear()', 'una tarta'],
-  ];
-  const col = movil ? [0, px(96), px(186)] : [0, px(118), px(224)];
-  filas.forEach(([a, b, d], i) => {
-    const y = cy + i * px(19);
-    if (i === 0) { etiqueta(a, cx, y, 'rgba(231,226,218,.42)', 11); return; }
-    etiqueta(a, cx + col[0], y, 'rgba(231,226,218,.8)', 11);
-    etiqueta('→ ' + b, cx + col[1], y, ROSA, 11);
-    etiqueta(d, cx + col[2], y, 'rgba(231,226,218,.55)', 11);
-  });
+  // El código que pinta lo que se ve. Primero, el CSS real del título, con los valores medidos del DOM
+  const bloque = (lineas, x, y, tam = 11) => {
+    lineas.forEach((ln, i) => {
+      let cx = x;
+      const yy = y + i * px(tam * 1.62);
+      // Resaltado mínimo: comentarios apagados, funciones y propiedades en rosa, el resto en crema
+      for (const [, com, pal, resto] of ln.matchAll(/(\/\/.*$)|([a-zA-Z_][\w-]*(?=\s*[(:]))|([^a-zA-Z_/]+|[a-zA-Z_][\w-]*|\/)/g)) {
+        const trozo = com || pal || resto;
+        const color = com ? 'rgba(231,226,218,.38)' : pal ? 'rgba(245,203,215,.92)' : 'rgba(231,226,218,.78)';
+        ctx.font = `400 ${px(tam)}px ${MONO}`;
+        if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+        ctx.fillStyle = color; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+        ctx.fillText(trozo, cx, yy);
+        cx += ctx.measureText(trozo).width;
+      }
+    });
+  };
+  const t0 = trozos[0];
+  if (t0) {
+    const tracking = (parseFloat(t0.tracking) / t0.tam).toFixed(3).replace(/0+$/, '');
+    bloque([
+      '// así se escribe el título',
+      'h1.portada__titulo {',
+      `  font-family: "${t0.familia}";`,
+      '  font-weight: 300;',
+      `  font-size: ${Math.round(t0.tam)}px;`,
+      `  letter-spacing: ${tracking}em;`,
+      '  color: #E7E2DA;',
+      '}',
+    ], movil ? px(18) : px(32), movil ? H * 0.35 : H * 0.49);
+  }
+  // Después, las líneas del shader que dibujan estas curvas de nivel a partir de la luz de la foto
+  if (!movil) {
+    bloque([
+      '// curvas de nivel: cada línea, un mismo valor de luz',
+      'float l = luma(texture(tFoto, uv).rgb);',
+      'float b = l * 16.0;',
+      'float iso = 1.0 - smoothstep(0.0, fwidth(b) * 1.4,',
+      '                  abs(fract(b + 0.5) - 0.5));',
+    ], W * 0.34, H * 0.15);
+  }
 
-  // Medida de luz sobre la foto: una cruz donde más brilla, con su valor real
+  // Regla del degradado: el color real de la portada en seis puntos, de arriba abajo
   if (foto) {
     const fctx = foto.getContext('2d', { willReadFrequently: true });
+    const rx = movil ? W * 0.86 : W * 0.64;
+    const y0 = movil ? H * 0.34 : H * 0.12, y1 = movil ? H * 0.6 : H * 0.62;
+    linea(rx, y0, rx, y1, 'rgba(231,226,218,.35)');
+    etiqueta('degradado', rx + px(10), y0 - px(10), 'rgba(231,226,218,.45)');
+    for (let i = 0; i < 6; i++) {
+      const y = y0 + (y1 - y0) * (i / 5);
+      const d = fctx.getImageData(Math.round((rx / W) * foto.width), Math.round((y / H) * foto.height), 1, 1).data;
+      // El mismo tratamiento que le da el shader a la foto (clave de noche)
+      const c = [0, 1, 2].map((k) => Math.round(Math.min(1, Math.pow(d[k] / 255, 1.3) * 0.68 * [1.03, 0.99, 0.94][k]) * 255));
+      const hexa = '#' + c.map((v) => v.toString(16).padStart(2, '0')).join('').toUpperCase();
+      linea(rx - px(5), y, rx + px(5), y, 'rgba(231,226,218,.6)');
+      ctx.fillStyle = hexa; ctx.fillRect(rx + px(10), y - px(5), px(10), px(10));
+      ctx.strokeStyle = 'rgba(231,226,218,.4)'; ctx.lineWidth = px(1); ctx.strokeRect(rx + px(10), y - px(5), px(10), px(10));
+      etiqueta(hexa, rx + px(26), y + px(4), 'rgba(231,226,218,.72)');
+    }
+
+    // Medida de luz: una cruz en el punto más luminoso del horizonte, con su valor real
     const fx = Math.round(foto.width * 0.5), fy = Math.round(foto.height * (movil ? 0.5 : 0.58));
     const d = fctx.getImageData(fx, fy, 1, 1).data;
     const luz = (0.299 * d[0] + 0.587 * d[1] + 0.114 * d[2]) / 255;
     const X = (fx / foto.width) * W, Y = (fy / foto.height) * H;
     linea(X - px(9), Y, X + px(9), Y, 'rgba(231,226,218,.8)');
     linea(X, Y - px(9), X, Y + px(9), 'rgba(231,226,218,.8)');
-    etiqueta(`luz ${luz.toFixed(2).replace('.', ',')} · x 0,50 y ${(fy / foto.height).toFixed(2).replace('.', ',')}`, X + px(14), Y - px(6), 'rgba(231,226,218,.7)');
+    etiqueta(`luz ${luz.toFixed(2).replace('.', ',')}`, X + px(14), Y - px(6), 'rgba(231,226,218,.7)');
   }
 }
 

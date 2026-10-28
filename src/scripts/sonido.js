@@ -1,15 +1,31 @@
 // Sonido de la web, generado en el navegador con Web Audio: no hay ni un fichero de audio.
-// - Textura del pincel: un roce de papel (la marca) y un granulado de datos (la máquina) que crecen con la velocidad del ratón.
-// - Efectos: entrar, tic, encaje del cubo, subida al mantener pulsado y suelta.
-// - Dron de fondo, muy bajo.
+// - Música: cuatro acordes que se suceden despacio (Fa maj9, La m7, Re m9, Si♭ maj7♯11), con colchón de
+//   cuerdas suaves, un bajo y notas sueltas de piano que nunca se repiten igual, todo en una sala con eco.
+// - El pincel suena a agua: un vaivén grave y burbujas que suben, más cuanto más rápido se mueve el ratón.
+// - Efectos (entrar, gota, mantener y soltar) en la misma tonalidad que la música.
 // Solo suena si se eligió en el umbral o en Ajustes, y se calla al cambiar de pestaña.
 
 let ctx = null;
 let master = null;
+let busMusica = null;
+let busEfectos = null;
+let sala = null;
+let eco = null;
 let ruido = null;
+let marron = null;
 let activo = false;
-const textura = {};
-const PENTA = [880, 987.77, 1174.66, 1318.51, 1567.98, 1760];
+const agua = {};
+
+const hz = (midi) => 440 * Math.pow(2, (midi - 69) / 12);
+// Acordes: [bajo, ...colchón] en MIDI. Cada uno dura COMPAS segundos.
+const ACORDES = [
+  [41, 57, 60, 64, 67],        // Fa maj9
+  [45, 55, 60, 64, 71],        // La m7 (add 11 arriba)
+  [38, 53, 57, 60, 64],        // Re m9
+  [46, 62, 65, 69, 76],        // Si♭ maj7 ♯11
+];
+const PENTA = [65, 67, 69, 72, 74, 77, 79, 81, 84];   // Fa mayor pentatónica, octavas 4-5
+const COMPAS = 9;
 
 export const sonidoActivo = () => activo;
 
@@ -17,8 +33,9 @@ export async function encender() {
   if (!ctx) crear();
   if (ctx.state === 'suspended') { try { await ctx.resume(); } catch (e) { /* sin gesto todavía */ } }
   activo = true;
-  master.gain.cancelScheduledValues(ctx.currentTime);
-  master.gain.setTargetAtTime(0.9, ctx.currentTime, 0.25);
+  const t = ctx.currentTime;
+  master.gain.cancelScheduledValues(t);
+  master.gain.setTargetAtTime(0.9, t, 0.3);
   document.documentElement.classList.add('sonido-on');
 }
 
@@ -27,20 +44,43 @@ export function apagar() {
   document.documentElement.classList.remove('sonido-on');
   if (!ctx) return;
   master.gain.cancelScheduledValues(ctx.currentTime);
-  master.gain.setTargetAtTime(0, ctx.currentTime, 0.12);
+  master.gain.setTargetAtTime(0, ctx.currentTime, 0.15);
 }
 
 function crear() {
   const AC = window.AudioContext || window.webkitAudioContext;
   ctx = new AC();
   const comp = ctx.createDynamicsCompressor();
-  comp.threshold.value = -16; comp.knee.value = 12; comp.ratio.value = 3.5;
-  master = ctx.createGain();
-  master.gain.value = 0;
+  comp.threshold.value = -14; comp.knee.value = 14; comp.ratio.value = 3; comp.attack.value = 0.02; comp.release.value = 0.4;
+  master = ctx.createGain(); master.gain.value = 0;
   master.connect(comp).connect(ctx.destination);
-  ruido = ruidoRosa(3);
-  montarTextura();
-  montarDron();
+
+  ruido = buferRuido(4, 'blanco');
+  marron = buferRuido(4, 'marron');
+
+  // Sala: reverberación de ~4,5 s hecha con ruido que se apaga, filtrada para que sea cálida
+  sala = ctx.createConvolver();
+  sala.buffer = respuestaSala(4.6);
+  const salaVuelta = ctx.createGain(); salaVuelta.gain.value = 0.9;
+  const salaLp = ctx.createBiquadFilter(); salaLp.type = 'lowpass'; salaLp.frequency.value = 5200;
+  sala.connect(salaLp).connect(salaVuelta).connect(master);
+
+  // Eco en ping-pong para las notas sueltas
+  eco = crearEco(0.42, 0.63, 0.32);
+  eco.salida.connect(master);
+
+  busMusica = ctx.createGain(); busMusica.gain.value = 0;
+  busMusica.connect(master);
+  const envioMusica = ctx.createGain(); envioMusica.gain.value = 0.55;
+  busMusica.connect(envioMusica).connect(sala);
+
+  busEfectos = ctx.createGain(); busEfectos.gain.value = 1;
+  busEfectos.connect(master);
+  const envioEfectos = ctx.createGain(); envioEfectos.gain.value = 0.35;
+  busEfectos.connect(envioEfectos).connect(sala);
+
+  montarAgua();
+  arrancarMusica();
   document.addEventListener('visibilitychange', () => {
     if (!ctx) return;
     if (document.hidden) ctx.suspend();
@@ -48,187 +88,256 @@ function crear() {
   });
 }
 
-// Ruido rosa (filtro de Paul Kellet): más cálido que el blanco
-function ruidoRosa(seg) {
+function buferRuido(seg, tipo) {
   const n = Math.floor(ctx.sampleRate * seg);
-  const buf = ctx.createBuffer(1, n, ctx.sampleRate);
-  const d = buf.getChannelData(0);
-  let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
-  for (let i = 0; i < n; i++) {
-    const w = Math.random() * 2 - 1;
-    b0 = 0.99886 * b0 + w * 0.0555179; b1 = 0.99332 * b1 + w * 0.0750759;
-    b2 = 0.96900 * b2 + w * 0.1538520; b3 = 0.86650 * b3 + w * 0.3104856;
-    b4 = 0.55000 * b4 + w * 0.5329522; b5 = -0.7616 * b5 - w * 0.0168980;
-    d[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362) * 0.11;
-    b6 = w * 0.115926;
+  const buf = ctx.createBuffer(2, n, ctx.sampleRate);
+  for (let c = 0; c < 2; c++) {
+    const d = buf.getChannelData(c);
+    let ultimo = 0;
+    for (let i = 0; i < n; i++) {
+      const w = Math.random() * 2 - 1;
+      if (tipo === 'marron') { ultimo = (ultimo + 0.02 * w) / 1.02; d[i] = ultimo * 3.2; }
+      else d[i] = w * 0.5;
+    }
   }
   return buf;
 }
 
-function fuenteRuido(loop = true) {
-  const s = ctx.createBufferSource();
-  s.buffer = ruido; s.loop = loop;
-  if (loop) s.loopStart = Math.random();
-  return s;
+function respuestaSala(seg) {
+  const n = Math.floor(ctx.sampleRate * seg);
+  const buf = ctx.createBuffer(2, n, ctx.sampleRate);
+  for (let c = 0; c < 2; c++) {
+    const d = buf.getChannelData(c);
+    let lp = 0;
+    for (let i = 0; i < n; i++) {
+      const t = i / n;
+      lp += ((Math.random() * 2 - 1) - lp) * (0.55 - t * 0.4);   // cada vez más oscura
+      d[i] = lp * Math.pow(1 - t, 2.6) * (i < 120 ? i / 120 : 1);
+    }
+  }
+  return buf;
 }
 
-function env(g, t, ataque, pico, caida) {
-  g.gain.setValueAtTime(0.0001, t);
-  g.gain.exponentialRampToValueAtTime(pico, t + ataque);
-  g.gain.exponentialRampToValueAtTime(0.0001, t + ataque + caida);
-}
-
-function montarTextura() {
-  // Roce de papel: ruido rosa por un paso banda, panoramizado con la x del ratón
-  const src = fuenteRuido();
-  const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 900; bp.Q.value = 0.7;
+function crearEco(ti, td, realim) {
+  const entrada = ctx.createGain();
+  const salida = ctx.createGain(); salida.gain.value = 0.5;
+  const di = ctx.createDelay(2), dd = ctx.createDelay(2);
+  di.delayTime.value = ti; dd.delayTime.value = td;
+  const fb = ctx.createGain(); fb.gain.value = realim;
   const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2600;
-  const g = ctx.createGain(); g.gain.value = 0;
-  const pan = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
-  src.connect(bp).connect(lp).connect(g);
-  if (pan) { g.connect(pan).connect(master); } else { g.connect(master); }
-  src.start();
-  Object.assign(textura, { g, bp, pan, acumulado: 0 });
+  const pi = ctx.createStereoPanner ? ctx.createStereoPanner() : ctx.createGain();
+  const pd = ctx.createStereoPanner ? ctx.createStereoPanner() : ctx.createGain();
+  if (pi.pan) { pi.pan.value = -0.7; pd.pan.value = 0.7; }
+  entrada.connect(di); di.connect(lp); lp.connect(dd); dd.connect(fb); fb.connect(di);
+  di.connect(pi).connect(salida); dd.connect(pd).connect(salida);
+  salida.connect(sala);
+  return { entrada, salida };
 }
 
-function montarDron() {
-  const g = ctx.createGain(); g.gain.value = 0;
-  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 320; lp.Q.value = 0.6;
-  [55, 82.41, 110.3].forEach((f, i) => {
-    const o = ctx.createOscillator(); o.type = i === 2 ? 'triangle' : 'sine';
-    o.frequency.value = f; o.detune.value = (i - 1) * 6;
-    const og = ctx.createGain(); og.gain.value = i === 2 ? 0.25 : 0.5;
-    o.connect(og).connect(lp); o.start();
+function panner(v) {
+  if (!ctx.createStereoPanner) return ctx.createGain();
+  const p = ctx.createStereoPanner(); p.pan.value = v; return p;
+}
+
+// Baja la música mientras alguien habla (FRESA) y la devuelve después
+export function atenuarMusica(si) {
+  if (!ctx || !busMusica) return;
+  busMusica.gain.cancelScheduledValues(ctx.currentTime);
+  busMusica.gain.setTargetAtTime(si ? 0.14 : 0.5, ctx.currentTime, 0.35);
+}
+
+// --- Música -----------------------------------------------------------------
+let siguienteAcorde = 0;
+let indice = 0;
+
+function arrancarMusica() {
+  siguienteAcorde = ctx.currentTime + 0.3;
+  busMusica.gain.setValueAtTime(0, ctx.currentTime);
+  busMusica.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 6);
+  setInterval(() => {
+    if (!ctx || ctx.state !== 'running') return;
+    // Si la pestaña estuvo parada, se retoma desde ahora (sin soltar de golpe los acordes atrasados)
+    if (siguienteAcorde < ctx.currentTime - 0.5) siguienteAcorde = ctx.currentTime + 0.2;
+    while (siguienteAcorde < ctx.currentTime + 1.5) {
+      programarAcorde(ACORDES[indice % ACORDES.length], siguienteAcorde);
+      siguienteAcorde += COMPAS;
+      indice++;
+    }
+  }, 250);
+}
+
+function programarAcorde([bajo, ...notas], t) {
+  const fin = t + COMPAS;
+  // Colchón: dos osciladores suaves por nota, filtro que respira y entrada y salida largas
+  notas.forEach((m, i) => {
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(0.034, t + 3.2);
+    g.gain.setValueAtTime(0.034, fin - 0.5);
+    g.gain.linearRampToValueAtTime(0.0001, fin + 3.8);
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 0.4;
+    lp.frequency.setValueAtTime(500, t);
+    lp.frequency.linearRampToValueAtTime(1100 + i * 140, t + COMPAS * 0.55);
+    lp.frequency.linearRampToValueAtTime(650, fin + 3);
+    const p = panner((i / (notas.length - 1) - 0.5) * 1.1);
+    [['sawtooth', -6], ['triangle', 5]].forEach(([tipo, cents]) => {
+      const o = ctx.createOscillator(); o.type = tipo; o.frequency.value = hz(m); o.detune.value = cents;
+      o.connect(lp); o.start(t); o.stop(fin + 4);
+    });
+    lp.connect(g).connect(p).connect(busMusica);
   });
-  const aire = fuenteRuido();
-  const ag = ctx.createGain(); ag.gain.value = 0.18;
-  aire.connect(ag).connect(lp); aire.start();
-  const lfo = ctx.createOscillator(); lfo.frequency.value = 0.05;
+  // Bajo
+  const ob = ctx.createOscillator(); ob.type = 'sine'; ob.frequency.value = hz(bajo);
+  const gb = ctx.createGain();
+  gb.gain.setValueAtTime(0.0001, t); gb.gain.linearRampToValueAtTime(0.11, t + 2.4);
+  gb.gain.setValueAtTime(0.11, fin - 0.6); gb.gain.linearRampToValueAtTime(0.0001, fin + 2);
+  ob.connect(gb).connect(busMusica); ob.start(t); ob.stop(fin + 2.2);
+  // Notas sueltas de piano: de 3 a 6 por acorde, en una rejilla de medio segundo, moviéndose por grados
+  const n = 3 + Math.floor(Math.random() * 4);
+  let pos = Math.floor(Math.random() * PENTA.length);
+  const huecos = new Set();
+  for (let k = 0; k < n; k++) {
+    let paso = 1 + Math.floor(Math.random() * (COMPAS * 2 - 3));
+    while (huecos.has(paso)) paso = (paso + 1) % (COMPAS * 2 - 2) + 1;
+    huecos.add(paso);
+    pos = Math.max(0, Math.min(PENTA.length - 1, pos + [-2, -1, -1, 1, 1, 2][Math.floor(Math.random() * 6)]));
+    piano(hz(PENTA[pos]), t + paso * 0.5, 0.05 + Math.random() * 0.03);
+  }
+}
+
+function piano(f, t, vol, destino = busMusica) {
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(vol, t + 0.008);
+  g.gain.exponentialRampToValueAtTime(vol * 0.35, t + 0.35);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 2.6);
+  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass';
+  lp.frequency.setValueAtTime(f * 6, t); lp.frequency.exponentialRampToValueAtTime(f * 1.5, t + 1.2);
+  [[1, 1, 'sine'], [2, 0.32, 'triangle'], [3, 0.08, 'sine']].forEach(([mult, nivel, tipo]) => {
+    const o = ctx.createOscillator(); o.type = tipo; o.frequency.value = f * mult; o.detune.value = (Math.random() - 0.5) * 6;
+    const og = ctx.createGain(); og.gain.value = nivel;
+    o.connect(og).connect(lp); o.start(t); o.stop(t + 2.8);
+  });
+  const p = panner((Math.random() - 0.5) * 0.9);
+  lp.connect(g).connect(p);
+  p.connect(destino);
+  p.connect(eco.entrada);
+}
+
+// --- Agua (el pincel) -------------------------------------------------------
+function montarAgua() {
+  // Vaivén: ruido marrón por un paso bajo que se mueve solo, como agua que se desplaza
+  const src = ctx.createBufferSource(); src.buffer = marron; src.loop = true;
+  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 420; lp.Q.value = 0.9;
+  const bp = ctx.createBiquadFilter(); bp.type = 'peaking'; bp.frequency.value = 300; bp.gain.value = 6; bp.Q.value = 1.4;
+  const lfo = ctx.createOscillator(); lfo.frequency.value = 0.23;
   const lfoG = ctx.createGain(); lfoG.gain.value = 140;
   lfo.connect(lfoG).connect(lp.frequency); lfo.start();
-  lp.connect(g).connect(master);
-  g.gain.setTargetAtTime(0.05, ctx.currentTime + 0.5, 2.5);
+  const g = ctx.createGain(); g.gain.value = 0;
+  const p = panner(0);
+  src.connect(lp).connect(bp).connect(g).connect(p).connect(busEfectos);
+  src.start();
+  Object.assign(agua, { g, lp, p, acumulado: 0 });
 }
 
 // Llamar en cada fotograma. velocidad 0..1, x 0..1, maquina 0..1 (cuánto «dentro» se está viendo)
 export function pincel(velocidad, x, dt, maquina = 0) {
-  if (!activo || !ctx || !textura.g) return;
+  if (!activo || !ctx || !agua.g) return;
   const t = ctx.currentTime;
   const v = Math.min(1, velocidad);
-  textura.g.gain.setTargetAtTime(v * 0.42 * (1 - maquina * 0.5), t, v > 0.02 ? 0.05 : 0.25);
-  textura.bp.frequency.setTargetAtTime(700 + v * 1400, t, 0.1);
-  if (textura.pan) textura.pan.pan.setTargetAtTime((x - 0.5) * 1.4, t, 0.1);
-  // Granulado de datos: más granos cuanto más rápido y cuanta más máquina
-  textura.acumulado += v * (18 + maquina * 40) * dt;
-  let n = 0;
-  while (textura.acumulado >= 1 && n < 4) { textura.acumulado -= 1; grano(x, maquina); n++; }
+  agua.g.gain.setTargetAtTime(Math.pow(v, 1.4) * 0.3, t, v > 0.03 ? 0.12 : 0.6);
+  agua.lp.frequency.setTargetAtTime(320 + v * 520, t, 0.25);
+  if (agua.p.pan) agua.p.pan.setTargetAtTime((x - 0.5) * 1.2, t, 0.2);
+  // Burbujas: pocas y al azar, nunca un tren continuo
+  agua.acumulado += v * (5 + maquina * 6) * dt * (0.5 + Math.random());
+  if (agua.acumulado >= 1) { agua.acumulado = 0; burbuja(x, 0.6 + v * 0.4); }
 }
 
-function grano(x, maquina) {
-  const t = ctx.currentTime + Math.random() * 0.01;
-  const s = fuenteRuido(false);
-  const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 2400 + Math.random() * 3600;
+function burbuja(x, fuerza = 1, t = ctx.currentTime + Math.random() * 0.02) {
+  // Una burbuja suena como un tono que sube muy deprisa y se apaga
+  const tam = Math.random();
+  const f0 = 380 + tam * 1100;
+  const dur = 0.05 + (1 - tam) * 0.07;
+  const o = ctx.createOscillator(); o.type = 'sine';
+  o.frequency.setValueAtTime(f0, t);
+  o.frequency.exponentialRampToValueAtTime(f0 * (1.7 + Math.random() * 0.6), t + dur);
   const g = ctx.createGain();
-  const pan = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
-  env(g, t, 0.002, 0.05 + Math.random() * 0.07, 0.01);
-  s.connect(hp).connect(g);
-  if (pan) { pan.pan.value = (x - 0.5) * 1.6 + (Math.random() - 0.5) * 0.3; g.connect(pan).connect(master); } else g.connect(master);
-  s.start(t, Math.random() * 2, 0.03);
-  if (Math.random() < 0.05 + maquina * 0.08) bip(t, PENTA[(Math.random() * PENTA.length) | 0], 0.025);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(0.045 * fuerza, t + 0.004);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  const p = panner((x - 0.5) * 1.4 + (Math.random() - 0.5) * 0.4);
+  o.connect(g).connect(p).connect(busEfectos);
+  o.start(t); o.stop(t + dur + 0.02);
 }
 
-function bip(t, f, vol, dur = 0.08, tipo = 'sine') {
-  const o = ctx.createOscillator(); o.type = tipo; o.frequency.value = f;
-  const g = ctx.createGain(); env(g, t, 0.004, vol, dur);
-  o.connect(g).connect(master); o.start(t); o.stop(t + dur + 0.05);
-}
-
+// --- Efectos -----------------------------------------------------------------
 export function entrar() {
   if (!activo || !ctx) return;
   const t = ctx.currentTime + 0.02;
-  // Golpe grave
+  // Golpe grave y suave
   const o = ctx.createOscillator(); o.type = 'sine';
-  o.frequency.setValueAtTime(92, t); o.frequency.exponentialRampToValueAtTime(36, t + 0.8);
-  const g = ctx.createGain(); env(g, t, 0.006, 0.7, 1.3);
-  o.connect(g).connect(master); o.start(t); o.stop(t + 1.5);
-  // Soplo que barre
-  const s = fuenteRuido();
-  const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 1.2;
-  bp.frequency.setValueAtTime(260, t); bp.frequency.exponentialRampToValueAtTime(3200, t + 0.6); bp.frequency.exponentialRampToValueAtTime(700, t + 1.6);
-  const sg = ctx.createGain(); sg.gain.setValueAtTime(0.0001, t); sg.gain.exponentialRampToValueAtTime(0.32, t + 0.45); sg.gain.exponentialRampToValueAtTime(0.0001, t + 1.8);
-  s.connect(bp).connect(sg).connect(master); s.start(t); s.stop(t + 2);
-  // Brillo: quinta abierta que se queda
-  [440, 659.25, 880].forEach((f, i) => {
-    const so = ctx.createOscillator(); so.type = 'sine'; so.frequency.value = f; so.detune.value = (Math.random() - 0.5) * 8;
-    const sg2 = ctx.createGain();
-    sg2.gain.setValueAtTime(0.0001, t + 0.1); sg2.gain.exponentialRampToValueAtTime(0.045 - i * 0.01, t + 0.6); sg2.gain.exponentialRampToValueAtTime(0.0001, t + 3.2);
-    so.connect(sg2).connect(master); so.start(t + 0.1); so.stop(t + 3.4);
-  });
+  o.frequency.setValueAtTime(87, t); o.frequency.exponentialRampToValueAtTime(43.6, t + 1.2);
+  const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.5, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 2);
+  o.connect(g).connect(busEfectos); o.start(t); o.stop(t + 2.1);
+  // Ola: ruido que crece y rompe
+  const s = ctx.createBufferSource(); s.buffer = marron;
+  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass';
+  lp.frequency.setValueAtTime(200, t); lp.frequency.exponentialRampToValueAtTime(1800, t + 0.7); lp.frequency.exponentialRampToValueAtTime(300, t + 2.4);
+  const sg = ctx.createGain(); sg.gain.setValueAtTime(0.0001, t); sg.gain.exponentialRampToValueAtTime(0.5, t + 0.6); sg.gain.exponentialRampToValueAtTime(0.0001, t + 2.6);
+  s.connect(lp).connect(sg).connect(busEfectos); s.start(t); s.stop(t + 2.8);
+  // Arpegio del primer acorde
+  [57, 60, 64, 67, 72].forEach((m, i) => piano(hz(m), t + 0.25 + i * 0.11, 0.06, busEfectos));
 }
 
-let ultimoTic = 0;
+let ultimaGota = 0;
+// Gota: una burbuja aguda (hover, líneas que entran, casillas)
 export function tic(volumen = 1) {
   if (!activo || !ctx) return;
   const t = ctx.currentTime;
-  if (t - ultimoTic < 0.06) return;
-  ultimoTic = t;
-  bip(t, [1760, 1975.5, 2349.3][(Math.random() * 3) | 0], 0.035 * volumen, 0.035);
-  const s = fuenteRuido(false);
-  const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 4000;
-  const g = ctx.createGain(); env(g, t, 0.001, 0.05 * volumen, 0.006);
-  s.connect(hp).connect(g).connect(master); s.start(t, Math.random() * 2, 0.02);
+  if (t - ultimaGota < 0.07) return;
+  ultimaGota = t;
+  burbuja(0.5 + (Math.random() - 0.5) * 0.4, 0.8 * volumen, t);
 }
 
-export function encaje() {
+// Nota suelta afinada con la música (para ir marcando cosas, como las casillas)
+export function nota(grado = 0, volumen = 1) {
   if (!activo || !ctx) return;
-  const t = ctx.currentTime;
-  const o = ctx.createOscillator(); o.type = 'triangle';
-  o.frequency.setValueAtTime(330, t); o.frequency.exponentialRampToValueAtTime(170, t + 0.08);
-  const g = ctx.createGain(); env(g, t, 0.002, 0.13, 0.09);
-  o.connect(g).connect(master); o.start(t); o.stop(t + 0.15);
-  const s = fuenteRuido(false);
-  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1400;
-  const sg = ctx.createGain(); env(sg, t, 0.001, 0.12, 0.03);
-  s.connect(lp).connect(sg).connect(master); s.start(t, Math.random() * 2, 0.05);
+  piano(hz(PENTA[Math.max(0, Math.min(PENTA.length - 1, grado))]), ctx.currentTime + 0.01, 0.06 * volumen, busEfectos);
 }
 
-// Mantener pulsado: devuelve un mando con avance(p 0..1) y soltar(completo)
+// Mantener pulsado: un acorde que se abre poco a poco; devuelve un mando con avance(p 0..1) y soltar(completo)
 export function subida() {
   if (!activo || !ctx) return { avance() {}, soltar() {} };
   const t = ctx.currentTime;
-  const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = 110;
-  const o2 = ctx.createOscillator(); o2.type = 'sawtooth'; o2.frequency.value = 110; o2.detune.value = 9;
-  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 7; lp.frequency.value = 180;
-  const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.05, t + 0.25);
-  const s = fuenteRuido();
-  const hp = ctx.createBiquadFilter(); hp.type = 'bandpass'; hp.Q.value = 0.8; hp.frequency.value = 600;
+  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 2; lp.frequency.value = 300;
+  const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.06, t + 0.3);
+  const oscs = [65, 69, 72, 76].map((m, i) => {
+    const o = ctx.createOscillator(); o.type = i % 2 ? 'triangle' : 'sawtooth'; o.frequency.value = hz(m); o.detune.value = (i - 1.5) * 4;
+    o.connect(lp); o.start(t); return o;
+  });
+  const s = ctx.createBufferSource(); s.buffer = ruido; s.loop = true;
+  const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 0.9; bp.frequency.value = 500;
   const sg = ctx.createGain(); sg.gain.value = 0.0001;
-  o.connect(lp); o2.connect(lp); lp.connect(g).connect(master);
-  s.connect(hp).connect(sg).connect(master);
-  o.start(t); o2.start(t); s.start(t);
+  s.connect(bp).connect(sg).connect(busEfectos); s.start(t);
+  lp.connect(g).connect(busEfectos);
   let parado = false;
   return {
     avance(p) {
       if (parado) return;
-      const ahora = ctx.currentTime;
-      lp.frequency.setTargetAtTime(180 + p * p * 2600, ahora, 0.05);
-      o.frequency.setTargetAtTime(110 + p * 110, ahora, 0.05);
-      o2.frequency.setTargetAtTime(110 + p * 110, ahora, 0.05);
-      hp.frequency.setTargetAtTime(600 + p * 3000, ahora, 0.05);
-      sg.gain.setTargetAtTime(0.0001 + p * 0.12, ahora, 0.05);
+      const a = ctx.currentTime;
+      lp.frequency.setTargetAtTime(300 + p * p * 3200, a, 0.06);
+      oscs.forEach((o, i) => o.detune.setTargetAtTime((i - 1.5) * 4 + p * 1200 * (i === 3 ? 1 : 0), a, 0.08));
+      bp.frequency.setTargetAtTime(500 + p * 2500, a, 0.06);
+      sg.gain.setTargetAtTime(0.0001 + p * 0.05, a, 0.06);
     },
     soltar(completo) {
       if (parado) return;
       parado = true;
-      const ahora = ctx.currentTime;
-      const caida = completo ? 0.9 : 0.25;
-      [g, sg].forEach((n) => { n.gain.cancelScheduledValues(ahora); n.gain.setTargetAtTime(0.0001, ahora, caida / 4); });
-      lp.frequency.setTargetAtTime(160, ahora, caida / 3);
-      [o, o2, s].forEach((n) => n.stop(ahora + caida + 0.2));
-      if (completo) {
-        bip(ahora, 220, 0.09, 1.4, 'sine');
-        bip(ahora + 0.02, 330, 0.05, 1.6, 'sine');
-      }
+      const a = ctx.currentTime;
+      const caida = completo ? 1.4 : 0.3;
+      [g, sg].forEach((n) => { n.gain.cancelScheduledValues(a); n.gain.setTargetAtTime(0.0001, a, caida / 4); });
+      [...oscs, s].forEach((n) => n.stop(a + caida + 0.3));
+      if (completo) [72, 76, 79, 84].forEach((m, i) => piano(hz(m), a + i * 0.07, 0.07, busEfectos));
     },
   };
 }

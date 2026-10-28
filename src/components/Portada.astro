@@ -1,28 +1,34 @@
 ---
-// Portada: la capa de marca (foto + «adsPartners» en Garamond) y, bajo el pincel, la capa máquina.
-// El título es texto real del DOM: el WebGL lo vuelve a pintar encima y el DOM se queda transparente
-// (sigue siendo seleccionable y lo leen buscadores y lectores). Sin WebGL, se ve el DOM tal cual.
+// Portada. El texto es el mismo en las tres ideas; cambia lo que hay detrás:
+// - pincel: foto + «adsPartners» repintado en WebGL y, bajo el pincel, la capa máquina (el DOM queda transparente).
+// - objeto: nada detrás; el isotipo de cristal vive en el canvas fijo de toda la página.
+// - fresa:  un orbe en WebGL (FRESA) detrás del título.
+// El título siempre es texto real del DOM: lo leen buscadores y lectores aunque no se vea.
+interface Props { concepto: 'pincel' | 'objeto' | 'fresa' }
+const { concepto } = Astro.props;
 const base = import.meta.env.BASE_URL;
 ---
-<section class="portada" id="portada" data-cursor="portada" aria-labelledby="portada-titulo"
-  style={`--foto: url('${base}assets/hero/Fondo-Hero_adsPartners.webp')`}>
-  <div class="portada__fondo" aria-hidden="true"></div>
-  <canvas class="portada__gl" data-gl aria-hidden="true"></canvas>
+<section class={`portada portada--${concepto}`} id="portada" data-cursor={concepto === 'fresa' ? undefined : 'portada'} aria-labelledby="portada-titulo"
+  style={concepto === 'pincel' ? `--foto: url('${base}assets/hero/Fondo-Hero_adsPartners.webp')` : undefined}
+  data-fresa="Esto es adsPartners. Mantén pulsado y te lo cuento."
+  data-fresa-voz="Hola. Soy FRESA, la inteligencia artificial de adsPartners. Somos un estudio de marca y tecnología de Madrid. Diseñamos cómo se ve tu empresa y construimos lo que la hace funcionar por dentro. Por fuera, marca. Por dentro, máquina.">
+  {concepto === 'pincel' && <div class="portada__fondo" aria-hidden="true"></div>}
+  {concepto !== 'objeto' && <canvas class="portada__gl" data-gl aria-hidden="true"></canvas>}
 
   <div class="portada__arriba" data-entra>
-    <p class="portada__etq mono">( Brand + Tech )</p>
+    <p class="portada__etq mono">( Estudio de marca y tecnología · Madrid )</p>
     <p class="portada__lema">Marca por fuera.<br /><em>Máquina por dentro.</em></p>
   </div>
 
   <p class="portada__texto" data-entra>
-    Diseñamos marcas que se recuerdan y montamos sistemas que trabajan solos. Desde Madrid, dentro de vuestra empresa.
+    Diseñamos cómo se ve tu empresa y construimos lo que la hace funcionar por dentro. El mismo equipo, de la primera idea al último detalle.
   </p>
 
   <h1 class="portada__titulo" id="portada-titulo" data-titulo>
     <span class="portada__trozo" data-trozo>ads<i class="portada__base" aria-hidden="true"></i></span><span class="portada__trozo" data-trozo>Partners<i class="portada__base" aria-hidden="true"></i></span>
   </h1>
 
-  <p class="portada__pista mono" aria-hidden="true">Desliza el dedo: debajo está la máquina</p>
+  <p class="portada__pista mono" aria-hidden="true">{concepto === 'pincel' ? 'Desliza el dedo: debajo está la máquina' : 'Mantén pulsado para ver más'}</p>
 </section>
 
 <style>
@@ -31,6 +37,7 @@ const base = import.meta.env.BASE_URL;
     height: 100vh; height: 100svh; min-height: 560px;
     overflow: hidden;
     isolation: isolate;
+    -webkit-touch-callout: none;
   }
   .portada__fondo {
     position: absolute; inset: 0; z-index: -2;
@@ -39,7 +46,7 @@ const base = import.meta.env.BASE_URL;
   }
   .portada__gl { position: absolute; inset: 0; z-index: -1; width: 100%; height: 100%; opacity: 0; transition: opacity 1s var(--curva); }
   :global(html.gl-activo) .portada__gl { opacity: 1; }
-  :global(html.gl-activo) .portada__fondo { visibility: hidden; }
+  :global(html.titulo-gl) .portada__fondo { visibility: hidden; }
 
   .portada__arriba { position: absolute; left: var(--margen); top: 27vh; max-width: 46vw; }
   .portada__etq { margin: 0 0 18px; color: var(--crema-3); }
@@ -52,7 +59,7 @@ const base = import.meta.env.BASE_URL;
 
   .portada__texto {
     position: absolute; right: var(--margen); top: 31vh; margin: 0;
-    width: min(300px, 32vw); font-size: 15px; line-height: 1.55; color: var(--crema);
+    width: min(320px, 32vw); font-size: 15px; line-height: 1.55; color: var(--crema);
     text-shadow: 0 1px 18px rgba(18, 13, 10, .45);
   }
 
@@ -66,18 +73,19 @@ const base = import.meta.env.BASE_URL;
   }
   .portada__trozo { position: relative; }
   .portada__base { display: inline-block; width: 0; height: 0; vertical-align: baseline; }
-  :global(html.gl-activo) .portada__titulo { color: transparent; }
+  :global(html.titulo-gl) .portada__titulo { color: transparent; }
 
   .portada__pista { display: none; }
 
   @media (max-width: 760px) {
     .portada__arriba { top: 17vh; max-width: none; right: var(--margen); }
     .portada__lema { font-size: clamp(34px, 10vw, 46px); }
-    .portada__texto { left: var(--margen); right: auto; top: auto; bottom: 68vw; width: auto; max-width: 300px; font-size: 14px; }
+    .portada__texto { left: var(--margen); right: auto; top: auto; bottom: 68vw; width: auto; max-width: 320px; font-size: 14px; }
     .portada__titulo { font-size: 31vw; line-height: .8; white-space: normal; }
     .portada__trozo { display: block; }
     .portada__pista { display: block; position: absolute; top: 46vh; left: var(--margen); margin: 0; color: var(--crema-3); }
   }
   @media (hover: hover) and (pointer: fine) { .portada__pista { display: none !important; } }
   :global(html.en-umbral) .portada__pista { visibility: hidden; }
+  .portada--fresa .portada__pista { display: none !important; }
 </style>

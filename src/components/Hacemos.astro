@@ -1,0 +1,103 @@
+---
+// Qué hacemos: dos mitades separadas por un eje. «Marca» se escribe en Garamond (la marca) y «máquina» en
+// mono (la máquina): la diferencia entre los dos oficios se cuenta con la propia tipografía.
+const fuera = [
+  ['Identidad de marca', 'Logotipo, tipografía, colores y un manual para que todo se vea igual, lo haga quien lo haga.'],
+  ['Arquitectura de marca', 'Si tienes varios negocios, que se entienda que son de la misma casa sin que se pisen.'],
+  ['Webs con una idea propia', 'Diseño y desarrollo con un concepto que sale de tu negocio, no de una plantilla.'],
+];
+const dentro = [
+  ['Automatización', 'Lo repetitivo se hace solo: facturas que se leen, pedidos que se registran, avisos que llegan.'],
+  ['Asistentes de IA', 'Atienden, responden y dan citas a cualquier hora, con el tono de tu empresa.'],
+  ['Software a medida', 'Portales, aplicaciones internas y paneles con tus datos, conectados a lo que ya usas.'],
+];
+---
+<section class="hacemos" id="hacemos" aria-labelledby="hacemos-t"
+  data-fresa="Dos oficios y un solo equipo: por fuera, la marca; por dentro, la máquina."
+  data-fresa-voz="Hacemos dos cosas. Por fuera, la marca: identidad, arquitectura de marca y webs con una idea propia. Por dentro, la máquina: automatización, asistentes de inteligencia artificial y software a medida. Y cuando hace falta, finanzas, contabilidad y campañas de publicidad con socios de confianza.">
+  <header class="hacemos__cab">
+    <p class="mono hacemos__etq">( Qué hacemos )</p>
+    <h2 class="hacemos__titulo" id="hacemos-t">Dos oficios. <em>Un solo equipo.</em></h2>
+  </header>
+
+  <div class="hacemos__mitades">
+    <div class="mitad mitad--fuera" data-mitad="fuera" data-fresa="Por fuera: lo que ve tu cliente.">
+      <p class="mitad__lado mono">Por fuera</p>
+      <h3 class="mitad__nombre mitad__nombre--serif">Marca</h3>
+      <p class="mitad__d">Lo que ve tu cliente: cómo se te reconoce y cómo se te recuerda.</p>
+      <ul class="mitad__lista">
+        {fuera.map(([n, d]) => (
+          <li class="servicio" data-sonido-hover><span class="servicio__n">{n}</span><span class="servicio__d">{d}</span></li>
+        ))}
+      </ul>
+    </div>
+
+    <div class="hacemos__eje" aria-hidden="true"><span></span></div>
+
+    <div class="mitad mitad--dentro" data-mitad="dentro" data-fresa="Por dentro: lo que hace que funcione. Yo soy parte de esta mitad.">
+      <p class="mitad__lado mono">Por dentro</p>
+      <h3 class="mitad__nombre mitad__nombre--mono">máquina</h3>
+      <p class="mitad__d">Lo que hace que tu empresa funcione por dentro, sin que nadie lo vea.</p>
+      <ul class="mitad__lista">
+        {dentro.map(([n, d]) => (
+          <li class="servicio" data-sonido-hover><span class="servicio__n servicio__n--mono">{n}</span><span class="servicio__d">{d}</span></li>
+        ))}
+      </ul>
+    </div>
+  </div>
+
+  <p class="hacemos__apoyo">
+    <span class="mono">+</span> Y cuando hace falta, con socios de confianza: <b>finanzas y contabilidad</b>, y <b>campañas de publicidad</b>.
+  </p>
+</section>
+
+<style>
+  .hacemos {
+    position: relative; z-index: 1;
+    background: var(--fondo-seccion, var(--noche));
+    padding: clamp(90px, 14vh, 160px) var(--margen) clamp(100px, 16vh, 180px);
+    border-top: 1px solid var(--linea);
+  }
+  .hacemos__cab { display: grid; gap: 22px; margin-bottom: clamp(56px, 9vh, 110px); }
+  .hacemos__etq { margin: 0; color: var(--crema-3); }
+  .hacemos__titulo { margin: 0; font-family: var(--serif); font-weight: 300; font-size: clamp(40px, 5vw, 80px); line-height: 1; letter-spacing: -.024em; }
+  .hacemos__titulo em { font-style: italic; font-weight: 400; color: var(--crema-2); }
+
+  .hacemos__mitades { display: grid; grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr); gap: clamp(28px, 4vw, 72px); }
+  .hacemos__eje { position: relative; }
+  .hacemos__eje span { position: absolute; inset: 0; background: var(--crema-3); transform-origin: top; }
+  .mitad { display: grid; align-content: start; gap: 18px; min-width: 0; }
+  .mitad__lado { margin: 0; color: var(--rosa); }
+  .mitad__nombre { margin: 0 0 4px; font-weight: 300; line-height: .9; color: var(--crema); }
+  .mitad__nombre--serif { font-family: var(--serif); font-size: clamp(64px, 9vw, 150px); letter-spacing: -.035em; }
+  .mitad__nombre--mono { font-family: var(--mono); font-weight: 400; font-size: clamp(48px, 7vw, 116px); letter-spacing: -.06em; }
+  .mitad__d { margin: 0 0 18px; max-width: 34ch; font-size: 16px; color: var(--crema-2); }
+
+  .mitad__lista { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--linea); }
+  .servicio {
+    position: relative; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 20px;
+    padding: 20px 0 22px; border-bottom: 1px solid var(--linea);
+    transition: border-color .45s var(--curva);
+  }
+  .servicio::before {
+    content: ''; position: absolute; left: 0; bottom: -1px; height: 1px; width: 100%;
+    background: var(--crema); transform: scaleX(0); transform-origin: left; transition: transform .55s var(--curva);
+  }
+  .servicio__n { font-family: var(--serif); font-size: 26px; line-height: 1.1; letter-spacing: -.01em; transition: transform .45s var(--curva); }
+  .servicio__n--mono { font-family: var(--mono); font-size: 17px; letter-spacing: -.01em; line-height: 1.5; text-transform: lowercase; }
+  .servicio__d { font-size: 14px; line-height: 1.55; color: var(--crema-2); transition: color .45s var(--curva); }
+  .servicio:hover::before { transform: scaleX(1); }
+  .servicio:hover .servicio__n { transform: translateX(10px); }
+  .servicio:hover .servicio__d { color: var(--crema); }
+
+  .hacemos__apoyo { margin: clamp(56px, 8vh, 96px) 0 0; font-size: 16px; color: var(--crema-2); max-width: 70ch; }
+  .hacemos__apoyo b { font-weight: 500; color: var(--crema); }
+  .hacemos__apoyo .mono { color: var(--rosa); margin-right: 10px; }
+
+  @media (max-width: 860px) {
+    .hacemos__mitades { grid-template-columns: 1fr; }
+    .hacemos__eje { height: 1px; }
+    .hacemos__eje span { transform-origin: left; }
+    .servicio { grid-template-columns: 1fr; gap: 6px; }
+  }
+</style>

@@ -1,0 +1,77 @@
+---
+// Para quién: situaciones en las que alguien se reconoce. Cada casilla se marca al pasar por ella.
+// Cierra con la llamada a hablar (correo y WhatsApp, los de la web actual).
+const casos = [
+  'Tu empresa ha crecido y su imagen se ha quedado atrás.',
+  'Tu equipo pierde horas en tareas que podría hacer un sistema.',
+  'Quieres una web que no se parezca a la de tu competencia.',
+  'Tienes la información repartida en mil sitios y no ves el negocio de un vistazo.',
+];
+---
+<section class="quien capitulo-claro" id="contacto" aria-labelledby="quien-t"
+  data-fresa="¿Te ves en alguna? Entonces deberíamos hablar."
+  data-fresa-voz="Te servimos si tu empresa ha crecido y su imagen se ha quedado atrás, si tu equipo pierde horas en tareas que podría hacer un sistema, si quieres una web que no se parezca a la de tu competencia, o si tienes la información repartida y no ves el negocio de un vistazo. Si te has visto en alguna, escríbenos.">
+  <p class="mono quien__etq">( Para quién )</p>
+  <h2 class="quien__titulo" id="quien-t">Te servimos si</h2>
+  <ul class="quien__lista">
+    {casos.map((c, i) => (
+      <li class="caso" data-caso={i}>
+        <span class="caso__caja" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7" pathLength="1" /></svg>
+        </span>
+        <span class="caso__t">{c}</span>
+      </li>
+    ))}
+  </ul>
+
+  <div class="quien__cta">
+    <p class="quien__cierre">Si te has visto en alguna, <em>hablemos.</em></p>
+    <div class="quien__botones">
+      <a class="boton boton--lleno" href="mailto:adsgroup@ads-partners.com?subject=Hablemos" data-sonido-hover>Escríbenos</a>
+      <a class="boton" href="https://wa.me/34633565840" target="_blank" rel="noopener" data-sonido-hover>Por WhatsApp</a>
+    </div>
+    <p class="mono quien__lugar">Madrid · Vamos donde estéis · adsgroup@ads-partners.com</p>
+  </div>
+</section>
+
+<style>
+  .quien {
+    position: relative; z-index: 1;
+    background: var(--fondo-claro, var(--crema)); color: var(--tinta);
+    padding: clamp(80px, 12vh, 140px) var(--margen) clamp(110px, 16vh, 180px);
+    border-top: 1px solid rgba(25, 9, 0, .12);
+  }
+  .quien__etq { margin: 0 0 22px; color: rgba(25, 9, 0, .5); }
+  .quien__titulo { margin: 0 0 clamp(36px, 6vh, 72px); font-family: var(--serif); font-weight: 300; font-size: clamp(40px, 5vw, 80px); line-height: 1; letter-spacing: -.024em; }
+  .quien__lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+  .caso {
+    display: grid; grid-template-columns: auto minmax(0, 1fr); gap: clamp(16px, 2.4vw, 32px); align-items: center;
+    padding: clamp(18px, 3vh, 28px) 0; border-top: 1px solid rgba(25, 9, 0, .16);
+  }
+  .caso:last-child { border-bottom: 1px solid rgba(25, 9, 0, .16); }
+  .caso__caja {
+    width: clamp(26px, 2.4vw, 36px); aspect-ratio: 1; border: 1.5px solid rgba(25, 9, 0, .55); border-radius: 3px;
+    display: grid; place-items: center; transition: background-color .5s var(--curva), border-color .5s var(--curva);
+  }
+  .caso__caja svg { width: 78%; height: auto; overflow: visible; }
+  .caso__caja path { fill: none; stroke: var(--crema); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset .6s var(--curva) .12s; }
+  .caso__t { font-family: var(--serif); font-weight: 300; font-size: clamp(24px, 3vw, 46px); line-height: 1.1; letter-spacing: -.018em; color: rgba(25, 9, 0, .45); transition: color .6s var(--curva); }
+  .caso.marcado .caso__caja { background: var(--tinta); border-color: var(--tinta); }
+  .caso.marcado path { stroke-dashoffset: 0; }
+  .caso.marcado .caso__t { color: var(--tinta); }
+  :global(html.mov-reducido) .caso .caso__t, :global(html:not(.js)) .caso .caso__t { color: var(--tinta); }
+
+  .quien__cta { margin-top: clamp(64px, 10vh, 120px); display: grid; gap: 26px; justify-items: start; }
+  .quien__cierre { margin: 0; font-family: var(--serif); font-weight: 300; font-size: clamp(44px, 6.4vw, 108px); line-height: .98; letter-spacing: -.03em; }
+  .quien__cierre em { font-style: italic; font-weight: 400; }
+  .quien__botones { display: flex; flex-wrap: wrap; gap: 12px; }
+  .boton {
+    display: inline-flex; align-items: center; padding: 14px 24px; border-radius: 99px; font-size: 15px;
+    border: 1px solid var(--tinta); color: var(--tinta);
+    transition: background-color .45s var(--curva), color .45s var(--curva), transform .45s var(--curva);
+  }
+  .boton:hover, .boton:focus-visible { background: var(--tinta); color: var(--crema); transform: translateY(-2px); }
+  .boton--lleno { background: var(--tinta); color: var(--crema); }
+  .boton--lleno:hover, .boton--lleno:focus-visible { background: var(--rosa-osc); border-color: var(--rosa-osc); }
+  .quien__lugar { margin: 8px 0 0; color: rgba(25, 9, 0, .55); text-transform: none; letter-spacing: .02em; }
+</style>

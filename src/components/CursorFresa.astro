@@ -1,0 +1,52 @@
+---
+// FRESA acompaña al ratón: un punto de luz y un globo con lo que te cuenta de lo que tienes debajo.
+// En el móvil el globo se queda fijo abajo y cambia con la sección que estás viendo.
+---
+<div class="fresa" data-fresa-el>
+  <span class="fresa__punto" aria-hidden="true"></span>
+  <div class="fresa__globo" role="status" aria-live="polite">
+    <span class="fresa__nombre mono">FRESA · IA de adsPartners</span>
+    <p class="fresa__texto" data-fresa-texto></p>
+    <span class="fresa__pista mono" data-fresa-pista>Mantén pulsado para escucharlo</span>
+    <span class="fresa__barra" aria-hidden="true"><i data-fresa-barra></i></span>
+  </div>
+</div>
+
+<style>
+  .fresa {
+    position: fixed; top: 0; left: 0; z-index: 60; pointer-events: none;
+    opacity: 0; transition: opacity .4s var(--curva);
+  }
+  :global(html.fresa-visible) .fresa { opacity: 1; }
+  .fresa__punto {
+    position: absolute; left: -7px; top: -7px; width: 14px; height: 14px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #fff, var(--rosa) 55%, rgba(245, 203, 215, 0) 72%);
+    box-shadow: 0 0 22px 6px rgba(245, 203, 215, .35);
+    transform: scale(var(--habla, 1)); transition: transform .12s linear;
+  }
+  .fresa__globo {
+    position: absolute; left: 22px; top: 14px; width: max-content; max-width: min(320px, 70vw);
+    display: grid; gap: 6px; padding: 12px 14px 12px;
+    background: rgba(27, 20, 16, .9); color: var(--crema);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(231, 226, 218, .14); border-radius: 3px 14px 14px 14px;
+    transform-origin: top left; transition: transform .45s var(--curva), opacity .3s var(--curva);
+  }
+  .fresa--izq .fresa__globo { left: auto; right: 22px; border-radius: 14px 3px 14px 14px; transform-origin: top right; }
+  .fresa--vacio .fresa__globo { transform: scale(.92); opacity: 0; }
+  .fresa__nombre { color: var(--rosa); font-size: 10px; }
+  .fresa__texto { margin: 0; font-size: 15px; line-height: 1.45; min-height: 1.45em; }
+  .fresa__pista { color: var(--crema-3); font-size: 10px; }
+  .fresa__barra { display: block; height: 1px; background: rgba(231, 226, 218, .12); overflow: hidden; }
+  .fresa__barra i { display: block; height: 100%; background: var(--rosa); transform-origin: left; transform: scaleX(0); }
+  :global(html.cab-clara) .fresa__globo { background: rgba(25, 9, 0, .88); }
+
+  /* Sin ratón: el globo vive abajo, fijo */
+  @media (hover: none), (pointer: coarse) {
+    .fresa { top: auto; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); left: 14px; right: 14px; transform: none !important; }
+    .fresa__punto { display: none; }
+    .fresa__globo { position: relative; left: 0; top: 0; width: auto; max-width: none; border-radius: 14px; padding: 10px 12px; gap: 4px; }
+    .fresa__texto { font-size: 13.5px; }
+    .fresa__pista { display: none; }
+  }
+</style>

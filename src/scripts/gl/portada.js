@@ -8,6 +8,7 @@ import { gsap } from 'gsap';
 import { Fluido } from './fluido.js';
 import { lienzo, pintarFoto, medirTitulo, pintarTitulo, pintarMaquina, pintarGlifos } from './capas.js';
 import * as sonido from '../sonido.js';
+import { ajustarTitulo } from '../titulo.js';
 
 const NIVELES = {
   alta: { sim: 128, tinte: 640, iteraciones: 18, dpr: 1.5, curl: 6, disipVel: 0.8, disipTinte: 1.1 },
@@ -319,7 +320,7 @@ export async function crearPortada({ cursor, reducido, calidad = 'auto' }) {
   });
 
   if (!html.classList.contains('gl-activo')) {
-    html.classList.add('gl-activo');
+    html.classList.add('gl-activo', 'titulo-gl');
     gsap.to(u.uIntro, { value: 1, duration: reducido ? 0 : 1.4, ease: 'power2.out' });
   }
 
@@ -365,16 +366,4 @@ export async function crearPortada({ cursor, reducido, calidad = 'auto' }) {
       nivel = v; aplicarNivel();
     },
   };
-}
-
-// El título ocupa el ancho disponible: en escritorio una línea, en móvil «ads» / «Partners»
-export function ajustarTitulo(h1, movil) {
-  h1.style.fontSize = '';
-  const fs = parseFloat(getComputedStyle(h1).fontSize);
-  const anchos = [...h1.querySelectorAll('[data-trozo]')].map((t) => {
-    const r = document.createRange(); r.selectNodeContents(t.firstChild);
-    return r.getBoundingClientRect().width;
-  });
-  const ancho = movil ? Math.max(...anchos) : anchos.reduce((a, b) => a + b, 0);
-  if (ancho > 0) h1.style.fontSize = `${(fs * h1.clientWidth / ancho) * 0.985}px`;
 }
