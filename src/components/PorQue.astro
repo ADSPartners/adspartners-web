@@ -10,12 +10,12 @@ const razones = [
 <section class="porque capitulo-claro" id="porque" aria-labelledby="porque-t">
   <header class="porque__cab">
     <p class="mono porque__etq">( Por qué nosotros )</p>
-    <h2 class="porque__titulo" id="porque-t">Lo que no vas a encontrar <em>en otra agencia.</em></h2>
+    <h2 class="porque__titulo" id="porque-t" data-lente>Lo que no vas a encontrar <em>en otra agencia.</em></h2>
   </header>
   <ol class="porque__lista">
     {razones.map(([t, d]) => (
       <li class="razon" data-razon>
-        <h3 class="razon__t">{t}</h3>
+        <h3 class="razon__t" data-lente>{t}</h3>
         <p class="razon__d">{d}</p>
       </li>
     ))}

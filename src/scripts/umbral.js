@@ -1,14 +1,14 @@
-// El umbral (Overworld): mientras carga, frases con humor y una barra de 1 px; después, entrar con o sin sonido.
+// El umbral (Overworld): mientras carga, frases con humor y una barra de 1 px; cuando la portada está lista,
+// se construye delante de ti en tres pases (alambre, luz y color) y después aparecen «entrar con o sin sonido».
 // La elección se guarda para la sesión: al recargar no vuelve a salir.
 import { gsap } from 'gsap';
 
 const FRASES = [
   'Encendiendo la máquina…',
   'Afinando el kerning…',
-  'Leyendo 115 facturas…',
   'Discutiendo con Sebas si esto es rosa o salmón…',
-  'Conectando lo de fuera con lo de dentro…',
 ];
+const PASES = { 1: 'Pase 1 de 3 · alambre', 2: 'Pase 2 de 3 · luz', 3: 'Pase 3 de 3 · color' };
 
 export function montarUmbral({ listo, reducido, alEntrar }) {
   const html = document.documentElement;
@@ -21,30 +21,34 @@ export function montarUmbral({ listo, reducido, alEntrar }) {
   const iso = el.querySelector('[data-umbral-iso]');
   const velo = el.querySelector('.umbral__velo');
 
-  // Frases: una cada 0,9 s, en orden, entrando desde abajo
-  let i = 0;
-  const cambiar = () => {
-    i = Math.min(i + 1, FRASES.length - 1);
-    if (reducido) { frase.textContent = FRASES[i]; return; }
+  const escribir = (texto) => {
+    if (reducido) { frase.textContent = texto; return; }
     gsap.timeline()
-      .to(frase, { yPercent: -100, opacity: 0, duration: 0.22, ease: 'power2.in' })
-      .add(() => { frase.textContent = FRASES[i]; })
-      .fromTo(frase, { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.4, ease: 'power3.out' });
+      .to(frase, { yPercent: -100, opacity: 0, duration: 0.2, ease: 'power2.in' })
+      .add(() => { frase.textContent = texto; })
+      .fromTo(frase, { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.38, ease: 'power3.out' });
   };
-  const reloj = setInterval(() => { if (i < FRASES.length - 1) cambiar(); }, 900);
 
-  // Progreso real (fuentes, imagen y WebGL) con una duración mínima para que se lean las frases
-  const minimo = reducido ? 500 : 3600;
-  const t0 = performance.now();
+  // Mientras carga: frases con humor; la barra llega a la mitad
+  let i = 0;
+  const reloj = setInterval(() => { if (i < FRASES.length - 1) escribir(FRASES[++i]); }, 900);
   const avance = { v: 0 };
-  gsap.to(avance, { v: 0.7, duration: minimo / 1000, ease: 'power1.inOut', onUpdate: () => { barra.style.transform = `scaleX(${avance.v})`; } });
+  const barraA = (v, d, ease = 'power2.out') => gsap.to(avance, { v, duration: d, ease, onUpdate: () => { barra.style.transform = `scaleX(${avance.v})`; } });
+  barraA(0.45, 1.6, 'power1.inOut');
 
-  Promise.all([listo, new Promise((ok) => setTimeout(ok, minimo))]).then(() => {
+  const t0 = performance.now();
+  Promise.all([listo, new Promise((ok) => setTimeout(ok, reducido ? 300 : 1200))]).then(async ([portada]) => {
     clearInterval(reloj);
-    gsap.to(avance, { v: 1, duration: 0.5, ease: 'power2.out', onUpdate: () => { barra.style.transform = `scaleX(${avance.v})`; } });
-    frase.textContent = 'Listo.';
+    // La portada se construye delante: tres pases, cada uno con su rótulo; la barra completa el resto
+    if (portada?.construir && !reducido) {
+      barraA(1, 3.7, 'none');
+      await portada.construir((n) => escribir(PASES[n]));
+    } else {
+      barraA(1, 0.4);
+    }
+    escribir('Listo.');
     gsap.set(entradas, { visibility: 'visible' });
-    gsap.fromTo(entradas, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: reducido ? 0 : 0.9, ease: 'power3.out', delay: 0.2 });
+    gsap.fromTo(entradas, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: reducido ? 0 : 0.9, ease: 'power3.out', delay: 0.15 });
     setTimeout(() => entradas.querySelector('[data-entrar="con"]').focus({ preventScroll: true }), 250);
   });
 

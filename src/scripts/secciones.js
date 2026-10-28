@@ -41,7 +41,7 @@ function idea() {
     });
   }
   gsap.from('.idea__notas li', {
-    opacity: 0, y: 18, duration: 0.9, ease: 'power3.out', stagger: 0.12,
+    opacity: 0, y: 18, duration: 0.9, ease: 'power3.out', stagger: 0.12, clearProps: 'transform',
     scrollTrigger: { trigger: '.idea__notas', start: 'top 85%', once: true },
   });
 }
@@ -52,7 +52,7 @@ function hacemos() {
   const movil = matchMedia('(max-width: 860px)').matches;
   const titulo = SplitText.create(sec.querySelector('.hacemos__titulo'), { type: 'lines', mask: 'lines' });
   gsap.from(titulo.lines, {
-    yPercent: 105, duration: 1.1, ease: 'power3.out', stagger: 0.1,
+    yPercent: 105, duration: 1.1, ease: 'power3.out', stagger: 0.1, clearProps: 'transform',
     scrollTrigger: { trigger: sec, start: 'top 78%', once: true },
   });
 
@@ -60,10 +60,10 @@ function hacemos() {
   const letras = mono ? SplitText.create(mono, { type: 'chars' }).chars : [];
   const tl = gsap.timeline({ scrollTrigger: { trigger: sec.querySelector('.hacemos__mitades'), start: 'top 75%', once: true } });
   tl.from(sec.querySelector('.hacemos__eje span'), { [movil ? 'scaleX' : 'scaleY']: 0, duration: 1.3, ease: 'power3.inOut' }, 0)
-    .from(sec.querySelector('.mitad--fuera'), { x: movil ? 0 : -40, y: movil ? 24 : 0, opacity: 0, duration: 1.1, ease: 'power3.out' }, 0.15)
-    .from(sec.querySelector('.mitad--dentro'), { x: movil ? 0 : 40, y: movil ? 24 : 0, opacity: 0, duration: 1.1, ease: 'power3.out' }, 0.3)
+    .from(sec.querySelector('.mitad--fuera'), { x: movil ? 0 : -40, y: movil ? 24 : 0, opacity: 0, duration: 1.1, ease: 'power3.out', clearProps: 'transform' }, 0.15)
+    .from(sec.querySelector('.mitad--dentro'), { x: movil ? 0 : 40, y: movil ? 24 : 0, opacity: 0, duration: 1.1, ease: 'power3.out', clearProps: 'transform' }, 0.3)
     .from(letras, { opacity: 0, duration: 0.01, stagger: 0.07, ease: 'none', onStart: () => sonido.tic(0.6) }, 0.55)
-    .from(sec.querySelectorAll('.servicio'), { opacity: 0, y: 14, duration: 0.8, ease: 'power3.out', stagger: 0.07 }, 0.6);
+    .from(sec.querySelectorAll('.servicio'), { opacity: 0, y: 14, duration: 0.8, ease: 'power3.out', stagger: 0.07, clearProps: 'transform' }, 0.6);
 }
 
 function porque() {
@@ -71,8 +71,8 @@ function porque() {
     const t = SplitText.create(r.querySelector('.razon__t'), { type: 'lines', mask: 'lines' });
     const tl = gsap.timeline({ scrollTrigger: { trigger: r, start: 'top 82%', once: true } });
     tl.fromTo(r, { '--linea-x': 0 }, { '--linea-x': 1, duration: 1.1, ease: 'power3.inOut' }, 0)
-      .from(t.lines, { yPercent: 105, duration: 1, ease: 'power3.out' }, 0.15)
-      .from(r.querySelector('.razon__d'), { opacity: 0, y: 12, duration: 0.8, ease: 'power3.out' }, 0.35);
+      .from(t.lines, { yPercent: 105, duration: 1, ease: 'power3.out', clearProps: 'transform' }, 0.15)
+      .from(r.querySelector('.razon__d'), { opacity: 0, y: 12, duration: 0.8, ease: 'power3.out', clearProps: 'transform' }, 0.35);
   });
 }
 
@@ -87,7 +87,7 @@ function paraQuien(casos) {
   const cierre = document.querySelector('.quien__cierre');
   if (cierre) {
     const l = SplitText.create(cierre, { type: 'lines', mask: 'lines' });
-    gsap.from(l.lines, { yPercent: 105, duration: 1.1, ease: 'power3.out', scrollTrigger: { trigger: cierre, start: 'top 85%', once: true } });
+    gsap.from(l.lines, { yPercent: 105, duration: 1.1, ease: 'power3.out', clearProps: 'transform', scrollTrigger: { trigger: cierre, start: 'top 85%', once: true } });
   }
 }
 

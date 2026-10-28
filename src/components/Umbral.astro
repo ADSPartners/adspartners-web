@@ -31,13 +31,14 @@ import Marca from './Marca.astro';
     color: var(--crema);
   }
   html:not(.en-umbral) .umbral { display: none; }
-  .umbral__velo { position: absolute; inset: 0; background: rgba(18, 13, 10, .8); }
+  /* Velo más ligero: detrás se ve la portada construyéndose por pases */
+  .umbral__velo { position: absolute; inset: 0; background: radial-gradient(ellipse 60% 45% at 50% 46%, rgba(18, 13, 10, .72), rgba(18, 13, 10, .38)); }
   .umbral__centro { position: relative; display: grid; justify-items: center; gap: 22px; transform: translateY(-4vh); }
   .umbral__iso { width: 44px; color: var(--crema); }
   .umbral__iso :global(svg) { width: 100%; height: auto; }
   .umbral__barra { width: 160px; height: 1px; background: var(--linea); overflow: hidden; }
   .umbral__barra span { display: block; height: 100%; background: var(--crema); transform-origin: left; transform: scaleX(0); }
-  .umbral__frase { margin: 0; min-height: 1.4em; color: var(--crema-2); overflow: hidden; }
+  .umbral__frase { margin: 0; min-height: 1.4em; color: var(--crema-2); overflow: hidden; text-shadow: 0 1px 10px rgba(18, 13, 10, .9); }
   .umbral__frase span { display: inline-block; }
 
   .umbral__entradas {

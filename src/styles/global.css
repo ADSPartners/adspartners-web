@@ -63,3 +63,55 @@ html.en-umbral body { overflow: hidden; }
   html.cursor-propio [data-cursor] a,
   html.cursor-propio [data-cursor] button { cursor: none; }
 }
+
+/* La lente (src/scripts/lente.js): dentro del círculo, los textos grandes se ven en contorno.
+   El fondo va recortado al texto: fuera del círculo se rellena con su color y dentro solo queda el trazo.
+   Cada trozo de texto recibe su posición en pantalla (--ox, --oy) porque el navegador no respeta
+   background-attachment: fixed junto con background-clip: text. Solo el titular que tienes debajo
+   (.lente-sobre) abre el círculo; los demás tienen radio 0. Las cursivas grises llevan su gris opaco. */
+:root { --lx: -999px; --ly: -999px; --lr: 0px; }
+@media (hover: hover) and (pointer: fine) {
+  html.lente-activa [data-lente] { --lr-l: 0px; }
+  html.lente-activa [data-lente].lente-sobre { --lr-l: var(--lr); }
+  html.lente-activa [data-lente],
+  html.lente-activa [data-lente] div,
+  html.lente-activa [data-lente] span:not(.oculto-accesible),
+  html.lente-activa [data-lente][data-lente] em {
+    --lc: var(--crema);
+    color: transparent;
+    -webkit-text-stroke: .5px var(--lc);
+    paint-order: stroke fill;
+    background: radial-gradient(circle var(--lr-l) at calc(var(--lx) - var(--ox, 0px)) calc(var(--ly) - var(--oy, 0px)),
+      transparent calc(var(--lr-l) - .5px), var(--lc) var(--lr-l));
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+  /* [data-lente] doble: los estilos del componente ponen color a la cursiva con más peso */
+  html.lente-activa [data-lente][data-lente] em { --lc: #9F9A93; }
+  html.lente-activa .capitulo-claro [data-lente],
+  html.lente-activa .capitulo-claro [data-lente] div,
+  html.lente-activa .capitulo-claro [data-lente] span:not(.oculto-accesible) { --lc: var(--tinta); }
+  html.lente-activa .capitulo-claro [data-lente][data-lente] em { --lc: #766B62; }
+  html.lente-activa .caso:not(.marcado) [data-lente] { --lc: #A79F98; }
+}
+.lente {
+  position: fixed; top: 0; left: 0; z-index: 58; pointer-events: none;
+  width: var(--d, 0px); height: var(--d, 0px); margin: calc(var(--d, 0px) / -2) 0 0 calc(var(--d, 0px) / -2);
+  border-radius: 50%; border: 1px solid rgba(245, 203, 215, .75);
+  background:
+    repeating-linear-gradient(0deg, rgba(231, 226, 218, .07) 0 1px, transparent 1px 12px),
+    repeating-linear-gradient(90deg, rgba(231, 226, 218, .07) 0 1px, transparent 1px 12px);
+  opacity: 0; transition: opacity .3s var(--curva);
+}
+.lente--visible { opacity: 1; }
+.lente--clara {
+  border-color: rgba(180, 98, 124, .8);
+  background:
+    repeating-linear-gradient(0deg, rgba(25, 9, 0, .08) 0 1px, transparent 1px 12px),
+    repeating-linear-gradient(90deg, rgba(25, 9, 0, .08) 0 1px, transparent 1px 12px);
+}
+.lente__dato {
+  position: absolute; left: 50%; top: calc(100% + 10px); transform: translateX(-50%);
+  white-space: nowrap; color: var(--crema-2); font-size: 10px;
+}
+.lente--clara .lente__dato { color: rgba(25, 9, 0, .6); }

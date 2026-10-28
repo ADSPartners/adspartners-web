@@ -25,10 +25,10 @@ const FRAG = /* glsl */ `#version 300 es
 precision highp float;
 in vec2 vUv; out vec4 color;
 uniform sampler2D tFoto; uniform sampler2D tTitulo; uniform sampler2D tMaquina;
-uniform sampler2D tTinte; uniform sampler2D tVel; uniform sampler2D tGlifos;
+uniform sampler2D tTinte; uniform sampler2D tVel; uniform sampler2D tGlifos; uniform sampler2D tHud;
 uniform vec2 uRes; uniform float uDpr; uniform float uTime; uniform float uCelda; uniform float uGlifosN;
 uniform float uRevelado; uniform vec2 uHold; uniform vec2 uPuntero; uniform float uCirculo;
-uniform float uUsaFluido; uniform float uIntro;
+uniform float uUsaFluido; uniform float uIntro; uniform float uLuz; uniform float uMarca; uniform vec4 uHud; uniform float uHudA;
 uniform vec3 cNoche; uniform vec3 cCrema; uniform vec3 cRosa;
 
 float luma (vec3 c) { return dot(c, vec3(0.299, 0.587, 0.114)); }
@@ -54,6 +54,14 @@ void main () {
   float r = uRevelado * 1.9;
   float anillo = step(0.001, uRevelado) * (1.0 - smoothstep(r - 0.015, r, length((uv - uHold) * asp) + n * uRevelado));
   float m = max(max(tinte, circ), anillo);
+  // Ventana del marcador en vivo: un rectángulo pegado al ratón que deja ver la máquina
+  vec2 hp = (uv - uHud.xy) / uHud.zw;
+  vec2 hb = smoothstep(vec2(0.0), vec2(0.06), hp) * smoothstep(vec2(1.0), vec2(0.94), hp);
+  m = max(m, uHudA * hb.x * hb.y);
+  // Carga: el color sube de abajo arriba como un escáner; por encima del frente, todo es máquina
+  float frente = uMarca * 1.25 - 0.12;
+  float barrido = step(uMarca, 0.999) * smoothstep(frente - 0.012, frente + 0.012, uv.y + n * 0.25);
+  m = max(m, barrido);
   float mascara = smoothstep(0.24, 0.3, m);
   float borde = smoothstep(0.17, 0.23, m) - smoothstep(0.28, 0.34, m);
 
@@ -80,13 +88,17 @@ void main () {
   float rej = max(1.0 - step(uDpr, mod(px.x, paso)), 1.0 - step(uDpr, mod(px.y, paso)));
   vec3 maq = cNoche;
   maq = mix(maq, cCrema, rej * 0.06);
-  maq = mix(maq, cCrema, glifo * (0.08 + lc * 0.34));
-  maq = mix(maq, cCrema, iso * (0.2 + l * 0.38));
+  maq = mix(maq, cCrema, glifo * (0.08 + lc * 0.34) * uLuz);
+  maq = mix(maq, cCrema, iso * (0.2 + l * 0.38) * uLuz);
   vec4 cap = texture(tMaquina, uv);
   maq = mix(maq, cap.rgb, cap.a);
+  // Marcador en vivo, pegado al ratón (solo se ve dentro del pincel)
+  if (hp.x >= 0.0 && hp.y >= 0.0 && hp.x <= 1.0 && hp.y <= 1.0) { vec4 hud = texture(tHud, hp); maq = mix(maq, hud.rgb, hud.a); }
 
   vec3 col = mix(marca, maq, mascara);
   col = mix(col, cRosa, clamp(borde, 0.0, 1.0) * 0.4);
+  float escaner = step(0.001, uMarca) * step(uMarca, 0.999) * (1.0 - smoothstep(0.0, 0.004, abs(uv.y + n * 0.25 - frente)));
+  col = mix(col, cRosa, escaner * 0.9);
   col += (hash(px + fract(uTime * 7.0) * 91.0) - 0.5) * 0.04;
   color = vec4(col * uIntro, 1.0);
 }`;
@@ -128,6 +140,11 @@ export async function crearPortada({ cursor, reducido, calidad = 'auto' }) {
 
   const capas = { foto: null, titulo: null, maquina: null };
   const texturas = { foto: tex(lienzo(1, 1)), titulo: tex(lienzo(1, 1)), maquina: tex(lienzo(1, 1)), glifos: tex(pintarGlifos(GLIFOS)) };
+  // Marcador en vivo: un lienzo pequeño que se repinta diez veces por segundo con la posición, la velocidad y los fps
+  const HUD = { w: 210, h: 86 };
+  const hud = lienzo(HUD.w * renderer.dpr, HUD.h * renderer.dpr);
+  texturas.hud = tex(hud);
+  const enUmbral = html.classList.contains('en-umbral') && !reducido;
 
   function pintarCapas() {
     const dpr = renderer.dpr;
@@ -158,6 +175,8 @@ export async function crearPortada({ cursor, reducido, calidad = 'auto' }) {
     uCelda: { value: (esMovil() ? 8 : 9) * renderer.dpr }, uGlifosN: { value: GLIFOS.length },
     uRevelado: { value: 0 }, uHold: { value: [0.5, 0.5] }, uPuntero: { value: [-2, -2] }, uCirculo: { value: 0 },
     uUsaFluido: { value: 0 }, uIntro: { value: 0 },
+    tHud: { value: texturas.hud }, uHud: { value: [-2, -2, 0.1, 0.1] }, uHudA: { value: 0 },
+    uLuz: { value: enUmbral ? 0 : 1 }, uMarca: { value: enUmbral ? 0 : 1 },
     cNoche: { value: hex('#120D0A') }, cCrema: { value: hex('#E7E2DA') }, cRosa: { value: hex('#F5CBD7') },
   };
   const malla = new Mesh(gl, { geometry: new Triangle(gl), program: new Program(gl, { vertex: VERT, fragment: FRAG, uniforms: u, depthTest: false, depthWrite: false }) });
@@ -247,6 +266,26 @@ export async function crearPortada({ cursor, reducido, calidad = 'auto' }) {
   new IntersectionObserver(([en]) => { visible = en.isIntersecting; }).observe(sec);
   let tAnterior = performance.now();
   const medida = { n: 0, suma: 0, hecha: calidad !== 'auto' };
+  const tiempos = [];
+  let ultimoHud = 0;
+  function pintarHud(ahora) {
+    if (ahora - ultimoHud < 100) return;
+    ultimoHud = ahora;
+    const media = tiempos.length ? tiempos.reduce((a, b) => a + b, 0) / tiempos.length : 1 / 60;
+    const d = renderer.dpr, ctx = hud.getContext('2d');
+    ctx.clearRect(0, 0, hud.width, hud.height);
+    ctx.font = `400 ${10.5 * d}px "Geist Mono", ui-monospace, monospace`;
+    ctx.textBaseline = 'alphabetic';
+    const filas = [
+      ['// en vivo', 'rgba(245,203,215,.9)'],
+      [`x ${Math.round(p.x)} · y ${Math.round(p.y)}`, 'rgba(231,226,218,.85)'],
+      [`velocidad ${velocidadSonido.toFixed(2).replace('.', ',')}`, 'rgba(231,226,218,.85)'],
+      [`${(media * 1000).toFixed(1).replace('.', ',')} ms · ${Math.round(1 / media)} fps`, 'rgba(231,226,218,.6)'],
+    ];
+    ctx.strokeStyle = 'rgba(231,226,218,.35)'; ctx.lineWidth = d; ctx.strokeRect(d * 0.5, d * 0.5, hud.width - d, hud.height - d);
+    filas.forEach(([t, c], i) => { ctx.fillStyle = c; ctx.fillText(t, 12 * d, (22 + i * 16) * d); });
+    texturas.hud.needsUpdate = true;
+  }
 
   gsap.ticker.add(() => {
     const ahora = performance.now();
@@ -303,6 +342,15 @@ export async function crearPortada({ cursor, reducido, calidad = 'auto' }) {
     } else {
       u.uUsaFluido.value = 0;
     }
+    tiempos.push(dt); if (tiempos.length > 30) tiempos.shift();
+    // El marcador sigue al ratón mientras se mueve (a su izquierda si no cabe a la derecha) y se apaga quieto
+    const moviendo = p.dentro && p.x >= 0 && p.quieto < 1.2 && !html.classList.contains('en-umbral');
+    u.uHudA.value += ((moviendo ? 1 : 0) - u.uHudA.value) * (1 - Math.exp(-6 * dt));
+    if (p.x >= 0) {
+      const hx = p.x + 28 + HUD.w > W ? p.x - 28 - HUD.w : p.x + 28;
+      u.uHud.value = [hx / W, 1 - (p.y + 24 + HUD.h) / H, HUD.w / W, HUD.h / H];
+      if (u.uHudA.value > 0.01) pintarHud(ahora);
+    }
     renderer.render({ scene: malla, sort: false, frustumCull: false });
     sonido.pincel(velocidadSonido, p.x / W, dt, u.uRevelado.value);
 
@@ -351,6 +399,16 @@ export async function crearPortada({ cursor, reducido, calidad = 'auto' }) {
 
   return {
     listo: Promise.resolve(true),
+    // La carga construye la portada en tres pases: alambre, luz y color (que sube como un escáner)
+    construir(alPase) {
+      if (!enUmbral) { u.uLuz.value = 1; u.uMarca.value = 1; return Promise.resolve(); }
+      return new Promise((ok) => {
+        gsap.timeline({ onComplete: ok })
+          .add(() => alPase(1, 'alambre'))
+          .to(u.uLuz, { value: 1, duration: 1.1, ease: 'power2.inOut', onStart: () => alPase(2, 'luz') }, 1.1)
+          .to(u.uMarca, { value: 1, duration: 1.4, ease: 'power2.inOut', onStart: () => alPase(3, 'color') }, 2.3);
+      });
+    },
     activarCursor() { cursor.decir('Mueve el ratón'); },
     // Al entrar: un golpe de fluido desde el centro que destapa la máquina y se disuelve
     entrar() {

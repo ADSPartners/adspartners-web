@@ -10,23 +10,23 @@ const casos = [
 ---
 <section class="quien capitulo-claro" id="contacto" aria-labelledby="quien-t">
   <p class="mono quien__etq">( Para quién )</p>
-  <h2 class="quien__titulo" id="quien-t">Te servimos si</h2>
+  <h2 class="quien__titulo" id="quien-t" data-lente>Te servimos si</h2>
   <ul class="quien__lista">
     {casos.map((c, i) => (
       <li class="caso" data-caso={i}>
         <span class="caso__caja" aria-hidden="true">
           <svg viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7" pathLength="1" /></svg>
         </span>
-        <span class="caso__t">{c}</span>
+        <span class="caso__t" data-lente>{c}</span>
       </li>
     ))}
   </ul>
 
   <div class="quien__cta">
-    <p class="quien__cierre">Si te has visto en alguna, <em>hablemos.</em></p>
+    <p class="quien__cierre" data-lente>Si te has visto en alguna, <em>hablemos.</em></p>
     <div class="quien__botones">
-      <a class="boton boton--lleno" href="mailto:adsgroup@ads-partners.com?subject=Hablemos" data-sonido-hover>Escríbenos</a>
-      <a class="boton" href="https://wa.me/34633565840" target="_blank" rel="noopener" data-sonido-hover>Por WhatsApp</a>
+      <a class="boton boton--lleno" href="mailto:adsgroup@ads-partners.com?subject=Hablemos" data-sonido-hover data-iman>Escríbenos</a>
+      <a class="boton" href="https://wa.me/34633565840" target="_blank" rel="noopener" data-sonido-hover data-iman>Por WhatsApp</a>
     </div>
     <p class="mono quien__lugar">Madrid · Vamos donde estéis · adsgroup@ads-partners.com</p>
   </div>

@@ -15,13 +15,13 @@ const dentro = [
 <section class="hacemos" id="hacemos" aria-labelledby="hacemos-t">
   <header class="hacemos__cab">
     <p class="mono hacemos__etq">( Qué hacemos )</p>
-    <h2 class="hacemos__titulo" id="hacemos-t">Dos oficios. <em>Un solo equipo.</em></h2>
+    <h2 class="hacemos__titulo" id="hacemos-t" data-lente>Dos oficios. <em>Un solo equipo.</em></h2>
   </header>
 
   <div class="hacemos__mitades">
     <div class="mitad mitad--fuera" data-mitad="fuera">
       <p class="mitad__lado mono">Por fuera</p>
-      <h3 class="mitad__nombre mitad__nombre--serif">Marca</h3>
+      <h3 class="mitad__nombre mitad__nombre--serif" data-lente>Marca</h3>
       <p class="mitad__d">Lo que ve tu cliente: cómo se te reconoce y cómo se te recuerda.</p>
       <ul class="mitad__lista">
         {fuera.map(([n, d]) => (
@@ -34,7 +34,7 @@ const dentro = [
 
     <div class="mitad mitad--dentro" data-mitad="dentro">
       <p class="mitad__lado mono">Por dentro</p>
-      <h3 class="mitad__nombre mitad__nombre--mono">máquina</h3>
+      <h3 class="mitad__nombre mitad__nombre--mono" data-lente>máquina</h3>
       <p class="mitad__d">Lo que hace que tu empresa funcione por dentro, sin que nadie lo vea.</p>
       <ul class="mitad__lista">
         {dentro.map(([n, d]) => (

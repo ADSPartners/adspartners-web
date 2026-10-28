@@ -10,6 +10,8 @@ import * as sonido from './sonido.js';
 import { crearCursor } from './cursor.js';
 import { montarUmbral } from './umbral.js';
 import { montarSecciones } from './secciones.js';
+import { montarTrabajo } from './trabajo.js';
+import { montarLente } from './lente.js';
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -76,6 +78,8 @@ export async function arrancar() {
   document.querySelectorAll('[data-sonido-hover]').forEach((a) => a.addEventListener('pointerenter', () => sonido.tic(0.7)));
 
   montarSecciones({ reducido });
+  montarTrabajo({ cursor, reducido });
+  montarLente({ reducido });
 
   try {
     const { crearPortada } = await import('./gl/portada.js');
@@ -83,7 +87,7 @@ export async function arrancar() {
   } catch (e) {
     console.warn('Portada sin efectos:', e);
   }
-  resolverListo(true);
+  resolverListo(portada);
   if (!enUmbral || entrado) portada.activarCursor?.();
 }
 
