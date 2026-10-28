@@ -96,7 +96,7 @@ const base = import.meta.env.BASE_URL;
     position: absolute; inset: 0; display: grid; place-items: center;
     background: var(--noche-2); border: 1px solid var(--linea);
     font-family: var(--serif); font-style: italic; font-size: 20px; line-height: 1; color: var(--crema);
-    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden; backface-visibility: hidden;
   }
   .cubo__cara :global(svg) { width: 22px; height: auto; }
   .cubo__cara--1 { transform: rotateX(0deg) translateZ(17px); }

@@ -42,6 +42,10 @@ void main () {
   vec2 asp = vec2(uRes.x / uRes.y, 1.0);
   vec2 vel = uUsaFluido > 0.5 ? texture(tVel, uv).xy : vec2(0.0);
   float tinte = uUsaFluido > 0.5 ? texture(tTinte, uv).r : 0.0;
+  // Si el fluido trae valores no numéricos (algún navegador), mejor sin pincel que la pantalla en negro
+  if (isnan(vel.x) || isnan(vel.y) || isinf(vel.x) || isinf(vel.y)) vel = vec2(0.0);
+  if (isnan(tinte) || isinf(tinte)) tinte = 0.0;
+  vel = clamp(vel, vec2(-2000.0), vec2(2000.0));
 
   // Máscara: tinte del fluido, círculo (sin fluido) y anillo de «mantener»
   float circ = uCirculo * (1.0 - smoothstep(0.1, 0.125, length((uv - uPuntero) * asp)));

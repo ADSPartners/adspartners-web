@@ -121,6 +121,13 @@ export class Fluido {
     });
     this.renderer.bindFramebuffer(rt);
     const ok = gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE;
+    if (ok) {
+      // WebKit no siempre entrega la textura a cero: si trae basura (NaN), el fluido la arrastra y la portada sale negra
+      const antes = gl.getParameter(gl.COLOR_CLEAR_VALUE);
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.clearColor(antes[0], antes[1], antes[2], antes[3]);
+    }
     this.renderer.bindFramebuffer();
     if (!ok) throw new Error('FBO de media precisión incompleto');
     return rt;
