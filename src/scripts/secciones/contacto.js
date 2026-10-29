@@ -22,7 +22,13 @@ export function montar(sec, { reducido }) {
     inp.style.width = `${Math.ceil(ancho + parseFloat(cs.fontSize) * 0.45)}px`;
   };
   const huecos = [...form.querySelectorAll('[data-ct-crece]')];
-  const medirTodos = () => huecos.forEach(crecer);
+  // La cota de la casilla de la posdata dice su medida real en pantalla (el cuadrado es 28 de las 40 del dibujo)
+  const caja = form.querySelector('.ct__pd-caja');
+  const medida = form.querySelector('[data-ct-medida]');
+  const medirTodos = () => {
+    huecos.forEach(crecer);
+    if (caja && medida) medida.textContent = String(Math.round((caja.getBoundingClientRect().width * 28) / 40));
+  };
   huecos.forEach((inp) => inp.addEventListener('input', () => { crecer(inp); inp.removeAttribute('aria-invalid'); sonido.tecla(0.5); }));
   medirTodos();
   document.fonts.ready.then(medirTodos);

@@ -30,15 +30,23 @@
     <input class="ct__miel" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
 
     <div class="ct__pie">
-      <!-- La privacidad, como posdata de la carta: una casilla dibujada a mano que se tacha con boli rojo -->
+      <!-- La privacidad, como posdata de la carta. La casilla es tech (un plano: guías, asas de selección, su medida
+           real y su valor) y la marca encima es brand: un visto a boli rojo -->
       <label class="ct__pd">
         <input class="ct__pd-input" type="checkbox" name="acepto" required />
         <span class="ct__pd-letra">P. D.</span>
         <span class="ct__pd-caja" aria-hidden="true">
           <svg viewBox="0 0 40 40">
-            <path class="ct__pd-marco" d="M5 7 C 14 5.2, 26 6.4, 35.2 5 C 36 15, 34.4 26, 35 35.4 C 25 36.2, 14 34.4, 4.6 35 C 5.8 26, 4.2 15, 5 7 Z" />
-            <path class="ct__pd-tick" pathLength="1" d="M9 20 C 12 23, 14.5 26.5, 16.5 31 C 21 21.5, 27.5 12.5, 37 3.5" />
+            <path class="ct__pd-guias" d="M-16 6H52M-16 34H52M6 -14V54M34 -14V54" />
+            <rect class="ct__pd-marco" x="6" y="6" width="28" height="28" />
+            <path class="ct__pd-cota" d="M6 43H34M6 41V45M34 41V45" />
+            <g class="ct__pd-asas">
+              <rect x="4.3" y="4.3" width="3.4" height="3.4" /><rect x="32.3" y="4.3" width="3.4" height="3.4" />
+              <rect x="4.3" y="32.3" width="3.4" height="3.4" /><rect x="32.3" y="32.3" width="3.4" height="3.4" />
+            </g>
+            <path class="ct__pd-tick" pathLength="1" d="M10 20 C 13 23, 15.5 26.5, 17.5 31 C 22 21.5, 28.5 12.5, 38 3.5" />
           </svg>
+          <span class="ct__pd-medida mono"><span data-ct-medida>27</span> px · </span>
         </span>
         <span class="ct__pd-texto">He leído la <a href="https://ads-partners.com/privacidad.html" target="_blank" rel="noopener">política de privacidad</a> y os dejo que me contestéis.</span>
       </label>
@@ -111,24 +119,40 @@
 
   .ct__pie { display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; margin-top: 8vh; }
 
-  /* P. D.: la casilla de privacidad, dibujada a mano */
+  /* P. D.: la casilla de privacidad. Tech (guías, asas, cota y valor) con el visto a boli rojo encima */
   .ct__pd {
-    position: relative; display: flex; align-items: center; gap: 14px; max-width: 560px;
+    position: relative; display: flex; align-items: center; gap: 28px; max-width: 600px;
     font-family: var(--serif); font-style: italic; font-size: clamp(18px, 1.55vw, 24px); line-height: 1.25; color: var(--tinta-2);
     cursor: pointer;
   }
   .ct__pd-input { position: absolute; left: 0; top: 0; width: 1px; height: 1px; opacity: 0; }
   .ct__pd-letra { flex: none; font-style: normal; font-family: var(--mono); font-size: 11px; letter-spacing: .08em; color: var(--tinta); }
-  .ct__pd-caja { flex: none; width: 38px; height: 38px; }
+  .ct__pd-caja { position: relative; flex: none; width: 48px; height: 48px; }
   .ct__pd-caja svg { width: 100%; height: 100%; overflow: visible; }
-  .ct__pd-marco { fill: none; stroke: var(--tinta); stroke-width: 1.4; stroke-linejoin: round; transition: stroke .3s; }
-  .ct__pd-tick { fill: none; stroke: #C8361F; stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset .45s cubic-bezier(.6, 0, .2, 1); }
-  .ct__pd-input:checked ~ .ct__pd-caja .ct__pd-tick { stroke-dashoffset: 0; }
+  .ct__pd-caja svg :where(path, rect) { vector-effect: non-scaling-stroke; }
+  .ct__pd-guias { fill: none; stroke: var(--tinta-3); stroke-width: 1; stroke-dasharray: 2 3; transition: opacity .4s; }
+  .ct__pd-marco { fill: none; stroke: var(--tinta); stroke-width: 1; shape-rendering: crispEdges; transition: stroke .3s; }
+  .ct__pd-cota { fill: none; stroke: var(--tinta-2); stroke-width: 1; }
+  .ct__pd-asas rect { fill: var(--crema); stroke: var(--tinta); stroke-width: 1; transition: fill .3s, transform .3s; }
+  .ct__pd-medida {
+    position: absolute; left: 50%; top: calc(100% + 6px); transform: translateX(-50%);
+    font-size: 9px; letter-spacing: .06em; white-space: nowrap; color: var(--tinta-2); font-style: normal;
+  }
+  .ct__pd-medida::after { content: 'false'; color: var(--tinta); }
+  .ct__pd-tick { fill: none; stroke: #C8361F; stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; transition: stroke-dashoffset .45s cubic-bezier(.6, 0, .2, 1), opacity 0s .45s; vector-effect: none; }
+  /* Al pasar el ratón, las guías corren (hormigas de selección) y las asas se rellenan */
+  .ct__pd:hover .ct__pd-guias, .ct__pd-input:focus-visible ~ .ct__pd-caja .ct__pd-guias { animation: guias .6s linear infinite; stroke: var(--tinta-2); }
+  .ct__pd:hover .ct__pd-asas rect { fill: var(--tinta); }
+  @keyframes guias { to { stroke-dashoffset: -5; } }
+  .ct__pd-input:checked ~ .ct__pd-caja .ct__pd-tick { stroke-dashoffset: 0; opacity: 1; transition: stroke-dashoffset .45s cubic-bezier(.6, 0, .2, 1), opacity 0s; }
+  .ct__pd-input:checked ~ .ct__pd-caja .ct__pd-guias { opacity: .35; animation: none; }
+  .ct__pd-input:checked ~ .ct__pd-caja .ct__pd-medida::after { content: 'true'; color: #C8361F; }
   .ct__pd-input:checked ~ .ct__pd-texto { color: var(--tinta); }
-  .ct__pd-input:focus-visible ~ .ct__pd-caja { outline: 1px solid var(--tinta); outline-offset: 4px; }
-  .ct__pd:hover .ct__pd-marco { stroke-width: 2; }
+  .ct__pd-input:focus-visible ~ .ct__pd-caja { outline: 1px solid var(--tinta); outline-offset: 10px; }
   .ct__pd a { color: var(--tinta); border-bottom: 1px solid var(--tinta-3); }
-  .ct__pd.invalido .ct__pd-marco { stroke: #C8361F; stroke-width: 2; }
+  .ct__pd.invalido .ct__pd-marco, .ct__pd.invalido .ct__pd-guias { stroke: #C8361F; }
+  .ct__pd.invalido .ct__pd-asas rect { stroke: #C8361F; }
+  .ct__pd.invalido .ct__pd-medida::after { content: 'required'; color: #C8361F; }
   .ct__pd.invalido .ct__pd-caja { animation: temblar .4s; }
   @keyframes temblar { 25% { transform: translateX(-4px) rotate(-3deg); } 75% { transform: translateX(4px) rotate(3deg); } }
 

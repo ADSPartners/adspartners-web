@@ -66,13 +66,15 @@ export function montar(sec, { reducido, conRaton }) {
     if (p !== pAnterior) {
       pAnterior = p;
       // El título: primero crece entero (todas las letras a la vez); al acercarse, cada una se adelanta o se retrasa
-      // un poco, se tuerce y te pasa por los lados hasta irse por detrás
+      // un poco, se tuerce y te pasa por los lados hasta irse por detrás. Al final del vuelo, hasta la más rezagada
+      // ha pasado la cámara (ninguna se queda gigante en medio de la pantalla)
       const pt = Math.min(1, p / FIN_TITULO);
-      const comun = Math.pow(pt, 1.5) * PERSPECTIVA * 1.08;
+      const SUELTA = 220;
+      const comun = Math.pow(pt, 1.5) * (PERSPECTIVA * 1.02 + SUELTA);
       const suelta = Math.pow(pt, 4);
       for (const l of letras) {
-        const z = comun + l.f * suelta * 220;
-        const op = 1 - suave(PERSPECTIVA * 0.84, PERSPECTIVA * 0.97, z);
+        const z = comun + l.f * suelta * SUELTA;
+        const op = pt >= 1 ? 0 : 1 - suave(PERSPECTIVA * 0.84, PERSPECTIVA * 0.97, z);
         l.el.style.opacity = op.toFixed(3);
         l.el.style.transform = op > 0 && pt > 0 ? `translate3d(0, 0, ${z.toFixed(1)}px) rotateX(${(l.giro * suelta).toFixed(1)}deg)` : 'none';
       }
@@ -81,7 +83,7 @@ export function montar(sec, { reducido, conRaton }) {
 
       // Los logos: la cámara empieza a avanzar cuando el título ya casi ha pasado
       const cam = Math.max(0, (p - FIN_TITULO * 0.7) / (1 - FIN_TITULO * 0.7)) * total;
-      const tras = suave(FIN_TITULO * 0.75, FIN_TITULO * 1.05, p);
+      const tras = suave(FIN_TITULO * 0.92, FIN_TITULO * 1.15, p);
       logos.forEach((el, i) => {
         const s = sitio[i];
         const z = s.z + cam;
