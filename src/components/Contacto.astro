@@ -1,7 +1,12 @@
 ---
 // CTA + contacto, el capítulo claro: una carta en Garamond con los huecos para rellenar en línea, la privacidad como
-// posdata (una casilla dibujada a mano) y «Enviar la carta».
+// posdata (una casilla en plano tech con un visto de píxeles) y «Enviar la carta».
 // Va al webhook de n8n (ads-contacto). Debajo, el cierre que parece el final de la página.
+
+// El visto, en píxeles (rejilla de 4 unidades del dibujo de 40): primero el brazo corto que baja, después el largo
+// que sube, lo cruza por un píxel y se sale de la casilla por arriba a la derecha
+const VISTO = [[1, 3], [2, 4], [3, 5], [4, 6], [2, 6], [3, 5], [4, 4], [5, 3], [6, 2], [7, 1], [8, 0]];
+const px = (c: number) => 6.3 + c * 4;
 ---
 <section class="ct" id="contacto" data-seccion="contacto" aria-labelledby="ct-titulo">
   <div class="ct__cabeza">
@@ -31,7 +36,7 @@
 
     <div class="ct__pie">
       <!-- La privacidad, como posdata de la carta. La casilla es un plano (guías y asas solo en algunas esquinas, un
-           lado que se alarga, su medida real y su valor) y el visto, rojo, se traza con dos rectas -->
+           lado que se alarga, su medida real y su valor) y el visto, rojo, en píxeles -->
       <label class="ct__pd">
         <input class="ct__pd-input" type="checkbox" name="acepto" required />
         <span class="ct__pd-letra">P. D.</span>
@@ -44,11 +49,11 @@
             <g class="ct__pd-asas">
               <rect x="32.3" y="4.3" width="3.4" height="3.4" /><rect x="4.3" y="32.3" width="3.4" height="3.4" />
             </g>
-            <!-- El visto, también tech: una recta que baja y otra que sube y la cruza; en reposo, se «glitchea» -->
+            <!-- El visto, en píxeles: se encienden uno a uno (la recta que baja y la que sube y la cruza); en reposo,
+                 se «glitchea» con un eco cian -->
             <g class="ct__pd-visto">
-              <path class="ct__pd-eco" d="M10 16L18.5 28.5M14 30.5L37.5 3" />
-              <path class="ct__pd-v1" pathLength="1" d="M10 16L18.5 28.5" />
-              <path class="ct__pd-v2" pathLength="1" d="M14 30.5L37.5 3" />
+              <g class="ct__pd-eco">{VISTO.map(([c, f]) => <rect x={px(c)} y={px(f)} width="3.4" height="3.4" />)}</g>
+              <g class="ct__pd-px">{VISTO.map(([c, f], i) => <rect x={px(c)} y={px(f)} width="3.4" height="3.4" style={`--i:${i}`} />)}</g>
             </g>
           </svg>
           <span class="ct__pd-medida mono"><span data-ct-medida>27</span> px · </span>
@@ -124,7 +129,7 @@
 
   .ct__pie { display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; margin-top: 8vh; }
 
-  /* P. D.: la casilla de privacidad. Tech (guías, asas, cota y valor) con el visto rojo de dos rectas */
+  /* P. D.: la casilla de privacidad. Tech (guías, asas, cota y valor) con el visto en píxeles rojos */
   .ct__pd {
     position: relative; display: flex; align-items: center; gap: 44px; max-width: 620px;
     font-family: var(--serif); font-style: italic; font-size: clamp(18px, 1.55vw, 24px); line-height: 1.25; color: var(--tinta-2);
@@ -146,17 +151,17 @@
   }
   .ct__pd-medida::after { content: 'false'; color: var(--tinta); }
   .ct__pd-visto { opacity: 0; transition: opacity 0s .2s; transform-box: fill-box; transform-origin: center; }
-  .ct__pd-visto path { fill: none; stroke: #C8361F; stroke-width: 2.6; stroke-linecap: butt; vector-effect: none; }
-  .ct__pd-v1, .ct__pd-v2 { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset .12s linear; }
-  .ct__pd-visto .ct__pd-eco { stroke: rgba(64, 196, 255, .75); opacity: 0; }
+  .ct__pd-visto rect { stroke: none; shape-rendering: crispEdges; }
+  .ct__pd-px rect { fill: #C8361F; opacity: 0; transition: opacity 0s; }
+  .ct__pd-eco { opacity: 0; }
+  .ct__pd-eco rect { fill: rgba(64, 196, 255, .8); }
   /* Al pasar el ratón, las guías corren (hormigas de selección) y las asas se rellenan */
   .ct__pd:hover .ct__pd-guias, .ct__pd-input:focus-visible ~ .ct__pd-caja .ct__pd-guias { animation: guias .6s linear infinite; stroke: var(--tinta-2); }
   .ct__pd:hover .ct__pd-asas rect { fill: var(--tinta); }
   @keyframes guias { to { stroke-dashoffset: -5; } }
-  /* Al marcar: primero la recta que baja, después la que sube y la cruza. Quieto, un glitch de vez en cuando */
+  /* Al marcar, los píxeles se encienden uno a uno: la recta que baja y la que sube y la cruza. Quieto, un glitch */
   .ct__pd-input:checked ~ .ct__pd-caja .ct__pd-visto { opacity: 1; transition: none; animation: visto-glitch 3.4s steps(1, end) .9s infinite; }
-  .ct__pd-input:checked ~ .ct__pd-caja .ct__pd-v1 { stroke-dashoffset: 0; transition: stroke-dashoffset .16s linear; }
-  .ct__pd-input:checked ~ .ct__pd-caja .ct__pd-v2 { stroke-dashoffset: 0; transition: stroke-dashoffset .24s cubic-bezier(.5, 0, .2, 1) .18s; }
+  .ct__pd-input:checked ~ .ct__pd-caja .ct__pd-px rect { opacity: 1; transition: opacity 0s calc(var(--i) * 38ms); }
   .ct__pd-input:checked ~ .ct__pd-caja .ct__pd-eco { animation: visto-eco 3.4s steps(1, end) .9s infinite; }
   @keyframes visto-glitch {
     0%, 86% { transform: none; }

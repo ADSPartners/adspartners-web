@@ -28,11 +28,15 @@ export function montar(sec, { reducido, conRaton, lenis, cursor }) {
   function medir() {
     L = Math.max(1, sec.offsetHeight - innerHeight);
     const n = piezas.length;
-    // La última pieza llega a media pantalla justo cuando empieza la transición (los últimos 120vh, que la tapan
-    // mientras las fotos siguen subiendo); la primera asoma ya al empezar
-    const util = Math.max(1, L - innerHeight * 1.2);
-    const hueco = (util * 0.98 * VEL - innerHeight * 0.32) / Math.max(1, n - 1);
-    base = piezas.map((_, i) => innerHeight * 0.82 + i * hueco * (0.97 + azar(i, 2) * 0.06));
+    // La transición se monta sobre los últimos 120vh y no empieza hasta que todas las fotos han salido por arriba:
+    // la última se coloca para que su borde de abajo pase el de arriba de la pantalla justo ahí. La primera asoma
+    // ya al empezar
+    const inicioTransicion = Math.max(1, L - innerHeight * 1.2);
+    const u = n - 1;
+    const factor = (i) => 0.97 + azar(i, 2) * 0.06;
+    const baseUltima = inicioTransicion * vel[u] - piezas[u].offsetHeight - innerHeight * 0.06;
+    const hueco = Math.max(innerHeight * 0.4, (baseUltima - innerHeight * 0.82) / ((u || 1) * factor(u)));
+    base = piezas.map((_, i) => innerHeight * 0.82 + i * hueco * factor(i));
   }
   medir();
   addEventListener('resize', () => { medir(); colocar(); });

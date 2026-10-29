@@ -75,7 +75,7 @@ const datos = PROYECTOS.map((p) => ({ ...p, enlace: `${base}proyectos/${p.slug}/
 
 <style>
   /* Los últimos 120vh son de la transición, que se monta encima (Transicion.astro) */
-  .pro { position: relative; height: 660vh; }
+  .pro { position: relative; height: 800vh; }
   .pro__pegado { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
 
   .pro__cabeza { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; text-align: center; pointer-events: none; padding: 0 var(--margen); }
@@ -133,7 +133,11 @@ const datos = PROYECTOS.map((p) => ({ ...p, enlace: `${base}proyectos/${p.slug}/
   @keyframes caret { 50% { opacity: 0; } }
 
   /* Proyecto abierto */
-  .pro__abierto { position: absolute; inset: 0; z-index: 5; }
+  /* El proyecto abierto va fijo a la pantalla (no a la sección): da igual dónde estuviera la foto o si la sección
+     aún no estaba pegada, el foco acaba en el centro y «Cerrar» siempre se ve. Mientras está abierto, la sección
+     pasa por encima de todo (también de la transición, que se monta encima de su final) */
+  .pro__abierto { position: fixed; inset: 0; z-index: 5; }
+  :global(html.pro-abierto) .pro__pegado { z-index: 50; }
   .pro__abierto[hidden] { display: none; }
   .pro__fondo-abierto { position: absolute; inset: 0; background: rgba(18, 13, 10, .55); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); }
   .pro__foco { position: absolute; overflow: hidden; box-shadow: 0 50px 140px -40px rgba(0, 0, 0, .95); }
@@ -156,7 +160,7 @@ const datos = PROYECTOS.map((p) => ({ ...p, enlace: `${base}proyectos/${p.slug}/
   .pro a, .pro button { cursor: pointer !important; }
 
   @media (max-width: 760px) {
-    .pro { height: 640vh; }
+    .pro { height: 780vh; }
     .pro__pieza { width: 86vw; left: calc(var(--xm) * 1vw); }
     .pro__ficha { left: var(--margen); right: var(--margen); top: auto; bottom: calc(var(--margen) * 1.4); transform: none; width: auto; }
     .pro__ficha-nombre { font-size: 38px; }
@@ -171,5 +175,4 @@ const datos = PROYECTOS.map((p) => ({ ...p, enlace: `${base}proyectos/${p.slug}/
   :global(html.mov-reducido) .pro__cabeza { position: static; margin-bottom: 8vh; }
   :global(html.mov-reducido) .pro__lienzo { position: static; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
   :global(html.mov-reducido) .pro__pieza { position: relative; left: auto; width: auto; transform: none !important; }
-  :global(html.mov-reducido) .pro__abierto { position: fixed; }
 </style>
