@@ -33,7 +33,7 @@ src/components/
   Proyectos.astro       el lienzo de proyectos, una foto cada uno, con el texto a máquina repartido encima (datos en src/data/proyectos.js)
   Transicion.astro      «se enciende la luz»: de la máquina al capítulo claro
   Contacto.astro        la carta con huecos, la posdata de privacidad, «Enviar la carta» y el cierre
-  Fresa.astro           el globo de FRESA (píldora con su logotipo) y el chat, debajo del contacto y tras el muro
+  Fresa.astro           el globo de FRESA (abre una ventana de chat en plano técnico) y el chat del final, tras el muro
   Cursor.astro, Marca.astro
 src/data/               partners y proyectos; de dónde sale cada logo, en partners-LEEME.md
 src/scripts/

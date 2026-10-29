@@ -1,17 +1,57 @@
 ---
-// FRESA: el globo de abajo a la izquierda en toda la página (la píldora con el logotipo de FRESA de la web actual) y,
-// debajo del contacto (que parece el final), una sección escondida con el chat. Para llegar hay que empujar: la página
-// termina de verdad en el contacto y solo después de varios empujones «se rompe» y deja bajar (fresa.js). Al
-// aparecer, el globo vuela hasta la píldora grande de la cabecera del chat y se convierte en ella.
+// FRESA: el globo de abajo a la izquierda en toda la página (la píldora con el logotipo de FRESA de la web actual),
+// que abre una ventana de chat construida como un dibujo técnico; y, debajo del contacto (que parece el final), una
+// sección escondida con el mismo chat. Para llegar a ella hay que empujar: la página termina de verdad en el contacto
+// y solo después de varios empujones «se rompe» y deja bajar (fresa.js). Al aparecer, el globo vuela hasta la píldora
+// grande de la cabecera y se convierte en ella.
 const base = import.meta.env.BASE_URL;
 ---
-<button class="fg" type="button" data-fresa-globo aria-label="Pregúntale a FRESA">
+<button class="fg" type="button" data-fresa-globo aria-label="Pregúntale a FRESA" aria-expanded="false" aria-controls="fv">
   <span class="pildora" data-fresa-pildora>
     <i class="pildora__punto"></i>
     <img src={`${base}assets/logos/fresa-wordmark.webp`} alt="" width="459" height="131" />
   </span>
-  <span class="fg__txt mono">Pregúntame</span>
+  <span class="fg__txt mono"><span class="fg__abrir">Pregúntame</span><span class="fg__cerrar">Cerrar</span></span>
 </button>
+
+<!-- La ventana del chat: un plano (guías de construcción, asas, cotas con su medida real, el borde que se traza y un
+     rayado de sección) y, dentro, la conversación. Sin mensajes ni sugerencias: solo la caja para escribir. Las guías
+     y cotas marcadas con data-fv-sobra se apartan al terminar, para que en reposo el plano quede asimétrico -->
+<div class="fv" id="fv" data-fresa-ventana role="dialog" aria-label="Chat con FRESA" hidden>
+  <div class="fv__plano" aria-hidden="true">
+    <i class="fv__guia fv__guia--h fv__guia--arriba"></i>
+    <i class="fv__guia fv__guia--h fv__guia--abajo" data-fv-sobra></i>
+    <i class="fv__guia fv__guia--v fv__guia--izq"></i>
+    <i class="fv__guia fv__guia--v fv__guia--dcha" data-fv-sobra></i>
+    <i class="fv__borde fv__borde--h fv__borde--arriba"></i>
+    <i class="fv__borde fv__borde--h fv__borde--abajo"></i>
+    <i class="fv__borde fv__borde--v fv__borde--izq"></i>
+    <i class="fv__borde fv__borde--v fv__borde--dcha"></i>
+    <span class="fv__asa fv__asa--a"></span>
+    <span class="fv__asa fv__asa--b"></span>
+    <span class="fv__cota fv__cota--ancho mono" data-fv-cota="ancho"></span>
+    <span class="fv__cota fv__cota--alto mono" data-fv-cota="alto" data-fv-sobra></span>
+    <span class="fv__cota fv__cota--coord mono" data-fv-cota="coord"></span>
+  </div>
+  <div class="fv__rayado" aria-hidden="true"></div>
+  <div class="fv__caja">
+    <div class="fv__cabeza">
+      <span class="pildora pildora--mini" aria-hidden="true">
+        <i class="pildora__punto"></i>
+        <img src={`${base}assets/logos/fresa-wordmark.webp`} alt="" width="459" height="131" />
+      </span>
+      <span class="fv__estado mono">IA de adsPartners · en línea</span>
+      <button class="fv__cerrar" type="button" data-fv-cerrar aria-label="Cerrar el chat">✕</button>
+    </div>
+    <div class="fv__lista" data-fv-lista aria-live="polite" data-lenis-prevent></div>
+    <p class="fv__vacia mono" data-fv-vacia aria-hidden="true">( conversación nueva )</p>
+    <form class="fv__form" data-fv-form>
+      <label class="oculto-accesible" for="fv-input">Tu pregunta para FRESA</label>
+      <input id="fv-input" name="q" autocomplete="off" maxlength="1000" placeholder="Pregúntale lo que quieras…" />
+      <button type="submit" aria-label="Enviar">→</button>
+    </form>
+  </div>
+</div>
 
 <section class="fr" id="fresa" data-seccion="fresa" aria-labelledby="fr-titulo">
   <div class="fr__caja">
@@ -70,6 +110,67 @@ const base = import.meta.env.BASE_URL;
   .fg__txt { opacity: 0; transform: translateX(-6px); transition: opacity .3s, transform .4s var(--curva); text-shadow: 0 1px 8px rgba(18, 13, 10, .8); }
   .fg:hover .fg__txt, .fg:focus-visible .fg__txt { opacity: 1; transform: none; }
   :global(html.en-umbral) .fg, :global(html.pro-abierto) .fg { opacity: 0; pointer-events: none; translate: 0 16px; }
+  .fg__cerrar { display: none; }
+  :global(html.fresa-abierta) .fg__abrir { display: none; }
+  :global(html.fresa-abierta) .fg__cerrar { display: inline; }
+
+  /* La ventana de FRESA: un plano técnico con el chat dentro (la animación está en fresa.js) */
+  .fv {
+    position: fixed; left: var(--margen); bottom: calc(var(--margen) + 64px); z-index: 26;
+    width: min(400px, calc(100vw - var(--margen) * 2)); height: min(540px, calc(100vh - 190px));
+  }
+  .fv[hidden] { display: none; }
+  :global(html.pro-abierto) .fv, :global(html.en-umbral) .fv { visibility: hidden; }
+  .fv__plano { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+  .fv__guia { position: absolute; display: block; }
+  .fv__guia--h { height: 1px; background: repeating-linear-gradient(90deg, var(--crema-3) 0 3px, transparent 3px 7px); transform-origin: 0 50%; }
+  .fv__guia--v { width: 1px; background: repeating-linear-gradient(0deg, var(--crema-3) 0 3px, transparent 3px 7px); transform-origin: 50% 100%; }
+  .fv__guia--arriba { top: 0; left: -36px; right: -72px; }
+  .fv__guia--abajo { bottom: 0; left: -24px; right: -30px; }
+  .fv__guia--dcha { right: 0; top: -30px; bottom: -24px; }
+  /* El lado que sobresale, macizo (como la casilla del contacto) */
+  .fv__guia--izq { left: 0; top: -70px; bottom: -40px; background: rgba(231, 226, 218, .55); }
+  .fv__borde { position: absolute; display: block; background: rgba(231, 226, 218, .5); }
+  .fv__borde--h { left: 0; right: 0; height: 1px; }
+  .fv__borde--v { top: 0; bottom: 0; width: 1px; }
+  .fv__borde--arriba { top: 0; transform-origin: 0 50%; }
+  .fv__borde--dcha { right: 0; transform-origin: 50% 0; }
+  .fv__borde--abajo { bottom: 0; transform-origin: 100% 50%; }
+  .fv__borde--izq { left: 0; transform-origin: 50% 100%; }
+  .fv__asa { position: absolute; width: 7px; height: 7px; border: 1px solid var(--crema); background: var(--noche); }
+  .fv__asa--a { right: -3px; top: -3px; }
+  .fv__asa--b { left: -3px; bottom: -3px; }
+  .fv__cota { position: absolute; font-size: 9px; color: var(--crema-3); white-space: nowrap; }
+  .fv__cota--ancho { left: 0; top: -18px; }
+  .fv__cota--alto { left: calc(100% + 10px); top: 50%; writing-mode: vertical-rl; transform: translateY(-50%); }
+  .fv__cota--coord { right: 0; bottom: -18px; }
+  .fv__rayado { position: absolute; inset: 1px; opacity: 0; background: repeating-linear-gradient(135deg, rgba(245, 203, 215, .18) 0 1px, transparent 1px 8px); }
+  .fv__caja {
+    position: absolute; inset: 1px; display: flex; flex-direction: column;
+    background: #17110D; box-shadow: 0 30px 80px -30px rgba(0, 0, 0, .8);
+  }
+  .fv__cabeza { display: flex; align-items: center; gap: 12px; padding: 12px 10px 12px 14px; border-bottom: 1px solid var(--linea); }
+  .pildora--mini { font-size: 11px; box-shadow: none; }
+  .fv__estado { flex: 1; font-size: 10px; color: var(--crema-3); }
+  .fv__cerrar { width: 32px; height: 32px; display: grid; place-items: center; font-size: 13px; color: var(--crema-2); }
+  .fv__cerrar:hover, .fv__cerrar:focus-visible { color: var(--crema); }
+  .fv__lista { flex: 1; min-height: 0; display: grid; gap: 12px; align-content: start; overflow-y: auto; overscroll-behavior: contain; padding: 18px 14px; }
+  .fv__vacia { position: absolute; left: 0; right: 0; top: 48%; margin: 0; text-align: center; color: var(--crema-3); pointer-events: none; }
+  .fv__form { display: flex; align-items: center; gap: 8px; padding: 8px 10px 8px 14px; border-top: 1px solid var(--linea); }
+  .fv__form input { flex: 1; min-width: 0; font: inherit; font-family: var(--serif); font-size: 19px; font-weight: 300; color: var(--crema); background: transparent; border: 0; padding: 10px 0; outline: none; }
+  .fv__form input::placeholder { color: var(--crema-3); }
+  .fv__form button { font-size: 22px; padding: 4px 6px; color: var(--rosa); }
+  .fv__form button[disabled] { opacity: .4; }
+  .fv__lista :global(.fr-msg) { max-width: 88%; margin: 0; padding: 10px 13px; line-height: 1.5; font-size: 14px; white-space: pre-wrap; }
+  .fv__lista :global(.fr-msg--yo) { justify-self: end; background: var(--crema); color: var(--tinta); }
+  .fv__lista :global(.fr-msg--fresa) { justify-self: start; border: 1px solid var(--linea); color: var(--crema); background: rgba(27, 20, 16, .7); }
+  .fv__lista :global(.fr-msg--fresa a) { border-bottom: 1px solid var(--crema-3); }
+  .fv__lista :global(.fr-pensando)::after { content: '▍'; animation: fr-caret 1s steps(1) infinite; }
+  @media (max-width: 760px) {
+    .fv { right: var(--margen); width: auto; bottom: calc(var(--margen) + 56px); height: min(560px, calc(100vh - 170px)); }
+    .fv__cota--alto { display: none; }
+    .fv__guia--arriba { right: -16px; }
+  }
   /* Ya en el chat: el globo se ha convertido en la píldora grande (sin transición: no hay dos a la vez) */
   .fg.fuera { opacity: 0; pointer-events: none; transition: none; }
 
