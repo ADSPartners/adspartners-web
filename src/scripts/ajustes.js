@@ -26,7 +26,7 @@ function pintarBoton() {
   btn.setAttribute('aria-pressed', String(si));
   btn.setAttribute('aria-label', si ? 'Quitar el sonido' : 'Poner el sonido');
   const txt = btn.querySelector('[data-sonido-txt]');
-  if (txt) txt.textContent = si ? 'Sonido sí' : 'Sonido no';
+  if (txt) txt.textContent = si ? 'Sonido on' : 'Sonido off';
 }
 
 // Un clic en las barras: si suena, se calla; si no, suena. El estado real lo da la clase sonido-on.

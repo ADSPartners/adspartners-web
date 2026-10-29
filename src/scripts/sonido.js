@@ -440,3 +440,27 @@ export function ok() {
   o.connect(g).connect(busEfectos); o.start(t); o.stop(t + 0.55);
   [65, 69, 72, 76, 79].forEach((m, i) => piano(hz(m), t + 0.18 + i * 0.08, 0.06, busEfectos));
 }
+
+// El muro de FRESA: cada empujón, un golpe sordo que sube con la tensión; al romperse, un soplo que baja y un acorde
+export function empuje(nivel = 0) {
+  if (!activo || !ctx) return;
+  const t = ctx.currentTime + 0.005;
+  const o = ctx.createOscillator(); o.type = 'sine';
+  o.frequency.setValueAtTime(70 + nivel * 60, t); o.frequency.exponentialRampToValueAtTime(42 + nivel * 30, t + 0.22);
+  const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.32, t + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.35);
+  o.connect(g).connect(busEfectos); o.start(t); o.stop(t + 0.4);
+  const s = ctx.createBufferSource(); s.buffer = marron;
+  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 260 + nivel * 500;
+  const sg = ctx.createGain(); sg.gain.setValueAtTime(0.0001, t); sg.gain.exponentialRampToValueAtTime(0.18, t + 0.02); sg.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+  s.connect(lp).connect(sg).connect(busEfectos); s.start(t, Math.random() * 2, 0.35);
+}
+export function rompe() {
+  if (!activo || !ctx) return;
+  const t = ctx.currentTime + 0.01;
+  const s = ctx.createBufferSource(); s.buffer = ruido;
+  const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 1.4;
+  bp.frequency.setValueAtTime(2600, t); bp.frequency.exponentialRampToValueAtTime(240, t + 1.1);
+  const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.2, t + 0.08); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.3);
+  s.connect(bp).connect(g).connect(busEfectos); s.start(t, Math.random() * 2, 1.4);
+  [60, 67, 72, 76].forEach((m, i) => piano(hz(m), t + 0.5 + i * 0.09, 0.05, busEfectos));
+}

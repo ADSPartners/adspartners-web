@@ -1,6 +1,7 @@
-// Proyectos: las piezas suben con el scroll a velocidades distintas; al señalar una se escribe encima a máquina
-// (con su sonido) y se acerca un poco; al abrirla viaja al centro, las demás salen de la pantalla y se cuenta el
-// proyecto. En el móvil: primer toque = señalar, segundo toque = abrir, toque fuera = quitar.
+// Proyectos: las fotos suben con el scroll, cada una a su velocidad; al señalar una se escribe encima a máquina (con
+// su sonido), en varios sitios a la vez y con letras distintas, y la foto se acerca y se inclina hacia el ratón; al
+// abrirla viaja al centro, las demás salen de la pantalla y se cuenta el proyecto.
+// En el móvil: primer toque = señalar, segundo toque = abrir, toque fuera = quitar.
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import * as sonido from '../sonido.js';
@@ -20,14 +21,16 @@ export function montar(sec, { reducido, conRaton, lenis, cursor }) {
 
   // --- El scroll: cada pieza sube a su velocidad ---------------------------------
   let L = 1, p = 0, estado = 'lienzo';
-  const vel = piezas.map((_, i) => 0.86 + azar(i, 1) * 0.36);
+  // Suben más despacio que el scroll (cada foto se queda más rato en pantalla)
+  const VEL = 0.72;
+  const vel = piezas.map((_, i) => VEL - 0.03 + azar(i, 1) * 0.06);
   let base = [];
   function medir() {
     L = Math.max(1, sec.offsetHeight - innerHeight);
     const n = piezas.length;
     // La última pieza llega a media pantalla justo al final; la primera asoma ya al empezar
-    const hueco = (L * 0.98 - innerHeight * 0.55) / Math.max(1, n - 1);
-    base = piezas.map((_, i) => innerHeight * 0.78 + i * hueco * (0.92 + azar(i, 2) * 0.16));
+    const hueco = (L * 0.98 * VEL - innerHeight * 0.32) / Math.max(1, n - 1);
+    base = piezas.map((_, i) => innerHeight * 0.82 + i * hueco * (0.97 + azar(i, 2) * 0.06));
   }
   medir();
   addEventListener('resize', () => { medir(); colocar(); });
@@ -43,52 +46,60 @@ export function montar(sec, { reducido, conRaton, lenis, cursor }) {
   }
 
   // --- Escribir a máquina sobre la pieza -----------------------------------------
-  // Un estado por pieza: n letras escritas; avanza con sonido al señalar y retrocede deprisa al soltar
+  // Cada trozo (nombre, cliente, rama, línea, dato, llamada) se escribe a la vez que los demás, con su retraso y su
+  // ritmo; el que está escribiendo lleva su cursor. Al soltar, todos se borran deprisa hacia atrás.
+  const CTA = tactil ? '→ Toca otra vez' : '→ Clic para verlo';
+  const RITMO = { nombre: [70, 40], meta: [0, 22], con: [220, 20], linea: [340, 18], dato: [520, 34], cta: [760, 24] };
   const escritos = new Map();
   function estadoDe(el) {
     if (escritos.has(el)) return escritos.get(el);
-    const pr = datos[el.dataset.proyecto];
-    const destino = el.querySelector('[data-pro-escrito]');
-    const total = [pr.nombre, pr.linea, tactil ? '→ Toca otra vez para verlo' : '→ Clic para verlo'].join('\n');
-    const e = {
-      n: 0, t: null, total,
-      pintar() {
-        if (!e.n) { destino.innerHTML = ''; return; }
-        const txt = total.slice(0, e.n);
-        const corte = txt.indexOf('\n');
-        const cab = corte < 0 ? txt : txt.slice(0, corte);
-        const resto = corte < 0 ? '' : txt.slice(corte + 1);
-        destino.innerHTML = `<b>${esc(cab)}</b>${esc(resto)}<span class="caret"></span>`;
-      },
-    };
+    const frags = [...el.querySelectorAll('[data-frag]')].map((span) => {
+      const tipo = span.dataset.frag;
+      const [retraso, ms] = RITMO[tipo] || [0, 24];
+      return { span, tipo, txt: tipo === 'cta' ? CTA : span.dataset.txt || '', n: 0, t: null, retraso: retraso + Math.random() * 90, ms };
+    });
+    const pintar = (f, cursor) => { f.span.innerHTML = f.n ? `${esc(f.txt.slice(0, f.n))}${cursor ? '<span class="caret"></span>' : ''}` : ''; };
+    const e = { frags, pintar };
     escritos.set(el, e);
     return e;
   }
   function escribir(el) {
     const e = estadoDe(el);
-    clearTimeout(e.t);
-    if (reducido) { e.n = e.total.length; e.pintar(); return; }
-    const paso = () => {
-      if (e.n >= e.total.length) return;
-      const ch = e.total[e.n++];
-      if (ch.trim()) sonido.tecla(0.8);
-      e.pintar();
-      e.t = setTimeout(paso, ch === '\n' ? 140 : 16 + Math.random() * 22);
-    };
-    paso();
+    for (const f of e.frags) {
+      clearTimeout(f.t);
+      if (reducido) { f.n = f.txt.length; e.pintar(f, false); continue; }
+      const paso = () => {
+        if (f.n >= f.txt.length) { e.pintar(f, f.tipo === 'cta'); return; }
+        const ch = f.txt[f.n++];
+        if (ch.trim()) sonido.tecla(0.7);
+        e.pintar(f, true);
+        f.t = setTimeout(paso, f.ms * (0.6 + Math.random() * 0.8));
+      };
+      f.t = setTimeout(paso, f.n ? 0 : f.retraso);
+    }
   }
   function borrar(el) {
     const e = estadoDe(el);
-    clearTimeout(e.t);
-    if (reducido) { e.n = 0; e.pintar(); return; }
-    const atras = () => {
-      e.n = Math.max(0, e.n - 3);
-      e.pintar();
-      if (e.n > 0) e.t = setTimeout(atras, 8);
-    };
-    atras();
+    for (const f of e.frags) {
+      clearTimeout(f.t);
+      if (reducido) { f.n = 0; e.pintar(f, false); continue; }
+      const atras = () => {
+        f.n = Math.max(0, f.n - 3);
+        e.pintar(f, false);
+        if (f.n > 0) f.t = setTimeout(atras, 10);
+      };
+      atras();
+    }
   }
-  function pararEscrito(el) { const e = escritos.get(el); if (e) clearTimeout(e.t); }
+  function pararEscrito(el) { const e = escritos.get(el); if (e) e.frags.forEach((f) => clearTimeout(f.t)); }
+
+  // La foto señalada se inclina un poco hacia el ratón
+  function inclinar(el, ev) {
+    const r = el.getBoundingClientRect();
+    const nx = (ev.clientX - r.left) / r.width - 0.5, ny = (ev.clientY - r.top) / r.height - 0.5;
+    el.style.setProperty('--ry', `${(nx * 7).toFixed(2)}deg`);
+    el.style.setProperty('--rx', `${(-ny * 6).toFixed(2)}deg`);
+  }
 
   let activa = null;
   function señalar(el) {
@@ -101,6 +112,7 @@ export function montar(sec, { reducido, conRaton, lenis, cursor }) {
   }
   function soltar(el) {
     el.classList.remove('activa');
+    el.style.removeProperty('--rx'); el.style.removeProperty('--ry');
     borrar(el);
     if (activa === el) activa = null;
     cursor?.decir?.('');
@@ -109,6 +121,7 @@ export function montar(sec, { reducido, conRaton, lenis, cursor }) {
   piezas.forEach((el) => {
     el.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse' && estado === 'lienzo') señalar(el); });
     el.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse' && estado === 'lienzo') soltar(el); });
+    el.addEventListener('pointermove', (e) => { if (e.pointerType === 'mouse' && estado === 'lienzo' && activa === el && !reducido) inclinar(el, e); });
     el.addEventListener('click', () => {
       if (estado !== 'lienzo') return;
       if (tactil && activa !== el) { señalar(el); return; }
@@ -154,7 +167,7 @@ export function montar(sec, { reducido, conRaton, lenis, cursor }) {
     const r = marcoOrigen.getBoundingClientRect();
     const ar = r.width / r.height;
     foco.innerHTML = '';
-    const copia = (marcoOrigen.querySelector(':scope > img') || marcoOrigen.querySelector('.pro__tarjeta')).cloneNode(true);
+    const copia = marcoOrigen.querySelector(':scope > img').cloneNode(true);
     foco.appendChild(copia);
     abierto.hidden = false;
     rellenarFicha(pr);

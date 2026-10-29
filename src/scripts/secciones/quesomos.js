@@ -51,7 +51,7 @@ function medirIso(sec) {
 function ajustarFantasmas(sec) {
   const base = sec.querySelector('[data-qs-fantasmas]');
   const lente = sec.querySelector('[data-qs-lente]');
-  for (const k of ['marca', 'maquina']) {
+  for (const k of ['brand', 'tech']) {
     const a = base.querySelector(`[data-qs-f="${k}"]`);
     const b = lente.querySelector(`[data-qs-f="${k}"]`);
     a.style.transform = ''; b.style.transform = ''; b.dataset.dy = '0';
@@ -95,7 +95,7 @@ function montarRaton(sec) {
     sec.style.setProperty('--my', `${actual.y.toFixed(1)}px`);
     // Paralaje: las palabras de fondo se van al lado contrario; el isotipo mira al ratón
     for (const f of fantasmas) {
-      const lado = f.classList.contains('qs__f--marca') ? 1 : -1;
+      const lado = f.classList.contains('qs__f--brand') ? 1 : -1;
       const dy = Number(f.dataset.dy || 0);
       f.style.transform = `translate3d(${(-actual.nx * 22 * lado).toFixed(2)}px, ${(dy - actual.ny * 14).toFixed(2)}px, 0)`;
     }

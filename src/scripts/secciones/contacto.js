@@ -1,5 +1,5 @@
-// La carta del contacto: los huecos crecen con lo que se escribe, una opción de «qué quieres», y al pulsar OK se
-// manda al webhook de n8n (que guarda la fila y nos avisa por correo). Si falla, se ofrece el correo directo.
+// La carta del contacto: los huecos crecen con lo que se escribe, una opción de «qué quieres», la posdata de
+// privacidad y «Enviar la carta», que la manda al webhook de n8n (nos avisa por correo). Si falla, el correo directo.
 import { gsap } from 'gsap';
 import * as sonido from '../sonido.js';
 
@@ -10,7 +10,7 @@ export function montar(sec, { reducido }) {
   const form = sec.querySelector('[data-ct-form]');
   const estado = sec.querySelector('[data-ct-estado]');
   const sello = sec.querySelector('[data-ct-sello]');
-  const ok = form.querySelector('.ct__ok');
+  const ok = form.querySelector('.ct__enviar');
   const acepto = form.querySelector('[name="acepto"]');
 
   // Cada hueco mide lo que su texto (o su pista), medido con su propia letra
@@ -37,7 +37,7 @@ export function montar(sec, { reducido }) {
     sonido.tic(0.8);
   }));
 
-  acepto.addEventListener('change', () => acepto.closest('label').classList.remove('invalido'));
+  acepto.addEventListener('change', () => { acepto.closest('label').classList.remove('invalido'); if (acepto.checked) sonido.tecla(1); });
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();

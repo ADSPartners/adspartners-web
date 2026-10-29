@@ -4,24 +4,24 @@
 // centro, y la marca solo aparece donde hay luz (el ratón es una linterna). Al entrar, la marca inunda desde el clic,
 // «ads» se funde en «adsPartners» y la máscara vuelve a la de la portada.
 // - Ratón: escribe velocidad en el fluido; el tinte es la máscara.
-// - Quieto 2,5 s (o en el móvil sin tocar), caen gotas: sus anillos de agua refractan la foto y abren la máquina en las crestas.
+// - Quieto 2,5 s (o en el móvil sin tocar), el inspector: cajas que se abren sobre una letra, un texto o un trozo de
+//   foto, enseñan la máquina dentro y dicen lo que es (medido del DOM y de la foto).
 // - Mantener pulsado: un anillo se abre desde el puntero y enseña la máquina entera.
-// - Movimiento reducido o sin fluido: la máscara es un círculo pegado al puntero, sin estela ni gotas.
+// - Al bajar, la máquina sube desde abajo celda a celda y se funde con el fondo de la página (sin corte).
+// - Movimiento reducido o sin fluido: la máscara es un círculo pegado al puntero, sin estela.
 import { Renderer, Program, Mesh, Triangle, Texture } from 'ogl';
 import { gsap } from 'gsap';
 import { Fluido } from './fluido.js';
-import { Ondas } from './ondas.js';
 import { lienzo, pintarFoto, medirTitulo, pintarTitulo, pintarMaquina, pintarGlifos } from './capas.js';
 import * as sonido from '../sonido.js';
 import { ajustarTitulo } from '../titulo.js';
 
 const NIVELES = {
-  alta: { sim: 128, tinte: 640, iteraciones: 18, dpr: 1.5, curl: 6, disipVel: 0.8, disipTinte: 1.1, ondas: 200 },
-  baja: { sim: 64, tinte: 320, iteraciones: 8, dpr: 1, curl: 6, disipVel: 0.8, disipTinte: 1.1, ondas: 128 },
+  alta: { sim: 128, tinte: 640, iteraciones: 18, dpr: 1.5, curl: 6, disipVel: 0.8, disipTinte: 1.1 },
+  baja: { sim: 64, tinte: 320, iteraciones: 8, dpr: 1, curl: 6, disipVel: 0.8, disipTinte: 1.1 },
 };
 const GLIFOS = ' .·:-=+10#@';
 const FUERZA = 2600;
-const GOTA = { fuerza: 0.6, radio: 0.05 };
 
 const VERT = /* glsl */ `#version 300 es
 in vec2 position; in vec2 uv; out vec2 vUv;
@@ -31,10 +31,11 @@ const FRAG = /* glsl */ `#version 300 es
 precision highp float;
 in vec2 vUv; out vec4 color;
 uniform sampler2D tFoto; uniform sampler2D tTitulo; uniform sampler2D tMaquina; uniform sampler2D tTituloU; uniform sampler2D tMaquinaU;
-uniform sampler2D tTinte; uniform sampler2D tVel; uniform sampler2D tGlifos; uniform sampler2D tOndas;
+uniform sampler2D tTinte; uniform sampler2D tVel; uniform sampler2D tGlifos;
 uniform vec2 uRes; uniform float uDpr; uniform float uTime; uniform float uCelda; uniform float uGlifosN;
 uniform float uRevelado; uniform vec2 uHold; uniform vec2 uPuntero; uniform float uCirculo;
-uniform float uUsaFluido; uniform float uIntro; uniform float uLuz; uniform float uUsaOndas; uniform vec2 uOndasTexel;
+uniform float uUsaFluido; uniform float uIntro; uniform float uLuz;
+uniform vec4 uCaja0; uniform vec4 uCaja1; uniform vec2 uCajaA; uniform float uSalida;
 uniform float uUmbral; uniform float uLinterna; uniform float uHalo; uniform float uInunda; uniform vec2 uFoco;
 uniform vec3 cNoche; uniform vec3 cCrema; uniform vec3 cRosa;
 
@@ -43,6 +44,14 @@ float hash (vec2 p) { p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32
 float ruido (vec2 p) {
   vec2 i = floor(p), f = fract(p); vec2 u = f * f * (3.0 - 2.0 * f);
   return mix(mix(hash(i), hash(i + vec2(1, 0)), u.x), mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), u.x), u.y);
+}
+// Una caja del inspector (en píxeles del canvas): se abre desde su línea del medio, como una persiana
+float caja (vec2 px, vec4 c, float a, out float filo) {
+  vec2 d = abs(px - (c.xy + c.zw) * 0.5) - (c.zw - c.xy) * 0.5 * vec2(1.0, a);
+  float fuera = max(d.x, d.y);
+  float dentro = (1.0 - step(0.0, fuera)) * step(0.02, a);
+  filo = dentro * (1.0 - step(1.5 * uDpr, -fuera));
+  return dentro;
 }
 
 void main () {
@@ -54,26 +63,26 @@ void main () {
   if (isnan(vel.x) || isnan(vel.y) || isinf(vel.x) || isinf(vel.y)) vel = vec2(0.0);
   if (isnan(tinte) || isinf(tinte)) tinte = 0.0;
   vel = clamp(vel, vec2(-2000.0), vec2(2000.0));
-  // Ondas: la altura del agua y su pendiente
-  float h = 0.0; vec2 pend = vec2(0.0);
-  if (uUsaOndas > 0.5) {
-    vec2 e = uOndasTexel;
-    h = texture(tOndas, uv).r;
-    pend = vec2(texture(tOndas, uv + vec2(e.x, 0.0)).r - texture(tOndas, uv - vec2(e.x, 0.0)).r,
-                texture(tOndas, uv + vec2(0.0, e.y)).r - texture(tOndas, uv - vec2(0.0, e.y)).r);
-    if (isnan(h) || isinf(h) || isnan(pend.x) || isnan(pend.y) || isinf(pend.x) || isinf(pend.y)) { h = 0.0; pend = vec2(0.0); }
-    pend = clamp(pend, vec2(-1.0), vec2(1.0));
-  }
+  vec2 px = uv * uRes;
+  float portada = 1.0 - uUmbral;
 
-  // Máscara de la portada: tinte del fluido, crestas de las ondas, círculo (sin fluido) y anillo de «mantener»
+  // Máscara de la portada: tinte del fluido, círculo (sin fluido), anillo de «mantener» y las cajas del inspector
   float circ = uCirculo * (1.0 - smoothstep(0.1, 0.125, length((uv - uPuntero) * asp)));
   float n = ruido(uv * 7.0 + uTime * 0.25) * 0.06;
   float r = uRevelado * 1.9;
   float anillo = step(0.001, uRevelado) * (1.0 - smoothstep(r - 0.015, r, length((uv - uHold) * asp) + n * uRevelado));
-  float cresta = smoothstep(0.035, 0.07, h);
-  float m = max(max(max(tinte, cresta), circ), anillo);
-  float mascaraP = smoothstep(0.24, 0.3, m);
-  float borde = (smoothstep(0.17, 0.23, m) - smoothstep(0.28, 0.34, m)) * (1.0 - uUmbral);
+  float filo0, filo1;
+  float cajas = max(caja(px, uCaja0, uCajaA.x, filo0), caja(px, uCaja1, uCajaA.y, filo1));
+  float m = max(max(tinte, circ), anillo);
+  float mascaraP = max(smoothstep(0.24, 0.3, m), cajas);
+  float borde = (smoothstep(0.17, 0.23, m) - smoothstep(0.28, 0.34, m)) * portada;
+  // Al bajar, la máquina sube desde abajo celda a celda (con el grano del tramado), con un frente rosa
+  vec2 celS = floor(px / (uCelda * 2.0));
+  float yS = uv.y + hash(celS) * 0.09;
+  float frenteS = 0.035 + uSalida * 1.3;
+  float salida = portada * step(yS, frenteS);
+  float filoS = portada * step(yS, frenteS + 0.014) * (1.0 - salida) * step(0.001, uSalida);
+  mascaraP = max(mascaraP, salida);
 
   // Máscara del umbral, al revés: la marca solo donde hay luz (la estela del fluido y un halo en el puntero).
   // Al entrar, la marca inunda en círculo desde el clic, con un frente rosa
@@ -87,8 +96,8 @@ void main () {
 
   float mascara = mix(mascaraP, mascaraU, uUmbral);
 
-  // MARCA: la foto en clave de noche, viñeta y el título; el fluido la desplaza un poco y el agua la refracta
-  vec2 uvM = uv - vel * 0.00008 - pend * 0.1;
+  // MARCA: la foto en clave de noche, viñeta y el título; el fluido la desplaza un poco
+  vec2 uvM = uv - vel * 0.00008;
   vec3 foto = texture(tFoto, uvM).rgb;
   vec3 marca = pow(foto, vec3(1.3)) * 0.68 * vec3(1.03, 0.99, 0.94);
   float vig = smoothstep(1.3, 0.3, length((uv - vec2(0.5, 0.56)) * vec2(1.15, 1.0)));
@@ -98,14 +107,15 @@ void main () {
   // En el umbral, la luz calienta lo que toca
   marca *= 1.0 + luz * 0.22 * uUmbral;
 
-  // MÁQUINA: curvas de nivel y tramado mono de la luz de la foto, rejilla y la capa dibujada
-  vec2 uvQ = uv - pend * 0.05;
+  // MÁQUINA: curvas de nivel y tramado mono de la luz de la foto, rejilla y la capa dibujada.
+  // Abajo se apaga hasta parecerse al fondo de la página, que sigue debajo
+  vec2 uvQ = uv;
+  float abajo = smoothstep(0.24, 0.0, uv.y) * portada;
   vec3 f = texture(tFoto, uvQ).rgb; float l = luma(f);
   float b = l * 16.0; float fw = fwidth(b);
-  float iso = 1.0 - smoothstep(0.0, fw * 1.4, abs(fract(b + 0.5) - 0.5));
-  vec2 px = uv * uRes;
+  float iso = (1.0 - smoothstep(0.0, fw * 1.4, abs(fract(b + 0.5) - 0.5))) * (1.0 - abajo * 0.85);
   vec2 cel = floor(px / uCelda);
-  float lc = luma(texture(tFoto, (cel + 0.5) * uCelda / uRes - pend * 0.05).rgb);
+  float lc = luma(texture(tFoto, (cel + 0.5) * uCelda / uRes).rgb) * (1.0 - abajo * 0.7);
   float idx = floor(clamp(lc, 0.0, 0.999) * uGlifosN);
   vec2 den = fract(px / uCelda);
   float glifo = texture(tGlifos, vec2((idx + den.x) / uGlifosN, den.y)).r;
@@ -120,9 +130,11 @@ void main () {
 
   vec3 col = mix(marca, maq, mascara);
   col = mix(col, cRosa, clamp(borde, 0.0, 1.0) * 0.4);
-  // Brillo del agua: la luz entra desde arriba a la izquierda
-  col += cCrema * clamp(dot(pend, vec2(-0.6, 0.8)) * 14.0, 0.0, 1.0) * 0.22;
+  col = mix(col, cRosa, max(filo0, filo1) * portada * 0.95);
+  col = mix(col, cRosa, filoS * 0.55);
   col = mix(col, cRosa, frente * 0.9);
+  // El último borde, en noche: ahí empieza el fondo de la página
+  col = mix(col, cNoche, smoothstep(0.035, 0.0, uv.y) * portada);
   col += (hash(px + fract(uTime * 7.0) * 91.0) - 0.5) * 0.04;
   color = vec4(col * uIntro, 1.0);
 }`;
@@ -196,14 +208,12 @@ export async function crearPortada({ cursor, reducido }) {
   pintarCapas();
   if (umbral) html.classList.add('umbral-gl');
 
-  let fluido = null, ondas = null;
+  let fluido = null;
   const crearFluido = () => {
     if (fluido) fluido._liberar();
-    if (ondas) ondas._liberar();
-    fluido = null; ondas = null;
+    fluido = null;
     if (reducido) return;
     try { fluido = new Fluido(renderer, NIVELES[nivel]); } catch (e) { fluido = null; }
-    try { ondas = new Ondas(renderer, { lado: NIVELES[nivel].ondas }); } catch (e) { ondas = null; }
   };
   crearFluido();
 
@@ -217,7 +227,7 @@ export async function crearPortada({ cursor, reducido }) {
     uCelda: { value: (esMovil() ? 8 : 9) * renderer.dpr }, uGlifosN: { value: GLIFOS.length },
     uRevelado: { value: 0 }, uHold: { value: [0.5, 0.5] }, uPuntero: { value: [-2, -2] }, uCirculo: { value: 0 },
     uUsaFluido: { value: 0 }, uIntro: { value: 0 },
-    tOndas: { value: texturas.foto }, uUsaOndas: { value: 0 }, uOndasTexel: { value: [0, 0] },
+    uCaja0: { value: [0, 0, 0, 0] }, uCaja1: { value: [0, 0, 0, 0] }, uCajaA: { value: [0, 0] }, uSalida: { value: 0 },
     uLuz: { value: construyendo ? 0 : 1 },
     cNoche: { value: hex('#120D0A') }, cCrema: { value: hex('#E7E2DA') }, cRosa: { value: hex('#F5CBD7') },
   };
@@ -225,7 +235,6 @@ export async function crearPortada({ cursor, reducido }) {
 
   // --- Puntero -------------------------------------------------------------
   const p = { x: -1, y: -1, px: -1, py: -1, dentro: false, movido: false, quieto: 0, recorrido: 0, sx: 0.5, sy: 0.5, toque: -10 };
-  const lluvia = { espera: 0, n: 0 };
   let velocidadSonido = 0;
 
   function mover(cx, cy) {
@@ -313,6 +322,8 @@ export async function crearPortada({ cursor, reducido }) {
   sec.addEventListener('touchcancel', finToque);
   sec.addEventListener('contextmenu', (e) => { if (hold.activo) e.preventDefault(); });
 
+  const inspector = crearInspector({ sec, h1, u, renderer, capas, nivel: () => NIVELES[nivel], tam: () => [W, H] });
+
   // --- Bucle ------------------------------------------------------------------
   let visible = true;
   new IntersectionObserver(([en]) => { visible = en.isIntersecting; }).observe(sec);
@@ -346,26 +357,17 @@ export async function crearPortada({ cursor, reducido }) {
         const fuerza = umbral ? FUERZA * 0.55 : FUERZA;
         fluido.splat(p.x / W, 1 - p.y / H, (dx / W) * fuerza * (W / H), (-dy / H) * fuerza, Math.min(0.9, 0.35 + dist01 * 12), umbral ? 0.007 : 0.0032);
       }
-      lluvia.n = 0; lluvia.espera = 0;
     } else {
       velocidadSonido *= Math.exp(-dt * 8);
     }
 
-    // Quieto 2,5 s (o en móvil sin tocar), caen gotas: la primera donde se paró el ratón y después al azar.
-    // Con el tiempo caen más espaciadas, como una lluvia que se acaba
-    if (ondas && !hold.activo && p.quieto > 2.5 && !umbral) {
-      lluvia.espera -= dt;
-      if (lluvia.espera <= 0) {
-        const primera = lluvia.n === 0 && p.dentro && p.x >= 0;
-        const gx = primera ? p.x / W : 0.1 + Math.random() * 0.8;
-        const gy = primera ? 1 - p.y / H : 0.15 + Math.random() * 0.7;
-        const fuerza = 0.75 + Math.random() * 0.25;
-        ondas.gota(gx, gy, fuerza * GOTA.fuerza, GOTA.radio * (0.8 + Math.random() * 0.4));
-        sonido.gota(gx, fuerza);
-        lluvia.n++;
-        lluvia.espera = p.quieto < 22 ? 1.2 + Math.random() * 1.4 : 2.8 + Math.random() * 2.6;
-      }
-    }
+    // Al bajar: la máquina sube y los textos se van (sin corte con la sección de abajo)
+    const salida = Math.min(1, Math.max(0, -sec.getBoundingClientRect().top / H));
+    u.uSalida.value = salida;
+    sec.style.setProperty('--salida', salida.toFixed(3));
+
+    // Quieto 2,5 s (o en el móvil sin tocar): el inspector
+    inspector.paso(dt, !umbral && !hold.activo && p.quieto > 2.5 && salida < 0.15);
 
     // El umbral en un móvil sin tocar: un haz lento que barre el «ads» (lo único que se mueve solo)
     if (umbral && tactil && u.uLinterna.value > 0 && u.uTime.value - p.toque > 1.4) {
@@ -390,12 +392,6 @@ export async function crearPortada({ cursor, reducido }) {
       u.tTinte.value = fluido.tinte; u.tVel.value = fluido.velocidad; u.uUsaFluido.value = 1;
     } else {
       u.uUsaFluido.value = 0;
-    }
-    if (ondas) {
-      ondas.paso(dt);
-      u.tOndas.value = ondas.altura; u.uOndasTexel.value = ondas.texel; u.uUsaOndas.value = 1;
-    } else {
-      u.uUsaOndas.value = 0;
     }
     renderer.render({ scene: malla, sort: false, frustumCull: false });
     sonido.pincel(velocidadSonido, p.x / W, dt, umbral ? 0 : u.uRevelado.value);
@@ -433,7 +429,6 @@ export async function crearPortada({ cursor, reducido }) {
     u.uCelda.value = (esMovil() ? 8 : 9) * renderer.dpr;
     pintarCapas();
     if (fluido) fluido.redimensionar(gl.canvas.width / gl.canvas.height);
-    if (ondas) ondas.redimensionar(gl.canvas.width / gl.canvas.height);
   }
   let espera = null;
   let anchoPrevio = innerWidth;
@@ -483,6 +478,117 @@ export async function crearPortada({ cursor, reducido }) {
         .to(u.uInunda, { value: 1, duration: 1.25, ease: 'power2.inOut' })
         .to(u.uUmbral, { value: 0, duration: 0.9, ease: 'power2.inOut' }, '-=0.35')
         .add(golpe, '-=0.5');
+    },
+  };
+}
+
+// --- El inspector ----------------------------------------------------------------------
+// Con la portada quieta, unas cajas se abren sobre algo concreto (una letra del título, el lema, el texto, un trozo de
+// foto o la etiqueta de arriba), enseñan la máquina dentro y dicen lo que es con valores medidos. Una caja se abre
+// mientras la anterior se cierra; al mover el ratón, se cierran todas.
+function crearInspector({ sec, h1, u, renderer, capas, nivel, tam }) {
+  const capa = sec.querySelector('[data-inspector]');
+  const etqs = capa ? [...capa.querySelectorAll('[data-inspector-etq]')] : [];
+  const cajas = etqs.map((el) => ({ a: 0, r: [0, 0, 0, 0], el, t: null }));
+  const estado = { espera: 0.2, n: 0, activo: false, tipos: [] };
+  if (cajas.length < 2) return { paso() {} };
+
+  const relativa = (r) => { const o = sec.getBoundingClientRect(); return { x: r.left - o.left, y: r.top - o.top, w: r.width, h: r.height }; };
+  const fs = (el) => Math.round(parseFloat(getComputedStyle(el).fontSize));
+  const margen = (r, mx, my) => ({ x: r.x - mx, y: r.y - my, w: r.w + mx * 2, h: r.h + my * 2 });
+  const OBJETIVOS = {
+    letra() {
+      const nodos = [];
+      const w = document.createTreeWalker(h1, NodeFilter.SHOW_TEXT);
+      while (w.nextNode()) if (w.currentNode.textContent.trim()) nodos.push(w.currentNode);
+      if (!nodos.length) return null;
+      const nodo = nodos[Math.floor(Math.random() * nodos.length)];
+      const i = Math.floor(Math.random() * nodo.textContent.length);
+      const rango = document.createRange(); rango.setStart(nodo, i); rango.setEnd(nodo, i + 1);
+      const r = relativa(rango.getBoundingClientRect());
+      return { r: { x: r.x - 6, y: r.y + r.h * 0.12, w: r.w + 12, h: r.h * 0.8 }, txt: `«${nodo.textContent[i]}» · Apple Garamond 300 · ${fs(h1)} px` };
+    },
+    lema() {
+      const el = sec.querySelector('.portada__lema');
+      return el && { r: margen(relativa(el.getBoundingClientRect()), 10, 8), txt: `p.lema · Garamond 300 + 400 itálica · ${fs(el)} px` };
+    },
+    texto() {
+      const el = sec.querySelector('.portada__texto');
+      if (!el) return null;
+      const lh = Math.round(parseFloat(getComputedStyle(el).lineHeight));
+      return { r: margen(relativa(el.getBoundingClientRect()), 10, 8), txt: `p · Open Sauce 400 · ${fs(el)}/${lh} px · ${el.textContent.trim().split(/\s+/).length} palabras` };
+    },
+    foto() {
+      const [W, H] = tam();
+      const lado = Math.round(Math.min(W, H) * (0.18 + Math.random() * 0.08));
+      const x = W * (0.32 + Math.random() * 0.3), y = H * (0.06 + Math.random() * 0.22);
+      // La luz media de ese trozo, leída de la foto que pinta la portada
+      let luz = '';
+      try {
+        const k = capas.foto.width / W, l = Math.max(1, Math.round(lado * k));
+        const d = capas.foto.getContext('2d', { willReadFrequently: true }).getImageData(Math.round(x * k), Math.round(y * k), l, l).data;
+        let s = 0;
+        for (let i = 0; i < d.length; i += 4) s += d[i] * 0.299 + d[i + 1] * 0.587 + d[i + 2] * 0.114;
+        luz = ` · luz media ${Math.round(s / (d.length / 4) / 2.55)} %`;
+      } catch (e) { /* sin lectura */ }
+      return { r: { x, y, w: lado, h: lado }, txt: `foto · ${lado}×${lado} px${luz} · fluido ${nivel().sim}²` };
+    },
+    etiqueta() {
+      const el = sec.querySelector('.portada__etq');
+      return el && { r: margen(relativa(el.getBoundingClientRect()), 8, 6), txt: `p.mono · Geist Mono · ${fs(el)} px · ${el.textContent.length} caracteres` };
+    },
+  };
+
+  function elegir() {
+    for (let i = 0; i < 6; i++) {
+      if (!estado.tipos.length) estado.tipos = Object.keys(OBJETIVOS).sort(() => Math.random() - 0.5);
+      const o = OBJETIVOS[estado.tipos.pop()]();
+      if (o && o.r.w > 4 && o.r.h > 4) return o;
+    }
+    return null;
+  }
+
+  function abrir(c, o) {
+    c.r = [o.r.x, o.r.y, o.r.x + o.r.w, o.r.y + o.r.h];
+    const [W] = tam();
+    const y = o.r.y > 34 ? o.r.y - 24 : o.r.y + o.r.h + 6;
+    c.el.style.transform = `translate3d(${Math.max(0, Math.min(o.r.x, W - 340)).toFixed(0)}px, ${y.toFixed(0)}px, 0)`;
+    c.el.classList.add('on');
+    clearTimeout(c.t);
+    let n = 0;
+    const escribir = () => { c.el.textContent = o.txt.slice(0, ++n); if (n < o.txt.length) c.t = setTimeout(escribir, 14); };
+    escribir();
+    gsap.to(c, { a: 1, duration: 0.6, ease: 'expo.out', overwrite: true });
+    sonido.tic(0.45);
+  }
+  function cerrar(c, rapido) {
+    clearTimeout(c.t);
+    c.el.classList.remove('on');
+    gsap.to(c, { a: 0, duration: rapido ? 0.18 : 0.45, ease: 'power3.in', overwrite: true });
+  }
+
+  return {
+    paso(dt, quieto) {
+      if (quieto) {
+        estado.activo = true;
+        estado.espera -= dt;
+        if (estado.espera <= 0) {
+          const c = cajas[estado.n % cajas.length];
+          cajas.forEach((otra) => { if (otra !== c && otra.a > 0) cerrar(otra); });
+          const o = elegir();
+          if (o) abrir(c, o);
+          estado.n++;
+          estado.espera = 2.8;
+        }
+      } else if (estado.activo) {
+        estado.activo = false; estado.espera = 0.2;
+        cajas.forEach((c) => cerrar(c, true));
+      }
+      // A píxeles del canvas (con la y hacia arriba, como el shader)
+      const [, H] = tam(); const k = renderer.dpr;
+      const vec = (c) => [c.r[0] * k, (H - c.r[3]) * k, c.r[2] * k, (H - c.r[1]) * k];
+      u.uCaja0.value = vec(cajas[0]); u.uCaja1.value = vec(cajas[1]);
+      u.uCajaA.value = [cajas[0].a, cajas[1].a];
     },
   };
 }

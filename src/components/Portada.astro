@@ -8,11 +8,15 @@ const base = import.meta.env.BASE_URL;
   style={`--foto: url('${base}assets/hero/Fondo-Hero_adsPartners.webp')`}>
   <div class="portada__fondo" aria-hidden="true"></div>
   <canvas class="portada__gl" data-gl aria-hidden="true"></canvas>
+  <div class="portada__inspector" data-inspector aria-hidden="true">
+    <span class="portada__insp mono" data-inspector-etq></span>
+    <span class="portada__insp mono" data-inspector-etq></span>
+  </div>
 
   <div class="portada__arriba" data-entra>
     <p class="portada__etq mono">( Estudio de marca y tecnología · Madrid )</p>
-    <p class="portada__lema">Marca por fuera.<br /><em>Máquina por dentro.</em></p>
-    <p class="portada__pista mono" aria-hidden="true">Desliza el dedo: debajo está la máquina</p>
+    <p class="portada__lema">Brand por fuera.<br /><em>Tech por dentro.</em></p>
+    <p class="portada__pista mono" aria-hidden="true">Desliza el dedo: debajo está el tech</p>
   </div>
 
   <p class="portada__texto" data-entra>
@@ -40,6 +44,19 @@ const base = import.meta.env.BASE_URL;
   .portada__gl { position: absolute; inset: 0; z-index: -1; width: 100%; height: 100%; opacity: 0; transition: opacity 1s var(--curva); }
   :global(html.gl-activo) .portada__gl { opacity: 1; }
   :global(html.titulo-gl) .portada__fondo { visibility: hidden; }
+
+  /* Las etiquetas del inspector (las cajas las pinta el canvas) */
+  .portada__inspector { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+  .portada__insp {
+    position: absolute; left: 0; top: 0; padding: 3px 7px 3px 18px; max-width: 340px;
+    font-size: 10px; color: var(--tinta); background: var(--rosa); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    opacity: 0; transition: opacity .25s var(--curva);
+  }
+  .portada__insp::before { content: ''; position: absolute; left: 7px; top: 50%; width: 5px; height: 5px; margin-top: -2.5px; background: var(--tinta); }
+  .portada__insp.on { opacity: 1; }
+
+  /* Al bajar, los textos se van hacia arriba (la máquina sube desde abajo en el canvas) */
+  .portada__arriba, .portada__texto { translate: 0 calc(var(--salida, 0) * -6vh); filter: opacity(max(0, 1 - var(--salida, 0) * 4.5)); }
 
   .portada__arriba { position: absolute; left: var(--margen); top: 27vh; max-width: 46vw; }
   .portada__etq { margin: 0 0 18px; color: var(--crema-3); }

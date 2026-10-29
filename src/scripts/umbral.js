@@ -12,7 +12,7 @@ const tactil = () => !matchMedia('(hover: hover) and (pointer: fine)').matches;
 const PASES = {
   1: 'Pase 1 de 3 · alambre',
   2: 'Pase 2 de 3 · luz',
-  3: () => `Pase 3 de 3 · la marca, donde pases ${tactil() ? 'el dedo' : 'el ratón'}`,
+  3: () => `Pase 3 de 3 · el brand, donde pases ${tactil() ? 'el dedo' : 'el ratón'}`,
 };
 
 export function montarUmbral({ listo, reducido, alEntrar }) {

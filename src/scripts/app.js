@@ -1,5 +1,5 @@
 // Arranque de la home: scroll suave, sonido (las barras de la cabecera), cursor, umbral, la portada en WebGL,
-// el fondo vivo (solo con ratón) y cada sección, que carga su JS cuando se acerca a la pantalla.
+// el fondo vivo y los textos que notan el ratón (solo con ratón) y cada sección, que carga su JS cuando se acerca.
 // La portada se carga aparte (import dinámico) para que el texto y el umbral no esperen al WebGL.
 import '@fontsource/geist-mono/400.css';
 import Lenis from 'lenis';
@@ -10,6 +10,7 @@ import * as sonido from './sonido.js';
 import { crearCursor } from './cursor.js';
 import { montarUmbral } from './umbral.js';
 import { montarGlobo } from './secciones/fresa.js';
+import { montarVivo } from './vivo.js';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -86,6 +87,7 @@ export async function arrancar() {
   document.querySelectorAll('[data-sonido-hover]').forEach((a) => a.addEventListener('pointerenter', () => sonido.tic(0.7)));
   montarImanes(reducido);
   montarSecciones({ reducido, conRaton, lenis, cursor });
+  if (conRaton && !reducido) montarVivo();
 
   try {
     const { crearPortada } = await import('./gl/portada.js');

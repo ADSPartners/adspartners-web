@@ -1,18 +1,18 @@
 // El fondo vivo (Emotion): un canvas fijo detrás de todo lo que no es la portada, solo en escritorio.
 // - Base máquina: noche, rejilla de 64 px y un campo de glifos mono, muy tenue y quieto.
-// - El ratón: un fluido pequeño que empuja los glifos y, por donde pasa, enciende la marca que hay debajo
-//   (la foto de la portada en mosaico, celda a celda), con un filo rosa. Es lo contrario de la portada:
-//   aquí el fondo es máquina y el ratón ilumina marca.
+// - El ratón no pinta: mueve. Un fluido pequeño empuja los glifos y, por donde pasa, los excita (más densos, un
+//   poco más claros y rosados) con una niebla rosa casi invisible. Se nota que algo se ha movido, no tapa nada.
+//   Los textos grandes reaccionan aparte (vivo.js).
 // - Nada se mueve solo: si nadie mueve el ratón, no se pinta (el canvas se queda con el último fotograma).
 import { Renderer, Program, Mesh, Triangle, Texture } from 'ogl';
 import { gsap } from 'gsap';
 import { Fluido } from './fluido.js';
-import { lienzo, pintarFoto, pintarGlifos } from './capas.js';
+import { pintarGlifos } from './capas.js';
 
 const GLIFOS = ' .·:-=+10#@';
-const NIVEL = { sim: 64, tinte: 320, iteraciones: 10, curl: 3, disipVel: 1.4, disipTinte: 2.2 };
-const FUERZA = 1800;
-const VIDA = 2.6;   // segundos que se sigue pintando después del último movimiento (lo que tarda en apagarse la luz)
+const NIVEL = { sim: 64, tinte: 256, iteraciones: 10, curl: 4, disipVel: 1.2, disipTinte: 2.4 };
+const FUERZA = 2000;
+const VIDA = 2.6;   // segundos que se sigue pintando después del último movimiento (lo que tarda en calmarse)
 
 const VERT = /* glsl */ `#version 300 es
 in vec2 position; in vec2 uv; out vec2 vUv;
@@ -21,7 +21,7 @@ void main () { vUv = uv; gl_Position = vec4(position, 0.0, 1.0); }`;
 const FRAG = /* glsl */ `#version 300 es
 precision highp float;
 in vec2 vUv; out vec4 color;
-uniform sampler2D tFoto; uniform sampler2D tTinte; uniform sampler2D tVel; uniform sampler2D tGlifos;
+uniform sampler2D tTinte; uniform sampler2D tVel; uniform sampler2D tGlifos;
 uniform vec2 uRes; uniform float uDpr; uniform float uCelda; uniform float uGlifosN; uniform float uIntro;
 uniform vec3 cNoche; uniform vec3 cCrema; uniform vec3 cRosa;
 
@@ -38,51 +38,36 @@ void main () {
   if (isnan(vel.x) || isnan(vel.y) || isinf(vel.x) || isinf(vel.y)) vel = vec2(0.0);
   if (isnan(tinte) || isinf(tinte)) tinte = 0.0;
   vel = clamp(vel, vec2(-2000.0), vec2(2000.0));
+  float luz = smoothstep(0.02, 0.45, tinte);
 
-  // Máquina: rejilla y glifos; el fluido los empuja un poco
-  vec2 px = uv * uRes - vel * 0.01 * uDpr;
-  vec2 cel = floor(px / uCelda);
-  vec2 den = fract(px / uCelda);
-  float v = ruido(cel * 0.09) * 0.7 + ruido(cel * 0.021 + 7.0) * 0.3;
-  float idx = floor(clamp(v, 0.0, 0.999) * uGlifosN);
-  float glifo = texture(tGlifos, vec2((idx + den.x) / uGlifosN, den.y)).r;
+  // Rejilla quieta; los glifos, empujados por el fluido
   vec2 q = uv * uRes;
   float paso = 64.0 * uDpr;
   float rej = max(1.0 - step(uDpr, mod(q.x, paso)), 1.0 - step(uDpr, mod(q.y, paso)));
+  vec2 px = q - vel * 0.02 * uDpr;
+  vec2 cel = floor(px / uCelda);
+  vec2 den = fract(px / uCelda);
+  float v = ruido(cel * 0.09) * 0.7 + ruido(cel * 0.021 + 7.0) * 0.3;
+  // Por donde pasa el ratón, los glifos se excitan: suben a los más densos
+  float idx = floor(clamp(v + luz * 0.55, 0.0, 0.999) * uGlifosN);
+  float glifo = texture(tGlifos, vec2((idx + den.x) / uGlifosN, den.y)).r;
+
   vec3 col = cNoche;
   col = mix(col, cCrema, rej * 0.045);
-  col = mix(col, cCrema, glifo * (0.03 + v * 0.07));
-
-  // Marca: la foto de la portada en mosaico, solo donde hay luz; cada celda, un cuadrado con su color
-  float luz = smoothstep(0.06, 0.42, tinte);
-  vec3 foto = texture(tFoto, (cel + 0.5) * uCelda / uRes).rgb;
-  // La foto, más viva, y teñida de rosa según su luz: en lo oscuro, rosa; en lo claro, crema
-  float lf = dot(foto, vec3(0.299, 0.587, 0.114));
-  vec3 marca = mix(cRosa * 0.92, mix(foto * 1.35, cCrema, 0.35), smoothstep(0.15, 0.7, lf));
-  float hueco = step(0.09, den.x) * step(0.09, den.y);
-  col = mix(col, marca, luz * hueco * 0.92);
-  col = mix(col, cNoche, glifo * luz * 0.22);
-  float filo = smoothstep(0.015, 0.05, tinte) - smoothstep(0.06, 0.16, tinte);
-  col = mix(col, cRosa, clamp(filo, 0.0, 1.0) * 0.35);
+  col = mix(col, mix(cCrema, cRosa, luz * 0.7), glifo * (0.03 + v * 0.07 + luz * 0.26));
+  col = mix(col, cRosa, luz * 0.045);
 
   color = vec4(mix(cNoche, col, uIntro), 1.0);
 }`;
 
 const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
-const cargarImagen = (src) => new Promise((ok, mal) => { const i = new Image(); i.decoding = 'async'; i.onload = () => ok(i); i.onerror = mal; i.src = src; });
 
 export async function crearFondo() {
   const html = document.documentElement;
   const canvas = document.querySelector('[data-fondo]');
   if (!canvas) return null;
 
-  let img;
-  try {
-    [img] = await Promise.all([
-      cargarImagen(`${window.ADS_BASE || '/'}assets/hero/Fondo-Hero_adsPartners.webp`),
-      document.fonts.load('400 12px "Geist Mono"'),
-    ]);
-  } catch (e) { return null; }
+  try { await document.fonts.load('400 12px "Geist Mono"'); } catch (e) { /* con la letra que haya */ }
 
   let renderer;
   try {
@@ -95,15 +80,11 @@ export async function crearFondo() {
   renderer.setSize(W, H);
   const tex = (image) => new Texture(gl, { image, generateMipmaps: false, minFilter: gl.LINEAR, magFilter: gl.LINEAR });
 
-  const foto = tex(lienzo(1, 1));
-  const pintarFotoTex = () => { const c = lienzo(W / 2, H / 2); pintarFoto(c, img); foto.image = c; foto.needsUpdate = true; };
-  pintarFotoTex();
-
   let fluido = null;
   try { fluido = new Fluido(renderer, NIVEL); } catch (e) { return null; }
 
   const u = {
-    tFoto: { value: foto }, tTinte: { value: fluido.tinte }, tVel: { value: fluido.velocidad },
+    tTinte: { value: fluido.tinte }, tVel: { value: fluido.velocidad },
     tGlifos: { value: tex(pintarGlifos(GLIFOS)) },
     uRes: { value: [gl.canvas.width, gl.canvas.height] }, uDpr: { value: renderer.dpr },
     uCelda: { value: 12 * renderer.dpr }, uGlifosN: { value: GLIFOS.length }, uIntro: { value: 0 },
@@ -111,7 +92,7 @@ export async function crearFondo() {
   };
   const malla = new Mesh(gl, { geometry: new Triangle(gl), program: new Program(gl, { vertex: VERT, fragment: FRAG, uniforms: u, depthTest: false, depthWrite: false }) });
 
-  // El ratón deja luz; la portada tiene la suya, así que encima de ella no se pinta
+  // El ratón mueve el fondo; la portada tiene lo suyo, así que encima de ella no se pinta
   const p = { x: -1, y: -1, px: -1, py: -1, movido: false, ultimo: -99 };
   let ahora = 0;
   window.addEventListener('pointermove', (e) => {
@@ -142,7 +123,7 @@ export async function crearFondo() {
       const dx = p.x - p.px, dy = p.y - p.py;
       p.px = p.x; p.py = p.y; p.movido = false;
       const d = Math.hypot(dx / W, dy / H);
-      if (d > 0) fluido.splat(p.x / W, 1 - p.y / H, (dx / W) * FUERZA * (W / H), (-dy / H) * FUERZA, Math.min(0.8, 0.28 + d * 9), 0.0016);
+      if (d > 0) fluido.splat(p.x / W, 1 - p.y / H, (dx / W) * FUERZA * (W / H), (-dy / H) * FUERZA, Math.min(0.45, 0.12 + d * 6), 0.0014);
     }
     fluido.paso(dt);
     pintar();
@@ -160,7 +141,6 @@ export async function crearFondo() {
       renderer.setSize(W, H);
       u.uRes.value = [gl.canvas.width, gl.canvas.height];
       fluido.redimensionar(gl.canvas.width / gl.canvas.height);
-      pintarFotoTex();
       pintar();
     }, 160);
   });

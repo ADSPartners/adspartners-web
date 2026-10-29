@@ -85,7 +85,7 @@ uniform sampler2D uTexture; uniform float value;
 void main () { gl_FragColor = value * texture2D(uTexture, vUv); }`,
 };
 
-// Textura de media precisión en la que se puede pintar (la usan el fluido y las ondas)
+// Textura de media precisión en la que se puede pintar (la usa el fluido)
 export function objetivo(renderer, w, h) {
   const gl = renderer.gl;
   const rt = new RenderTarget(gl, {

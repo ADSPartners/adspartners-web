@@ -1,55 +1,59 @@
 ---
-// Proyectos: un lienzo con el fondo máquina detrás por el que suben, con el scroll, las piezas de cada proyecto
-// (fotos y su tarjeta de marca). Pasar el ratón (o un toque en el móvil) escribe encima qué es; un clic (o un
-// segundo toque) lo acerca a cámara, saca las demás de la pantalla y cuenta el proyecto con su enlace.
+// Proyectos: un lienzo con el fondo máquina detrás por el que suben, con el scroll, las fotos de los proyectos (una
+// por proyecto, grandes). Pasar el ratón (o un toque en el móvil) escribe encima, en varios sitios a la vez y con
+// letras distintas; un clic (o un segundo toque) lo acerca a cámara, saca las demás de la pantalla y cuenta el proyecto.
 import { PROYECTOS } from '../data/proyectos.js';
 const base = import.meta.env.BASE_URL;
 
-// Las piezas, intercaladas por proyecto (una de cada uno, después la segunda de cada uno…)
-const piezas: any[] = [];
-const max = Math.max(...PROYECTOS.map((p) => p.piezas.length));
-for (let r = 0; r < max; r++) {
-  PROYECTOS.forEach((p) => { if (p.piezas[r]) piezas.push({ ...p.piezas[r], proyecto: p }); });
-}
-const CALLES = [5, 39, 70];
-const anchoDe = (pz: any) => {
-  if (pz.marca) return 17;
-  const r = pz.ancho / pz.alto;
-  return r > 1.3 ? 25 : r < 0.8 ? 16 : 20;
-};
-// En el móvil, dos calles: izquierda y derecha (pegadas al margen)
-const anchoMovil = (pz: any) => {
-  if (pz.marca) return 40;
-  const r = pz.ancho / pz.alto;
-  return r > 1.3 ? 50 : r < 0.8 ? 36 : 42;
-};
-const datos = PROYECTOS.map(({ piezas: _, ...p }) => ({ ...p, enlace: `${base}proyectos/${p.slug}/` }));
+// Dónde va cada foto (ancho en vw y x en %): en zigzag, para que el título de detrás asome entre ellas
+const SITIO = [{ w: 40, x: 5 }, { w: 27, x: 64 }, { w: 44, x: 9 }, { w: 34, x: 58 }, { w: 40, x: 13 }];
+// Cómo se reparte el texto escrito encima: tres maquetas que se alternan (posiciones en % de la foto)
+const MAQUETAS = [
+  { nombre: 'left:6%;top:7%', meta: 'right:6%;top:7%;text-align:right', dato: 'left:34%;top:46%', linea: 'left:6%;bottom:15%;max-width:60%', con: 'left:6%;bottom:6%', cta: 'right:6%;bottom:6%' },
+  { meta: 'left:6%;top:6%', con: 'right:6%;top:6%;text-align:right', nombre: 'left:10%;top:30%', linea: 'right:6%;top:60%;max-width:48%;text-align:right', dato: 'left:6%;bottom:8%', cta: 'right:6%;bottom:6%' },
+  { con: 'left:6%;top:6%', linea: 'right:6%;top:10%;max-width:46%;text-align:right', dato: 'left:8%;top:44%', nombre: 'left:6%;bottom:9%', meta: 'right:6%;bottom:19%;text-align:right', cta: 'right:6%;bottom:6%' },
+];
+const ORDEN = ['nombre', 'meta', 'con', 'linea', 'dato', 'cta'];
+const textos = (p: any) => ({
+  nombre: p.nombre,
+  meta: [p.rama, p.anio].filter(Boolean).join(' · '),
+  con: p.con || p.sector,
+  linea: p.linea,
+  dato: p.dato,
+  cta: '',   // lo pone el JS (ratón o dedo)
+});
+const datos = PROYECTOS.map((p) => ({ ...p, enlace: `${base}proyectos/${p.slug}/` }));
 ---
 <section class="pro" id="proyectos" data-seccion="proyectos" data-cursor="proyectos" aria-labelledby="pro-titulo">
   <div class="pro__pegado" data-pro-pegado>
     <div class="pro__cabeza">
       <p class="pro__etq mono">( 03 — Proyectos )</p>
-      <h2 class="pro__titulo" id="pro-titulo">Lo que <em>hemos hecho</em></h2>
+      <h2 class="pro__titulo" id="pro-titulo" data-vivo>Lo que <em>hemos hecho</em></h2>
       <p class="pro__pista mono" aria-hidden="true"><span class="pro__pista-raton">Pasa el ratón por encima de una foto</span><span class="pro__pista-dedo">Toca una foto</span></p>
     </div>
 
     <div class="pro__lienzo" data-pro-lienzo>
-      {piezas.map((pz, k) => (
-        <div class="pro__pieza" role="button" tabindex="0" data-pro-pieza data-proyecto={pz.proyecto.slug}
-          aria-label={`${pz.proyecto.nombre}: ${pz.proyecto.linea}`}
-          style={`--w:${anchoDe(pz)};--x:${CALLES[k % 3] + ((k * 7) % 5) - 2};--wm:${anchoMovil(pz)};--xm:${k % 2 ? 96 - anchoMovil(pz) : 4};--ar:${pz.marca ? 1 : pz.ancho / pz.alto}`}>
-          <div class="pro__marco" data-pro-marco>
-            {pz.foto
-              ? <img src={`${base}assets/proyectos/${pz.foto}`} alt="" loading="lazy" decoding="async" />
-              : <div class="pro__tarjeta" style={`--fondo:${pz.fondo};--tinta:${pz.tinta || 'transparent'};--logo:${pz.logo};--src:url('${base}assets/partners/${pz.marca}')`}>
-                  {pz.tinta ? <span class="pro__mascara"></span> : <img src={`${base}assets/partners/${pz.marca}`} alt="" loading="lazy" decoding="async" />}
-                </div>}
-            {pz.provisional && <span class="pro__provisional mono">foto provisional</span>}
-            <span class="pro__velo" aria-hidden="true"></span>
-            <p class="pro__escrito mono" data-pro-escrito aria-hidden="true"></p>
+      {PROYECTOS.map((pr, k) => {
+        const s = SITIO[k % SITIO.length];
+        const m = MAQUETAS[k % MAQUETAS.length];
+        const t: any = textos(pr);
+        return (
+          <div class="pro__pieza" role="button" tabindex="0" data-pro-pieza data-proyecto={pr.slug}
+            aria-label={`${pr.nombre}: ${pr.linea}`}
+            style={`--w:${s.w};--x:${s.x};--xm:${k % 2 ? 10 : 4};--ar:${pr.foto.ancho / pr.foto.alto}`}>
+            <div class="pro__marco" data-pro-marco>
+              <img src={`${base}assets/proyectos/${pr.foto.src}`} alt="" loading="lazy" decoding="async" />
+              {pr.foto.provisional && <span class="pro__provisional mono">foto provisional</span>}
+              <span class="pro__velo" aria-hidden="true"></span>
+              <div class="pro__escrito" aria-hidden="true">
+                {ORDEN.filter((c) => c === 'cta' || t[c]).map((c) => (
+                  <span class={`pro__frag pro__frag--${c}`} style={m[c as keyof typeof m]} data-frag={c} data-txt={t[c]}></span>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
 
     <div class="pro__abierto" data-pro-abierto hidden>
@@ -70,7 +74,7 @@ const datos = PROYECTOS.map(({ piezas: _, ...p }) => ({ ...p, enlace: `${base}pr
 </section>
 
 <style>
-  .pro { position: relative; height: 420vh; }
+  .pro { position: relative; height: 540vh; }
   .pro__pegado { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
 
   .pro__cabeza { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; text-align: center; pointer-events: none; padding: 0 var(--margen); }
@@ -87,32 +91,44 @@ const datos = PROYECTOS.map(({ piezas: _, ...p }) => ({ ...p, enlace: `${base}pr
     width: calc(var(--w) * 1vw);
     will-change: transform;
     outline: none;
+    --rx: 0deg; --ry: 0deg;
   }
   .pro__marco {
     position: relative; aspect-ratio: var(--ar); overflow: hidden;
     background: var(--noche-2);
+    container-type: inline-size;
+    transform: perspective(1000px) rotateX(var(--rx)) rotateY(var(--ry));
     transition: transform .7s var(--curva), box-shadow .7s var(--curva);
     box-shadow: 0 20px 60px -30px rgba(0, 0, 0, .7);
   }
   .pro__marco > img { width: 100%; height: 100%; object-fit: cover; transition: transform 1.2s var(--curva), filter .7s var(--curva); }
-  .pro__pieza.activa .pro__marco, .pro__pieza:focus-visible .pro__marco { transform: scale(1.05); box-shadow: 0 30px 90px -30px rgba(0, 0, 0, .9); }
-  .pro__pieza.activa .pro__marco > img { transform: scale(1.04); }
+  .pro__pieza.activa .pro__marco, .pro__pieza:focus-visible .pro__marco {
+    transform: perspective(1000px) rotateX(var(--rx)) rotateY(var(--ry)) scale(1.04);
+    box-shadow: 0 30px 90px -30px rgba(0, 0, 0, .9);
+    transition: transform .25s var(--curva), box-shadow .7s var(--curva);
+  }
+  .pro__pieza.activa .pro__marco > img { transform: scale(1.05); filter: saturate(.85) brightness(.82); }
   .pro__pieza:focus-visible .pro__marco { outline: 1px solid var(--rosa); outline-offset: 4px; }
 
-  .pro__tarjeta { position: absolute; inset: 0; display: grid; place-items: center; background: var(--fondo); }
-  .pro__tarjeta img { width: calc(var(--logo) * 100%); height: 60%; object-fit: contain; }
-  .pro__mascara { width: calc(var(--logo) * 100%); height: 60%; background: var(--tinta); -webkit-mask: var(--src) center / contain no-repeat; mask: var(--src) center / contain no-repeat; }
-
-  .pro__provisional { position: absolute; top: 8px; right: 8px; padding: 3px 6px; font-size: 9px; color: var(--tinta); background: var(--rosa); }
-  .pro__velo { position: absolute; inset: 0; background: linear-gradient(rgba(18, 13, 10, 0) 25%, rgba(18, 13, 10, .86)); opacity: 0; transition: opacity .5s var(--curva); pointer-events: none; }
-  .pro__pieza.activa .pro__velo { opacity: 1; }
-  .pro__escrito {
-    position: absolute; left: 14px; right: 14px; bottom: 12px; margin: 0;
-    font-size: 11px; line-height: 1.5; color: var(--crema); white-space: pre-wrap; text-transform: none; letter-spacing: .02em;
-    pointer-events: none;
+  .pro__provisional { position: absolute; top: 8px; right: 8px; padding: 3px 6px; font-size: 9px; color: var(--tinta); background: var(--rosa); z-index: 1; }
+  .pro__pieza.activa .pro__provisional { opacity: 0; }
+  .pro__velo {
+    position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .5s var(--curva);
+    background: radial-gradient(120% 90% at 50% 50%, rgba(18, 13, 10, .25), rgba(18, 13, 10, .72));
   }
-  .pro__escrito :global(b) { display: block; font-weight: 400; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--rosa); margin-bottom: 4px; }
-  .pro__escrito :global(.caret) { display: inline-block; width: .6em; height: 1.05em; margin-left: 1px; vertical-align: -2px; background: var(--crema); animation: caret 1s steps(1) infinite; }
+  .pro__pieza.activa .pro__velo { opacity: 1; }
+
+  /* Lo escrito encima: varios trozos, en sitios distintos y con letras distintas */
+  .pro__escrito { position: absolute; inset: 0; pointer-events: none; }
+  .pro__frag { position: absolute; color: var(--crema); white-space: pre-wrap; text-shadow: 0 1px 14px rgba(18, 13, 10, .6); }
+  .pro__frag:empty { display: none; }
+  .pro__frag--nombre { font-family: var(--serif); font-weight: 300; font-size: max(34px, 10.5cqw); line-height: .9; letter-spacing: -.035em; }
+  .pro__frag--dato { font-family: var(--serif); font-style: italic; font-size: max(20px, 5.2cqw); line-height: 1; letter-spacing: -.015em; color: var(--rosa); }
+  .pro__frag--linea { font-family: var(--sans); font-weight: 500; font-size: max(14px, 3.3cqw); line-height: 1.15; letter-spacing: -.01em; }
+  .pro__frag--meta, .pro__frag--con, .pro__frag--cta { font-family: var(--mono); font-size: max(10px, 1.9cqw); line-height: 1.35; letter-spacing: .06em; text-transform: uppercase; }
+  .pro__frag--con { color: var(--rosa); }
+  .pro__frag--cta { color: var(--tinta); background: var(--crema); padding: .35em .6em; text-shadow: none; }
+  .pro__frag :global(.caret) { display: inline-block; width: .5em; height: .95em; margin-left: 2px; vertical-align: -.08em; background: currentColor; animation: caret 1s steps(1) infinite; }
   @keyframes caret { 50% { opacity: 0; } }
 
   /* Proyecto abierto */
@@ -120,7 +136,7 @@ const datos = PROYECTOS.map(({ piezas: _, ...p }) => ({ ...p, enlace: `${base}pr
   .pro__abierto[hidden] { display: none; }
   .pro__fondo-abierto { position: absolute; inset: 0; background: rgba(18, 13, 10, .55); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); }
   .pro__foco { position: absolute; overflow: hidden; box-shadow: 0 50px 140px -40px rgba(0, 0, 0, .95); }
-  .pro__foco > img, .pro__foco > .pro__tarjeta { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .pro__foco > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
   .pro__ficha {
     position: absolute; right: calc(var(--margen) * 2); top: 50%; transform: translateY(-50%);
     width: min(400px, 30vw);
@@ -139,8 +155,8 @@ const datos = PROYECTOS.map(({ piezas: _, ...p }) => ({ ...p, enlace: `${base}pr
   .pro a, .pro button { cursor: pointer !important; }
 
   @media (max-width: 760px) {
-    .pro { height: 460vh; }
-    .pro__pieza { width: calc(var(--wm) * 1vw); left: calc(var(--xm) * 1vw); }
+    .pro { height: 520vh; }
+    .pro__pieza { width: 86vw; left: calc(var(--xm) * 1vw); }
     .pro__ficha { left: var(--margen); right: var(--margen); top: auto; bottom: calc(var(--margen) * 1.4); transform: none; width: auto; }
     .pro__ficha-nombre { font-size: 38px; }
     .pro__ficha-texto { margin-top: 14px; font-size: 14px; }
@@ -152,7 +168,7 @@ const datos = PROYECTOS.map(({ piezas: _, ...p }) => ({ ...p, enlace: `${base}pr
   :global(html.mov-reducido) .pro { height: auto; padding: 16vh var(--margen); }
   :global(html.mov-reducido) .pro__pegado { position: static; height: auto; overflow: visible; }
   :global(html.mov-reducido) .pro__cabeza { position: static; margin-bottom: 8vh; }
-  :global(html.mov-reducido) .pro__lienzo { position: static; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 24px; }
+  :global(html.mov-reducido) .pro__lienzo { position: static; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
   :global(html.mov-reducido) .pro__pieza { position: relative; left: auto; width: auto; transform: none !important; }
   :global(html.mov-reducido) .pro__abierto { position: fixed; }
 </style>
