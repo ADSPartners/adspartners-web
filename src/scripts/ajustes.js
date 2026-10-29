@@ -1,41 +1,43 @@
-// Ajustes del visitante: sonido, movimiento y calidad. Se recuerdan en este navegador (si se puede).
-const CLAVES = { sonido: 'ads-sonido', movimiento: 'ads-movimiento', calidad: 'ads-calidad' };
-const leer = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
-const guardar = (k, v) => { try { localStorage.setItem(k, v); } catch (e) { /* modo privado */ } };
+// Lo único que elige el visitante es el sonido: las barras de la cabecera lo encienden y lo callan.
+// La calidad es automática (la mide la portada) y el movimiento lo decide el sistema (prefers-reduced-motion).
+const CLAVE = 'ads-sonido';
+const leer = () => { try { return localStorage.getItem(CLAVE); } catch (e) { return null; } };
+const guardar = (v) => { try { localStorage.setItem(CLAVE, v); } catch (e) { /* modo privado */ } };
 
 export const ajustes = {
-  sonido: leer(CLAVES.sonido) || 'no',
+  sonido: leer() || 'no',
   movimiento: document.documentElement.classList.contains('mov-reducido') ? 'reducido' : 'completo',
-  calidad: leer(CLAVES.calidad) || 'auto',
 };
 
 const oyentes = new Set();
 export const alCambiar = (fn) => oyentes.add(fn);
 
-export function fijar(clave, valor) {
-  ajustes[clave] = valor;
-  guardar(CLAVES[clave], valor);
-  sincronizar();
-  oyentes.forEach((fn) => fn(clave, valor));
+export function fijarSonido(valor) {
+  ajustes.sonido = valor;
+  guardar(valor);
+  pintarBoton();
+  oyentes.forEach((fn) => fn('sonido', valor));
 }
 
-function sincronizar() {
-  const panel = document.querySelector('[data-ajustes]');
-  if (!panel) return;
-  for (const [k, v] of Object.entries(ajustes)) {
-    const r = panel.querySelector(`input[name="${k}"][value="${v}"]`);
-    if (r) r.checked = true;
-  }
+function pintarBoton() {
+  const btn = document.querySelector('[data-sonido-btn]');
+  if (!btn) return;
+  const si = document.documentElement.classList.contains('sonido-on');
+  btn.setAttribute('aria-pressed', String(si));
+  btn.setAttribute('aria-label', si ? 'Quitar el sonido' : 'Poner el sonido');
+  const txt = btn.querySelector('[data-sonido-txt]');
+  if (txt) txt.textContent = si ? 'Sonido sí' : 'Sonido no';
 }
 
-export function montarPanel() {
-  const btn = document.querySelector('[data-ajustes-btn]');
-  const panel = document.querySelector('[data-ajustes]');
-  if (!btn || !panel) return;
-  sincronizar();
-  const abrir = (si) => { panel.hidden = !si; btn.setAttribute('aria-expanded', String(si)); };
-  btn.addEventListener('click', (e) => { e.stopPropagation(); abrir(panel.hidden); });
-  document.addEventListener('click', (e) => { if (!panel.hidden && !panel.contains(e.target)) abrir(false); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !panel.hidden) { abrir(false); btn.focus(); } });
-  panel.addEventListener('change', (e) => { if (e.target.name) fijar(e.target.name, e.target.value); });
+// Un clic en las barras: si suena, se calla; si no, suena. El estado real lo da la clase sonido-on.
+export function montarBotonSonido() {
+  const btn = document.querySelector('[data-sonido-btn]');
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    const si = document.documentElement.classList.contains('sonido-on');
+    fijarSonido(si ? 'no' : 'si');
+  });
+  // sonido.js pone y quita la clase; el botón se repinta cuando cambia
+  new MutationObserver(pintarBoton).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+  pintarBoton();
 }

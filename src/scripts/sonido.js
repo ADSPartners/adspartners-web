@@ -363,3 +363,80 @@ export function subida() {
     },
   };
 }
+
+// --- Efectos de la home (segunda ronda) ------------------------------------------
+let ultimaTecla = 0;
+// Máquina de escribir: un chasquido de ruido filtrado más un golpe seco, cada uno un poco distinto (máx. 25 por segundo)
+export function tecla(volumen = 1) {
+  if (!activo || !ctx) return;
+  const t = ctx.currentTime;
+  if (t - ultimaTecla < 0.04) return;
+  ultimaTecla = t;
+  const s = ctx.createBufferSource(); s.buffer = ruido;
+  const off = Math.random() * 3;
+  const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 2400 + Math.random() * 1800; bp.Q.value = 1.6;
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(0.11 * volumen, t + 0.002);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.035);
+  const o = ctx.createOscillator(); o.type = 'triangle';
+  o.frequency.setValueAtTime(190 + Math.random() * 60, t);
+  o.frequency.exponentialRampToValueAtTime(70, t + 0.04);
+  const go = ctx.createGain();
+  go.gain.setValueAtTime(0.0001, t);
+  go.gain.exponentialRampToValueAtTime(0.07 * volumen, t + 0.003);
+  go.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
+  const p = panner((Math.random() - 0.5) * 0.3);
+  s.connect(bp).connect(g).connect(p);
+  o.connect(go).connect(p);
+  p.connect(busEfectos);
+  s.start(t, off, 0.05); o.start(t); o.stop(t + 0.06);
+}
+
+// Un logo que pasa por delante de la cámara: un soplo que sube y baja, del lado por el que pasa
+export function pasa(x = 0.5) {
+  if (!activo || !ctx) return;
+  const t = ctx.currentTime + 0.005;
+  const s = ctx.createBufferSource(); s.buffer = ruido;
+  const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 2.2;
+  bp.frequency.setValueAtTime(380, t); bp.frequency.exponentialRampToValueAtTime(1900, t + 0.22); bp.frequency.exponentialRampToValueAtTime(500, t + 0.5);
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.16, t + 0.18); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.55);
+  const p = panner((x - 0.5) * 1.6);
+  s.connect(bp).connect(g).connect(p).connect(busEfectos);
+  s.start(t, Math.random() * 3, 0.6);
+  piano(hz(PENTA[Math.floor(Math.random() * 5) + 2]), t + 0.12, 0.022, busEfectos);
+}
+
+// Un proyecto que se acerca (abrir) o vuelve a su sitio (cerrar)
+export function abrir() {
+  if (!activo || !ctx) return;
+  const t = ctx.currentTime + 0.01;
+  const s = ctx.createBufferSource(); s.buffer = marron;
+  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass';
+  lp.frequency.setValueAtTime(220, t); lp.frequency.exponentialRampToValueAtTime(2400, t + 0.45);
+  const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.32, t + 0.35); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.9);
+  s.connect(lp).connect(g).connect(busEfectos); s.start(t); s.stop(t + 1);
+  [60, 64, 67, 72].forEach((m, i) => piano(hz(m), t + 0.32 + i * 0.06, 0.05, busEfectos));
+}
+export function cerrar() {
+  if (!activo || !ctx) return;
+  const t = ctx.currentTime + 0.01;
+  const s = ctx.createBufferSource(); s.buffer = marron;
+  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass';
+  lp.frequency.setValueAtTime(1800, t); lp.frequency.exponentialRampToValueAtTime(200, t + 0.5);
+  const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.22, t + 0.06); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.6);
+  s.connect(lp).connect(g).connect(busEfectos); s.start(t); s.stop(t + 0.7);
+  piano(hz(67), t + 0.05, 0.04, busEfectos);
+}
+
+// Enviado: un sello grave y un acorde que se abre
+export function ok() {
+  if (!activo || !ctx) return;
+  const t = ctx.currentTime + 0.01;
+  const o = ctx.createOscillator(); o.type = 'sine';
+  o.frequency.setValueAtTime(130, t); o.frequency.exponentialRampToValueAtTime(65, t + 0.25);
+  const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.4, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.5);
+  o.connect(g).connect(busEfectos); o.start(t); o.stop(t + 0.55);
+  [65, 69, 72, 76, 79].forEach((m, i) => piano(hz(m), t + 0.18 + i * 0.08, 0.06, busEfectos));
+}

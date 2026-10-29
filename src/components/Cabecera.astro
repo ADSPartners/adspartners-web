@@ -1,5 +1,6 @@
 ---
-// Barra fija: logotipo, ajustes (sonido, movimiento, calidad) y contacto. Se esconde al bajar y vuelve al subir.
+// Barra fija: logotipo, las barras del sonido (se pulsan para callarlo o encenderlo) y contacto.
+// Se esconde al bajar y vuelve al subir.
 import Marca from './Marca.astro';
 const base = import.meta.env.BASE_URL;
 ---
@@ -7,29 +8,10 @@ const base = import.meta.env.BASE_URL;
   <a class="cab__logo" href={base} aria-label="adsPartners, inicio"><Marca tipo="logo" /></a>
 
   <div class="cab__dcha">
-    <div class="cab__ajustes">
-      <button class="cab__btn mono" type="button" aria-expanded="false" aria-controls="ajustes" data-ajustes-btn>
-        <span class="cab__sonido" data-sonido-ind aria-hidden="true"><i></i><i></i><i></i></span>Ajustes
-      </button>
-      <div class="ajustes" id="ajustes" hidden data-ajustes>
-        <fieldset>
-          <legend class="mono">Sonido</legend>
-          <label><input type="radio" name="sonido" value="si" /> Sí</label>
-          <label><input type="radio" name="sonido" value="no" /> No</label>
-        </fieldset>
-        <fieldset>
-          <legend class="mono">Movimiento</legend>
-          <label><input type="radio" name="movimiento" value="completo" /> Completo</label>
-          <label><input type="radio" name="movimiento" value="reducido" /> Reducido</label>
-        </fieldset>
-        <fieldset>
-          <legend class="mono">Calidad</legend>
-          <label><input type="radio" name="calidad" value="auto" /> Auto</label>
-          <label><input type="radio" name="calidad" value="alta" /> Alta</label>
-          <label><input type="radio" name="calidad" value="baja" /> Baja</label>
-        </fieldset>
-      </div>
-    </div>
+    <button class="cab__sonido" type="button" aria-pressed="false" aria-label="Sonido" data-sonido-btn data-sonido-hover>
+      <span class="cab__barras" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      <span class="cab__sonido-t mono" data-sonido-txt>Sonido no</span>
+    </button>
 
     <a class="cab__hablemos" href="mailto:adsgroup@ads-partners.com" data-sonido-hover data-iman>Hablemos</a>
   </div>
@@ -53,33 +35,31 @@ const base = import.meta.env.BASE_URL;
   }
   .cab--fondo::before { opacity: 1; }
   .cab--fuera { transform: translateY(-110%); opacity: 0; }
+  /* Sobre el capítulo claro (contacto), en tinta */
+  .cab--clara { color: var(--tinta); }
+  .cab--clara::before { background: linear-gradient(var(--crema) 30%, rgba(231, 226, 218, 0)); }
+  .cab--clara .cab__hablemos:hover, .cab--clara .cab__hablemos:focus-visible { background: var(--tinta); color: var(--crema); border-color: var(--tinta); }
+  /* Durante la carga no se ve (el umbral ya no tiene velo opaco) */
+  :global(html.en-umbral) .cab { opacity: 0; pointer-events: none; }
+  /* Con un proyecto abierto, fuera */
+  :global(html.pro-abierto) .cab { transform: translateY(-110%); opacity: 0; pointer-events: none; }
   .cab--fuera:focus-within { transform: none; opacity: 1; }
   .cab__logo { width: 132px; color: currentColor; }
   .cab__logo :global(svg) { width: 100%; height: auto; }
   .cab__dcha { display: flex; align-items: center; gap: 22px; }
 
-  .cab__btn { display: inline-flex; align-items: center; gap: 8px; color: currentColor; opacity: .66; padding: 6px 0; transition: opacity .3s; }
-  .cab__btn:hover, .cab__btn[aria-expanded="true"] { opacity: 1; }
-  .cab__sonido { display: inline-flex; align-items: flex-end; gap: 2px; height: 10px; }
-  .cab__sonido i { width: 2px; height: 100%; background: currentColor; transform-origin: bottom; transform: scaleY(.3); transition: transform .4s var(--curva); }
-  :global(html.sonido-on) .cab__sonido i { animation: barras 1s ease-in-out infinite; }
-  :global(html.sonido-on) .cab__sonido i:nth-child(2) { animation-delay: .2s; }
-  :global(html.sonido-on) .cab__sonido i:nth-child(3) { animation-delay: .4s; }
-  @keyframes barras { 0%, 100% { transform: scaleY(.3); } 50% { transform: scaleY(1); } }
-
-  .cab__ajustes { position: relative; }
-  .ajustes {
-    position: absolute; top: calc(100% + 12px); right: 0;
-    display: grid; gap: 14px; padding: 18px 20px; min-width: 220px;
-    color: var(--crema);
-    background: rgba(27, 20, 16, .94); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-    border: 1px solid var(--linea); border-radius: 3px;
-  }
-  .ajustes[hidden] { display: none; }
-  .ajustes fieldset { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 14px; }
-  .ajustes legend { color: var(--crema-3); padding: 0; margin-bottom: 6px; width: 100%; }
-  .ajustes label { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
-  .ajustes input { accent-color: var(--rosa); margin: 0; }
+  /* Sonido: con sonido, las barras se mueven; sin sonido, se quedan planas */
+  .cab__sonido { display: inline-flex; align-items: center; gap: 9px; padding: 8px 2px; color: currentColor; }
+  .cab__barras { display: inline-flex; align-items: flex-end; gap: 2px; height: 12px; }
+  .cab__barras i { width: 2px; height: 100%; background: currentColor; transform-origin: bottom; transform: scaleY(.15); transition: transform .5s var(--curva); }
+  .cab__sonido-t { opacity: 0; transform: translateX(4px); transition: opacity .3s, transform .4s var(--curva); }
+  .cab__sonido:hover .cab__sonido-t, .cab__sonido:focus-visible .cab__sonido-t { opacity: .66; transform: none; }
+  :global(html.sonido-on) .cab__barras i { animation: barras 1s ease-in-out infinite; }
+  :global(html.sonido-on) .cab__barras i:nth-child(2) { animation-delay: .2s; animation-duration: .8s; }
+  :global(html.sonido-on) .cab__barras i:nth-child(3) { animation-delay: .4s; animation-duration: 1.2s; }
+  :global(html.sonido-on) .cab__barras i:nth-child(4) { animation-delay: .1s; animation-duration: .9s; }
+  :global(html.mov-reducido.sonido-on) .cab__barras i { animation: none; transform: scaleY(.7); }
+  @keyframes barras { 0%, 100% { transform: scaleY(.25); } 50% { transform: scaleY(1); } }
 
   .cab__hablemos {
     font-size: 13px; letter-spacing: .01em; padding: 9px 16px;
@@ -91,7 +71,7 @@ const base = import.meta.env.BASE_URL;
   @media (max-width: 700px) {
     .cab__logo { width: 104px; }
     .cab__dcha { gap: 14px; }
-    .cab__btn { font-size: 0; gap: 0; }
+    .cab__sonido-t { display: none; }
     .cab__hablemos { font-size: 12px; padding: 8px 13px; }
   }
 </style>

@@ -59,6 +59,7 @@ html.en-umbral body { overflow: hidden; }
 /* Cursor propio solo donde hay experiencia, y solo con ratón */
 @media (hover: hover) and (pointer: fine) {
   html.cursor-propio [data-cursor] { cursor: none; }
+  /* Sobre enlaces y botones el cursor propio se esconde: vuelve la mano del sistema */
   html.cursor-propio [data-cursor] a,
-  html.cursor-propio [data-cursor] button { cursor: none; }
+  html.cursor-propio [data-cursor] button { cursor: pointer; }
 }

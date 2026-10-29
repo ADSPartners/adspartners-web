@@ -1,13 +1,13 @@
 ---
 import '../styles/global.css';
 
-interface Props { titulo: string; descripcion: string; lang?: string }
-const { titulo, descripcion, lang = 'es' } = Astro.props;
+interface Props { titulo: string; descripcion: string; lang?: string; umbral?: boolean }
+const { titulo, descripcion, lang = 'es', umbral = false } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const canonica = new URL(Astro.url.pathname, Astro.site).href;
 ---
 <!doctype html>
-<html lang={lang}>
+<html lang={lang} data-umbral={umbral ? '' : undefined}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -24,13 +24,13 @@ const canonica = new URL(Astro.url.pathname, Astro.site).href;
     <link rel="preload" href={`${base}assets/fonts/AppleGaramond-Light.woff2`} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={`${base}assets/fonts/OpenSauceSans-Regular.woff2`} as="font" type="font/woff2" crossorigin />
     <script is:inline>
-      // Antes de pintar: ¿ya pasó por el umbral en esta sesión? ¿prefiere menos movimiento?
+      // Antes de pintar: ¿ya pasó por el umbral en esta sesión? ¿el sistema pide menos movimiento? ¿hay ratón?
       (function () {
-        var h = document.documentElement, umbral = null, mov = null;
-        try { umbral = sessionStorage.getItem('ads-umbral'); mov = localStorage.getItem('ads-movimiento'); } catch (e) {}
-        if (!umbral) h.classList.add('en-umbral');
-        var reducido = mov ? mov === 'reducido' : window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        if (reducido) h.classList.add('mov-reducido');
+        var h = document.documentElement, umbral = null;
+        try { umbral = sessionStorage.getItem('ads-umbral'); } catch (e) {}
+        if (!umbral && h.hasAttribute('data-umbral')) h.classList.add('en-umbral');
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) h.classList.add('mov-reducido');
+        if (window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth > 760) h.classList.add('con-raton');
         h.classList.add('js');
       })();
     </script>

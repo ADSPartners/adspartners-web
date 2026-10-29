@@ -2,6 +2,7 @@
 // - foto:    la imagen de marca a sangre (cover). De su luz salen las curvas de nivel y el tramado de la máquina.
 // - titulo:  «adsPartners» en Garamond, en el sitio exacto del h1 del DOM (lo mide del propio DOM).
 // - maquina: la anatomía del título (contorno, cajas, líneas guía), el código que lo pinta y el degradado medido.
+//            En el umbral («ads» en el centro), además el código de la linterna y una ficha con los valores del canvas.
 // - glifos:  atlas de caracteres mono para el tramado.
 // Todo lo que se escribe en la máquina construye lo que se ve: valores medidos del DOM y de la foto, y el shader real.
 
@@ -56,7 +57,8 @@ export function pintarTitulo(c, trozos, dpr) {
   for (const t of trozos) { prepararTexto(ctx, t, dpr); ctx.fillText(t.texto, t.x * dpr, t.base * dpr); }
 }
 
-export function pintarMaquina(c, trozos, dpr, { foto, movil }) {
+export function pintarMaquina(c, trozos, dpr, { foto, movil, variante = 'portada', ficha = null }) {
+  const enUmbral = variante === 'umbral';
   const ctx = c.getContext('2d');
   const W = c.width, H = c.height;
   ctx.clearRect(0, 0, W, H);
@@ -129,19 +131,44 @@ export function pintarMaquina(c, trozos, dpr, { foto, movil }) {
   const t0 = trozos[0];
   if (t0) {
     const tracking = (parseFloat(t0.tracking) / t0.tam).toFixed(3).replace(/0+$/, '');
-    bloque([
-      '// así se escribe el título',
-      'h1.portada__titulo {',
+    const css = [
+      enUmbral ? '// así se escribe el «ads» del centro' : '// así se escribe el título',
+      enUmbral ? '.umbral__ads {' : 'h1.portada__titulo {',
       `  font-family: "${t0.familia}";`,
       '  font-weight: 300;',
       `  font-size: ${Math.round(t0.tam)}px;`,
       `  letter-spacing: ${tracking}em;`,
       '  color: #E7E2DA;',
       '}',
-    ], movil ? px(18) : px(32), movil ? H * 0.35 : H * 0.49);
+    ];
+    if (enUmbral) bloque(css, movil ? px(18) : px(32), movil ? H * 0.66 : H * 0.74);
+    else bloque(css, movil ? px(18) : px(32), movil ? H * 0.35 : H * 0.49);
   }
-  // Después, las líneas del shader que dibujan estas curvas de nivel a partir de la luz de la foto
-  if (!movil) {
+  if (enUmbral) {
+    // La linterna: las líneas del shader que deciden dónde se ve la marca
+    if (!movil) {
+      bloque([
+        '// la linterna: la marca solo donde hay luz',
+        'float halo = uHalo * (1.0 - smoothstep(0.0, 0.21, d));',
+        'float luz = max(tinte * 1.3, halo) * uLinterna;',
+        'float mascara = 1.0 - smoothstep(0.08, 0.62, luz);',
+        'vec3 col = mix(marca, maquina, mascara);',
+      ], W * 0.6, H * 0.15);
+    }
+    // Ficha: con qué se está pintando esto, medido en este navegador
+    if (ficha) {
+      const n = ficha.nivel;
+      const coma = (v) => String(v).replace('.', ',');
+      bloque([
+        '// la máquina que pinta esto',
+        `canvas  ${ficha.canvas[0]} × ${ficha.canvas[1]} px · dpr ${coma(ficha.dpr)}`,
+        `fluido  ${n.sim}² · ${n.iteraciones} iteraciones · curl ${n.curl}`,
+        `tinte   ${n.tinte}² · disipa ${coma(n.disipTinte)}`,
+        `glifos  "${ficha.glifos}"`,
+      ], movil ? px(18) : px(32), movil ? H * 0.14 : H * 0.15, movil ? 9.5 : 11);
+    }
+  } else if (!movil) {
+    // Las líneas del shader que dibujan estas curvas de nivel a partir de la luz de la foto
     bloque([
       '// curvas de nivel: cada línea, un mismo valor de luz',
       'float l = luma(texture(tFoto, uv).rgb);',
@@ -154,8 +181,9 @@ export function pintarMaquina(c, trozos, dpr, { foto, movil }) {
   // Regla del degradado: el color real de la portada en seis puntos, de arriba abajo
   if (foto) {
     const fctx = foto.getContext('2d', { willReadFrequently: true });
-    const rx = movil ? W * 0.86 : W * 0.64;
-    const y0 = movil ? H * 0.34 : H * 0.12, y1 = movil ? H * 0.6 : H * 0.62;
+    const rx = enUmbral ? (movil ? W * 0.82 : W * 0.9) : (movil ? W * 0.86 : W * 0.64);
+    const y0 = enUmbral ? (movil ? H * 0.68 : H * 0.6) : (movil ? H * 0.34 : H * 0.12);
+    const y1 = enUmbral ? (movil ? H * 0.86 : H * 0.88) : (movil ? H * 0.6 : H * 0.62);
     linea(rx, y0, rx, y1, 'rgba(231,226,218,.35)');
     etiqueta('degradado', rx + px(10), y0 - px(10), 'rgba(231,226,218,.45)');
     for (let i = 0; i < 6; i++) {

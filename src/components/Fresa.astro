@@ -1,0 +1,96 @@
+---
+// FRESA: el globo de abajo a la izquierda en toda la página y, debajo del contacto (que parece el final), una sección
+// escondida con el chat. La sección está pegada al fondo de la pantalla detrás del contacto: al seguir bajando, el
+// contacto se levanta y la deja ver. Al aparecer, el globo vuela a la cabecera del chat y se va.
+const base = import.meta.env.BASE_URL;
+---
+<button class="fg" type="button" data-fresa-globo aria-label="Pregúntale a FRESA">
+  <img src={`${base}assets/logos/fresa-icono.webp`} alt="" width="44" height="44" />
+  <span class="fg__txt mono">Pregúntame</span>
+</button>
+
+<section class="fr" id="fresa" data-seccion="fresa" aria-labelledby="fr-titulo">
+  <div class="fr__caja">
+    <p class="fr__etq mono">( 05 — ¿Sigues aquí? )</p>
+    <div class="fr__cabeza">
+      <img class="fr__avatar" data-fresa-avatar src={`${base}assets/logos/fresa-icono.webp`} alt="" width="64" height="64" />
+      <div>
+        <h2 class="fr__titulo" id="fr-titulo">Entonces tienes una pregunta.</h2>
+        <p class="fr__sub">Soy FRESA, la IA de adsPartners. Pregúntame lo que quieras: qué hacemos, cómo trabajamos o por dónde empezar.</p>
+      </div>
+    </div>
+
+    <div class="fr__chat" data-fresa-chat aria-live="polite"></div>
+
+    <div class="fr__sugerencias" data-fresa-sugerencias>
+      <button type="button" class="mono">¿Qué hacéis exactamente?</button>
+      <button type="button" class="mono">¿Cómo empezamos?</button>
+      <button type="button" class="mono">¿Cuánto cuesta?</button>
+    </div>
+
+    <form class="fr__form" data-fresa-form>
+      <label class="oculto-accesible" for="fr-input">Tu pregunta para FRESA</label>
+      <input id="fr-input" name="q" autocomplete="off" maxlength="1000" placeholder="Escribe tu pregunta…" />
+      <button type="submit" class="fr__enviar" aria-label="Enviar">→</button>
+    </form>
+    <p class="fr__humano mono">¿Mejor con una persona? <a href="https://wa.me/34633565840" target="_blank" rel="noopener">WhatsApp</a> · <a href="mailto:adsgroup@ads-partners.com">Correo</a></p>
+  </div>
+</section>
+
+<style>
+  /* El globo */
+  .fg {
+    position: fixed; left: var(--margen); bottom: var(--margen); z-index: 25;
+    display: flex; align-items: center; gap: 10px;
+    padding: 0; color: var(--crema);
+    transition: opacity .5s var(--curva), transform .6s var(--curva);
+  }
+  .fg img { width: 44px; height: 44px; border-radius: 50%; box-shadow: 0 10px 30px -8px rgba(0, 0, 0, .6); transition: transform .5s var(--curva); }
+  .fg:hover img { transform: scale(1.08) rotate(-6deg); }
+  .fg__txt { opacity: 0; transform: translateX(-6px); transition: opacity .3s, transform .4s var(--curva); text-shadow: 0 1px 8px rgba(18, 13, 10, .8); }
+  .fg:hover .fg__txt, .fg:focus-visible .fg__txt { opacity: 1; transform: none; }
+  :global(html.en-umbral) .fg, :global(html.pro-abierto) .fg, .fg.fuera { opacity: 0; pointer-events: none; transform: translateY(16px); }
+
+  /* La sección escondida: pegada abajo, detrás del contacto, y solo visible al llegar al final */
+  .fr {
+    position: sticky; bottom: 0; z-index: 1;
+    min-height: 100vh; min-height: 100svh;
+    display: grid; align-items: center;
+    padding: 14vh var(--margen) 8vh;
+    visibility: hidden;
+  }
+  .fr.cerca { visibility: visible; }
+  .fr__caja { width: min(760px, 100%); margin: 0 auto; }
+  .fr__etq { margin: 0 0 28px; color: var(--crema-3); }
+  .fr__cabeza { display: flex; gap: 22px; align-items: flex-start; }
+  .fr__avatar { width: 64px; height: 64px; border-radius: 50%; flex: none; }
+  .fr__titulo { margin: 0; font-family: var(--serif); font-weight: 300; font-size: clamp(36px, 4.6vw, 72px); line-height: .98; letter-spacing: -.025em; }
+  .fr__sub { margin: 16px 0 0; max-width: 34em; color: var(--crema-2); line-height: 1.55; }
+
+  .fr__chat { display: grid; gap: 14px; margin-top: 36px; max-height: 38vh; overflow-y: auto; overscroll-behavior: contain; padding-right: 6px; }
+  .fr__chat:empty { display: none; }
+  .fr__chat :global(.fr-msg) { max-width: 85%; padding: 12px 16px; line-height: 1.5; font-size: 15px; white-space: pre-wrap; }
+  .fr__chat :global(.fr-msg--yo) { justify-self: end; background: var(--crema); color: var(--tinta); }
+  .fr__chat :global(.fr-msg--fresa) { justify-self: start; border: 1px solid var(--linea); color: var(--crema); background: rgba(27, 20, 16, .7); }
+  .fr__chat :global(.fr-msg--fresa a) { border-bottom: 1px solid var(--crema-3); }
+  .fr__chat :global(.fr-pensando)::after { content: '▍'; animation: fr-caret 1s steps(1) infinite; }
+  @keyframes fr-caret { 50% { opacity: 0; } }
+
+  .fr__sugerencias { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 32px; }
+  .fr__sugerencias button { padding: 9px 14px; border: 1px solid var(--linea); border-radius: 99px; color: var(--crema-2); transition: border-color .3s, color .3s; }
+  .fr__sugerencias button:hover, .fr__sugerencias button:focus-visible { border-color: var(--crema); color: var(--crema); }
+
+  .fr__form { display: flex; align-items: center; gap: 10px; margin-top: 18px; border-bottom: 1px solid var(--crema-3); }
+  .fr__form input { flex: 1; min-width: 0; font: inherit; font-family: var(--serif); font-size: clamp(22px, 2.2vw, 32px); font-weight: 300; color: var(--crema); background: transparent; border: 0; padding: 12px 0; outline: none; }
+  .fr__form input::placeholder { color: var(--crema-3); }
+  .fr__enviar { font-size: 26px; padding: 6px 4px 6px 12px; color: var(--rosa); }
+  .fr__enviar[disabled] { opacity: .4; }
+  .fr__humano { margin: 22px 0 0; color: var(--crema-3); }
+  .fr__humano a { color: var(--crema-2); border-bottom: 1px solid var(--crema-3); }
+
+  @media (max-width: 760px) {
+    .fg img { width: 40px; height: 40px; }
+    .fr__cabeza { flex-direction: column; gap: 16px; }
+    .fr__avatar { width: 52px; height: 52px; }
+  }
+</style>

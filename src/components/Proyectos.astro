@@ -1,0 +1,158 @@
+---
+// Proyectos: un lienzo con el fondo máquina detrás por el que suben, con el scroll, las piezas de cada proyecto
+// (fotos y su tarjeta de marca). Pasar el ratón (o un toque en el móvil) escribe encima qué es; un clic (o un
+// segundo toque) lo acerca a cámara, saca las demás de la pantalla y cuenta el proyecto con su enlace.
+import { PROYECTOS } from '../data/proyectos.js';
+const base = import.meta.env.BASE_URL;
+
+// Las piezas, intercaladas por proyecto (una de cada uno, después la segunda de cada uno…)
+const piezas: any[] = [];
+const max = Math.max(...PROYECTOS.map((p) => p.piezas.length));
+for (let r = 0; r < max; r++) {
+  PROYECTOS.forEach((p) => { if (p.piezas[r]) piezas.push({ ...p.piezas[r], proyecto: p }); });
+}
+const CALLES = [5, 39, 70];
+const anchoDe = (pz: any) => {
+  if (pz.marca) return 17;
+  const r = pz.ancho / pz.alto;
+  return r > 1.3 ? 25 : r < 0.8 ? 16 : 20;
+};
+// En el móvil, dos calles: izquierda y derecha (pegadas al margen)
+const anchoMovil = (pz: any) => {
+  if (pz.marca) return 40;
+  const r = pz.ancho / pz.alto;
+  return r > 1.3 ? 50 : r < 0.8 ? 36 : 42;
+};
+const datos = PROYECTOS.map(({ piezas: _, ...p }) => ({ ...p, enlace: `${base}proyectos/${p.slug}/` }));
+---
+<section class="pro" id="proyectos" data-seccion="proyectos" data-cursor="proyectos" aria-labelledby="pro-titulo">
+  <div class="pro__pegado" data-pro-pegado>
+    <div class="pro__cabeza">
+      <p class="pro__etq mono">( 03 — Proyectos )</p>
+      <h2 class="pro__titulo" id="pro-titulo">Lo que <em>hemos hecho</em></h2>
+      <p class="pro__pista mono" aria-hidden="true"><span class="pro__pista-raton">Pasa el ratón por encima de una foto</span><span class="pro__pista-dedo">Toca una foto</span></p>
+    </div>
+
+    <div class="pro__lienzo" data-pro-lienzo>
+      {piezas.map((pz, k) => (
+        <div class="pro__pieza" role="button" tabindex="0" data-pro-pieza data-proyecto={pz.proyecto.slug}
+          aria-label={`${pz.proyecto.nombre}: ${pz.proyecto.linea}`}
+          style={`--w:${anchoDe(pz)};--x:${CALLES[k % 3] + ((k * 7) % 5) - 2};--wm:${anchoMovil(pz)};--xm:${k % 2 ? 96 - anchoMovil(pz) : 4};--ar:${pz.marca ? 1 : pz.ancho / pz.alto}`}>
+          <div class="pro__marco" data-pro-marco>
+            {pz.foto
+              ? <img src={`${base}assets/proyectos/${pz.foto}`} alt="" loading="lazy" decoding="async" />
+              : <div class="pro__tarjeta" style={`--fondo:${pz.fondo};--tinta:${pz.tinta || 'transparent'};--logo:${pz.logo};--src:url('${base}assets/partners/${pz.marca}')`}>
+                  {pz.tinta ? <span class="pro__mascara"></span> : <img src={`${base}assets/partners/${pz.marca}`} alt="" loading="lazy" decoding="async" />}
+                </div>}
+            {pz.provisional && <span class="pro__provisional mono">foto provisional</span>}
+            <span class="pro__velo" aria-hidden="true"></span>
+            <p class="pro__escrito mono" data-pro-escrito aria-hidden="true"></p>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <div class="pro__abierto" data-pro-abierto hidden>
+      <div class="pro__fondo-abierto" data-pro-cerrar-fondo></div>
+      <div class="pro__foco" data-pro-foco></div>
+      <div class="pro__ficha" data-pro-ficha role="dialog" aria-modal="true" aria-labelledby="pro-ficha-nombre">
+        <p class="pro__ficha-etq mono" data-f="etq"></p>
+        <h3 class="pro__ficha-nombre" id="pro-ficha-nombre" data-f="nombre"></h3>
+        <p class="pro__ficha-con mono" data-f="con"></p>
+        <p class="pro__ficha-texto" data-f="texto"></p>
+        <ul class="pro__ficha-datos" data-f="datos"></ul>
+        <a class="pro__ficha-enlace" data-f="enlace" href="#" data-sonido-hover>Ver proyecto <span aria-hidden="true">→</span></a>
+      </div>
+      <button class="pro__cerrar mono" type="button" data-pro-cerrar>Cerrar <span aria-hidden="true">✕</span></button>
+    </div>
+  </div>
+  <script type="application/json" data-pro-datos set:html={JSON.stringify(datos)} />
+</section>
+
+<style>
+  .pro { position: relative; height: 420vh; }
+  .pro__pegado { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
+
+  .pro__cabeza { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; text-align: center; pointer-events: none; padding: 0 var(--margen); }
+  .pro__etq { margin: 0 0 18px; color: var(--crema-3); }
+  .pro__titulo { margin: 0; font-family: var(--serif); font-weight: 300; font-size: clamp(54px, 9vw, 168px); line-height: .86; letter-spacing: -.035em; color: rgba(231, 226, 218, .9); }
+  .pro__titulo em { font-style: italic; color: var(--rosa); }
+  .pro__pista { margin: 26px 0 0; color: var(--crema-3); }
+  .pro__pista-dedo { display: none; }
+  @media (hover: none), (pointer: coarse) { .pro__pista-raton { display: none; } .pro__pista-dedo { display: inline; } }
+
+  .pro__lienzo { position: absolute; inset: 0; }
+  .pro__pieza {
+    position: absolute; top: 0; left: calc(var(--x) * 1%);
+    width: calc(var(--w) * 1vw);
+    will-change: transform;
+    outline: none;
+  }
+  .pro__marco {
+    position: relative; aspect-ratio: var(--ar); overflow: hidden;
+    background: var(--noche-2);
+    transition: transform .7s var(--curva), box-shadow .7s var(--curva);
+    box-shadow: 0 20px 60px -30px rgba(0, 0, 0, .7);
+  }
+  .pro__marco > img { width: 100%; height: 100%; object-fit: cover; transition: transform 1.2s var(--curva), filter .7s var(--curva); }
+  .pro__pieza.activa .pro__marco, .pro__pieza:focus-visible .pro__marco { transform: scale(1.05); box-shadow: 0 30px 90px -30px rgba(0, 0, 0, .9); }
+  .pro__pieza.activa .pro__marco > img { transform: scale(1.04); }
+  .pro__pieza:focus-visible .pro__marco { outline: 1px solid var(--rosa); outline-offset: 4px; }
+
+  .pro__tarjeta { position: absolute; inset: 0; display: grid; place-items: center; background: var(--fondo); }
+  .pro__tarjeta img { width: calc(var(--logo) * 100%); height: 60%; object-fit: contain; }
+  .pro__mascara { width: calc(var(--logo) * 100%); height: 60%; background: var(--tinta); -webkit-mask: var(--src) center / contain no-repeat; mask: var(--src) center / contain no-repeat; }
+
+  .pro__provisional { position: absolute; top: 8px; right: 8px; padding: 3px 6px; font-size: 9px; color: var(--tinta); background: var(--rosa); }
+  .pro__velo { position: absolute; inset: 0; background: linear-gradient(rgba(18, 13, 10, 0) 25%, rgba(18, 13, 10, .86)); opacity: 0; transition: opacity .5s var(--curva); pointer-events: none; }
+  .pro__pieza.activa .pro__velo { opacity: 1; }
+  .pro__escrito {
+    position: absolute; left: 14px; right: 14px; bottom: 12px; margin: 0;
+    font-size: 11px; line-height: 1.5; color: var(--crema); white-space: pre-wrap; text-transform: none; letter-spacing: .02em;
+    pointer-events: none;
+  }
+  .pro__escrito :global(b) { display: block; font-weight: 400; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--rosa); margin-bottom: 4px; }
+  .pro__escrito :global(.caret) { display: inline-block; width: .6em; height: 1.05em; margin-left: 1px; vertical-align: -2px; background: var(--crema); animation: caret 1s steps(1) infinite; }
+  @keyframes caret { 50% { opacity: 0; } }
+
+  /* Proyecto abierto */
+  .pro__abierto { position: absolute; inset: 0; z-index: 5; }
+  .pro__abierto[hidden] { display: none; }
+  .pro__fondo-abierto { position: absolute; inset: 0; background: rgba(18, 13, 10, .55); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); }
+  .pro__foco { position: absolute; overflow: hidden; box-shadow: 0 50px 140px -40px rgba(0, 0, 0, .95); }
+  .pro__foco > img, .pro__foco > .pro__tarjeta { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .pro__ficha {
+    position: absolute; right: calc(var(--margen) * 2); top: 50%; transform: translateY(-50%);
+    width: min(400px, 30vw);
+  }
+  .pro__ficha-etq { margin: 0 0 16px; color: var(--crema-3); }
+  .pro__ficha-nombre { margin: 0; font-family: var(--serif); font-weight: 300; font-size: clamp(36px, 3.6vw, 60px); line-height: .95; letter-spacing: -.02em; min-height: 1em; }
+  .pro__ficha-con { margin: 10px 0 0; color: var(--rosa); }
+  .pro__ficha-texto { margin: 26px 0 0; font-size: 15px; line-height: 1.55; color: var(--crema-2); }
+  .pro__ficha-datos { margin: 22px 0 0; padding: 0; list-style: none; border-top: 1px solid var(--linea); }
+  .pro__ficha-datos :global(li) { padding: 10px 0; border-bottom: 1px solid var(--linea); font-family: var(--mono); font-size: 11px; letter-spacing: .04em; text-transform: uppercase; color: var(--crema); }
+  .pro__ficha-datos :global(li)::before { content: '→ '; color: var(--rosa); }
+  .pro__ficha-enlace { display: inline-flex; gap: 10px; margin-top: 28px; padding: 12px 20px; border: 1px solid var(--crema); border-radius: 99px; font-size: 14px; transition: background-color .4s var(--curva), color .4s var(--curva); }
+  .pro__ficha-enlace:hover, .pro__ficha-enlace:focus-visible { background: var(--crema); color: var(--tinta); }
+  .pro__cerrar { position: absolute; top: var(--margen); right: var(--margen); padding: 10px 4px; color: var(--crema-2); }
+  .pro__cerrar:hover, .pro__cerrar:focus-visible { color: var(--crema); }
+  .pro a, .pro button { cursor: pointer !important; }
+
+  @media (max-width: 760px) {
+    .pro { height: 460vh; }
+    .pro__pieza { width: calc(var(--wm) * 1vw); left: calc(var(--xm) * 1vw); }
+    .pro__ficha { left: var(--margen); right: var(--margen); top: auto; bottom: calc(var(--margen) * 1.4); transform: none; width: auto; }
+    .pro__ficha-nombre { font-size: 38px; }
+    .pro__ficha-texto { margin-top: 14px; font-size: 14px; }
+    .pro__ficha-datos { display: none; }
+    .pro__ficha-enlace { margin-top: 16px; }
+  }
+
+  /* Sin movimiento: una rejilla quieta, con el texto ya escrito */
+  :global(html.mov-reducido) .pro { height: auto; padding: 16vh var(--margen); }
+  :global(html.mov-reducido) .pro__pegado { position: static; height: auto; overflow: visible; }
+  :global(html.mov-reducido) .pro__cabeza { position: static; margin-bottom: 8vh; }
+  :global(html.mov-reducido) .pro__lienzo { position: static; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 24px; }
+  :global(html.mov-reducido) .pro__pieza { position: relative; left: auto; width: auto; transform: none !important; }
+  :global(html.mov-reducido) .pro__abierto { position: fixed; }
+</style>

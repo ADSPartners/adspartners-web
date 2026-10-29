@@ -1,0 +1,19 @@
+---
+// Transición entre «Proyectos» y el contacto: «se enciende la luz». Un canvas 2D pegado a la pantalla en el que,
+// con el scroll, cada celda de la rejilla pasa de máquina (un glifo que parpadea) a crema maciza, en el orden de una
+// matriz de Bayer y de abajo arriba, hasta que todo es el capítulo claro del contacto.
+---
+<section class="tr" data-seccion="transicion" aria-hidden="true">
+  <div class="tr__pegado">
+    <canvas class="tr__canvas" data-tr-canvas></canvas>
+    <p class="tr__texto mono" data-tr-texto>encendiendo la luz…</p>
+  </div>
+</section>
+
+<style>
+  .tr { position: relative; height: 220vh; }
+  .tr__pegado { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
+  .tr__canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .tr__texto { position: absolute; left: 0; right: 0; top: 50%; margin: 0; text-align: center; color: var(--crema-2); mix-blend-mode: difference; }
+  :global(html.mov-reducido) .tr { display: none; }
+</style>

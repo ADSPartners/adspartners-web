@@ -79,5 +79,6 @@ const base = import.meta.env.BASE_URL;
     .portada__pista { display: block; margin: 22px 0 0; color: var(--crema-3); }
   }
   @media (hover: hover) and (pointer: fine) { .portada__pista { display: none !important; } }
-  :global(html.en-umbral) .portada__pista { visibility: hidden; }
+  /* Durante la carga, los textos de la portada esperan (el umbral ya no tiene velo opaco) */
+  :global(html.en-umbral) .portada [data-entra], :global(html.en-umbral) .portada__pista { visibility: hidden; }
 </style>

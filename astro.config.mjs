@@ -9,4 +9,7 @@ export default defineConfig({
   trailingSlash: 'ignore',
   build: { format: 'directory', assets: '_ads' },
   devToolbar: { enabled: false },
+  // Sin comprimir: comprimido, Astro se come el espacio entre un texto y la etiqueta de la línea siguiente
+  // («nadie.Juntas», «me llamo[hueco]»)
+  compressHTML: false,
 });

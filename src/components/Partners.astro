@@ -1,0 +1,109 @@
+---
+// Transición entre «Qué somos» y «Proyectos»: un túnel. Al bajar, la cámara avanza entre los 12 logos.
+// De lejos cada logo es máquina (su silueta en crema, tramada, con una etiqueta); al acercarse es marca (su color
+// de verdad sobre su tarjeta, con el nombre). Sin movimiento, una rejilla de logos.
+import { PARTNERS } from '../data/partners.js';
+const base = import.meta.env.BASE_URL;
+const dos = (n: number) => String(n).padStart(2, '0');
+---
+<section class="pt" id="partners" data-seccion="partners" aria-labelledby="pt-titulo">
+  <div class="pt__pegado" data-pt-pegado>
+    <div class="pt__intro" data-pt-intro>
+      <p class="pt__etq mono">( partners · {dos(PARTNERS.length)} )</p>
+      <h2 class="pt__titulo" id="pt-titulo">Gente que ya ha trabajado <em>con nosotros</em></h2>
+      <p class="pt__pista mono" aria-hidden="true">Sigue bajando: vamos a pasar por delante</p>
+    </div>
+
+    <ul class="pt__mundo" data-pt-mundo>
+      {PARTNERS.map((p, i) => (
+        <li class="pt__logo" data-pt-logo
+          style={`--fondo:${p.fondo};--tinta:${p.tinta || 'transparent'};--ancho:${p.ancho};--src:url('${base}assets/partners/${p.logo}')`}>
+          <div class="pt__tarjeta">
+            <span class="pt__cara pt__cara--maquina" aria-hidden="true">
+              <span class="pt__silueta"></span>
+              <span class="pt__esquinas"></span>
+            </span>
+            <span class="pt__cara pt__cara--marca">
+              {p.tinta
+                ? <span class="pt__mascara" role="img" aria-label={p.nombre}></span>
+                : <img src={`${base}assets/partners/${p.logo}`} alt={p.nombre} loading="lazy" decoding="async" />}
+            </span>
+          </div>
+          <p class="pt__pie">
+            <span class="pt__cod mono">partner_{dos(i + 1)} · {p.sector}</span>
+            <span class="pt__nombre">{p.nombre}</span>
+          </p>
+        </li>
+      ))}
+    </ul>
+
+    <p class="pt__fin" data-pt-fin aria-hidden="true"><span class="mono">( 03 )</span> Y esto es lo que hemos hecho</p>
+  </div>
+</section>
+
+<style>
+  .pt { position: relative; height: 380vh; }
+  .pt__pegado {
+    position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden;
+    perspective: 900px; perspective-origin: 50% 50%;
+  }
+  .pt__intro { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; text-align: center; padding: 0 var(--margen); pointer-events: none; }
+  .pt__etq { margin: 0 0 18px; color: var(--crema-3); }
+  .pt__titulo { margin: 0; font-family: var(--serif); font-weight: 300; font-size: clamp(38px, 5.4vw, 92px); line-height: .96; letter-spacing: -.025em; max-width: 12em; }
+  .pt__titulo em { font-style: italic; color: var(--rosa); }
+  .pt__pista { margin: 22px 0 0; color: var(--crema-3); }
+
+  .pt__mundo { position: absolute; left: 50%; top: 50%; width: 0; height: 0; margin: 0; padding: 0; list-style: none; transform-style: preserve-3d; }
+  .pt__logo {
+    --marca: 0;
+    position: absolute; left: 0; top: 0;
+    width: clamp(240px, 24vw, 400px);
+    transform-style: preserve-3d;
+    will-change: transform, opacity;
+  }
+  .pt__tarjeta { position: relative; aspect-ratio: 16 / 10; margin-left: -50%; margin-top: -31.25%; }
+  .pt__cara { position: absolute; inset: 0; display: grid; place-items: center; }
+  /* Máquina: la silueta del logo tramada en crema, en una caja con esquinas de recorte */
+  .pt__cara--maquina { opacity: calc(1 - var(--marca)); border: 1px dashed rgba(231, 226, 218, .22); }
+  .pt__silueta {
+    width: calc(var(--ancho) * 100%); height: 64%;
+    background: repeating-linear-gradient(0deg, rgba(231, 226, 218, .85) 0 1px, transparent 1px 3px);
+    -webkit-mask: var(--src) center / contain no-repeat; mask: var(--src) center / contain no-repeat;
+  }
+  .pt__esquinas { position: absolute; inset: -6px; pointer-events: none;
+    background:
+      linear-gradient(var(--crema), var(--crema)) left top / 12px 1px no-repeat, linear-gradient(var(--crema), var(--crema)) left top / 1px 12px no-repeat,
+      linear-gradient(var(--crema), var(--crema)) right top / 12px 1px no-repeat, linear-gradient(var(--crema), var(--crema)) right top / 1px 12px no-repeat,
+      linear-gradient(var(--crema), var(--crema)) left bottom / 12px 1px no-repeat, linear-gradient(var(--crema), var(--crema)) left bottom / 1px 12px no-repeat,
+      linear-gradient(var(--crema), var(--crema)) right bottom / 12px 1px no-repeat, linear-gradient(var(--crema), var(--crema)) right bottom / 1px 12px no-repeat;
+    opacity: .5; }
+  /* Marca: su tarjeta, su color y su logo de verdad */
+  .pt__cara--marca { opacity: var(--marca); background: var(--fondo); box-shadow: 0 30px 80px -30px rgba(0, 0, 0, .6); }
+  .pt__cara--marca img { width: calc(var(--ancho) * 100%); height: 64%; object-fit: contain; }
+  .pt__mascara { width: calc(var(--ancho) * 100%); height: 64%; background: var(--tinta);
+    -webkit-mask: var(--src) center / contain no-repeat; mask: var(--src) center / contain no-repeat; }
+
+  .pt__pie { margin: 12px 0 0 -50%; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; white-space: nowrap; }
+  .pt__cod { color: var(--crema-3); opacity: calc(1 - var(--marca) * .6); }
+  .pt__nombre { font-family: var(--serif); font-size: 22px; letter-spacing: -.01em; opacity: var(--marca); }
+
+  .pt__fin { position: absolute; left: 0; right: 0; bottom: 14vh; margin: 0; text-align: center; font-family: var(--serif); font-weight: 300; font-size: clamp(28px, 3vw, 46px); opacity: 0; pointer-events: none; }
+  .pt__fin .mono { display: block; margin-bottom: 12px; color: var(--crema-3); }
+
+  @media (max-width: 760px) {
+    .pt { height: 340vh; }
+    .pt__logo { width: 50vw; }
+    .pt__nombre { font-size: 18px; }
+    .pt__cod { font-size: 9px; }
+  }
+
+  /* Sin movimiento: una rejilla de logos en «marca» */
+  :global(html.mov-reducido) .pt { height: auto; padding: 18vh var(--margen); }
+  :global(html.mov-reducido) .pt__pegado { position: static; height: auto; overflow: visible; perspective: none; }
+  :global(html.mov-reducido) .pt__intro { position: static; margin-bottom: 8vh; }
+  :global(html.mov-reducido) .pt__pista, :global(html.mov-reducido) .pt__fin { display: none; }
+  :global(html.mov-reducido) .pt__mundo { position: static; width: auto; height: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 48px 24px; transform: none; }
+  :global(html.mov-reducido) .pt__logo { --marca: 1; position: relative; width: auto; transform: none !important; opacity: 1 !important; }
+  :global(html.mov-reducido) .pt__tarjeta { margin: 0; }
+  :global(html.mov-reducido) .pt__pie { margin: 12px 0 0; flex-direction: column; align-items: flex-start; gap: 4px; white-space: normal; }
+</style>
