@@ -79,7 +79,7 @@ void main () {
   // Al bajar, la máquina sube desde abajo celda a celda (con el grano del tramado), con un frente rosa
   vec2 celS = floor(px / (uCelda * 2.0));
   float yS = uv.y + hash(celS) * 0.09;
-  float frenteS = 0.035 + uSalida * 1.3;
+  float frenteS = uSalida * 1.4 - 0.1;   // en reposo (uSalida = 0) no hay ninguna celda
   float salida = portada * step(yS, frenteS);
   float filoS = portada * step(yS, frenteS + 0.014) * (1.0 - salida) * step(0.001, uSalida);
   mascaraP = max(mascaraP, salida);
@@ -133,8 +133,8 @@ void main () {
   col = mix(col, cRosa, max(filo0, filo1) * portada * 0.95);
   col = mix(col, cRosa, filoS * 0.55);
   col = mix(col, cRosa, frente * 0.9);
-  // El último borde, en noche: ahí empieza el fondo de la página
-  col = mix(col, cNoche, smoothstep(0.035, 0.0, uv.y) * portada);
+  // El último borde, en noche, solo al bajar (es donde empieza el fondo de la página); quieta, la portada no se toca
+  col = mix(col, cNoche, smoothstep(0.035, 0.0, uv.y) * portada * min(1.0, uSalida * 10.0));
   col += (hash(px + fract(uTime * 7.0) * 91.0) - 0.5) * 0.04;
   color = vec4(col * uIntro, 1.0);
 }`;

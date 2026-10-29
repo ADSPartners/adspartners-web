@@ -29,7 +29,7 @@
   <link rel="stylesheet" href="/_ads/index.ClVmhQ35.css">
 <style>@font-face{font-family:Apple Garamond;src:url(/assets/fonts/AppleGaramond-Light.woff2)format("woff2");font-weight:300;font-style:normal;font-display:swap}@font-face{font-family:Apple Garamond;src:url(/assets/fonts/AppleGaramond.woff2)format("woff2");font-weight:400;font-style:normal;font-display:swap}@font-face{font-family:Apple Garamond;src:url(/assets/fonts/AppleGaramond-Italic.woff2)format("woff2");font-weight:400;font-style:italic;font-display:swap}@font-face{font-family:Open Sauce;src:url(/assets/fonts/OpenSauceSans-Regular.woff2)format("woff2");font-weight:400;font-style:normal;font-display:swap}@font-face{font-family:Open Sauce;src:url(/assets/fonts/OpenSauceSans-Medium.woff2)format("woff2");font-weight:500;font-style:normal;font-display:swap}:root{--noche:#120d0a;--noche-2:#1b1410;--tinta:#190900;--crema:#e7e2da;--crema-2:#e7e2daa8;--crema-3:#e7e2da66;--linea:#e7e2da1f;--rosa:#f5cbd7;--serif:"Apple Garamond", Georgia, serif;--sans:"Open Sauce", system-ui, -apple-system, sans-serif;--mono:"Geist Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;--curva:cubic-bezier(.22, 1, .36, 1);--margen:clamp(18px, 2.2vw, 32px)}*,:before,:after{box-sizing:border-box}html{-webkit-text-size-adjust:100%;text-size-adjust:100%}html.lenis,html.lenis body{height:auto}.lenis.lenis-smooth{scroll-behavior:auto!important}body{background:var(--noche);color:var(--crema);font-family:var(--sans);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;margin:0;font-size:15px;line-height:1.5;overflow-x:clip}img,svg,video,canvas{max-width:100%;display:block}a{color:inherit;text-decoration:none}button{font:inherit;color:inherit;cursor:pointer;background:0 0;border:0;padding:0}:focus-visible{outline:1px solid var(--rosa);outline-offset:4px}::selection{background:var(--rosa);color:var(--tinta)}.oculto-accesible{clip:rect(0 0 0 0);white-space:nowrap;border:0;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;position:absolute!important}.mono{font-family:var(--mono);letter-spacing:.04em;text-transform:uppercase;font-size:11px;line-height:1.4}html.con-raton [data-vivo].vivo-on{text-shadow:calc(var(--vivo) * -10px) 0 #ff407880, calc(var(--vivo) * 10px) 0 #40c4ff6b;transform:skewX(calc(var(--vivo) * -7deg))}html.en-umbral body{overflow:hidden}@media (hover:hover) and (pointer:fine){html.cursor-propio [data-cursor]{cursor:none}html.cursor-propio [data-cursor] a,html.cursor-propio [data-cursor] button{cursor:pointer}}
 </style>
-<link rel="stylesheet" href="/_ads/index.Dng7cVrT.css"></head>
+<link rel="stylesheet" href="/_ads/index.DZlL6tZX.css"></head>
   <body>
     
   <div class="fondo" aria-hidden="true" data-astro-cid-lcdefpme><canvas class="fondo__gl" data-fondo data-astro-cid-lcdefpme></canvas></div>
@@ -357,8 +357,8 @@
     <input class="ct__miel" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" data-astro-cid-7b4tjujo>
 
     <div class="ct__pie" data-astro-cid-7b4tjujo>
-      <!-- La privacidad, como posdata de la carta. La casilla es tech (un plano: guías, asas de selección, su medida
-           real y su valor) y la marca encima es brand: un visto a boli rojo -->
+      <!-- La privacidad, como posdata de la carta. La casilla es un plano (guías y asas solo en algunas esquinas, un
+           lado que se alarga, su medida real y su valor) y el visto, rojo, se traza con dos rectas -->
       <label class="ct__pd" data-astro-cid-7b4tjujo>
         <input class="ct__pd-input" type="checkbox" name="acepto" required data-astro-cid-7b4tjujo>
         <span class="ct__pd-letra" data-astro-cid-7b4tjujo>P. D.</span>
@@ -366,12 +366,17 @@
           <svg viewBox="0 0 40 40" data-astro-cid-7b4tjujo>
             <path class="ct__pd-guias" d="M34 -16V6M-18 34H6" data-astro-cid-7b4tjujo></path>
             <rect class="ct__pd-marco" x="6" y="6" width="28" height="28" data-astro-cid-7b4tjujo></rect>
-            <path class="ct__pd-filo" d="M34 6H60M6 34V52" data-astro-cid-7b4tjujo></path>
+            <path class="ct__pd-filo" d="M6 34V54" data-astro-cid-7b4tjujo></path>
             <path class="ct__pd-cota" d="M14 43H34M14 41V45M34 41V45" data-astro-cid-7b4tjujo></path>
             <g class="ct__pd-asas" data-astro-cid-7b4tjujo>
               <rect x="32.3" y="4.3" width="3.4" height="3.4" data-astro-cid-7b4tjujo></rect><rect x="4.3" y="32.3" width="3.4" height="3.4" data-astro-cid-7b4tjujo></rect>
             </g>
-            <path class="ct__pd-tick" pathLength="1" d="M10 20 C 13 23, 15.5 26.5, 17.5 31 C 22 21.5, 28.5 12.5, 38 3.5" data-astro-cid-7b4tjujo></path>
+            <!-- El visto, también tech: una recta que baja y otra que sube y la cruza; en reposo, se «glitchea» -->
+            <g class="ct__pd-visto" data-astro-cid-7b4tjujo>
+              <path class="ct__pd-eco" d="M10 16L18.5 28.5M14 30.5L37.5 3" data-astro-cid-7b4tjujo></path>
+              <path class="ct__pd-v1" pathLength="1" d="M10 16L18.5 28.5" data-astro-cid-7b4tjujo></path>
+              <path class="ct__pd-v2" pathLength="1" d="M14 30.5L37.5 3" data-astro-cid-7b4tjujo></path>
+            </g>
           </svg>
           <span class="ct__pd-medida mono" data-astro-cid-7b4tjujo><span data-ct-medida data-astro-cid-7b4tjujo>27</span> px · </span>
         </span>
@@ -448,7 +453,7 @@
 </div>
   <script>(function(){const base = "/";
 window.ADS_BASE = base;})();</script>
-  <script type="module" src="/_ads/index.astro_astro_type_script_index_0_lang.C3ronlwz.js"></script>
+  <script type="module" src="/_ads/index.astro_astro_type_script_index_0_lang.B1IE2TLB.js"></script>
 
   </body>
 </html>

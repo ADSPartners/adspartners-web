@@ -74,7 +74,8 @@ const datos = PROYECTOS.map((p) => ({ ...p, enlace: `${base}proyectos/${p.slug}/
 </section>
 
 <style>
-  .pro { position: relative; height: 540vh; }
+  /* Los últimos 120vh son de la transición, que se monta encima (Transicion.astro) */
+  .pro { position: relative; height: 660vh; }
   .pro__pegado { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
 
   .pro__cabeza { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; text-align: center; pointer-events: none; padding: 0 var(--margen); }
@@ -155,7 +156,7 @@ const datos = PROYECTOS.map((p) => ({ ...p, enlace: `${base}proyectos/${p.slug}/
   .pro a, .pro button { cursor: pointer !important; }
 
   @media (max-width: 760px) {
-    .pro { height: 520vh; }
+    .pro { height: 640vh; }
     .pro__pieza { width: 86vw; left: calc(var(--xm) * 1vw); }
     .pro__ficha { left: var(--margen); right: var(--margen); top: auto; bottom: calc(var(--margen) * 1.4); transform: none; width: auto; }
     .pro__ficha-nombre { font-size: 38px; }

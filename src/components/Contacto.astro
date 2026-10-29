@@ -30,8 +30,8 @@
     <input class="ct__miel" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
 
     <div class="ct__pie">
-      <!-- La privacidad, como posdata de la carta. La casilla es tech (un plano: guías, asas de selección, su medida
-           real y su valor) y la marca encima es brand: un visto a boli rojo -->
+      <!-- La privacidad, como posdata de la carta. La casilla es un plano (guías y asas solo en algunas esquinas, un
+           lado que se alarga, su medida real y su valor) y el visto, rojo, se traza con dos rectas -->
       <label class="ct__pd">
         <input class="ct__pd-input" type="checkbox" name="acepto" required />
         <span class="ct__pd-letra">P. D.</span>
@@ -39,12 +39,17 @@
           <svg viewBox="0 0 40 40">
             <path class="ct__pd-guias" d="M34 -16V6M-18 34H6" />
             <rect class="ct__pd-marco" x="6" y="6" width="28" height="28" />
-            <path class="ct__pd-filo" d="M34 6H60M6 34V52" />
+            <path class="ct__pd-filo" d="M6 34V54" />
             <path class="ct__pd-cota" d="M14 43H34M14 41V45M34 41V45" />
             <g class="ct__pd-asas">
               <rect x="32.3" y="4.3" width="3.4" height="3.4" /><rect x="4.3" y="32.3" width="3.4" height="3.4" />
             </g>
-            <path class="ct__pd-tick" pathLength="1" d="M10 20 C 13 23, 15.5 26.5, 17.5 31 C 22 21.5, 28.5 12.5, 38 3.5" />
+            <!-- El visto, también tech: una recta que baja y otra que sube y la cruza; en reposo, se «glitchea» -->
+            <g class="ct__pd-visto">
+              <path class="ct__pd-eco" d="M10 16L18.5 28.5M14 30.5L37.5 3" />
+              <path class="ct__pd-v1" pathLength="1" d="M10 16L18.5 28.5" />
+              <path class="ct__pd-v2" pathLength="1" d="M14 30.5L37.5 3" />
+            </g>
           </svg>
           <span class="ct__pd-medida mono"><span data-ct-medida>27</span> px · </span>
         </span>
@@ -119,9 +124,9 @@
 
   .ct__pie { display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; margin-top: 8vh; }
 
-  /* P. D.: la casilla de privacidad. Tech (guías, asas, cota y valor) con el visto a boli rojo encima */
+  /* P. D.: la casilla de privacidad. Tech (guías, asas, cota y valor) con el visto rojo de dos rectas */
   .ct__pd {
-    position: relative; display: flex; align-items: center; gap: 28px; max-width: 600px;
+    position: relative; display: flex; align-items: center; gap: 44px; max-width: 620px;
     font-family: var(--serif); font-style: italic; font-size: clamp(18px, 1.55vw, 24px); line-height: 1.25; color: var(--tinta-2);
     cursor: pointer;
   }
@@ -140,12 +145,36 @@
     font-size: 9px; letter-spacing: .06em; white-space: nowrap; color: var(--tinta-2); font-style: normal;
   }
   .ct__pd-medida::after { content: 'false'; color: var(--tinta); }
-  .ct__pd-tick { fill: none; stroke: #C8361F; stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; transition: stroke-dashoffset .45s cubic-bezier(.6, 0, .2, 1), opacity 0s .45s; vector-effect: none; }
+  .ct__pd-visto { opacity: 0; transition: opacity 0s .2s; transform-box: fill-box; transform-origin: center; }
+  .ct__pd-visto path { fill: none; stroke: #C8361F; stroke-width: 2.6; stroke-linecap: butt; vector-effect: none; }
+  .ct__pd-v1, .ct__pd-v2 { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset .12s linear; }
+  .ct__pd-visto .ct__pd-eco { stroke: rgba(64, 196, 255, .75); opacity: 0; }
   /* Al pasar el ratón, las guías corren (hormigas de selección) y las asas se rellenan */
   .ct__pd:hover .ct__pd-guias, .ct__pd-input:focus-visible ~ .ct__pd-caja .ct__pd-guias { animation: guias .6s linear infinite; stroke: var(--tinta-2); }
   .ct__pd:hover .ct__pd-asas rect { fill: var(--tinta); }
   @keyframes guias { to { stroke-dashoffset: -5; } }
-  .ct__pd-input:checked ~ .ct__pd-caja .ct__pd-tick { stroke-dashoffset: 0; opacity: 1; transition: stroke-dashoffset .45s cubic-bezier(.6, 0, .2, 1), opacity 0s; }
+  /* Al marcar: primero la recta que baja, después la que sube y la cruza. Quieto, un glitch de vez en cuando */
+  .ct__pd-input:checked ~ .ct__pd-caja .ct__pd-visto { opacity: 1; transition: none; animation: visto-glitch 3.4s steps(1, end) .9s infinite; }
+  .ct__pd-input:checked ~ .ct__pd-caja .ct__pd-v1 { stroke-dashoffset: 0; transition: stroke-dashoffset .16s linear; }
+  .ct__pd-input:checked ~ .ct__pd-caja .ct__pd-v2 { stroke-dashoffset: 0; transition: stroke-dashoffset .24s cubic-bezier(.5, 0, .2, 1) .18s; }
+  .ct__pd-input:checked ~ .ct__pd-caja .ct__pd-eco { animation: visto-eco 3.4s steps(1, end) .9s infinite; }
+  @keyframes visto-glitch {
+    0%, 86% { transform: none; }
+    87% { transform: translate(1.6px, 0); }
+    88% { transform: translate(-1.2px, .6px); }
+    89%, 93% { transform: none; }
+    94% { transform: translate(.8px, -.6px) skewX(-10deg); }
+    95%, 100% { transform: none; }
+  }
+  @keyframes visto-eco {
+    0%, 86% { opacity: 0; transform: none; }
+    87% { opacity: 1; transform: translate(-2.4px, 0); }
+    88% { opacity: .8; transform: translate(2px, .4px); }
+    89%, 93% { opacity: 0; transform: none; }
+    94% { opacity: .9; transform: translate(-1.6px, .6px); }
+    95%, 100% { opacity: 0; transform: none; }
+  }
+  :global(html.mov-reducido) .ct__pd-visto, :global(html.mov-reducido) .ct__pd-eco { animation: none !important; }
   .ct__pd-input:checked ~ .ct__pd-caja .ct__pd-guias { opacity: .35; animation: none; }
   .ct__pd-input:checked ~ .ct__pd-caja .ct__pd-medida::after { content: 'true'; color: #C8361F; }
   .ct__pd-input:checked ~ .ct__pd-texto { color: var(--tinta); }

@@ -28,8 +28,10 @@ export function montar(sec, { reducido, conRaton, lenis, cursor }) {
   function medir() {
     L = Math.max(1, sec.offsetHeight - innerHeight);
     const n = piezas.length;
-    // La última pieza llega a media pantalla justo al final; la primera asoma ya al empezar
-    const hueco = (L * 0.98 * VEL - innerHeight * 0.32) / Math.max(1, n - 1);
+    // La última pieza llega a media pantalla justo cuando empieza la transición (los últimos 120vh, que la tapan
+    // mientras las fotos siguen subiendo); la primera asoma ya al empezar
+    const util = Math.max(1, L - innerHeight * 1.2);
+    const hueco = (util * 0.98 * VEL - innerHeight * 0.32) / Math.max(1, n - 1);
     base = piezas.map((_, i) => innerHeight * 0.82 + i * hueco * (0.97 + azar(i, 2) * 0.06));
   }
   medir();

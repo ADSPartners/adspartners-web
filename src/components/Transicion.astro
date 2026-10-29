@@ -1,5 +1,6 @@
 ---
-// Transición entre «Proyectos» y el contacto: «se enciende la luz». Un canvas 2D pegado a la pantalla en el que,
+// Transición entre «Proyectos» y el contacto: «se enciende la luz». Un canvas 2D pegado a la pantalla (encima del
+// final de «Proyectos», que sigue quieto debajo) en el que,
 // con el scroll, cada celda de la rejilla pasa de máquina (un glifo que parpadea) a crema maciza, en el orden de una
 // matriz de Bayer y de abajo arriba, hasta que todo es el capítulo claro del contacto.
 ---
@@ -11,7 +12,9 @@
 </section>
 
 <style>
-  .tr { position: relative; height: 220vh; }
+  /* Se monta sobre el final de «Proyectos» (que sigue pegado con su título en medio): los píxeles lo borran ahí
+     mismo y los dos se van juntos cuando la pantalla ya es crema */
+  .tr { position: relative; height: 220vh; margin-top: -220vh; pointer-events: none; }
   .tr__pegado { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
   .tr__canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
   .tr__texto { position: absolute; left: 0; right: 0; top: 50%; margin: 0; text-align: center; color: var(--crema-2); mix-blend-mode: difference; }
