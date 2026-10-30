@@ -1,4 +1,4 @@
-// Graba al asistente de la misión «Pregunta»: para cada pregunta, una ejecución real de Claude con dos herramientas,
+// Graba al asistente de la misión de «Observa»: para cada pregunta, una ejecución real de Claude con dos herramientas,
 // consultar_ventas (la de src/data/negocio.js, sobre los datos de la cafetería de ejemplo) y responder (la respuesta
 // final: frase, cifra y gráfica). Se guarda todo lo que hizo (consultas, resultados, respuesta, tiempos y tokens) en
 // src/data/preguntas.json, que es lo que la web reproduce (la web no llama a nadie).

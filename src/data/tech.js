@@ -4,8 +4,9 @@
 // Todo lo que se dice tiene que ser verdad: las cifras salen de los proyectos (src/data/proyectos.js) o se miden en
 // la propia misión. Nada inventado.
 // mision.modulo: el fichero de scripts/tech/ que la monta; sin él, todavía no tiene misión (no sale el botón).
-// El orden es el que pidió Álvaro el 30-oct: Pregunta, Conecta, Automatiza y A medida (y de la cuarta, otra vez a la
-// primera: el slider da la vuelta).
+// El orden es el que pidió Álvaro el 30-oct: Observa (antes «Pregunta»), Conecta, Automatiza y A medida (y de la
+// cuarta, otra vez a la primera: el slider da la vuelta).
+// entradilla: el texto de debajo del título al entrar; si no hay, el mismo del slider.
 import lectura from './lectura.json';
 import preguntas from './preguntas.json';
 
@@ -17,29 +18,30 @@ const segundos = (ms) => (ms / 1000).toLocaleString('es-ES', { maximumFractionDi
 
 export const TECH = [
   {
-    slug: 'pregunta',
+    slug: 'observa',
     servicio: 'Asistentes de IA',
-    titulo: 'Pregunta',
-    texto: 'Tu negocio, en una conversación. Le preguntas como a alguien de tu equipo y el asistente busca en tus datos y te contesta con la cifra y la gráfica.',
+    titulo: 'Observa',
+    texto: 'Tu negocio, en una conversación. Le preguntas y el asistente busca en tus datos y te contesta con la cifra y la gráfica.',
+    entradilla: 'Un asistente personalizado e integrado en el negocio que ordena datos, ve oportunidades y resalta mejoras.',
     puntos: [
       { p: [0.0, 0.95, -0.42], t: 'Respuesta · gráfica' },
       { p: [0.55, 0.0, 0.35], t: 'Tus datos' },
     ],
     articulo: {
       intro: [
-        'Los datos de una empresa están repartidos: las ventas en un sitio, los gastos en otro y los clientes en un tercero. Para saber cómo va el mes hay que pedírselo a alguien y esperar.',
+        'Los datos de una empresa están repartidos: contabilidad, clientes, plazos, stock, etc.',
         'Un asistente de IA conectado a esos datos contesta al momento, en lenguaje normal. Y no se inventa nada: cada respuesta sale de una consulta a tus datos, que puedes ver.',
       ],
       permite: [
         'Preguntar por ventas, gastos o clientes como se lo preguntarías a una persona',
-        'Ver la respuesta con su cifra y su gráfica, no un párrafo',
+        'Resaltar espacios de optimización y posibles puntos débiles de la operativa',
         'Saber de dónde sale cada número: la consulta queda a la vista',
         'Usarlo desde el ordenador, el móvil o el WhatsApp del equipo',
       ],
       cifras: [],
-      frase: 'Pregunta como hablas. Contesta con tus datos',
+      frase: 'Preguntas con normalidad. Contesta con exactitud.',
       ficha: [
-        ['Modelo', 'Claude, de Anthropic'],
+        ['Modelo', 'Depende de las necesidades'],
         ['Datos', 'Excel, base de datos, ERP o CRM'],
         ['Acceso', 'Solo lectura: no toca nada'],
         ['Respuesta', 'Cifra, gráfica y la consulta que la saca'],

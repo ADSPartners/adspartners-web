@@ -54,7 +54,7 @@ src/scripts/
                         los shaders), los modelos que se dibujan al llegar y la sala de las misiones
   tech/modelos.js       los modelos, hechos en código (portátil, tienda + Excel, escáner, microscopio), la peana, la antena y la sala
   tech/glitch.js        las letras de Tech notan el ratón: se mueven, se separan en rojo y azul y se rasgan en franjas pixeladas
-  tech/pregunta.js      misión «Pregunta»: mantienes pulsado para preguntar y el asistente (grabado) consulta y contesta
+  tech/pregunta.js      misión de «Observa»: mantienes pulsado para preguntar y el asistente (grabado) consulta y contesta
   tech/conecta.js       misión «Conecta»: el cable de la tienda al Excel, y los pedidos que pasan solos
   tech/factura.js       misión «Automatiza»: el lector que lee la factura y apunta la línea en el Excel
   tech/tejido.js        misión «A medida» (Tysiu): Otsu + regiones medidas, de verdad, en el navegador

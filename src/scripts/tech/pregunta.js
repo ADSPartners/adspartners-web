@@ -1,4 +1,4 @@
-// Misión «Pregunta»: pregúntale a la cafetería de ejemplo cómo le va. Eliges una pregunta y mantienes pulsado el botón
+// Misión de «Observa»: pregúntale a la cafetería de ejemplo cómo le va. Eliges una pregunta y mantienes pulsado el botón
 // (como una nota de voz): la pregunta se escribe mientras aprietas y, si sueltas antes, se borra. Al completarla, el
 // asistente hace lo que hizo de verdad en la grabación (src/data/preguntas.json, scripts/grabar-pregunta.mjs): decide
 // qué consultar, lo consulta (la consulta queda a la vista) y contesta con la cifra y la gráfica.

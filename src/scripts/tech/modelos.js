@@ -92,7 +92,7 @@ function escaner() {
   return t.listo();
 }
 
-// --- 01 · Pregunta: un portátil con la gráfica de la respuesta en la pantalla (la gráfica, en rosa) -------------
+// --- 01 · Observa: un portátil con la gráfica de la respuesta en la pantalla (la gráfica, en rosa) -------------
 function portatil() {
   const t = new Trazo();
   t.caja(0, -0.84, 0.35, 2.7, 0.1, 1.75);
@@ -180,9 +180,9 @@ function conexion() {
   return t.listo();
 }
 
-export const MODELOS = { pregunta: portatil, conecta: conexion, automatiza: escaner, 'a-medida': microscopio };
+export const MODELOS = { observa: portatil, conecta: conexion, automatiza: escaner, 'a-medida': microscopio };
 // Lo que crece cada uno para que pesen lo mismo en pantalla (el microscopio es estrecho; el portátil, ancho)
-export const ESCALA = { pregunta: 0.94, conecta: 1.04, automatiza: 1, 'a-medida': 1.32 };
+export const ESCALA = { observa: 0.94, conecta: 1.04, automatiza: 1, 'a-medida': 1.32 };
 
 // --- La peana de cada estación: el círculo del suelo, con sus marcas --------------------------------------------
 export function peana() {
