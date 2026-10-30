@@ -1,0 +1,399 @@
+---
+// Brand, «El manual que se defiende» (la idea del 29-oct; la eligió Álvaro el 30-oct). El manual de marca de adsPartners
+// abierto en la web, con su maqueta de verdad: la portada de papel doblado, el índice, los folios y la p. 29 del
+// logotipo. Intentas romperlo y se defiende: el inspector mide lo que has hecho y lo deshace (tech), y el manual se queja
+// al margen en Quetine, como un diseñador que corrige una prueba (brand). Primera ronda: portada, índice, logotipo y
+// cierre. Lo mueve scripts/brand.js; aquí está lo que se ve sin él (las reglas, en texto).
+import Base from '../../layouts/Base.astro';
+import Cursor from '../../components/Cursor.astro';
+import Marca from '../../components/Marca.astro';
+import logoRaw from '../../../public/assets/logos/logotipo_marron.svg?raw';
+import { nodos, nodosComoTrazo } from '../../scripts/brand/trazado.js';
+import { FOLIOS, INDICE, LOGO, CIERRE, remate } from '../../data/brand.js';
+
+const base = import.meta.env.BASE_URL;
+// El logotipo oficial, trazado a trazado, y sus nodos (se sacan aquí, al compilar)
+const viewBox = logoRaw.match(/viewBox="([^"]+)"/)[1];
+const trazos = [...logoRaw.matchAll(/\sd="([^"]+)"/g)].map((m) => m[1]);
+const puntos = trazos.flatMap(nodos);
+const proporcion = LOGO.proporcion.toFixed(2).replace('.', ',');
+---
+<Base
+  titulo="Brand · adsPartners®"
+  descripcion="El manual de marca de adsPartners, abierto. Intenta romperlo: se defiende solo. Así trabajamos la identidad, las webs, la dirección de arte y el contenido de tu marca."
+>
+  <!-- Arriba, fija: el logotipo, el sonido, la hora y la vuelta a la página principal -->
+  <div class="bm-barra">
+    <a class="bm-barra__logo" href={base} aria-label="adsPartners, inicio" data-sonido-hover><Marca tipo="logo" /></a>
+    <button class="bm-barra__sonido" type="button" aria-pressed="false" aria-label="Sonido" data-sonido-btn data-sonido-hover><span data-sonido-txt>Sonido off</span> —</button>
+    <p class="bm-barra__donde" aria-hidden="true"><span>Desde Madrid</span><span class="bm-barra__hora" data-bm-hora></span></p>
+    <a class="bm-barra__volver" href={base} data-sonido-hover><span class="bm-flecha" aria-hidden="true">◀</span> <span class="bm-subraya">Página principal</span></a>
+  </div>
+
+  <!-- Abajo, fijo (aparece al llegar al logotipo): lo que llevas intentado y lo que has conseguido, que no se mueve -->
+  <p class="bm-contador" data-bm-contador>
+    <span>Intentos <b data-bm-intentos>00</b></span>
+    <span>Conseguidos <b>00</b></span>
+  </p>
+
+  <main class="bm" data-brand data-cursor="manual">
+    <h1 class="oculto-accesible">Brand: el manual de marca de adsPartners</h1>
+
+    <!-- p. 01 · La portada del manual, tal cual: papel doblado, «Brand guide» y el isotipo en rosa -->
+    <section class="bm-pag bm-portada" aria-label="Portada del manual" style={`--papel: url('${base}assets/brand/papel.webp'); --papel-movil: url('${base}assets/brand/papel-movil.webp')`}>
+      <p class="bm-portada__titulo" data-vivo>Brand guide</p>
+      <p class="bm-portada__esq bm-portada__esq--a">Est. 2025</p>
+      <p class="bm-portada__esq bm-portada__esq--b">Based in Madrid / Available worldwide</p>
+      <div class="bm-portada__iso" aria-hidden="true"><Marca tipo="iso" /></div>
+      <p class="bm-portada__mano bm-mano" aria-hidden="true">Intenta romperlo.</p>
+      <p class="bm-portada__pie bm-portada__pie--a"><span class="bm-nombre">adsPartners<sup>®</sup></span><br />Brand · Tech<br />Octubre 2026</p>
+      <p class="bm-portada__pie bm-portada__pie--b">ads-partners.com<br />adsgroup@ads-partners.com</p>
+    </section>
+
+    <!-- p. 04 · El índice -->
+    <section class="bm-pag bm-indice" aria-labelledby="bm-indice-t">
+      <p class="bm-doc">
+        <span class="bm-doc__iso"><Marca tipo="iso" /></span>
+        <span class="bm-doc__t">Documento de uso <s>interno</s><span class="bm-doc__mano bm-mano">externo, por una vez</span></span>
+      </p>
+      <h2 class="bm-indice__t" id="bm-indice-t">Lo que verás por aquí:</h2>
+      <ol class="bm-indice__lista">
+        {INDICE.map((it) => (
+          <li class={it.id ? '' : 'bm-indice__luego'}>
+            {it.id
+              ? <a href={`#${it.id}`} data-sonido-hover><span class="bm-indice__n">{it.n}.</span>{it.t}</a>
+              : <span><span class="bm-indice__n">{it.n}.</span>{it.t}<span class="bm-indice__nota bm-mano" aria-hidden="true">en la próxima ronda</span></span>}
+          </li>
+        ))}
+      </ol>
+      <p class="bm-indice__intro">
+        Esto es el manual de nuestra marca, el de verdad: las reglas que la mantienen entera en todos los sitios. Están
+        hechas para cumplirse solas. Compruébalo: intenta romperla.
+      </p>
+      <p class="bm-folio"><span class="bm-nombre">adsPartners<sup>®</sup></span><br />Brand guide<span class="bm-folio__p bm-mano">p. {FOLIOS.indice}</span></p>
+    </section>
+
+    <!-- p. 29 · El logotipo: estíralo, aplástalo o gíralo; vuelve a su sitio -->
+    <section class="bm-pag bm-logo" id="logotipo" aria-labelledby="bm-logo-t">
+      <header class="bm-cab">
+        <p class="bm-kicker">Identidad visual</p>
+        <h2 class="bm-cab__t" id="bm-logo-t">Logotipo</h2>
+      </header>
+      <p class="bm-doc"><span class="bm-doc__iso"><Marca tipo="iso" /></span><span class="bm-doc__t">Documento de uso externo</span></p>
+
+      <div class="bl" data-bl>
+        <!-- El plano: dónde va el logo de verdad (guías solo en algunas esquinas, cotas con su medida) -->
+        <div class="bl__plano" aria-hidden="true">
+          <i class="bl__guia bl__guia--h bl__guia--arriba"></i>
+          <i class="bl__guia bl__guia--h bl__guia--abajo"></i>
+          <i class="bl__guia bl__guia--v bl__guia--izq"></i>
+          <i class="bl__guia bl__guia--v bl__guia--dcha"></i>
+          <span class="bl__cota bl__cota--x mono"><span data-bl-cota="x">—</span></span>
+          <span class="bl__cota bl__cota--y mono"><span data-bl-cota="y">—</span></span>
+        </div>
+        <svg class="bl__svg" viewBox={viewBox} role="img" aria-label="adsPartners" data-bl-svg>
+          <g data-bl-g>
+            <g class="bl__relleno">{trazos.map((d) => <path d={d} />)}</g>
+            <g class="bl__contorno">{trazos.map((d) => <path d={d} />)}</g>
+            <path class="bl__nodos" d={nodosComoTrazo(puntos)} />
+          </g>
+        </svg>
+        <span class="bl__asa" data-bl-asa="ne" aria-hidden="true"></span>
+        <span class="bl__asa" data-bl-asa="so" aria-hidden="true"></span>
+        <span class="bl__asa bl__asa--giro" data-bl-asa="giro" aria-hidden="true"></span>
+        <i class="bl__brazo" data-bl-brazo aria-hidden="true"></i>
+        <div class="bl__caja" data-bl-caja aria-hidden="true"></div>
+        <span class="insp bl__etq" data-bl-etq aria-hidden="true"></span>
+        <p class="bl__queja bm-mano" data-bl-queja aria-live="polite">
+          <span data-bl-queja-t></span>
+          <svg class="bl__flecha" viewBox="0 0 120 70" aria-hidden="true"><path d="M114 6C92 10 70 22 54 38S26 60 8 62M8 62l15-11M8 62l17 4" pathLength="1" /></svg>
+        </p>
+      </div>
+
+      <div class="bm-regla">
+        <h3 class="bm-regla__t">Logotipo principal</h3>
+        <p>{LOGO.regla}</p>
+        <p class="bm-regla__datos mono">Proporción {proporcion} : 1 · {trazos.length} trazados · {puntos.length} nodos</p>
+      </div>
+      <p class="bm-pista mono" aria-hidden="true"><span class="bm-pista__raton">Agarra una esquina y estíralo</span><span class="bm-pista__dedo">Arrastra una esquina</span></p>
+      <p class="bm-folio"><span class="bm-nombre">adsPartners<sup>®</sup></span><br />Brand guide<span class="bm-folio__p bm-mano">p. {FOLIOS.logo}</span></p>
+    </section>
+
+    <!-- p. 43 · Lo que hacemos con la tuya -->
+    <section class="bm-pag bm-cierre" id="la-tuya" aria-labelledby="bm-cierre-t">
+      <header class="bm-cab">
+        <p class="bm-kicker">Resumen operativo</p>
+        <p class="bm-cab__t">Brand</p>
+      </header>
+      <p class="bm-doc"><span class="bm-doc__iso"><Marca tipo="iso" /></span><span class="bm-doc__t">Documento de uso externo</span></p>
+
+      <div class="bm-cierre__rejilla">
+        <div class="bm-cierre__izq">
+          <h2 class="bm-cierre__t" id="bm-cierre-t" data-vivo>{CIERRE.titulo}</h2>
+          <p class="bm-cierre__remate" data-bm-remate>{remate(0)}</p>
+        </div>
+        <div class="bm-cierre__dcha">
+          <div class="bm-cierre__texto">
+            {CIERRE.texto.map((p) => <p>{p}</p>)}
+          </div>
+          <ul class="bm-cierre__servicios mono">
+            {CIERRE.servicios.map((s) => <li>{s}</li>)}
+          </ul>
+          <p class="bm-cierre__quien bm-mano">{CIERRE.quien}</p>
+          <a class="bm-cierre__carta" href={`${base}#contacto`} data-sonido-hover><span class="bm-subraya">Cuéntanos la tuya</span> <span class="bm-flecha" aria-hidden="true">▶</span></a>
+        </div>
+      </div>
+      <p class="bm-folio"><span class="bm-nombre">adsPartners<sup>®</sup></span><br />Brand guide<span class="bm-folio__p bm-mano">p. {FOLIOS.cierre}</span></p>
+    </section>
+  </main>
+  <Cursor />
+  <script>
+    import { arrancarPagina } from '../../scripts/pagina.js';
+    import { montarBrand } from '../../scripts/brand.js';
+    arrancarPagina(montarBrand);
+  </script>
+</Base>
+
+<style is:global>
+  /* Las letras del manual que la home no usa: Open Sauce en negrita (los antetítulos) y Quetine (la de detalle) */
+  @font-face { font-family: 'Open Sauce'; src: url('/assets/fonts/OpenSauceSans-Bold.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'Quetine'; src: url('/assets/fonts/Quetine.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+  /* La página es papel: en claro, y el cursor propio en tinta */
+  html:has(main.bm), html:has(main.bm) body { background: var(--crema); color: var(--tinta); }
+  html:has(main.bm) .cursor__iso, html:has(main.bm) .cursor__texto { color: var(--tinta); }
+  html:has(main.bm) .cursor__pista { stroke: rgba(25, 9, 0, .3); }
+</style>
+
+<style>
+  .bm {
+    --marron: #34190A;
+    --gris: rgba(25, 9, 0, .46);
+    --raya: rgba(25, 9, 0, .14);
+    --arriba: 72px;
+    color: var(--tinta); background: var(--crema);
+  }
+  .bm-mano { font-family: 'Quetine', 'Apple Garamond', cursive; font-weight: 400; letter-spacing: 0; text-transform: none; }
+  .bm-subraya { text-decoration: underline; text-underline-offset: 2px; }
+  .bm-flecha { display: inline-block; font-size: 10px; transition: transform .4s var(--curva); }
+
+  /* --- La barra de arriba -------------------------------------------------------------------------------------- */
+  .bm-barra {
+    position: fixed; left: 0; right: 0; top: 0; z-index: 30;
+    display: flex; align-items: center; gap: 32px; padding: 16px var(--margen);
+    font-size: 13px; line-height: 1.22; font-weight: 500; color: var(--tinta); pointer-events: none;
+  }
+  .bm-barra > * { pointer-events: auto; }
+  .bm-barra__logo { width: 104px; }
+  .bm-barra__logo :global(svg) { width: 100%; height: auto; }
+  .bm-barra__donde { margin: 0; display: flex; gap: 8px; }
+  .bm-barra__hora { opacity: .58; font-variant-numeric: tabular-nums; }
+  .bm-barra__volver { margin-left: auto; }
+  .bm-barra__volver .bm-flecha { margin-right: 4px; }
+  .bm-barra__volver:hover .bm-flecha, .bm-barra__volver:focus-visible .bm-flecha { transform: translateX(-4px); }
+
+  /* --- El contador ---------------------------------------------------------------------------------------------- */
+  .bm-contador {
+    position: fixed; right: var(--margen); bottom: var(--margen); z-index: 30; margin: 0;
+    display: grid; justify-items: end; gap: 4px;
+    font-family: var(--mono); font-size: 10px; line-height: 1; letter-spacing: .04em; text-transform: uppercase;
+    opacity: 0; transform: translateY(8px); transition: opacity .5s var(--curva), transform .5s var(--curva); pointer-events: none;
+  }
+  .bm-contador.on { opacity: 1; transform: none; }
+  .bm-contador span { display: flex; align-items: baseline; gap: 10px; }
+  .bm-contador b { font-family: var(--sans); font-weight: 500; font-size: 22px; letter-spacing: -.02em; font-variant-numeric: tabular-nums; display: inline-block; }
+  .bm-contador b.salta { animation: bm-salta .5s var(--curva); }
+  @keyframes bm-salta { 0% { transform: translateY(-40%); opacity: 0; } 100% { transform: none; opacity: 1; } }
+
+  /* --- Lo común de cada página del manual: antetítulo y título, el «documento de uso» y el folio ---------------- */
+  .bm-pag { position: relative; min-height: 100vh; min-height: 100svh; padding: var(--arriba) var(--margen) var(--margen); overflow: hidden; }
+  .bm-pag + .bm-pag { border-top: 1px solid var(--raya); }
+  .bm-cab { position: absolute; left: var(--margen); top: var(--arriba); }
+  .bm-kicker { margin: 0; font-size: 10px; line-height: 1.2; font-weight: 700; letter-spacing: .01em; text-transform: uppercase; }
+  .bm-cab__t { margin: 3px 0 0; font-family: var(--serif); font-weight: 400; font-size: clamp(26px, 2.3vw, 38px); line-height: 1; letter-spacing: -.015em; }
+  .bm-doc {
+    position: absolute; right: var(--margen); top: var(--arriba); margin: 0;
+    display: grid; justify-items: end; gap: 8px; font-size: 10px; line-height: 1.2; font-weight: 500; text-transform: uppercase;
+  }
+  .bm-doc__iso { width: 44px; }
+  .bm-doc__iso :global(svg) { width: 100%; height: auto; }
+  .bm-doc__t { position: relative; }
+  .bm-doc__t s { text-decoration-thickness: 1.5px; }
+  /* «externo, por una vez», a boli debajo de lo tachado (encima va el isotipo) */
+  .bm-doc__mano { position: absolute; right: 0; top: calc(100% + 4px); font-size: 26px; line-height: 1; white-space: nowrap; color: var(--marron); transform: rotate(-4deg); transform-origin: 100% 0; }
+  /* El nombre, siempre «adsPartners», aunque el resto vaya en mayúsculas (regla del manual) */
+  .bm-nombre { text-transform: none; }
+  .bm-folio { position: absolute; left: var(--margen); bottom: var(--margen); margin: 0; font-size: 11px; line-height: 1.1; font-weight: 700; text-transform: uppercase; }
+  .bm-folio sup, .bm-portada__pie sup { font-size: .55em; }
+  .bm-folio__p { display: block; margin-top: 6px; font-size: 20px; line-height: 1; }
+
+  /* --- p. 01 · La portada ---------------------------------------------------------------------------------------- */
+  .bm-portada {
+    padding-top: calc(var(--arriba) - 8px);
+    background: #8E8074 var(--papel) center / cover no-repeat; background-blend-mode: multiply;
+  }
+  .bm-portada__titulo {
+    margin: 0; text-align: center; white-space: nowrap;
+    font-weight: 700; font-size: 13.4vw; line-height: .78; letter-spacing: -.05em; text-transform: uppercase;
+    color: rgba(25, 9, 0, .74); mix-blend-mode: multiply;
+  }
+  .bm-portada__esq { position: absolute; top: calc(var(--arriba) + 11.4vw); margin: 0; font-size: 11px; font-weight: 500; text-transform: uppercase; }
+  .bm-portada__esq--a { left: var(--margen); }
+  .bm-portada__esq--b { right: var(--margen); }
+  .bm-portada__iso { position: absolute; left: 50%; bottom: -.5vw; width: min(94vw, 230vh); color: var(--rosa); transform: translateX(-50%); }
+  .bm-portada__iso :global(svg) { width: 100%; height: auto; }
+  .bm-portada__mano { position: absolute; right: 9vw; top: calc(var(--arriba) + 16vw); margin: 0; font-size: clamp(40px, 4.6vw, 80px); line-height: 1; color: var(--tinta); transform: rotate(-6deg); }
+  .bm-portada__pie { position: absolute; bottom: var(--margen); z-index: 1; margin: 0; font-size: 11px; line-height: 1.15; font-weight: 500; text-transform: uppercase; }
+  .bm-portada__pie--a { left: var(--margen); }
+  .bm-portada__pie--b { right: var(--margen); text-align: right; text-transform: none; font-size: 12px; }
+
+  /* --- p. 04 · El índice ----------------------------------------------------------------------------------------- */
+  .bm-indice__t { position: absolute; left: 5.6%; top: 12%; margin: 0; font-family: var(--serif); font-weight: 400; font-size: clamp(32px, 3vw, 52px); line-height: 1; letter-spacing: -.015em; }
+  .bm-indice__lista { position: absolute; left: 7.6%; top: 38%; margin: 0; padding: 0; list-style: none; font-family: var(--serif); font-size: clamp(18px, 1.4vw, 24px); line-height: 1.18; }
+  .bm-indice__lista a:hover { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+  .bm-indice__n { display: inline-block; min-width: 1.1em; }
+  .bm-indice__luego { color: rgba(25, 9, 0, .36); }
+  .bm-indice__nota { margin-left: 14px; font-size: 1.15em; color: var(--marron); opacity: .8; }
+  .bm-indice__intro { position: absolute; left: 50%; top: 38%; margin: 0; max-width: 40ch; font-size: 15px; line-height: 1.45; }
+
+  /* --- p. 29 · El logotipo --------------------------------------------------------------------------------------- */
+  .bl {
+    position: absolute; left: 50%; top: 47%; width: min(64vw, 1180px); aspect-ratio: 2500 / 363.858;
+    transform: translate(-50%, -50%); touch-action: none;
+  }
+  .bl__svg { width: 100%; height: 100%; overflow: visible; color: var(--tinta); }
+  /* Sin el cursor propio (que ya dice qué hacer), los del sistema */
+  :global(html:not(.cursor-propio)) .bl__svg { cursor: grab; }
+  :global(html:not(.cursor-propio)) .bl.tirando .bl__svg { cursor: grabbing; }
+  :global(html:not(.cursor-propio)) .bl__asa { cursor: nesw-resize; }
+  :global(html:not(.cursor-propio)) .bl__asa--giro { cursor: grab; }
+  .bl__relleno path { fill: currentColor; }
+  .bl__relleno { transition: opacity .4s var(--curva); }
+  .bl__contorno path { fill: none; stroke: var(--tinta); stroke-width: 1; vector-effect: non-scaling-stroke; }
+  .bl__nodos { fill: none; stroke: var(--tinta); stroke-width: 3.5; stroke-linecap: square; vector-effect: non-scaling-stroke; }
+  .bl__contorno, .bl__nodos { opacity: 0; transition: opacity .4s var(--curva); }
+  /* Al tirar, el logo enseña cómo está hecho: contornos y nodos, como en Illustrator */
+  .bl.tirando .bl__relleno { opacity: .07; }
+  .bl.tirando .bl__contorno, .bl.tirando .bl__nodos { opacity: 1; }
+
+  /* El plano: aparece al acercarse (en el móvil, siempre, más tenue) */
+  .bl__plano { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .6s var(--curva); }
+  .bl.cerca .bl__plano, .bl.tirando .bl__plano { opacity: 1; }
+  .bl__guia { position: absolute; display: block; }
+  .bl__guia--h { height: 1px; background: repeating-linear-gradient(90deg, rgba(25, 9, 0, .42) 0 3px, transparent 3px 7px); }
+  .bl__guia--v { width: 1px; background: repeating-linear-gradient(0deg, rgba(25, 9, 0, .42) 0 3px, transparent 3px 7px); }
+  .bl__guia--arriba { top: 0; left: -44px; right: -110px; }
+  .bl__guia--abajo { bottom: 0; left: -22px; right: -36px; }
+  .bl__guia--izq { left: 0; top: -84px; bottom: -40px; background: rgba(25, 9, 0, .5); }
+  .bl__guia--dcha { right: 0; top: -30px; bottom: -64px; }
+  .bl__cota { position: absolute; display: flex; align-items: center; justify-content: center; color: var(--gris); font-size: 10px; }
+  .bl__cota span { padding: 0 6px; background: var(--crema); }
+  .bl__cota--x { left: 0; right: 0; bottom: -34px; height: 1px; background: var(--gris); }
+  .bl__cota--x::before, .bl__cota--x::after { content: ''; position: absolute; top: -4px; width: 1px; height: 9px; background: var(--gris); }
+  .bl__cota--x::before { left: 0; }
+  .bl__cota--x::after { right: 0; }
+  .bl__cota--y { top: 0; bottom: 0; left: -30px; width: 1px; background: var(--gris); }
+  .bl__cota--y span { transform: rotate(-90deg); white-space: nowrap; }
+
+  /* Las asas (dos esquinas y el giro): las coloca brand/logo.js donde estén las esquinas de verdad */
+  .bl__asa {
+    position: absolute; left: 0; top: 0; z-index: 2; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px;
+    border: 1px solid var(--tinta); background: var(--crema); touch-action: none;
+    opacity: 0; transition: opacity .5s var(--curva);
+  }
+  .bl__asa::before { content: ''; position: absolute; inset: -14px; }
+  .bl__asa--giro { border-radius: 50%; }
+  .bl__brazo { position: absolute; left: 0; top: 0; width: 1px; background: var(--tinta); transform-origin: 50% 0; opacity: 0; transition: opacity .5s var(--curva); }
+  .bl.cerca .bl__asa, .bl.tirando .bl__asa, .bl.cerca .bl__brazo, .bl.tirando .bl__brazo { opacity: 1; }
+  :global(html:not(.js)) .bl__asa, :global(html:not(.js)) .bl__brazo { display: none; }
+
+  /* La caja del inspector (se abre como una persiana) y su etiqueta */
+  .bl__caja { position: absolute; left: 0; top: 0; pointer-events: none; outline: 1px solid var(--tinta); background: rgba(245, 203, 215, .16); clip-path: inset(50% 0 50% 0); }
+  .bl__etq { position: absolute; left: 0; top: 0; z-index: 3; opacity: 0; transition: opacity .25s; pointer-events: none; }
+  .bl__etq.on { opacity: 1; }
+
+  /* La queja, a boli, en el margen: se escribe de izquierda a derecha y una flecha señala el logo */
+  .bl__queja {
+    position: absolute; right: 4%; bottom: calc(100% + 78px); z-index: 2; margin: 0;
+    font-size: clamp(28px, 2.6vw, 46px); line-height: 1; color: var(--marron); white-space: nowrap;
+    transform: rotate(-4deg); transform-origin: 100% 100%; pointer-events: none;
+  }
+  .bl__queja span { display: block; clip-path: inset(-30% 100% -40% 0); }
+  .bl__flecha { position: absolute; left: -2.4em; top: 55%; width: 2em; overflow: visible; }
+  .bl__flecha path { fill: none; stroke: var(--marron); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; }
+
+  .bm-regla { position: absolute; left: var(--margen); bottom: 17%; max-width: 38ch; }
+  .bm-regla__t { margin: 0 0 10px; font-family: var(--serif); font-weight: 400; font-size: 24px; line-height: 1.05; }
+  .bm-regla p { margin: 0; font-size: 14px; line-height: 1.45; }
+  .bm-regla .bm-regla__datos { margin-top: 12px; color: var(--gris); font-size: 10px; }
+  .bm-pista { position: absolute; left: 50%; bottom: var(--margen); margin: 0; color: var(--gris); transform: translateX(-50%); white-space: nowrap; }
+  .bm-pista__dedo { display: none; }
+  @media (hover: none), (pointer: coarse) {
+    .bm-pista__raton { display: none; }
+    .bm-pista__dedo { display: inline; }
+    .bl .bl__plano { opacity: .55; }
+    .bl .bl__asa, .bl .bl__brazo { opacity: 1; }
+    .bl__asa { width: 13px; height: 13px; margin: -6.5px 0 0 -6.5px; }
+  }
+
+  /* --- p. 43 · Lo que hacemos con la tuya ------------------------------------------------------------------------ */
+  .bm-cierre__rejilla {
+    display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); column-gap: 5vw; align-items: stretch;
+    min-height: calc(100svh - var(--arriba) - var(--margen)); padding: 15vh 4vw 12vh 0;
+  }
+  .bm-cierre__izq { display: flex; flex-direction: column; justify-content: space-between; gap: 6vh; }
+  .bm-cierre__dcha { padding-top: 1.2vw; }
+  .bm-cierre__t { margin: 0; max-width: 11ch; font-family: var(--serif); font-weight: 300; font-size: clamp(46px, 6.2vw, 112px); line-height: .94; letter-spacing: -.025em; }
+  .bm-cierre__texto { font-size: 16px; line-height: 1.5; }
+  .bm-cierre__texto p { margin: 0 0 1em; }
+  .bm-cierre__servicios { margin: 3vh 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 20px; }
+  .bm-cierre__servicios li { padding-top: 8px; border-top: 1px solid var(--raya); }
+  .bm-cierre__quien { margin: 4vh 0 0; font-size: 34px; line-height: 1; color: var(--marron); transform: rotate(-3deg); transform-origin: 0 50%; }
+  .bm-cierre__remate { margin: 0; font-family: var(--serif); font-style: italic; font-size: clamp(20px, 1.7vw, 28px); line-height: 1.2; }
+  .bm-cierre__carta { display: inline-block; margin-top: 5vh; font-weight: 500; }
+  .bm-cierre__carta .bm-flecha { margin-left: 4px; }
+  .bm-cierre__carta:hover .bm-flecha, .bm-cierre__carta:focus-visible .bm-flecha { transform: translateX(4px); }
+
+  /* --- Móvil ----------------------------------------------------------------------------------------------------- */
+  @media (max-width: 760px) {
+    .bm { --arriba: 58px; }
+    .bm-barra { gap: 18px; padding: 14px var(--margen); font-size: 12px; }
+    .bm-barra__logo { width: 84px; }
+    .bm-barra__donde { display: none; }
+    .bm-contador b { font-size: 18px; }
+
+    .bm-portada__titulo { white-space: normal; font-size: 25vw; line-height: .8; margin-top: 4px; }
+    .bm-portada { background-image: var(--papel-movil); }
+    .bm-portada__esq { top: calc(var(--arriba) + 46vw); font-size: 10px; }
+    .bm-portada__esq--b { max-width: 20ch; text-align: right; }
+    .bm-portada__iso { width: 94vw; bottom: 16vh; }
+    .bm-portada__mano { right: auto; left: var(--margen); top: auto; bottom: calc(16vh + 46vw); font-size: 40px; }
+    .bm-portada__pie { font-size: 10px; }
+    .bm-portada__pie--b { font-size: 11px; }
+
+    .bm-indice__t { position: static; margin-top: 18vh; }
+    .bm-indice__lista { position: static; margin-top: 6vh; padding-left: 2px; }
+    .bm-indice__nota { display: block; margin: -2px 0 6px 1.1em; }
+    .bm-indice__intro { position: static; margin-top: 6vh; padding-bottom: 80px; }
+    .bm-doc__mano { font-size: 22px; }
+
+    .bl { top: 44%; width: calc(100vw - var(--margen) * 2 - 24px); }
+    .bl__guia--arriba { right: -16px; }
+    .bl__guia--abajo { right: -12px; }
+    .bl__queja { right: 0; bottom: calc(100% + 56px); width: 74vw; font-size: 28px; line-height: 1.05; white-space: normal; text-align: right; }
+    .bl__flecha { left: -1.6em; top: 70%; width: 1.5em; }
+    .bl__etq { white-space: normal; max-width: calc(100vw - 24px); }
+    .bm-regla { left: var(--margen); right: var(--margen); bottom: 13%; }
+    .bm-regla__t { font-size: 20px; }
+    .bm-pista { bottom: calc(var(--margen) + 4px); left: var(--margen); transform: none; }
+    .bm-logo .bm-folio, .bl__cota--y { display: none; }
+
+    /* En columna: el título, lo que hacemos y, al final, el remate */
+    .bm-cierre__rejilla { display: flex; flex-direction: column; min-height: 0; padding: 14vh 0 18vh; }
+    .bm-cierre__izq { display: contents; }
+    .bm-cierre__dcha { order: 2; padding-top: 5vh; }
+    .bm-cierre__remate { order: 3; margin-top: 6vh; }
+    .bm-cierre__texto { font-size: 15px; }
+    .bm-cierre__quien { font-size: 30px; }
+    .bm-cierre__carta { margin-top: 4vh; }
+  }
+</style>
