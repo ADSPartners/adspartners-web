@@ -1,4 +1,4 @@
-// La página Tech, «La sala de máquinas»: el slider de innovaciones de orano.group (la referencia que eligió Álvaro
+// La página Tech: el slider de innovaciones de orano.group (la referencia que eligió Álvaro
 // el 30-oct), con lo nuestro. Una innovación por cada servicio de Tech de «Qué somos»; cada una tiene su modelo en
 // alambre (scripts/tech/modelos.js), su artículo al entrar y su misión, que se hace con el ratón o el dedo.
 // Todo lo que se dice tiene que ser verdad: las cifras salen de los proyectos (src/data/proyectos.js) o se miden en
@@ -7,6 +7,7 @@
 // El orden es el que pidió Álvaro el 30-oct: Pregunta, Conecta, Automatiza y A medida (y de la cuarta, otra vez a la
 // primera: el slider da la vuelta).
 import lectura from './lectura.json';
+import preguntas from './preguntas.json';
 
 // Lo que devolvió la lectura de la factura de la misión «Automatiza»: la llamada real a la API de Claude, grabada una
 // vez con scripts/grabar-lectura.mjs. Mientras no esté grabada (grabada: false), son los datos de la propia factura y
@@ -52,7 +53,15 @@ export const TECH = [
         ['Siempre', 'A cualquier hora, sin esperar a nadie'],
       ],
     },
-    mision: null,
+    // Solo con el asistente grabado (scripts/grabar-pregunta.mjs): sin grabación no hay nada que enseñar
+    mision: preguntas.grabada ? {
+      modulo: 'pregunta',
+      orden: 'Pregúntale a la cafetería cómo le va',
+      gesto: 'Elige una pregunta y mantén pulsado el botón',
+      curso: 'El asistente está consultando…',
+      veredicto: 'Respondido con sus datos',
+      explica: 'El asistente no se sabe las cifras: entiende la pregunta, decide qué consultar, lo consulta en los datos de la cafetería y contesta con la cifra y la gráfica. Es una ejecución real de Claude, grabada; los datos son de ejemplo.',
+    } : null,
   },
   {
     slug: 'conecta',
@@ -91,7 +100,14 @@ export const TECH = [
         ['Tranquilidad', 'Si algo falla, te enteras'],
       ],
     },
-    mision: null,
+    mision: {
+      modulo: 'conecta',
+      orden: 'Conecta la tienda con el Excel de pedidos',
+      gesto: 'Arrastra el cable de la tienda al Excel',
+      curso: 'Pasando los pedidos…',
+      veredicto: 'Conectadas · los pedidos pasan solos',
+      explica: 'Al conectarlas, cada pedido de la tienda llega al Excel en el momento, sin que nadie lo copie; los que esperaban pasan primero. En la vida real, si algo falla se reintenta y te avisa. Los pedidos son de ejemplo.',
+    },
   },
   {
     slug: 'automatiza',

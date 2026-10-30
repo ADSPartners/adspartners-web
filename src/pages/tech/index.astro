@@ -1,5 +1,5 @@
 ---
-// Tech, «La sala de máquinas»: la maqueta del slider de innovaciones de orano.group (la referencia que eligió Álvaro
+// Tech: la maqueta del slider de innovaciones de orano.group (la referencia que eligió Álvaro
 // el 30-oct), con lo nuestro: marca, letras, textos, sonido y código. Una innovación por pantalla, con su modelo en
 // alambre (scripts/tech/escena.js); «Entrar» abre su artículo y el botón [+] su misión, que se hace con el ratón o el
 // dedo. Lo mueve scripts/tech.js; aquí está lo que se ve sin él (los cuatro artículos, enteros).
@@ -15,12 +15,12 @@ const primero = TECH[0];
   descripcion="Lo que construimos en adsPartners, para tocarlo: automatizaciones, asistentes de IA, software a medida e integraciones. Cada uno con una demo que haces tú."
 >
   <main class="tec" data-tech data-vista="slider" data-lado="izq">
-    <h1 class="oculto-accesible">Tech · la sala de máquinas de adsPartners</h1>
+    <h1 class="oculto-accesible">Tech · adsPartners</h1>
     <canvas class="tec__lienzo" data-tec-lienzo aria-hidden="true"></canvas>
     <div class="tec__rejilla" aria-hidden="true"></div>
 
     <!-- Fijo: arriba, dónde estás y la vuelta; abajo, el logotipo, el sonido y el correo -->
-    <p class="tec__donde"><span class="tec__barra" aria-hidden="true"></span>Tech · la sala de máquinas</p>
+    <p class="tec__donde"><span class="tec__barra" aria-hidden="true"></span><span>Tech · <span class="tec__marca">adsPartners</span></span></p>
     <a class="tec__volver" href={base} data-sonido-hover><span aria-hidden="true">◀</span> Página principal</a>
     <a class="tec__logo" href={base} aria-label="adsPartners, inicio" data-sonido-hover><Marca tipo="logo" /></a>
     <div class="tec__pie">
@@ -167,6 +167,7 @@ const primero = TECH[0];
   }
   .tec__donde { position: absolute; left: var(--lado); top: var(--arriba); z-index: 6; margin: 0; display: flex; align-items: center; gap: 14px; pointer-events: none; }
   .tec__barra { width: 4px; height: 18px; background: var(--rosa); }
+  .tec__marca { text-transform: none; letter-spacing: .04em; }
   .tec__volver { position: absolute; right: var(--lado); top: var(--arriba); z-index: 6; transition: color .3s; }
   .tec__volver:hover, .tec__correo:hover { color: var(--crema); }
   .tec__logo { position: absolute; left: var(--lado); bottom: calc(var(--arriba) - 4px); z-index: 6; width: 128px; color: var(--crema); }
@@ -314,7 +315,7 @@ const primero = TECH[0];
   .tec__orden.es-estado { width: auto; min-width: 220px; background: var(--noche-2); }
   .tec__cerrar-m { position: absolute; right: calc(var(--lado) + 75px); top: calc(var(--arriba) + 76px); }
   .tec__zona { position: absolute; left: 50%; top: 50%; width: 600px; height: 420px; transform: translate(-50%, -50%); }
-  .tec__leyenda { position: absolute; left: 15.4%; top: 40%; width: 14vw; opacity: 0; transition: opacity .6s var(--curva); }
+  .tec__leyenda { position: absolute; left: max(var(--lado), calc(var(--zona-izq, 30vw) - 28px - 14vw)); top: 40%; width: 14vw; opacity: 0; transition: opacity .6s var(--curva); }
   .tec__explica { position: absolute; left: 75%; top: 40%; width: min(240px, 15vw); opacity: 0; transition: opacity .6s var(--curva) .15s; }
   .tec__explica i { display: block; width: 70px; height: 2px; margin-bottom: 26px; background: var(--rosa); transform-origin: left; }
   .tec__explica p { margin: 0; font-size: 13px; line-height: 1.85; color: var(--crema-2); }
@@ -388,6 +389,9 @@ const primero = TECH[0];
     .tec__mision:has(.mtej) .tec__leyenda { top: calc(var(--zona-abajo, 60vh) + 16px); }
     .tec__mision:has(.mtej) .tec__explica { bottom: 70px; }
     .tec__mision:has(.mtej) .tec__explica i { margin-bottom: 10px; }
+    /* En Pregunta y Conecta el resultado es el propio panel: sin leyenda, y la explicación debajo */
+    .tec__mision:has(.mpre) .tec__leyenda, .tec__mision:has(.mcon) .tec__leyenda { display: none; }
+    .tec__mision:has(.mpre) .tec__explica, .tec__mision:has(.mcon) .tec__explica { bottom: 70px; }
     .tec__leyenda { left: var(--lado); right: var(--lado); top: calc(var(--arriba) + 180px); width: auto; }
     .tec__explica { left: var(--lado); right: var(--lado); top: auto; bottom: 96px; width: auto; }
     /* El artículo pasa por debajo de una franja oscura, para que el logo y la vuelta no se monten en el texto */

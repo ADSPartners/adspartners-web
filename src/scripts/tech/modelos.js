@@ -1,4 +1,4 @@
-// Los modelos en alambre de la sala de máquinas, hechos en código (Orano los carga en .obj; aquí no hay ficheros),
+// Los modelos en alambre de Tech, hechos en código (Orano los carga en .obj; aquí no hay ficheros),
 // y las piezas del paisaje que no se calculan en el shader: la peana de cada estación, las antenas y la sala.
 // Cada modelo es una lista de segmentos: dos puntos y si es la pieza protagonista (acento 1, en rosa) o no (crema),
 // como la cámara amarilla sobre el rover de Orano. Todos caben en una caja de unas 3 × 2,4 unidades, con la base

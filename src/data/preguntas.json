@@ -1,0 +1,127 @@
+{
+  "grabada": true,
+  "modelo": "claude-opus-5-5",
+  "fecha": "2026-10-30T12:38:54.505Z",
+  "negocio": "Cafetería de Ejemplo",
+  "preguntas": [
+    {
+      "pregunta": "¿Cuánto vendimos en octubre?",
+      "ms": 5730,
+      "tokens": {
+        "entrada": 2461,
+        "salida": 319
+      },
+      "pasos": [
+        {
+          "entrada": {
+            "desde": "2026-09-01",
+            "hasta": "2026-10-31",
+            "agrupar_por": "mes"
+          },
+          "consulta": "SELECT date_trunc('month', fecha) AS grupo, SUM(importe), SUM(unidades) FROM ventas WHERE fecha BETWEEN '2026-09-01' AND '2026-10-31' GROUP BY grupo",
+          "filas": 2,
+          "total": 51686.7,
+          "ms": 2761
+        }
+      ],
+      "respuesta": {
+        "texto": "En octubre vendiste 26.843 €, un 8 % más que en septiembre (24.843 €).",
+        "cifra": "26.843 €",
+        "grafica": {
+          "titulo": "Ventas por mes (€)",
+          "etiquetas": [
+            "Sep",
+            "Oct"
+          ],
+          "valores": [
+            24843.3,
+            26843.4
+          ]
+        }
+      },
+      "msRespuesta": 2967
+    },
+    {
+      "pregunta": "¿Qué fue lo que más vendimos en octubre?",
+      "ms": 4102,
+      "tokens": {
+        "entrada": 2566,
+        "salida": 362
+      },
+      "pasos": [
+        {
+          "entrada": {
+            "desde": "2026-10-01",
+            "hasta": "2026-10-31",
+            "agrupar_por": "producto"
+          },
+          "consulta": "SELECT producto AS grupo, SUM(importe), SUM(unidades) FROM ventas WHERE fecha BETWEEN '2026-10-01' AND '2026-10-31' GROUP BY grupo",
+          "filas": 6,
+          "total": 26843.4,
+          "ms": 1503
+        }
+      ],
+      "respuesta": {
+        "texto": "En octubre lo que más vendiste fue café: 7.914 € y 4.946 tazas, casi un 30 % de la facturación.",
+        "cifra": "7.914 €",
+        "grafica": {
+          "titulo": "Ventas por producto, octubre 2026 (€)",
+          "etiquetas": [
+            "Café",
+            "Bocadillos",
+            "Tostadas",
+            "Bollería",
+            "Tartas",
+            "Zumos"
+          ],
+          "valores": [
+            7913.6,
+            5994,
+            4228.2,
+            3767.4,
+            2793,
+            2147.2
+          ]
+        }
+      },
+      "msRespuesta": 2598
+    },
+    {
+      "pregunta": "¿Vamos mejor que en septiembre?",
+      "ms": 5032,
+      "tokens": {
+        "entrada": 2461,
+        "salida": 390
+      },
+      "pasos": [
+        {
+          "entrada": {
+            "desde": "2026-09-01",
+            "hasta": "2026-10-31",
+            "agrupar_por": "mes"
+          },
+          "consulta": "SELECT date_trunc('month', fecha) AS grupo, SUM(importe), SUM(unidades) FROM ventas WHERE fecha BETWEEN '2026-09-01' AND '2026-10-31' GROUP BY grupo",
+          "filas": 2,
+          "total": 51686.7,
+          "ms": 1874
+        }
+      ],
+      "respuesta": {
+        "texto": "Sí: octubre cerró con 26.843 €, un 8 % más que septiembre (+2.000 €). Por día, que octubre tiene uno más, la subida es de un 4,6 %.",
+        "cifra": "+8 %",
+        "grafica": {
+          "titulo": "Ventas por mes (€)",
+          "etiquetas": [
+            "Sept.",
+            "Oct."
+          ],
+          "valores": [
+            24843.3,
+            26843.4
+          ]
+        }
+      },
+      "msRespuesta": 3158
+    }
+  ]
+}

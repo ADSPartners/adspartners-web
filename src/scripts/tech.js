@@ -1,4 +1,4 @@
-// Tech, «La sala de máquinas» (el slider de innovaciones de orano.group, con lo nuestro). Tres vistas:
+// Tech (el slider de innovaciones de orano.group, con lo nuestro). Tres vistas:
 // - slider: una innovación por pantalla; las flechas, la rueda, el dedo o el teclado pasan a la siguiente, volando
 //   por el valle hasta su estación (tech/escena.js). Es circular: de la cuarta se pasa a la primera, y al revés.
 //   Cada una espera a un lado (las pares a la izquierda, las impares a la derecha) y el texto se pone en el otro
@@ -14,6 +14,8 @@ import { crearEscena, ladoDe } from './tech/escena.js';
 import { montarGlitch } from './tech/glitch.js';
 
 const MISIONES = {
+  pregunta: () => import('./tech/pregunta.js'),
+  conecta: () => import('./tech/conecta.js'),
   factura: () => import('./tech/factura.js'),
   tejido: () => import('./tech/tejido.js'),
 };
@@ -233,6 +235,7 @@ export function montarTech({ reducido, conRaton, lenis }) {
     const b = escena.proyectarMundo([1.9, -1.2, -3.19]);
     Object.assign(ui.zona.style, { left: `${a.x}px`, top: `${a.y}px`, width: `${b.x - a.x}px`, height: `${b.y - a.y}px`, transform: 'none' });
     ui.mision.style.setProperty('--zona-abajo', `${b.y}px`);
+    ui.mision.style.setProperty('--zona-izq', `${a.x}px`);
   }
   addEventListener('resize', () => { if (vista === 'mision') colocarZona(); });
 

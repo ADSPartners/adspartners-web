@@ -1,4 +1,4 @@
-// La escena de la sala de máquinas: un viaje. Las innovaciones esperan a lo largo de un valle de alambre, una cada SEP
+// La escena de Tech: un viaje. Las innovaciones esperan a lo largo de un valle de alambre, una cada SEP
 // unidades y cada una en su lado (las pares a la izquierda, las impares a la derecha); pasar a la siguiente es volar
 // por el valle hasta ella y dejar atrás la que estaba. El recorrido no se acaba: la estación k lleva la innovación
 // k mod 4, así que después de la cuarta viene otra vez la primera, en los dos sentidos.
