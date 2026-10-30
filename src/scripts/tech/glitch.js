@@ -1,10 +1,12 @@
 // Las letras de Tech notan el ratón, en versión máquina de los textos vivos de la home (vivo.js), y como allí solo en
 // la zona por la que pasa: si el ratón pasa deprisa cerca, esas letras saltan de sitio, se separan en rojo y azul y,
 // si pasa muy deprisa, se pixelan; y en esa zona el texto se rasga en franjas que saltan. El resto no se mueve.
-// Quieto, no hay nada: vuelve con un muelle. Solo con ratón; el motor, letra a letra, está en letras.js.
+// Quieto, no hay nada: vuelve con un muelle. Cada salto de las franjas suena (sonido.glitch). Solo con ratón; el
+// motor, letra a letra, está en letras.js.
 // Se marcan con data-glitch; las franjas son el ::before y el ::after (tech/index.astro), que copian el texto de
 // data-texto (aquí se mantiene al día). Los filtros de píxeles son SVG, también de aquí.
 import { letrasQueNotan } from '../letras.js';
+import * as sonido from '../sonido.js';
 
 // Pixelar con un filtro SVG: una rejilla de puntos que coge el color del texto y cada punto se engorda a un bloque
 const filtro = (id, b) => `<filter id="${id}" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB">
@@ -58,6 +60,8 @@ export function montarGlitch(raiz, { vale = () => true } = {}) {
       s.cuando = t;
       s.salto = Float32Array.from(s.letras, () => azar(-1, 1));
       const x = s.pos[imax * 2], y = s.pos[imax * 2 + 1], f = s.fs;
+      // Cada salto suena: un chisporroteo del lado del ratón, más fuerte cuanto más se rasga
+      sonido.glitch(max, (r.left + x) / innerWidth);
       const izq = limitar(x - s.R, 0, r.width), der = limitar(r.width - x - s.R, 0, r.width);
       const franja = (alto) => {
         const arriba = limitar(y + azar(-0.7, 0.7) * f - alto / 2, 0, Math.max(0, r.height - alto));

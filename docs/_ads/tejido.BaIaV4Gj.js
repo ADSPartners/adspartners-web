@@ -1,4 +1,4 @@
-import{D as e}from"./preload-helper.B-0fTmDk.js";var t=`
+import{O as e}from"./preload-helper.BAm-WlXS.js";var t=`
 .mtej { position: absolute; inset: 0; display: grid; place-items: center; touch-action: none; }
 .mtej__lienzo { display: block; max-width: 100%; max-height: 100%; image-rendering: pixelated; outline: 1px solid rgba(231,226,218,.35); cursor: none; }
 .mtej__visor { position: fixed; left: 0; top: 0; width: 64px; height: 64px; margin: -32px 0 0 -32px; pointer-events: none; opacity: 0; transition: opacity .25s; z-index: 9; }

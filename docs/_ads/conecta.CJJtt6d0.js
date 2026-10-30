@@ -1,4 +1,4 @@
-import{D as e}from"./preload-helper.B-0fTmDk.js";var t=[[`1041`,`Taza`,2,24],[`1042`,`Camiseta`,1,22],[`1043`,`Libreta`,3,27],[`1044`,`Bolsa de tela`,1,14.5],[`1045`,`Lámina A3`,2,36],[`1046`,`Taza`,1,12],[`1047`,`Camiseta`,2,44]],n=3,r=1.5,i=`
+import{O as e}from"./preload-helper.BAm-WlXS.js";var t=[[`1041`,`Taza`,2,24],[`1042`,`Camiseta`,1,22],[`1043`,`Libreta`,3,27],[`1044`,`Bolsa de tela`,1,14.5],[`1045`,`Lámina A3`,2,36],[`1046`,`Taza`,1,12],[`1047`,`Camiseta`,2,44]],n=3,r=1.5,i=`
 .mcon { position: absolute; inset: 0; display: grid; place-items: center; user-select: none; -webkit-user-select: none; }
 .mcon__mesa { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 18%; font-family: var(--mono); color: var(--crema-2); letter-spacing: .03em; }
 .mcon--vertical .mcon__mesa { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; gap: 14%; }

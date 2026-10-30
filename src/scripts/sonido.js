@@ -428,6 +428,38 @@ export function viaje(duracion = 2.3, dir = 1) {
   piano(hz(PENTA[n + 2]), t + d * 0.86, 0.024, busEfectos);
 }
 
+let ultimoGlitch = 0;
+// Las letras de Tech que se rasgan: un chisporroteo digital corto, un tono cuadrado que salta de nota en nota (de la
+// pentatónica, una octava arriba) sobre un clic de ruido agudo, del lado del ratón. Cada uno distinto (máx. ~16 por s)
+export function glitch(fuerza = 1, x = 0.5) {
+  if (!activo || !ctx) return;
+  const t = ctx.currentTime;
+  if (t - ultimoGlitch < 0.06) return;
+  ultimoGlitch = t;
+  const v = Math.min(1, fuerza);
+  const p = panner((x - 0.5) * 1.4);
+  p.connect(busEfectos);
+  const saltos = 2 + Math.floor(Math.random() * 3), paso = 0.011 + Math.random() * 0.01, dur = saltos * paso;
+  const o = ctx.createOscillator(); o.type = 'square';
+  for (let k = 0; k < saltos; k++) o.frequency.setValueAtTime(hz(PENTA[Math.floor(Math.random() * PENTA.length)] + 12), t + k * paso);
+  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 3200;
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(0.03 * v, t + 0.002);
+  g.gain.setValueAtTime(0.03 * v, t + dur * 0.8);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.01);
+  o.connect(lp).connect(g).connect(p);
+  o.start(t); o.stop(t + dur + 0.02);
+  const s = ctx.createBufferSource(); s.buffer = ruido;
+  const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 2800 + Math.random() * 2000;
+  const sg = ctx.createGain();
+  sg.gain.setValueAtTime(0.0001, t);
+  sg.gain.exponentialRampToValueAtTime(0.09 * v, t + 0.001);
+  sg.gain.exponentialRampToValueAtTime(0.0001, t + 0.018);
+  s.connect(hp).connect(sg).connect(p);
+  s.start(t, Math.random() * 3, 0.03);
+}
+
 // Un proyecto que se acerca (abrir) o vuelve a su sitio (cerrar)
 export function abrir() {
   if (!activo || !ctx) return;
