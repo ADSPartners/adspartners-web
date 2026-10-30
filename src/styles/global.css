@@ -56,8 +56,8 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 /* Textos que notan el ratón (vivo.js), solo las letras de la zona por la que pasa: el rojo y el azul se separan y la
    letra se va un poco hacia donde va el ratón; vuelven con un muelle. Desplazamiento relativo: las letras son en línea */
 html.con-raton [data-vivo] .vivo-on {
-  position: relative; left: calc(var(--vivo) * 6px);
-  text-shadow: calc(var(--vivo) * -10px) 0 rgb(255 64 120 / calc(var(--vivo-a) * .5)), calc(var(--vivo) * 10px) 0 rgb(64 196 255 / calc(var(--vivo-a) * .42));
+  position: relative; left: calc(var(--vivo) * 9px);
+  text-shadow: calc(var(--vivo) * -24px) 0 rgb(255 64 120 / calc(var(--vivo-a) * .8)), calc(var(--vivo) * 24px) 0 rgb(64 196 255 / calc(var(--vivo-a) * .7));
 }
 
 /* Mientras el umbral está delante, nada se mueve por debajo */

@@ -39,7 +39,8 @@ function trocear(el) {
 
 // pintar(letra, k, i, s): cada fotograma, para cada letra que se mueve (k va de -1 a 1, con el signo hacia donde va
 // el ratón). apagar(letra): cuando vuelve a su sitio. despues(el, s, zona): una vez por texto, con la letra más movida.
-export function letrasQueNotan(els, { velMax, radio, vale = () => true, pintar, apagar, despues }) {
+// estela: lo deprisa que se le va la carga a cada letra (cuanto más bajo, más dura la estela del ratón).
+export function letrasQueNotan(els, { velMax, radio, estela = 7, vale = () => true, pintar, apagar, despues }) {
   if (!els.length) return;
   const visibles = new Set();
   const io = new IntersectionObserver((es) => es.forEach((e) => (e.isIntersecting ? visibles.add(e.target) : visibles.delete(e.target))));
@@ -108,9 +109,9 @@ export function letrasQueNotan(els, { velMax, radio, vale = () => true, pintar, 
       cola.push(el, s, r, cerca);
     }
 
-    // Cada letra se carga cuando el ratón pasa cerca y la carga se le va en unos 150 ms: un ratón rápido cruza una
-    // letra en pocos fotogramas, y sin esa carga el muelle no llegaría a cogerla
-    const descarga = Math.exp(-7 * dt);
+    // Cada letra se carga cuando el ratón pasa cerca y la carga se le va poco a poco (unos 150 ms con estela 7): un
+    // ratón rápido cruza una letra en pocos fotogramas, y sin esa carga el muelle no llegaría a cogerla
+    const descarga = Math.exp(-estela * dt);
     for (let c = 0; c < cola.length; c += 4) {
       const el = cola[c], s = cola[c + 1], r = cola[c + 2], cerca = cola[c + 3];
       let activas = 0, max = 0, imax = -1;

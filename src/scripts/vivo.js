@@ -6,8 +6,9 @@ import { letrasQueNotan } from './letras.js';
 
 export function montarVivo() {
   letrasQueNotan([...document.querySelectorAll('[data-vivo]')], {
-    velMax: 2200,
-    radio: (fs) => Math.min(170, Math.max(56, fs * 1.7)),   // px alrededor del ratón en los que aún se nota
+    velMax: 1300,                                            // px/s a los que llega al máximo
+    radio: (fs) => Math.min(260, Math.max(80, fs * 2.4)),    // px alrededor del ratón en los que aún se nota
+    estela: 4.5,                                             // la estela dura unos 250 ms
     pintar(l, k) {
       if (!l.classList.contains('vivo-on')) l.classList.add('vivo-on');
       l.style.setProperty('--vivo', k.toFixed(3));
