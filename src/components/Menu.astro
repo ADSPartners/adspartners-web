@@ -1,220 +1,93 @@
 ---
-// El menú, que abre el botón «Menú» de la cabecera (se queda encima y pasa a «Cerrar»). Prototipo con las dos ideas
-// montadas para que Álvaro elija (30-oct); se cambia con el selector de arriba y, cuando elija, la otra se borra:
-// - Inspector (menu/inspector.js): cada página es una caja con sus datos medidos, como las de la portada; al pinchar,
-//   la caja crece hasta ser la página.
-// - Workflow (menu/workflow.js): nodos con cables, de «Tú» a cada página y de cada página a Hablemos; al pasar por
-//   un nodo, abajo, lo que entra y lo que sale; al pinchar, un pulso recorre el cable y entra.
-// Sin «Inicio»: a la home se vuelve con el logo. Los datos salen de data/menu.js.
-import { PAGINAS, HABLEMOS, FOTOS_PROYECTOS } from '../data/menu.js';
+// El menú, que abre el botón «Menú» de la cabecera (se queda encima y pasa a «Cerrar»): un viaje hasta una aurora
+// (scripts/menu/aurora.js). Cada cortina es una página, con el color de una emisión real, y su nombre va encima. Abajo,
+// siempre a mano, la lista de las páginas (para ir directo, con teclado o con lector de pantalla) y el viento solar,
+// que sale de la visita. Sin «Inicio»: a la home se vuelve con el logo. Los datos salen de data/menu.js.
+import { DESTINOS } from '../data/menu.js';
 const base = import.meta.env.BASE_URL;
-const todas = [...PAGINAS, HABLEMOS];
-const enlace = (p) => (p.ruta === null ? undefined : `${base}${p.ruta}`);
-const ruta = (p) => (p.ruta === null ? `/${p.slug}/` : p.ruta.startsWith('#') ? p.ruta : `/${p.ruta}`);
-const dos = (n) => String(n).padStart(2, '0');
+const enlace = (d) => (d.ruta === null ? undefined : `${base}${d.ruta}`);
 ---
-<div class="menu" id="menu" data-menu data-version="inspector" role="dialog" aria-modal="true" aria-label="Menú" hidden data-lenis-prevent data-cursor>
-  <div class="menu__rejilla" aria-hidden="true"></div>
+<div class="menu" id="menu" data-menu role="dialog" aria-modal="true" aria-label="Menú" hidden data-lenis-prevent>
+  <canvas class="au__lienzo" data-au-lienzo aria-hidden="true"></canvas>
 
-  <div class="menu__version mono" role="group" aria-label="Versión del menú (prototipo)">
-    <span class="menu__version-t">Prototipo · elige</span>
-    <button type="button" data-menu-ver="inspector" aria-pressed="true" data-sonido-hover>Inspector</button>
-    <button type="button" data-menu-ver="workflow" aria-pressed="false" data-sonido-hover>Workflow</button>
+  <div class="au__nombres" aria-hidden="true">
+    {DESTINOS.map((d) => (
+      <span class="au__dest" data-au-dest={d.slug} style={`--c: ${d.color}`}>
+        <span class="au__nombre">{d.nombre}</span>
+        <span class="au__frase mono">{d.frase}</span>
+        <span class="insp au__luz" data-texto={d.luz}></span>
+      </span>
+    ))}
   </div>
 
-  <!-- 1 · El inspector -->
-  <nav class="mi" data-menu-v="inspector" aria-label="Páginas">
-    {todas.map((p, i) => (
-      <a class={`mi__caja mi__caja--${p.slug}`} href={enlace(p)} aria-disabled={p.ruta === null ? 'true' : undefined} data-mi-caja data-slug={p.slug}>
-        <span class="insp mi__etq" data-mi-etq data-texto={`a · ${ruta(p)} · ${p.etiqueta ?? `${p.datos[0][1]} ${p.datos[0][0]}`}`}></span>
-        <span class="mi__esq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-        <span class="mi__num mono" aria-hidden="true">{dos(i + 1)}</span>
-        {p.slug === 'proyectos' && (
-          <span class="mi__fotos" aria-hidden="true">
-            {FOTOS_PROYECTOS.map((f) => <img src={`${base}assets/proyectos/${f.src}`} alt="" loading="lazy" decoding="async" width="400" height="300" />)}
-          </span>
-        )}
-        <span class="mi__nombre">{p.nombre}</span>
-        <span class="mi__frase">{p.frase}</span>
-        <dl class="mi__datos mono">
-          {p.datos.map(([k, v]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}
-        </dl>
-        <span class="mi__medida mono" aria-hidden="true" data-mi-medida></span>
+  <p class="au__altitud mono" data-au-altitud aria-hidden="true"></p>
+  <p class="au__viento mono" data-au-viento aria-hidden="true"></p>
+
+  <nav class="au__lista mono" aria-label="Páginas">
+    {DESTINOS.map((d) => (
+      <a href={enlace(d)} aria-disabled={d.ruta === null ? 'true' : undefined} data-au-ir={d.slug} style={`--c: ${d.color}`}>
+        <i aria-hidden="true"></i>{d.nombre}
       </a>
     ))}
   </nav>
 
-  <!-- 2 · El workflow -->
-  <nav class="mw" data-menu-v="workflow" aria-label="Páginas">
-    <svg class="mw__cables" data-mw-cables aria-hidden="true"></svg>
-    <div class="mw__nodo mw__nodo--tu" data-mw-nodo="tu" aria-hidden="true">
-      <span class="mw__icono"><svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z" /></svg></span>
-      <span class="mw__textos"><span class="mw__t">Tú</span><span class="mw__s mono">Madrid · <span data-mw-hora></span></span></span>
-      <i class="mw__asa mw__asa--sale"></i>
-    </div>
-    {todas.map((p) => (
-      <a class={`mw__nodo mw__nodo--${p.slug}`} href={enlace(p)} aria-disabled={p.ruta === null ? 'true' : undefined} data-mw-nodo={p.slug} draggable="false">
-        <i class="mw__asa mw__asa--entra" aria-hidden="true"></i>
-        <span class="mw__icono" aria-hidden="true">{p.nombre.slice(0, 1)}</span>
-        <span class="mw__textos"><span class="mw__t">{p.nombre}</span><span class="mw__s mono">{p.ruta === null ? 'en obras' : ruta(p)}</span></span>
-        {p.slug !== 'hablemos' && <i class="mw__asa mw__asa--sale" aria-hidden="true"></i>}
-        <span class="mw__hecho mono" aria-hidden="true">✓ ejecutado</span>
-      </a>
-    ))}
-    <div class="mw__panel mono" data-mw-panel aria-hidden="true">
-      <div class="mw__panel-cab"><span data-mw-panel-t>Pasa por un nodo</span><span class="mw__panel-ok" data-mw-panel-ok></span></div>
-      <div class="mw__panel-cols">
-        <div><p class="mw__panel-r">Entra</p><pre data-mw-entra></pre></div>
-        <div><p class="mw__panel-r">Sale</p><pre data-mw-sale></pre></div>
-      </div>
-    </div>
-  </nav>
-
-  <script type="application/json" data-menu-datos set:html={JSON.stringify(todas.map(({ slug, nombre, ruta: r, datos }) => ({ slug, nombre, ruta: r, datos })))} />
+  <div class="au__inundar" data-au-inundar aria-hidden="true"></div>
+  <script type="application/json" data-menu-datos set:html={JSON.stringify(DESTINOS)} />
 </div>
 
 <style>
-  .menu {
-    position: fixed; inset: 0; z-index: 28; overflow: hidden;
-    background: var(--noche); color: var(--crema);
-  }
+  .menu { position: fixed; inset: 0; z-index: 28; overflow: hidden; background: var(--noche); color: var(--crema); }
   .menu[hidden] { display: none; }
-  .menu__rejilla {
-    position: absolute; inset: 0; pointer-events: none; opacity: .5;
-    background-image: linear-gradient(var(--linea) 1px, transparent 1px), linear-gradient(90deg, var(--linea) 1px, transparent 1px);
-    background-size: 64px 64px; background-position: -1px -1px;
-  }
-  .menu[data-version='workflow'] .menu__rejilla {
-    background-image: radial-gradient(circle, rgba(231, 226, 218, .16) 1px, transparent 1.4px);
-    background-size: 22px 22px; opacity: 1;
-  }
-  .menu:not([data-version='inspector']) .mi, .menu:not([data-version='workflow']) .mw { display: none; }
+  .au__lienzo { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
 
-  /* El selector del prototipo, arriba en el medio (los lados son de la cabecera) */
-  .menu__version {
-    position: absolute; left: 50%; top: calc(var(--margen) + 4px); z-index: 5; transform: translateX(-50%);
-    display: flex; align-items: center; gap: 4px; padding: 4px; border: 1px solid var(--linea); border-radius: 99px;
-    background: var(--noche);
+  /* El nombre de cada página, encima de su cortina (aurora.js lo lleva a su sitio); no tapa el ratón */
+  .au__dest {
+    position: absolute; left: 0; top: 0; z-index: 2; pointer-events: none;
+    display: grid; justify-items: center; gap: 6px; width: max-content; translate: -50% -50%;
+    opacity: 0; transition: opacity .8s var(--curva);
   }
-  .menu__version-t { padding: 0 10px 0 8px; color: var(--crema-3); }
-  .menu__version button { padding: 6px 12px; border-radius: 99px; color: var(--crema-2); text-transform: uppercase; letter-spacing: .04em; transition: background-color .3s, color .3s; }
-  .menu__version button[aria-pressed='true'] { background: var(--rosa); color: var(--tinta); }
+  .au__dest:global(.visto) { opacity: .82; }
+  .au__dest:global(.visto.on) { opacity: 1; }
+  .au__nombre {
+    font-family: var(--serif); font-weight: 300; font-size: clamp(30px, 3.4vw, 60px); line-height: 1; letter-spacing: -.01em;
+    text-shadow: 0 0 10px rgba(18, 13, 10, .55), 0 0 28px color-mix(in srgb, var(--c) 55%, transparent);
+    transition: transform .6s var(--curva), color .4s;
+  }
+  .au__dest:global(.on) .au__nombre { color: #fff; transform: scale(1.08); }
+  .au__frase { color: var(--crema); text-shadow: 0 0 6px var(--noche), 0 0 14px var(--noche); opacity: 0; transform: translateY(-4px); transition: opacity .4s, transform .5s var(--curva); }
+  .au__dest:global(.on) .au__frase { opacity: 1; transform: none; }
+  .au__luz { background: var(--c); }
+  .au__luz:empty { visibility: hidden; }
 
-  /* --- 1 · El inspector: cajas como las de la portada, con su etiqueta rosa y sus datos medidos -------------------- */
-  .mi {
-    position: absolute; inset: 0; padding: 150px var(--margen) 64px;
-    display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); grid-template-rows: 1.15fr 1fr; gap: 46px 30px;
-  }
-  .mi__caja--proyectos { grid-column: 1 / 6; grid-row: 1 / 3; margin-bottom: 9vh; }
-  .mi__caja--tech { grid-column: 6 / 10; grid-row: 1; margin-top: 4vh; }
-  .mi__caja--brand { grid-column: 10 / 13; grid-row: 1; margin-bottom: 6vh; }
-  .mi__caja--hablemos { grid-column: 7 / 13; grid-row: 2; margin-left: 4vw; }
-  .mi__caja {
-    position: relative; display: flex; flex-direction: column; justify-content: flex-end; gap: 10px;
-    padding: 26px 26px 22px; border: 1px solid rgba(231, 226, 218, .22);
-    transition: border-color .4s var(--curva), background-color .4s var(--curva), opacity .4s var(--curva);
-  }
-  /* Las esquinas, en rosa: lo que marca el inspector */
-  .mi__esq i { position: absolute; width: 9px; height: 9px; border: 0 solid var(--rosa); }
-  .mi__esq i:nth-child(1) { left: -1px; top: -1px; border-left-width: 1px; border-top-width: 1px; }
-  .mi__esq i:nth-child(2) { right: -1px; top: -1px; border-right-width: 1px; border-top-width: 1px; }
-  .mi__esq i:nth-child(3) { left: -1px; bottom: -1px; border-left-width: 1px; border-bottom-width: 1px; }
-  .mi__esq i:nth-child(4) { right: -1px; bottom: -1px; border-right-width: 1px; border-bottom-width: 1px; }
-  .mi__etq { position: absolute; left: -1px; top: -24px; min-height: 19px; }
-  .mi__etq:empty { visibility: hidden; }
-  .mi__num { position: absolute; right: 22px; top: 18px; color: var(--crema-3); }
-  /* En Proyectos, una tira con las fotos del archivo: en gris, y a color al pasar */
-  .mi__fotos { flex: 1; min-height: 0; display: flex; align-items: flex-start; gap: 10px; margin: 18px 30px 0 0; overflow: hidden; }
-  .mi__fotos img {
-    flex: 1 1 0; min-width: 0; height: auto; aspect-ratio: 4 / 3; object-fit: cover;
-    filter: grayscale(1) brightness(.7); transition: filter .6s var(--curva), transform .6s var(--curva);
-  }
-  .mi__fotos img:nth-child(even) { transform: translateY(18px); }
-  .mi__caja:hover .mi__fotos img, .mi__caja:focus-visible .mi__fotos img { filter: none; }
-  .mi__nombre { font-family: var(--serif); font-weight: 300; font-size: clamp(44px, 5.4vw, 104px); line-height: .9; letter-spacing: -.02em; }
-  .mi__caja--proyectos .mi__nombre { font-size: clamp(56px, 7.6vw, 150px); }
-  .mi__frase { max-width: 32ch; font-size: 15px; line-height: 1.45; color: var(--crema-2); }
-  .mi__datos { margin: 8px 0 0; display: grid; gap: 4px; max-width: 340px; }
-  .mi__datos div { display: flex; align-items: baseline; gap: 8px; }
-  .mi__datos dt { color: var(--crema-3); }
-  .mi__datos div::after { content: ''; order: 1; flex: 1; border-bottom: 1px dotted rgba(231, 226, 218, .2); }
-  .mi__datos dd { order: 2; margin: 0; color: var(--crema); }
-  .mi__medida { position: absolute; right: 22px; bottom: -22px; color: var(--rosa); opacity: 0; transition: opacity .3s; }
-  .mi__caja:hover, .mi__caja:focus-visible { border-color: var(--rosa); background: rgba(245, 203, 215, .035); outline: none; }
-  .mi__caja:hover .mi__medida, .mi__caja:focus-visible .mi__medida { opacity: 1; }
-  .mi:has(.mi__caja:hover) .mi__caja:not(:hover) { opacity: .45; }
-  .mi__caja[aria-disabled='true'] { cursor: not-allowed; border-style: dashed; }
-  .mi__caja[aria-disabled='true'] .mi__nombre { color: var(--crema-2); }
-  /* La caja que crece hasta ser la página (la crea inspector.js) */
-  :global(.mi__crece) {
-    position: fixed; z-index: 70; pointer-events: none; border: 1px solid var(--rosa); background: var(--noche);
-  }
-  :global(.mi__crece .insp) { position: absolute; left: -1px; top: -1px; }
+  /* El inspector del viaje: la altitud (abajo a la izquierda, encima de la lista) y el viento (abajo a la derecha) */
+  .au__altitud, .au__viento { position: absolute; z-index: 3; margin: 0; color: var(--crema-2); pointer-events: none; min-height: 1.4em; }
+  .au__altitud { left: var(--margen); bottom: calc(var(--margen) + 34px); }
+  .au__viento { right: var(--margen); bottom: var(--margen); max-width: 46ch; text-align: right; }
 
-  /* --- 2 · El workflow: nodos con cables, sobre puntos ---------------------------------------------------------- */
-  .mw { position: absolute; inset: 0; }
-  .mw__cables { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
-  :global(.mw__cable) { fill: none; stroke: rgba(231, 226, 218, .28); stroke-width: 1.5; transition: stroke .3s; }
-  :global(.mw__cable.on) { stroke: var(--rosa); stroke-dasharray: 6 6; animation: mw-flujo .6s linear infinite; }
-  :global(.mw__cable-t) { fill: var(--crema-3); font-family: var(--mono); font-size: 10px; letter-spacing: .04em; text-transform: uppercase; }
-  :global(.mw__pulso) { fill: var(--rosa); }
-  @keyframes mw-flujo { to { stroke-dashoffset: -12; } }
-  .mw__nodo {
-    position: absolute; left: 0; top: 0; z-index: 2; width: 236px;
-    display: flex; align-items: center; gap: 14px; padding: 12px 16px 12px 12px;
-    background: var(--noche-2); border: 1px solid rgba(231, 226, 218, .2); border-radius: 12px;
-    cursor: grab; touch-action: none; user-select: none;
-    transition: border-color .3s, box-shadow .3s;
+  /* La lista de siempre: para ir directo */
+  .au__lista { position: absolute; left: var(--margen); bottom: var(--margen); z-index: 3; display: flex; flex-wrap: wrap; gap: 6px 22px; }
+  .au__lista a { display: inline-flex; align-items: center; gap: 8px; color: var(--crema-2); transition: color .3s; }
+  .au__lista a:hover, .au__lista a:focus-visible { color: var(--crema); }
+  .au__lista i { width: 7px; height: 7px; border-radius: 50%; background: var(--c); box-shadow: 0 0 10px var(--c); }
+  .au__lista a[aria-disabled='true'] { opacity: .55; }
+
+  /* Al entrar en una cortina, los textos se apagan y todo se inunda de su color */
+  .menu:global(.zambullendo) :is(.au__dest, .au__lista, .au__altitud, .au__viento) { opacity: 0 !important; transition: opacity .5s; }
+  .au__inundar {
+    position: absolute; inset: 0; z-index: 5; pointer-events: none; opacity: 0;
+    background: radial-gradient(ellipse at 50% 55%, color-mix(in srgb, var(--c, #fff) 85%, white) 0%, var(--c, #fff) 45%, color-mix(in srgb, var(--c, #fff) 40%, var(--noche)) 100%);
   }
-  .mw__nodo.arrastrando { cursor: grabbing; z-index: 3; }
-  .mw__nodo:hover, .mw__nodo:focus-visible, .mw__nodo.on { border-color: var(--rosa); box-shadow: 0 0 0 4px rgba(245, 203, 215, .08); outline: none; }
-  .mw__icono {
-    flex: none; width: 44px; height: 44px; border-radius: 9px; display: grid; place-items: center;
-    background: rgba(231, 226, 218, .07); font-family: var(--serif); font-size: 26px; line-height: 1;
-  }
-  .mw__nodo--tu .mw__icono { background: var(--rosa); color: var(--tinta); }
-  .mw__icono svg { width: 22px; height: 22px; fill: currentColor; }
-  .mw__nodo--hablemos .mw__icono { background: none; border: 1px solid var(--rosa); color: var(--rosa); }
-  .mw__textos { display: grid; gap: 3px; min-width: 0; }
-  .mw__t { font-size: 16px; line-height: 1.2; }
-  .mw__s { color: var(--crema-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .mw__asa { position: absolute; top: 50%; width: 9px; height: 9px; margin-top: -4.5px; border-radius: 50%; background: var(--noche-2); border: 1px solid rgba(231, 226, 218, .5); }
-  .mw__asa--entra { left: -5px; }
-  .mw__asa--sale { right: -5px; }
-  .mw__hecho { position: absolute; left: 12px; bottom: -22px; color: var(--rosa); opacity: 0; transition: opacity .3s; }
-  .mw__nodo.hecho .mw__hecho { opacity: 1; }
-  .mw__nodo[aria-disabled='true'] { border-style: dashed; }
-  .mw__nodo[aria-disabled='true'] .mw__t { color: var(--crema-2); }
-  /* Abajo, como en n8n: lo que entra en el nodo y lo que sale */
-  .mw__panel {
-    position: absolute; left: var(--margen); right: var(--margen); bottom: var(--margen); z-index: 4; height: 196px;
-    border: 1px solid var(--linea); border-radius: 12px; background: rgba(27, 20, 16, .94);
-    transform: translateY(calc(100% + var(--margen) + 2px)); transition: transform .55s var(--curva);
-  }
-  .mw__panel.on { transform: none; }
-  .mw__panel-cab { display: flex; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--linea); text-transform: uppercase; }
-  .mw__panel-ok { color: var(--rosa); }
-  .mw__panel-cols { display: grid; grid-template-columns: 1fr 1.6fr; }
-  .mw__panel-cols > div { padding: 10px 16px; min-width: 0; }
-  .mw__panel-cols > div + div { border-left: 1px solid var(--linea); }
-  .mw__panel-r { margin: 0 0 6px; color: var(--crema-3); text-transform: uppercase; }
-  .mw__panel pre { margin: 0; font: inherit; text-transform: none; letter-spacing: 0; font-size: 12px; line-height: 1.6; white-space: pre-wrap; color: var(--crema); }
-  .mw__panel :global(.k) { color: var(--rosa); }
-  .mw__panel :global(.n) { color: #9fd6ff; }
+
+  /* Sin WebGL: la lista, grande y en el centro */
+  .menu:global(.sin-gl) .au__lista { inset: 0; flex-direction: column; justify-content: center; align-items: center; gap: 18px; font-family: var(--serif); font-size: 44px; text-transform: none; letter-spacing: 0; }
+
+  /* En vertical, solo los nombres (las etiquetas de la emisión no caben) */
+  .menu:global(.vertical) .au__luz, .menu:global(.vertical) .au__frase { display: none; }
+  .menu:global(.vertical) .au__nombre { font-size: 34px; }
 
   @media (max-width: 760px) {
-    .menu { overflow-y: auto; }
-    .menu__version { position: fixed; top: auto; bottom: 14px; }
-    .menu__version-t { display: none; }
-    .mi__fotos { flex: none; margin-right: 0; }
-    .mi { position: relative; inset: auto; min-height: 100%; padding: 120px var(--margen) 90px; display: flex; flex-direction: column; gap: 44px; }
-    .mi__caja { margin: 0 !important; min-height: 200px; }
-    .mi__nombre, .mi__caja--proyectos .mi__nombre { font-size: 52px; }
-    .mw { position: relative; inset: auto; min-height: 780px; }
-    .mw__nodo { width: 210px; }
-    /* En columna, los cables salen de Tú por la izquierda y llegan a Hablemos por la derecha */
-    .mw__nodo--tu .mw__asa--sale { right: auto; left: -5px; }
-    .mw__nodo--hablemos .mw__asa--entra { left: auto; right: -5px; }
-    .mw__panel { display: none; }
+    .au__viento { left: var(--margen); right: var(--margen); bottom: calc(var(--margen) + 64px); text-align: left; max-width: none; }
+    .au__altitud { bottom: calc(var(--margen) + 100px); }
+    .au__lista { gap: 8px 18px; }
   }
 </style>

@@ -13,6 +13,7 @@ import { montarGlobo } from './secciones/fresa.js';
 import { montarVivo } from './vivo.js';
 import { montarCabecera, montarImanes } from './comun.js';
 import { montarMenu } from './menu.js';
+import { seguirRastro } from './rastro.js';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -50,6 +51,7 @@ export async function arrancar() {
 
   const cursor = crearCursor({ reducido });
   montarCabecera();
+  seguirRastro();
   montarMenu({ lenis, reducido });
   montarGlobo({ lenis, reducido });
   const entran = [...document.querySelectorAll('[data-entra]')];
