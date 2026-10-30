@@ -104,11 +104,16 @@ function montarRaton(sec) {
 }
 
 function montarEntradas(sec) {
+  // Las líneas se vuelven a partir si cambia el ancho o termina de cargar la letra (autoSplit): partidas una sola vez,
+  // al estrechar la ventana cada línea dejaba caer su última palabra. La entrada se devuelve en onSplit para que, al
+  // volver a partir, siga por donde iba (si ya entró, no se repite)
   for (const el of sec.querySelectorAll('[data-qs-lineas]')) {
-    const partido = SplitText.create(el, { type: 'lines', mask: 'lines', linesClass: 'qs-linea' });
-    gsap.from(partido.lines, {
-      yPercent: 105, duration: 1.1, ease: 'power3.out', stagger: 0.08,
-      scrollTrigger: { trigger: el, start: 'top 85%', once: true },
+    SplitText.create(el, {
+      type: 'lines', mask: 'lines', linesClass: 'qs-linea', autoSplit: true,
+      onSplit: (partido) => gsap.from(partido.lines, {
+        yPercent: 105, duration: 1.1, ease: 'power3.out', stagger: 0.08,
+        scrollTrigger: { trigger: el, start: 'top 85%', once: true },
+      }),
     });
   }
   // Las listas entran elemento a elemento, con una gota cada uno
