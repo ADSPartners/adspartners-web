@@ -408,6 +408,26 @@ export function pasa(x = 0.5) {
   piano(hz(PENTA[Math.floor(Math.random() * 5) + 2]), t + 0.12, 0.022, busEfectos);
 }
 
+// El vuelo de una innovación a otra (Tech): un soplo largo que sube a mitad de camino, cruza de un oído al otro y
+// se apaga al llegar, con dos notas de llegada
+export function viaje(duracion = 2.3, dir = 1) {
+  if (!activo || !ctx) return;
+  const t = ctx.currentTime + 0.01, d = duracion;
+  const s = ctx.createBufferSource(); s.buffer = marron; s.loop = true;
+  const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 1.3;
+  bp.frequency.setValueAtTime(240, t); bp.frequency.exponentialRampToValueAtTime(dir > 0 ? 1500 : 1100, t + d * 0.5); bp.frequency.exponentialRampToValueAtTime(280, t + d);
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.3, t + d * 0.48); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+  const p = panner(-0.5 * dir);
+  p.pan?.setValueAtTime(-0.5 * dir, t);
+  p.pan?.linearRampToValueAtTime(0.5 * dir, t + d);
+  s.connect(bp).connect(g).connect(p).connect(busEfectos);
+  s.start(t); s.stop(t + d + 0.05);
+  const n = Math.floor(Math.random() * 4) + 2;
+  piano(hz(PENTA[n]), t + d * 0.78, 0.03, busEfectos);
+  piano(hz(PENTA[n + 2]), t + d * 0.86, 0.024, busEfectos);
+}
+
 // Un proyecto que se acerca (abrir) o vuelve a su sitio (cerrar)
 export function abrir() {
   if (!activo || !ctx) return;

@@ -1,0 +1,21 @@
+{
+  "grabada": true,
+  "ms": 4089,
+  "modelo": "claude-opus-5-5",
+  "fecha": "2026-10-30T12:24:28.424Z",
+  "tokens": {
+    "entrada": 2228,
+    "salida": 81
+  },
+  "campos": {
+    "proveedor": "Huerta de Ejemplo, S.L.",
+    "fecha": "2026-10-27",
+    "base": 113.2,
+    "iva": 11.32,
+    "total": 124.52
+  },
+  "extra": {
+    "nif": "B00000000",
+    "numero": "F-2026/0417"
+  }
+}

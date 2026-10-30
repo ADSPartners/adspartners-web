@@ -1,0 +1,38 @@
+import{E as e}from"./preload-helper.D93ujLFU.js";var t=`
+.mtej { position: absolute; inset: 0; display: grid; place-items: center; touch-action: none; }
+.mtej__lienzo { display: block; max-width: 100%; max-height: 100%; image-rendering: pixelated; outline: 1px solid rgba(231,226,218,.35); cursor: none; }
+.mtej__visor { position: fixed; left: 0; top: 0; width: 64px; height: 64px; margin: -32px 0 0 -32px; pointer-events: none; opacity: 0; transition: opacity .25s; z-index: 9; }
+.mtej__visor i { position: absolute; width: 12px; height: 12px; border: 0 solid var(--rosa); }
+.mtej__visor i:nth-child(1) { left: 0; top: 0; border-width: 1.5px 0 0 1.5px; } .mtej__visor i:nth-child(2) { right: 0; top: 0; border-width: 1.5px 1.5px 0 0; }
+.mtej__visor i:nth-child(3) { left: 0; bottom: 0; border-width: 0 0 1.5px 1.5px; } .mtej__visor i:nth-child(4) { right: 0; bottom: 0; border-width: 0 1.5px 1.5px 0; }
+.mtej__visor b { position: absolute; left: 88px; top: 50%; transform: translateY(-50%); padding: 9px 16px; background: var(--rosa); color: var(--tinta); white-space: nowrap;
+  font-family: var(--mono); font-weight: 400; font-size: 10px; letter-spacing: .16em; text-transform: uppercase; }
+.mtej.es-encima .mtej__visor { opacity: 1; }
+.mtej.es-hecha .mtej__visor, .mtej.es-curso .mtej__visor b { opacity: 0; }
+.mtej-ley { font-family: var(--mono); display: grid; grid-template-columns: auto 1fr; gap: 0 14px; }
+.mtej-ley__escala { grid-row: 1 / 3; width: 3px; height: 110px; }
+.mtej-ley__v { font-size: 10px; letter-spacing: .08em; color: var(--crema); }
+.mtej-ley__v small { display: block; font-size: 8.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--crema-3); }
+.mtej-ley__v--abajo { align-self: end; }
+.mtej-ley dl { grid-column: 1 / 3; margin: 26px 0 0; display: grid; gap: 10px; }
+.mtej-ley dt { font-size: 8.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--rosa); }
+.mtej-ley dd { margin: 2px 0 0; font-size: 13px; color: var(--crema); }
+@media (max-width: 760px) {
+  .mtej-ley { grid-template-columns: auto 1fr auto; align-items: center; gap: 8px 12px; }
+  .mtej-ley__v--abajo { grid-column: 1; grid-row: 1; align-self: center; }
+  .mtej-ley__escala { grid-column: 2; grid-row: 1; width: 100%; height: 3px; background-image: var(--grad-h) !important; }
+  .mtej-ley__v:not(.mtej-ley__v--abajo) { grid-column: 3; grid-row: 1; text-align: right; }
+  .mtej-ley dl { grid-column: 1 / 4; grid-row: 2; margin-top: 4px; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .mtej-ley dd { font-size: 12px; }
+  .mtej__visor b { left: auto; right: 0; top: auto; bottom: -46px; transform: none; }
+}
+`,n=[[48,70,210],[64,170,255],[245,203,215],[255,150,90],[255,70,70]],r=e=>{let t=Math.max(0,Math.min(.9999,e))*(n.length-1),r=Math.floor(t),i=t-r;return n[r].map((e,t)=>Math.round(e+(n[r+1][t]-e)*i))};function i(e){let t=Array(256).fill(0);for(let n of e)t[n]++;let n=e.length,r=0;for(let e=0;e<256;e++)r+=e*t[e];let i=0,a=0,o=0,s=128;for(let e=0;e<256;e++){if(a+=t[e],!a)continue;let c=n-a;if(!c)break;i+=e*t[e];let l=i/a,u=(r-i)/c,d=a*c*(l-u)*(l-u);d>o&&(o=d,s=e)}return s}function a(e,t,n){let r=new Int32Array(t*n).fill(-1),i=[],a=new Int32Array(t*n);for(let o=0;o<t*n;o++){if(!e[o]||r[o]!==-1)continue;let s=i.length,c=0,l=0;for(a[c++]=o,r[o]=s;c;){let i=a[--c];l++;let o=i%t,u=[o>0?i-1:-1,o<t-1?i+1:-1,i-t,i+t];for(let i of u)i<0||i>=t*n||!e[i]||r[i]!==-1||(r[i]=s,a[c++]=i)}i.push(l)}return{etq:r,areas:i}}var o=!1,s=e=>e.toLocaleString(`es-ES`);async function c(c,{mision:l,panel:u,sonido:d,reducido:f}){if(!o){let e=document.createElement(`style`);e.textContent=t,document.head.append(e),o=!0}let p=document.createElement(`div`);p.className=`mtej`;let m=!matchMedia(`(hover: hover) and (pointer: fine)`).matches;p.innerHTML=`<canvas class="mtej__lienzo" data-lienzo aria-label="Muestra de tejido pulmonar de Tysiu"></canvas>
+    <div class="mtej__visor" data-visor aria-hidden="true"><i></i><i></i><i></i><i></i><b>${m?l.gestoDedo:l.gesto}</b></div>`,c.append(p);let h=p.querySelector(`[data-lienzo]`),g=p.querySelector(`[data-visor]`),_=new Image;_.src=`/assets/proyectos/fundacion-jimenez-diaz/lienzo-tysiu.webp`,await _.decode();let v=performance.now(),y=Math.round(440*_.naturalHeight/_.naturalWidth),b=document.createElement(`canvas`);b.width=440,b.height=y;let x=b.getContext(`2d`,{willReadFrequently:!0});x.drawImage(_,0,0,440,y);let S=x.getImageData(0,0,440,y),C=new Uint8Array(440*y);for(let e=0;e<440*y;e++)C[e]=Math.round(S.data[e*4]*.299+S.data[e*4+1]*.587+S.data[e*4+2]*.114);let w=i(C),T=new Uint8Array(440*y),E=0;for(let e=0;e<440*y;e++)C[e]>w?E++:T[e]=1;let{etq:D,areas:O}=a(T,440,y),k=O.filter(e=>e>=4),A=Math.max(...k),j=Math.min(...k),M=Math.log(j),N=Math.log(A),P=x.createImageData(440,y);for(let e=0;e<440*y;e++){let t=e*4,n=D[e];if(n>=0&&O[n]>=4){let[e,i,a]=r((Math.log(O[n])-M)/(N-M));P.data[t]=e,P.data[t+1]=i,P.data[t+2]=a,P.data[t+3]=235}else P.data[t]=231,P.data[t+1]=226,P.data[t+2]=218,P.data[t+3]=255}let F=document.createElement(`canvas`);F.width=440,F.height=y,F.getContext(`2d`).putImageData(P,0,0);let I=performance.now()-v,L=(_.naturalWidth/440)**2,R=h.getContext(`2d`),z=()=>{R.imageSmoothingEnabled=!1,R.globalAlpha=1,R.fillStyle=`#120D0A`,R.fillRect(0,0,440,y),R.globalAlpha=.42,R.drawImage(b,0,0),R.globalAlpha=1};h.width=440,h.height=y;let B=()=>{let e=Math.min(c.clientWidth/440,c.clientHeight/y)*.98;h.style.width=`${440*e}px`,h.style.height=`${y*e}px`};B(),addEventListener(`resize`,B),z(),u.gesto(l.gesto&&m?l.gestoDedo:l.gesto);let V=`listo`,H=(e,t)=>{g.style.transform=`translate(${e}px, ${t}px)`},U=e=>{H(e.clientX,e.clientY)};if(h.addEventListener(`pointerenter`,()=>p.classList.add(`es-encima`)),h.addEventListener(`pointerleave`,()=>{m||p.classList.remove(`es-encima`)}),addEventListener(`pointermove`,U),m){let e=h.getBoundingClientRect();H(e.left+e.width/2,e.top+e.height/2),p.classList.add(`es-encima`)}h.addEventListener(`click`,t=>{if(V!==`listo`)return;V=`curso`,p.classList.add(`es-curso`);let n=h.getBoundingClientRect(),r=(t.clientX-n.left)/n.width*440,i=(t.clientY-n.top)/n.height*y;H(t.clientX,t.clientY),u.gesto(``),u.orden(l.curso,!0);let a=d.subida(),o=Math.hypot(Math.max(r,440-r),Math.max(i,y-i)),s={r:0};e.to(s,{r:o,duration:f?0:2.2,ease:`power1.inOut`,onUpdate(){z(),R.save(),R.beginPath(),R.arc(r,i,s.r,0,Math.PI*2),R.clip(),R.drawImage(F,0,0),R.restore(),R.strokeStyle=`rgba(245,203,215,.9)`,R.lineWidth=1,R.beginPath(),R.arc(r,i,s.r,0,Math.PI*2),R.stroke(),a.avance(s.r/o)},onComplete(){z(),R.drawImage(F,0,0),a.soltar(!0),W()}})});function W(){V=`hecha`,p.classList.add(`es-hecha`),u.orden(l.veredicto,!0),d.ok();let e=document.createElement(`div`);e.className=`mtej-ley`,e.innerHTML=`
+      <span class="mtej-ley__escala" style="background:${`linear-gradient(${n.map(e=>`rgb(${e.join(`,`)})`).reverse().join(`,`)})`};--grad-h:linear-gradient(90deg,${n.map(e=>`rgb(${e.join(`,`)})`).join(`,`)})"></span>
+      <span class="mtej-ley__v"><small>Mayor región</small>${s(Math.round(A*L))} px</span>
+      <span class="mtej-ley__v mtej-ley__v--abajo"><small>Menor</small>${s(Math.round(j*L))} px</span>
+      <dl>
+        <div><dt>Tejido</dt><dd>${Math.round(E/(440*y)*100)} %</dd></div>
+        <div><dt>Regiones medidas</dt><dd>${s(k.length)}</dd></div>
+        <div><dt>Calculado en</dt><dd>${Math.max(1,Math.round(I))} ms</dd></div>
+      </dl>`,u.leyenda(e),u.hecha(l.explica)}return{destruir(){removeEventListener(`resize`,B),removeEventListener(`pointermove`,U),p.remove()}}}export{c as montar};

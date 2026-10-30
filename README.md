@@ -25,6 +25,10 @@ src/pages/index.astro   la home: orden de los bloques y el fondo vivo
 src/pages/proyectos/index.astro   el archivo, «La cinta»: la maqueta de la home de huyml.co con lo nuestro. Los proyectos pasan en
                         diagonal, uno por gesto, y el ratón mueve la fila; lo de cada uno va en la esquina de la izquierda (cambia a
                         píxeles) y en el índice (no hay página por proyecto; scripts/cinta.js)
+src/pages/tech/index.astro   Tech, «La sala de máquinas»: la maqueta del slider de innovaciones de orano.group con lo nuestro. Una
+                        innovación por pantalla con su modelo en alambre; pasar a la siguiente es volar por un valle hasta ella (y de la
+                        cuarta, otra vez a la primera). «Entrar» abre su artículo y [+] su misión (scripts/tech.js; textos y datos en
+                        src/data/tech.js; la lectura grabada de la factura, en src/data/lectura.json)
 src/layouts/Base.astro  <head>, metas, fuentes precargadas y el script que decide umbral, movimiento y ratón
 src/components/
   Umbral.astro          carga con humor, barra de 1 px y entrar con o sin sonido (el final lo pinta portada.js)
@@ -44,6 +48,13 @@ src/scripts/
   pagina.js             arranque de las subpáginas: lo mismo menos el umbral y la portada, más el montaje propio de cada una
   comun.js              lo compartido: los imanes y la barra que se esconde (y se pone en tinta sobre lo claro)
   cinta.js              el archivo de proyectos
+  tech.js               la página Tech: slider, artículo y misiones (las tres vistas y sus pasos)
+  tech/escena.js        la escena en alambre con OGL: el viaje por el valle (montañas, camino, antenas y polvo, calculados en
+                        los shaders), los modelos que se dibujan al llegar y la sala de las misiones
+  tech/modelos.js       los modelos, hechos en código (portátil, tienda + Excel, escáner, microscopio), la peana, la antena y la sala
+  tech/glitch.js        las letras de Tech notan el ratón: se mueven, se separan en rojo y azul y se rasgan en franjas pixeladas
+  tech/factura.js       misión «Automatiza»: el lector que lee la factura y apunta la línea en el Excel
+  tech/tejido.js        misión «A medida» (Tysiu): Otsu + regiones medidas, de verdad, en el navegador
   vivo.js               los textos grandes notan el ratón (rojo y azul que se separan y se inclinan); solo con ratón
   gl/portada.js         el shader de la portada y del final de la carga (uUmbral): pincel, linterna, inspector, mantener, salida al bajar
   gl/fondo.js           el fondo vivo (solo con ratón): los glifos se excitan donde pasa el ratón, sin tapar nada
@@ -58,6 +69,10 @@ public/assets/          fuentes, logos, partners, imagen de portada, fondo y mat
 Los `.jsx`, `.css` y `.html` sueltos de la raíz son la **web anterior** (React con el build
 propio). Ya no se compilan; se quedan de consulta (textos, legales, datos de proyectos, cookies,
 chat de FRESA) hasta que la v5 tenga esas piezas, y entonces se borran.
+
+`scripts/grabar-lectura.mjs` graba, una sola vez, la lectura real de la factura de la misión con la API de Claude
+(`ANTHROPIC_API_KEY` en el entorno; cuesta céntimos). Lee `scripts/grabaciones/factura-ejemplo.png` y deja lo que
+contesta en `src/data/lectura.json`. La web nunca llama a la API: solo enseña lo grabado.
 
 ## Reglas de la casa
 
