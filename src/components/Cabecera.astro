@@ -1,11 +1,16 @@
 ---
-// Barra fija: logotipo, las barras del sonido (se pulsan para callarlo o encenderlo) y contacto.
-// Se esconde al bajar y vuelve al subir.
+// Barra fija: logotipo con el botón del menú debajo, las barras del sonido (se pulsan para callarlo o encenderlo) y
+// contacto. Se esconde al bajar y vuelve al subir. El menú aún no existe: el botón está, pero no abre nada.
 import Marca from './Marca.astro';
 const base = import.meta.env.BASE_URL;
 ---
 <header class="cab" data-cab>
-  <a class="cab__logo" href={base} aria-label="adsPartners, inicio"><Marca tipo="logo" /></a>
+  <div class="cab__izq">
+    <a class="cab__logo" href={base} aria-label="adsPartners, inicio"><Marca tipo="logo" /></a>
+    <button class="cab__menu mono" type="button" aria-expanded="false" data-menu-btn data-sonido-hover>
+      <span class="cab__menu-i" aria-hidden="true"><i></i><i></i></span>Menú
+    </button>
+  </div>
 
   <div class="cab__dcha">
     <button class="cab__sonido" type="button" aria-pressed="false" aria-label="Sonido" data-sonido-btn data-sonido-hover>
@@ -44,8 +49,22 @@ const base = import.meta.env.BASE_URL;
   /* Con un proyecto abierto, fuera */
   :global(html.pro-abierto) .cab { transform: translateY(-110%); opacity: 0; pointer-events: none; }
   .cab--fuera:focus-within { transform: none; opacity: 1; }
+  /* El menú cuelga debajo del logo sin ocupar sitio: la barra sigue alineada con el logo */
+  .cab__izq { position: relative; display: flex; }
   .cab__logo { width: 132px; color: currentColor; }
   .cab__logo :global(svg) { width: 100%; height: auto; }
+
+  /* Menú: dos rayas que se igualan al pasar el ratón */
+  .cab__menu {
+    position: absolute; left: 0; top: calc(100% + 10px);
+    display: inline-flex; align-items: center; gap: 9px; padding: 4px 0; color: currentColor; white-space: nowrap;
+  }
+  .cab__menu-i { display: inline-flex; flex-direction: column; gap: 4px; width: 16px; }
+  .cab__menu-i i { height: 1px; background: currentColor; transition: width .5s var(--curva), transform .5s var(--curva); }
+  .cab__menu-i i:first-child { width: 100%; }
+  .cab__menu-i i:last-child { width: 55%; }
+  .cab__menu:hover .cab__menu-i i:first-child, .cab__menu:focus-visible .cab__menu-i i:first-child { width: 55%; transform: translateX(45%); }
+  .cab__menu:hover .cab__menu-i i:last-child, .cab__menu:focus-visible .cab__menu-i i:last-child { width: 100%; }
   .cab__dcha { display: flex; align-items: center; gap: 22px; }
 
   /* Sonido: con sonido, las barras se mueven; sin sonido, se quedan planas */
@@ -70,6 +89,7 @@ const base = import.meta.env.BASE_URL;
 
   @media (max-width: 700px) {
     .cab__logo { width: 104px; }
+    .cab__menu { top: calc(100% + 8px); }
     .cab__dcha { gap: 14px; }
     .cab__sonido-t { display: none; }
     .cab__hablemos { font-size: 12px; padding: 8px 13px; }
