@@ -22,7 +22,9 @@ la ruta de la copia de prueba.
 ```
 astro.config.mjs        salida a docs/ y ruta base (ADS_BASE=<carpeta> para la copia de prueba); HTML sin comprimir
 src/pages/index.astro   la home: orden de los bloques y el fondo vivo
-src/pages/proyectos/[slug].astro  esbozo de cada proyecto («en construcción»), hasta la Fase 3
+src/pages/proyectos/index.astro   el archivo, «La cinta»: la maqueta de la home de huyml.co con lo nuestro. Los proyectos pasan en
+                        diagonal, uno por gesto, y el ratón mueve la fila; lo de cada uno va en la esquina de la izquierda (cambia a
+                        píxeles) y en el índice (no hay página por proyecto; scripts/cinta.js)
 src/layouts/Base.astro  <head>, metas, fuentes precargadas y el script que decide umbral, movimiento y ratón
 src/components/
   Umbral.astro          carga con humor, barra de 1 px y entrar con o sin sonido (el final lo pinta portada.js)
@@ -34,10 +36,14 @@ src/components/
   Transicion.astro      «se enciende la luz»: de la máquina al capítulo claro
   Contacto.astro        la carta con huecos, la posdata de privacidad, «Enviar la carta» y el cierre
   Fresa.astro           el globo de FRESA (abre una ventana de chat en plano técnico) y el chat del final, tras el muro
+  Fondo.astro           el fondo tech de todas las páginas (rejilla quieta; con ratón, el canvas de gl/fondo.js)
   Cursor.astro, Marca.astro
-src/data/               partners y proyectos; de dónde sale cada logo, en partners-LEEME.md
+src/data/               partners y proyectos (el archivo los enseña todos con su foto «cinta»; el lienzo de la home, los home: true con su «foto»); de dónde sale cada logo, en partners-LEEME.md
 src/scripts/
   app.js                arranque: Lenis + ScrollTrigger, sonido, cursor, umbral, portada, fondo, textos vivos y secciones bajo demanda
+  pagina.js             arranque de las subpáginas: lo mismo menos el umbral y la portada, más el montaje propio de cada una
+  comun.js              lo compartido: los imanes y la barra que se esconde (y se pone en tinta sobre lo claro)
+  cinta.js              el archivo de proyectos
   vivo.js               los textos grandes notan el ratón (rojo y azul que se separan y se inclinan); solo con ratón
   gl/portada.js         el shader de la portada y del final de la carga (uUmbral): pincel, linterna, inspector, mantener, salida al bajar
   gl/fondo.js           el fondo vivo (solo con ratón): los glifos se excitan donde pasa el ratón, sin tapar nada

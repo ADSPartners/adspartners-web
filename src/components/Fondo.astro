@@ -1,0 +1,13 @@
+---
+// El fondo tech de toda la página: en el móvil, una rejilla quieta; con ratón, el canvas vivo encima (gl/fondo.js)
+---
+<div class="fondo" aria-hidden="true"><canvas class="fondo__gl" data-fondo></canvas></div>
+
+<style>
+  .fondo {
+    position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background: var(--noche) url('/assets/fondo/rejilla.svg') 0 0 / 192px 192px repeat;
+  }
+  .fondo__gl { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 1s var(--curva); }
+  :global(html.fondo-gl) .fondo__gl { opacity: 1; }
+</style>

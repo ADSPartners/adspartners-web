@@ -220,7 +220,7 @@ export function montarGlobo({ lenis, reducido }) {
   globo.addEventListener('click', () => (ventana.abierta() ? ventana.cerrar() : ventana.abrir()));
 
   // --- El muro --------------------------------------------------------------------
-  const muro = { sellado: !!lenis && !reducido, tension: 0, empuje: 0, ultimo: 0, n: 0, alto: 0 };
+  const muro = { sellado: !!lenis && !reducido, tension: 0, empuje: 0, ultimo: 0, n: 0, alto: 0, pico: 0, minimo: 0, frenado: false };
   if (muro.sellado) sec.classList.add('sellada');
 
   function romper(duracion = 1.6) {
@@ -246,18 +246,28 @@ export function montarGlobo({ lenis, reducido }) {
   }
 
   if (lenis && !reducido) {
-    // Cada gesto (rueda, trackpad o dedo) es un empujón; dentro de un mismo gesto se suma como mucho 0,42
+    // Cada gesto (rueda, trackpad o dedo) es un empujón; dentro de un mismo gesto se suma como mucho 0,42.
+    // Un empujón nuevo empieza tras un silencio (la rueda) o cuando el gesto vuelve a acelerar después de haber
+    // frenado: el trackpad no se calla nunca (su inercia sigue mandando eventos) y el siguiente deslizamiento llega
+    // pegado al anterior
     lenis.on('virtual-scroll', ({ deltaY, event }) => {
       if (!muro.sellado || deltaY <= 0 || lenis.scroll < lenis.limit - 2) return;
       const ahora = performance.now();
-      if (ahora - muro.ultimo > 220) {
+      const acelera = muro.frenado && deltaY > muro.minimo * 2 + 4;
+      if (ahora - muro.ultimo > 220 || acelera) {
         muro.empuje = 0;
+        muro.pico = deltaY;
+        muro.frenado = false;
         aviso.textContent = EMPUJES[Math.min(muro.n, EMPUJES.length - 1)];
         aviso.classList.add('on');
         sonido.empuje(Math.min(1, muro.tension));
         muro.n++;
       }
       muro.ultimo = ahora;
+      // Frena cuando baja de la mitad de lo más fuerte del gesto; desde ahí se mira lo más flojo que llega
+      muro.pico = Math.max(muro.pico, deltaY);
+      if (!muro.frenado && deltaY < muro.pico * 0.5) { muro.frenado = true; muro.minimo = deltaY; }
+      else muro.minimo = Math.min(muro.minimo, deltaY);
       const suma = Math.min(0.42 - muro.empuje, deltaY / (event.type.includes('touch') ? 600 : 900));
       if (suma > 0) { muro.empuje += suma; muro.tension += suma; }
       if (muro.tension >= 1) romper();
@@ -266,7 +276,8 @@ export function montarGlobo({ lenis, reducido }) {
     gsap.ticker.add(() => {
       const t = performance.now(); const dt = Math.min(0.05, (t - t0) / 1000); t0 = t;
       if (muro.sellado) {
-        muro.tension = Math.max(0, muro.tension - dt * 0.22);
+        // El muro vuelve a caer cuando se deja de empujar (no mientras siguen llegando eventos)
+        if (t - muro.ultimo > 250) muro.tension = Math.max(0, muro.tension - dt * 0.22);
         const objetivo = innerHeight * 0.17 * (1 - Math.exp(-muro.tension * 1.8));
         muro.alto += (objetivo - muro.alto) * (1 - Math.exp(-(objetivo > muro.alto ? 12 : 3) * dt));
         if (muro.tension < 0.02 && muro.n) { muro.n = 0; aviso.classList.remove('on'); }

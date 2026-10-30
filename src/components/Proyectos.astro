@@ -2,7 +2,9 @@
 // Proyectos: un lienzo con el fondo máquina detrás por el que suben, con el scroll, las fotos de los proyectos (una
 // por proyecto, grandes). Pasar el ratón (o un toque en el móvil) escribe encima, en varios sitios a la vez y con
 // letras distintas; un clic (o un segundo toque) lo acerca a cámara, saca las demás de la pantalla y cuenta el proyecto.
-import { PROYECTOS } from '../data/proyectos.js';
+import { PROYECTOS as TODOS } from '../data/proyectos.js';
+// En la home, solo los del lienzo (el archivo los tiene todos)
+const PROYECTOS = TODOS.filter((p) => p.home);
 const base = import.meta.env.BASE_URL;
 
 // Dónde va cada foto (ancho en vw y x en %): en zigzag, para que el título de detrás asome entre ellas
@@ -22,7 +24,8 @@ const textos = (p: any) => ({
   dato: p.dato,
   cta: '',   // lo pone el JS (ratón o dedo)
 });
-const datos = PROYECTOS.map((p) => ({ ...p, enlace: `${base}proyectos/${p.slug}/` }));
+// No hay una página por proyecto: «Ver proyecto» lleva al archivo, parado en ese
+const datos = PROYECTOS.map((p) => ({ ...p, enlace: `${base}proyectos/#${p.slug}` }));
 ---
 <section class="pro" id="proyectos" data-seccion="proyectos" data-cursor="proyectos" aria-labelledby="pro-titulo">
   <div class="pro__pegado" data-pro-pegado>

@@ -1,0 +1,219 @@
+---
+// El archivo, «La cinta»: la maqueta de la home de huyml.co (la referencia que eligió Álvaro el 29-oct), con lo
+// nuestro: marca, letras, fotos, textos y código. Una sola pantalla en claro que no baja: la rueda, el dedo o las
+// flechas pasan los proyectos en diagonal, uno cada vez; llegan desde abajo a la izquierda, se paran en el centro y se
+// apilan arriba a la derecha, y el ratón mueve toda la fila. No hay una página por proyecto: lo de cada uno va en la
+// esquina de la izquierda (equipo, rol, lanzamiento y lo que hicimos, que cambia a píxeles) y en el índice de la
+// derecha (un resumen). Lo mueve scripts/cinta.js; aquí está lo que se ve sin él (el índice, con sus enlaces).
+import Base from '../../layouts/Base.astro';
+import Cursor from '../../components/Cursor.astro';
+import Marca from '../../components/Marca.astro';
+import { PROYECTOS } from '../../data/proyectos.js';
+const base = import.meta.env.BASE_URL;
+const dos = (n: number) => String(n).padStart(2, '0');
+const correo = 'adsgroup@ads-partners.com';
+---
+<Base
+  titulo="Proyectos · adsPartners®"
+  descripcion="Los proyectos de adsPartners: marca, webs, software y automatización. Pasan uno a uno, con quién lo hizo, qué hicimos y cuándo salió."
+>
+  <main class="cin" data-cursor="archivo" data-cinta>
+    <h1 class="oculto-accesible">Proyectos de adsPartners</h1>
+
+    <!-- Arriba: el logotipo en vertical y su sello, el sonido, la hora y la vuelta a la página principal -->
+    <a class="cin__logo" href={base} aria-label="adsPartners, inicio" data-sonido-hover><Marca tipo="logo" /></a>
+    <p class="cin__sello" aria-hidden="true"><span>copyright 2026</span><span>madrid, es</span><span>work</span></p>
+    <button class="cin__sonido" type="button" aria-pressed="false" aria-label="Sonido" data-sonido-btn data-sonido-hover><span data-sonido-txt>Sonido off</span> —</button>
+    <p class="cin__donde" aria-hidden="true"><span>Desde Madrid</span><span class="cin__hora" data-cin-hora></span></p>
+    <a class="cin__volver" href={base} data-sonido-hover><span class="cin__flecha" aria-hidden="true">◀</span> <span class="cin__subraya">Página principal</span></a>
+
+    <!-- La fila de cartas -->
+    <div class="cin__escena" data-cin-escena aria-hidden="true">
+      {PROYECTOS.map((p, j) => (
+        <a class="cin__carta" href={p.enlace ? p.enlace.url : `mailto:${correo}`} tabindex="-1" data-cin-carta={j}>
+          <img src={`${base}assets/proyectos/${p.cinta.src}`} alt="" decoding="async" data-cin-img />
+        </a>
+      ))}
+    </div>
+
+    <div class="cin__marcas" data-cin-marcas aria-hidden="true">
+      <span class="insp cin__marca" data-cin-marca="foto"></span>
+    </div>
+
+    <!-- La esquina de la izquierda: lo del que está en el centro. Dos capas iguales, para pasar de uno a otro a píxeles
+         (cinta.js rellena la de debajo y cambia una por otra celda a celda) -->
+    <div class="cin__info" data-cin-info aria-live="polite">
+      <div class="cin__capa" data-cin-capa>
+        <dl class="cin__par cin__par--equipo">
+          <dt>Equipo</dt><dd data-v="equipo"></dd>
+          <dt>Rol</dt><dd data-v="rol"></dd>
+        </dl>
+        <dl class="cin__par cin__par--lanza">
+          <dt>Lanzamiento</dt><dd data-v="anio"></dd>
+        </dl>
+        <dl class="cin__par cin__par--hicimos">
+          <dt>Hicimos</dt><dd data-v="datos"></dd>
+        </dl>
+      </div>
+    </div>
+
+    <!-- El índice: cada entrada lleva a su proyecto dentro de la fila -->
+    <nav class="cin__indice" aria-label="Los proyectos">
+      <ol class="cin__lista" data-cin-lista>
+        {PROYECTOS.map((p, j) => (
+          <li class="cin__item" data-cin-item={j}>
+            <a href={`#${p.slug}`} data-cursor-enlace data-sonido-hover>
+              <span class="cin__item-etq">{p.sector}</span>
+              <span class="cin__item-nombre">{p.nombre}</span>
+              <span class="cin__item-raya" aria-hidden="true"></span>
+              <span class="cin__item-linea">{p.resumen}</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+
+    <p class="cin__paleta" data-cin-paleta aria-hidden="true"></p>
+
+    <div class="cin__contador" aria-hidden="true">
+      <span class="cin__contador-etq">Proyectos</span>
+      <span class="cin__cifras"><span class="cin__tira" data-cin-tira></span></span>
+      <span class="cin__total" data-cin-total>/{dos(PROYECTOS.length)}</span>
+    </div>
+
+    <p class="cin__pista" aria-hidden="true"><span class="cin__pista-raton">Rueda</span><span class="cin__pista-dedo">Desliza</span></p>
+    <a class="cin__ver" href={`mailto:${correo}`} data-cin-ver data-sonido-hover><span class="cin__subraya" data-cin-ver-t>Te lo contamos</span> <span class="cin__flecha" aria-hidden="true">▶</span></a>
+  </main>
+  <Cursor />
+  <script>
+    import { arrancarPagina } from '../../scripts/pagina.js';
+    import { montarCinta } from '../../scripts/cinta.js';
+    arrancarPagina(montarCinta);
+  </script>
+</Base>
+
+<style>
+  /* La página no baja: la rueda, el dedo y las flechas mueven la fila. En claro, como papel */
+  :global(html.cinta-fija), :global(html.cinta-fija body) { height: 100%; overflow: hidden; overscroll-behavior: none; background: var(--crema); }
+  .cin {
+    position: fixed; inset: 0; overflow: hidden; touch-action: none;
+    background: var(--crema); color: var(--tinta);
+    font-size: 13px; line-height: 1.22;
+    --gris: rgba(25, 9, 0, .46);
+    --raya: rgba(25, 9, 0, .14);
+    --alto-item: clamp(150px, 20vh, 215px);
+    --col-b: clamp(250px, 15vw, 300px);   /* la segunda columna: el sonido, la esquina de la derecha y el contador */
+    --arriba: calc(var(--margen) + 6px);
+  }
+  /* El cursor propio, en tinta sobre el papel */
+  :global(html.cinta-fija .cursor__iso), :global(html.cinta-fija .cursor__texto) { color: var(--tinta); }
+  :global(html.cinta-fija .cursor__pista) { stroke: rgba(25, 9, 0, .3); }
+  .cin__subraya { text-decoration: underline; text-underline-offset: 2px; }
+  .cin__flecha { display: inline-block; font-size: 10px; transition: transform .4s var(--curva); }
+
+  /* --- Arriba ------------------------------------------------------------------------------------------------- */
+  /* El logotipo en vertical, de abajo arriba; a su lado, el sello en pequeño */
+  .cin__logo { position: absolute; left: var(--margen); top: var(--arriba); z-index: 5; width: 26px; height: 136px; }
+  .cin__logo :global(svg) { position: absolute; left: 0; top: 100%; width: 136px; max-width: none; height: auto; transform: rotate(-90deg); transform-origin: 0 0; }
+  .cin__sello {
+    position: absolute; left: calc(var(--margen) + 36px); top: var(--arriba); z-index: 5; height: 136px; margin: 0;
+    display: flex; flex-direction: column; gap: 3px; writing-mode: vertical-rl; transform: rotate(180deg);
+    font-size: 9px; line-height: 1; font-weight: 500; color: var(--gris); text-align: end; white-space: nowrap;
+  }
+
+  .cin__sonido { position: absolute; left: var(--col-b); top: var(--arriba); z-index: 5; font-weight: 500; }
+  /* Desde dónde y qué hora es aquí (se invierte sobre las fotos, como el contador) */
+  .cin__donde {
+    position: absolute; top: var(--arriba); left: calc(var(--col-b) + 180px); z-index: 4; margin: 0; display: grid;
+    font-weight: 500; mix-blend-mode: difference; color: #FFEBDA; pointer-events: none;
+  }
+  .cin__hora { opacity: .58; font-variant-numeric: tabular-nums; }
+  .cin__volver { position: absolute; right: var(--margen); top: var(--arriba); z-index: 5; font-weight: 500; }
+  .cin__volver .cin__flecha { margin-right: 4px; }
+  .cin__volver:hover .cin__flecha, .cin__volver:focus-visible .cin__flecha { transform: translateX(-4px); }
+
+  /* --- La fila de cartas (cinta.js pone a cada una su sitio y su tamaño) --------------------------------------- */
+  .cin__escena { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+  :global(html:not(.js)) .cin__escena { display: none; }
+  .cin__carta {
+    position: absolute; left: 50%; top: 50%; width: var(--w, 20vw); height: var(--h, 15vw); overflow: hidden;
+    transform: translate(-50%, -50%); background: #DCD5CA;
+    will-change: transform; backface-visibility: hidden; pointer-events: auto;
+  }
+  .cin__carta img { width: 100%; height: 100%; object-fit: cover; transition: transform 1.1s var(--curva); }
+  /* Con el ratón encima, la foto se acerca */
+  .cin__carta:hover img { transform: scale(1.09); }
+
+  /* La etiqueta del inspector, encima de la carta del centro (--w, --h y --cy los pone cinta.js) */
+  .cin__marcas { position: absolute; left: 50%; top: calc(50% + var(--cy, 0px)); width: 0; height: 0; z-index: 3; pointer-events: none; }
+  .cin__marca { position: absolute; left: 0; top: 0; transition: transform .7s var(--curva), opacity .3s; transform: translate(calc(var(--w, 0px) / -2), calc(var(--h, 0px) / -2 - 100% - 10px)); }
+  .cin__marca:empty { opacity: 0; transition: transform .7s var(--curva); }   /* vacía, se esconde ya */
+
+  /* --- La esquina de la izquierda, como la de Huyml: equipo y rol; a su derecha, lanzamiento y lo que hicimos ---- */
+  .cin__info { position: absolute; left: var(--margen); top: calc(43% - 8px); z-index: 2; width: calc(var(--col-b) - var(--margen) + 380px); height: 180px; pointer-events: none; }
+  .cin__capa { position: absolute; inset: 0; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
+  /* 8 px de aire arriba: las tildes de la primera línea tienen que caber dentro de la máscara de los píxeles */
+  .cin__par { position: absolute; top: 8px; margin: 0; display: grid; grid-template-columns: 64px 1fr; align-items: baseline; }
+  .cin__par--equipo { left: 0; width: calc(var(--col-b) - var(--margen) - 20px); }
+  .cin__par--lanza, .cin__par--hicimos { left: calc(var(--col-b) - var(--margen)); right: 0; grid-template-columns: 90px 1fr; }
+  .cin__par--hicimos { top: 96px; }
+  .cin__par dt { color: var(--gris); font-weight: 500; }
+  .cin__par dd { margin: 0; font-weight: 500; }
+  .cin__par dd :global(span) { display: block; }
+
+  /* --- El índice: todos en columna, centrados, el del centro encendido (sube con la fila; las cartas, por encima) */
+  .cin__indice {
+    position: absolute; top: 0; bottom: 0; left: 71.3%; width: 17.4vw; z-index: 0; overflow: hidden;
+    -webkit-mask-image: linear-gradient(transparent 3%, #000 24%, #000 76%, transparent 97%);
+    mask-image: linear-gradient(transparent 3%, #000 24%, #000 76%, transparent 97%);
+  }
+  .cin__lista { position: absolute; left: 0; right: 0; top: calc(50% - var(--alto-item) / 2); margin: 0; padding: 0; list-style: none; will-change: transform; }
+  .cin__item { height: var(--alto-item); }
+  .cin__item a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; height: 100%; text-align: center; }
+  .cin__item-etq { color: var(--gris); font-weight: 500; }
+  .cin__item-nombre { font-size: clamp(24px, 1.6vw, 30px); line-height: .9; letter-spacing: -.03em; text-transform: uppercase; }
+  .cin__item-raya { width: 9px; height: 1px; background: currentColor; }
+  .cin__item-linea { max-width: 36ch; font-weight: 500; }
+
+  /* Su paleta, medida en la foto: tres cuadrados en el borde (el hexadecimal, al pasar por encima) */
+  .cin__paleta { position: absolute; right: var(--margen); top: 50%; z-index: 2; margin: 0; display: flex; gap: 2px; transform: translateY(-50%); }
+  .cin__paleta :global(i) { display: block; width: 14px; height: 14px; outline: 1px solid var(--raya); outline-offset: -1px; transition: background .5s var(--curva); }
+
+  /* --- Abajo ---------------------------------------------------------------------------------------------------- */
+  /* El contador: la cifra pasa como un rodillo, con la fila, y cabe entera; se invierte sobre las fotos (es crema +
+     tinta con «difference»: sobre el papel sale tinta, sobre una foto oscura sale claro) */
+  .cin__contador {
+    position: absolute; left: var(--col-b); bottom: var(--margen); z-index: 4;
+    display: flex; align-items: flex-start; gap: 3.2vw; pointer-events: none; mix-blend-mode: difference; color: #FFEBDA;
+    font-size: clamp(120px, 17vh, 190px);
+  }
+  .cin__contador-etq, .cin__total { font-size: 13px; font-weight: 500; white-space: nowrap; }
+  /* Cada cifra va en un hueco de 1em; en Open Sauce su tinta va de 0,11 a 0,89 (medido), así que la ventana enseña
+     de 0,1 a 0,9 (cinta.js baja el rodillo 0,1) y la de al lado no asoma */
+  .cin__cifras { display: block; height: .8em; overflow: hidden; padding-right: .06em; letter-spacing: -.045em; }
+  .cin__tira { display: block; will-change: transform; }
+  .cin__tira :global(span) { display: block; height: 1em; line-height: 1em; white-space: nowrap; }
+
+  .cin__pista { position: absolute; left: var(--margen); bottom: var(--margen); z-index: 4; margin: 0; font-weight: 500; color: var(--gris); }
+  .cin__pista-dedo { display: none; }
+  @media (hover: none), (pointer: coarse) {
+    .cin__pista-raton { display: none; }
+    .cin__pista-dedo { display: inline; }
+  }
+  .cin__ver { position: absolute; right: var(--margen); bottom: var(--margen); z-index: 4; font-weight: 500; }
+  .cin__ver .cin__flecha { margin-left: 4px; }
+  .cin__ver:hover .cin__flecha, .cin__ver:focus-visible .cin__flecha { transform: translateX(4px); }
+
+  /* --- Móvil: la carta arriba y debajo su nombre; sin la esquina, la paleta, el sonido ni la hora (no caben) ---- */
+  @media (max-width: 760px) {
+    .cin { --alto-item: 160px; --col-b: var(--margen); --arriba: var(--margen); }
+    .cin__logo { width: 120px; height: 24px; }
+    .cin__logo :global(svg) { top: 0; width: 120px; transform: none; }
+    .cin__sello, .cin__donde, .cin__sonido, .cin__info, .cin__paleta, .cin__pista { display: none; }
+    .cin__marca { transform: translate(-50%, calc(var(--h, 0px) / -2 - 100% - 10px)); }
+    .cin__indice { left: var(--margen); right: var(--margen); width: auto; top: 57%; bottom: auto; height: var(--alto-item); -webkit-mask-image: none; mask-image: none; }
+    .cin__lista { top: 0; }
+    .cin__contador { left: var(--margen); font-size: 92px; gap: 8px; }
+    .cin__contador-etq { display: none; }
+  }
+</style>

@@ -23,7 +23,9 @@ export function crearCursor({ reducido }) {
   function actualizarZona(destino) {
     const z = destino && destino.closest ? destino.closest('[data-cursor]') : null;
     zona = z ? z.dataset.cursor : null;
-    const sobreControl = destino && destino.closest && destino.closest('a, button, input, label');
+    // Sobre un control vuelve el cursor del sistema, salvo en los enlaces que llevan su frase (data-cursor-enlace)
+    const control = destino && destino.closest && destino.closest('a, button, input, label');
+    const sobreControl = control && !control.hasAttribute('data-cursor-enlace');
     html.classList.toggle('cursor-visible', activo && !!zona && !sobreControl && !html.classList.contains('en-umbral'));
   }
   function onMove(e) { tx = e.clientX; ty = e.clientY; actualizarZona(e.target); }

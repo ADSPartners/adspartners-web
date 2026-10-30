@@ -11,6 +11,7 @@ import { crearCursor } from './cursor.js';
 import { montarUmbral } from './umbral.js';
 import { montarGlobo } from './secciones/fresa.js';
 import { montarVivo } from './vivo.js';
+import { montarCabecera, montarImanes } from './comun.js';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -124,37 +125,4 @@ function montarSecciones(ctx) {
     }
   }, { rootMargin: '150% 0px 150% 0px' });
   pendientes.forEach((el) => io.observe(el));
-}
-
-// Imanes: el botón se acerca un poco al ratón cuando está cerca, y vuelve con un pequeño rebote
-function montarImanes(reducido) {
-  if (reducido || !matchMedia('(hover: hover) and (pointer: fine)').matches) return;
-  document.querySelectorAll('[data-iman]').forEach((b) => {
-    b.addEventListener('pointermove', (e) => {
-      const r = b.getBoundingClientRect();
-      gsap.to(b, { x: (e.clientX - (r.left + r.width / 2)) * 0.3, y: (e.clientY - (r.top + r.height / 2)) * 0.35, duration: 0.5, ease: 'power3.out' });
-    });
-    b.addEventListener('pointerleave', () => gsap.to(b, { x: 0, y: 0, duration: 0.9, ease: 'elastic.out(1, 0.45)' }));
-  });
-}
-
-// La barra se esconde al bajar (pasada la portada) y vuelve al subir. Sobre el capítulo claro, cambia a tinta
-function montarCabecera() {
-  const cab = document.querySelector('[data-cab]');
-  if (!cab) return;
-  let ultimo = window.scrollY;
-  const claro = document.getElementById('contacto');
-  const mirar = (y) => {
-    const bajando = y > ultimo + 2, subiendo = y < ultimo - 2;
-    cab.classList.toggle('cab--fondo', y > innerHeight * 0.8);
-    if (bajando && y > innerHeight * 0.6) cab.classList.add('cab--fuera');
-    else if (subiendo || y < innerHeight * 0.6) cab.classList.remove('cab--fuera');
-    if (claro) {
-      const r = claro.getBoundingClientRect();
-      cab.classList.toggle('cab--clara', r.top < 60 && r.bottom > 60);
-    }
-    ultimo = y;
-  };
-  // El scroll nativo (Lenis lo mueve también): así cuenta igual el scroll de rueda que el de foco o el de un enlace
-  window.addEventListener('scroll', () => mirar(window.scrollY), { passive: true });
 }

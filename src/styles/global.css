@@ -68,4 +68,14 @@ html.en-umbral body { overflow: hidden; }
   /* Sobre enlaces y botones el cursor propio se esconde: vuelve la mano del sistema */
   html.cursor-propio [data-cursor] a,
   html.cursor-propio [data-cursor] button { cursor: pointer; }
+  /* …salvo en los enlaces que llevan su frase en el cursor propio */
+  html.cursor-propio [data-cursor] a[data-cursor-enlace] { cursor: none; }
 }
+
+/* Etiqueta del inspector (la de la portada): rosa, con su cuadradito, y lo que dice va a máquina */
+.insp {
+  position: relative; display: inline-block; padding: 3px 7px 3px 18px;
+  font-family: var(--mono); font-size: 10px; line-height: 1.4; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--tinta); background: var(--rosa); white-space: nowrap;
+}
+.insp::before { content: ''; position: absolute; left: 7px; top: 50%; width: 5px; height: 5px; margin-top: -2.5px; background: var(--tinta); }
