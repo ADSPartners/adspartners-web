@@ -74,6 +74,13 @@ export function montarTech({ reducido, conRaton, lenis }) {
   let ocupado = false;
   let misionViva = null;
 
+  // La hora de aquí, como en la cinta
+  const hora = $('[data-tec-hora]');
+  const reloj = new Intl.DateTimeFormat('es-ES', { timeZone: 'Europe/Madrid', hour: '2-digit', minute: '2-digit' });
+  const darHora = () => { if (hora) hora.textContent = reloj.format(new Date()); };
+  darHora();
+  setInterval(darHora, 15000);
+
   const ponerVista = (v) => { vista = v; raiz.dataset.vista = v; };
   const marcarHash = () => { try { history.replaceState(null, '', `#${TECH[i].slug}`); } catch (e) { /* nada */ } };
 
