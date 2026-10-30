@@ -1,324 +1,335 @@
-// El menú es un viaje: «la aurora». Al abrirlo, la página se apaga y la cámara sube desde un horizonte de alambre,
-// atraviesa las nubes y se asoma a la noche, donde se despliega una aurora. Cada cortina es una página, con el color de
-// una emisión real (data/menu.js): pasar por encima la enciende y pinchar te mete dentro y te lleva a la página.
-// La aurora es física exacta que aun así emociona: brand por fuera, tech por dentro.
-// El viento solar sale de la visita (rastro.js): cuanto más y más deprisa se ha movido el ratón, más se mueve la
-// aurora; y dentro del menú, cada movimiento rápido es una ráfaga. Suena a su «coro del amanecer» (sonido.coro).
-// Todo es código con OGL: cortinas de rayos (quads sumados), suelo y nubes de líneas, estrellas de puntos.
-import { Renderer, Camera, Transform, Program, Mesh, Geometry, Vec3 } from 'ogl';
+// El menú es un viaje. Al abrirlo, las letras de la página se difuminan y queda la puesta de sol de la portada; la
+// cámara va hacia el sol hasta que todo es luz, y de esa luz sale el cielo de verdad: sube por la atmósfera (el
+// inspector dice la altitud y la capa), se ve la curva de la Tierra y las estrellas, gira del atardecer a la noche y se
+// mete en una aurora. Vuela por ella entre cortinas de luz y al final esperan cuatro puntos, uno por página: apuntar a
+// uno acerca la cámara y tiñe la aurora de su color (el de una emisión real); pinchar te lleva volando hasta él.
+// Todo es un shader (la foto, el cielo, la Tierra, la aurora volumétrica y los puntos), con la cámara llevada desde
+// aquí. El viento solar sale de la visita (rastro.js) y mueve la aurora; suena su «coro del amanecer».
+import { Renderer, Program, Mesh, Triangle, Texture } from 'ogl';
 import { gsap } from 'gsap';
 import { rastro } from '../rastro.js';
 
-// Dónde está cada cortina: x, z del centro; largo, la mitad de su ancho; base y alto, dónde empieza y cuánto sube.
-// Por alturas como en el cielo: el rosa abajo, el verde en medio, el rojo arriba del todo. nombre: a qué altura de
-// la cortina va su nombre y sNombre, en qué punto de su ancho (donde se ve sola, sin otra delante). vertical: dónde va
-// en una pantalla en vertical (el móvil), escalonadas en altura para que llenen la pantalla y los nombres no se pisen.
-const CORTINAS = {
-  proyectos: {
-    x: -10, z: -60, largo: 30, base: 13, alto: 29, fase: 0.0, rayos: 1100, nombre: 0.62, sNombre: 0,
-    vertical: { x: 2, base: 22, alto: 30, nombre: 0.55, sNombre: 0.2 },
-  },
-  tech: {
-    x: 6, z: -40, largo: 24, base: 7.5, alto: 22, fase: 1.7, rayos: 1100, borde: '#ff8fc0', nombre: 0.2, sNombre: -0.3,
-    vertical: { x: 3, base: 7, alto: 22, nombre: 0.25, sNombre: 0.25 },
-  },
-  brand: {
-    x: -16, z: -26, largo: 9, base: 4.5, alto: 6.5, fase: 3.1, rayos: 480, nombre: 0.5, sNombre: 0,
-    vertical: { x: -4, base: 3.5, alto: 7, nombre: 0.6, sNombre: -0.2 },
-  },
-  hablemos: {
-    x: 24, z: -48, largo: 12, base: 10, alto: 15, fase: 4.4, rayos: 560, nombre: 0.72, sNombre: 0.15,
-    vertical: { x: -3, base: 14, alto: 16, nombre: 0.6, sNombre: -0.3 },
-  },
+// Dónde espera cada punto, respecto al sitio donde se para la cámara (km; la cámara mira hacia -z)
+const PUNTOS = {
+  tech: [-25, 30, -82],
+  proyectos: [28, 40, -98],
+  brand: [-27, -8, -86],
+  about: [26, -2, -82],
 };
-const SUBIDA = 4.6;   // s del viaje la primera vez
-const REPOSO = { pos: [0, 2, 12], mira: [2, 18.5, -40] };
-const SALIDA = { pos: [0, 0.35, 12], mira: [0, 0.9, -40] };
-// Las capas que se cruzan al subir (lo que dice el inspector mientras tanto)
-const CAPAS = [[0, 'troposfera'], [2, 'troposfera'], [6, 'troposfera · nubes'], [12, 'tropopausa · por encima de las nubes']];
+const REPOSO = [0, 112, -260];   // donde se para la cámara: dentro de la aurora, justo por encima de su borde de abajo
+const SOL_UV = [0.506, 0.369];   // dónde está el sol en la foto de la portada (medido en la imagen)
+const CAPAS = [[0, 'troposfera'], [12, 'estratosfera'], [50, 'mesosfera'], [85, 'termosfera · aquí empiezan las auroras']];
 
 const rgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+// Para la luz del shader, en lineal: un color de pantalla mezclado tal cual se ensucia (el rojo salía marrón)
+const luz = (hex) => rgb(hex).map((v) => v ** 2.2);
 const mezcla = (a, b, k) => a.map((v, i) => v + (b[i] - v) * k);
 const suave = (x) => x * x * (3 - 2 * x);
-// Ruido para el CPU, el mismo que el del shader de la cortina (para saber dónde cae en pantalla)
-const azar1 = (i) => { const v = Math.sin(i * 127.1) * 43758.5453; return v - Math.floor(v); };
-const ruido1 = (x) => { const i = Math.floor(x), f = x - i; return azar1(i) + (azar1(i + 1) - azar1(i)) * f * f * (3 - 2 * f); };
-const azar2 = (x, z) => { const v = Math.sin(x * 12.9898 + z * 78.233) * 43758.5453; return v - Math.floor(v); };
-const ruido2 = (x, z) => {
-  const ix = Math.floor(x), iz = Math.floor(z), fx = x - ix, fz = z - iz, sx = fx * fx * (3 - 2 * fx), sz = fz * fz * (3 - 2 * fz);
-  const a = azar2(ix, iz), b = azar2(ix + 1, iz), c = azar2(ix, iz + 1), d = azar2(ix + 1, iz + 1);
-  return a + (b - a) * sx + (c - a) * sz + (a - b - c + d) * sx * sz;
-};
 
-const CORTINA_V = /* glsl */ `
-attribute vec3 position;   // x: dónde está el rayo en la cortina (-1..1); y: lado del rayo (-1/1); z: abajo/arriba (0/1)
-attribute float semilla;
-uniform mat4 modelViewMatrix;
-uniform mat4 projectionMatrix;
-uniform float uT, uX, uZ, uLargo, uBase, uAlto, uFase, uAncho;
-varying float vV, vU, vLuz;
-float azar1(float i) { return fract(sin(i * 127.1) * 43758.5453); }
-float ruido1(float x) { float i = floor(x), f = fract(x); return mix(azar1(i), azar1(i + 1.0), f * f * (3.0 - 2.0 * f)); }
-void main() {
-  float s = position.x;
-  float x = uX + s * uLargo;
-  // Los pliegues de la cortina, que se mueven con el viento
-  float z = uZ + 2.4 * sin(s * 3.1 + uT * 0.7 + uFase) + 1.2 * sin(s * 7.3 - uT * 1.3 + uFase * 2.0);
-  // Manchas de luz que recorren la cortina y el parpadeo de cada rayo
-  float parche = ruido1(s * 5.0 - uT * 0.9 + uFase * 3.0) * 0.6 + ruido1(s * 13.0 + uT * 1.7) * 0.4;
-  float chispa = 0.6 + 0.4 * sin(semilla * 60.0 + uT * (3.0 + semilla * 4.0));
-  float luz = (0.25 + 0.75 * parche) * chispa * smoothstep(1.0, 0.72, abs(s));
-  float alto = uAlto * (0.45 + 0.75 * parche) * (0.85 + 0.15 * chispa);
-  float y = uBase + position.z * alto + (ruido1(s * 9.0 + uT * 0.5) - 0.5) * 0.5;
-  x += position.y * uAncho;
-  gl_Position = projectionMatrix * modelViewMatrix * vec4(x, y, z, 1.0);
-  vV = position.z; vU = position.y; vLuz = luz;
-}`;
-const CORTINA_F = /* glsl */ `
+const VERT = /* glsl */ `#version 300 es
+in vec2 position; in vec2 uv; out vec2 vUv;
+void main() { vUv = uv; gl_Position = vec4(position, 0.0, 1.0); }`;
+
+const FRAG = /* glsl */ `#version 300 es
 precision highp float;
-uniform vec3 uColor, uBorde;
-uniform float uBrillo, uAparece, uAlfa;
-varying float vV, vU, vLuz;
+in vec2 vUv; out vec4 salida;
+uniform vec2 uRes;
+uniform float uT, uTA;
+uniform sampler2D tFoto; uniform vec2 uFotoTam; uniform vec2 uSolUv; uniform float uZoom, uMezcla;
+uniform vec3 uCam, uDer, uArr, uFre; uniform float uFoco;
+uniform vec3 uSol; uniform float uEstrellas, uAurora, uPasos, uVel;
+uniform vec3 uTinte; uniform float uTinteK;
+uniform vec3 uP0, uP1, uP2, uP3, uC0, uC1, uC2, uC3; uniform vec4 uLuzP;
+
+const float R = 6371.0;
+float azar(vec2 p) { vec3 q = fract(vec3(p.xyx) * 0.1031); q += dot(q, q.yzx + 33.33); return fract((q.x + q.y) * q.z); }
+float ruido(vec2 p) {
+  vec2 i = floor(p), f = fract(p), s = f * f * (3.0 - 2.0 * f);
+  return mix(mix(azar(i), azar(i + vec2(1.0, 0.0)), s.x), mix(azar(i + vec2(0.0, 1.0)), azar(i + vec2(1.0, 1.0)), s.x), s.y);
+}
+
+// --- 1 · La puesta de sol de la portada, y la cámara que va hacia el sol -------------------------------------------
+vec2 escalaFoto() {
+  float ar = uRes.x / uRes.y, ai = uFotoTam.x / uFotoTam.y;
+  return ar > ai ? vec2(1.0, ai / ar) : vec2(ar / ai, 1.0);
+}
+vec3 puesta(vec2 uv) {
+  vec2 s = escalaFoto();
+  float z = 1.0 + pow(uZoom, 2.3) * 26.0;
+  vec2 solPant = (uSolUv - 0.5) / s + 0.5;
+  vec2 ancla = mix(solPant, vec2(0.5), smoothstep(0.0, 0.8, uZoom));   // el sol se va al centro mientras te acercas
+  vec2 f = uSolUv + (uv - ancla) * s / z;
+  vec3 acc = vec3(0.0);
+  for (int i = 0; i < 12; i++) {                    // desenfoque de velocidad hacia el sol
+    float k = 1.0 - float(i) * 0.016 * uZoom;
+    acc += texture(tFoto, uSolUv + (f - uSolUv) * k).rgb;
+  }
+  acc /= 12.0;
+  vec3 col = pow(acc, vec3(1.3)) * 0.68 * vec3(1.03, 0.99, 0.94);   // la foto en clave de noche, como en la portada
+  float vig = smoothstep(1.3, 0.3, length((uv - vec2(0.5, 0.56)) * vec2(1.15, 1.0)));
+  col *= mix(mix(0.5, 1.0, vig), 1.0, uZoom);
+  float d = length((uv - ancla) * vec2(uRes.x / uRes.y, 1.0));
+  col *= 1.0 + uZoom * 2.4;
+  col += vec3(1.0, 0.8, 0.55) * exp(-d * mix(10.0, 1.4, uZoom)) * (0.15 + 2.6 * uZoom * uZoom);
+  return mix(col, vec3(1.0, 0.94, 0.84), smoothstep(0.84, 1.0, uZoom));   // el fogonazo
+}
+
+// --- 2 · El cielo: la atmósfera según la altura, la curva de la Tierra, las estrellas y el sol --------------------------
+vec3 estrellas(vec3 rd) {
+  vec3 p = rd * 140.0;
+  vec3 i = floor(p), f = fract(p);
+  float h = azar(i.xy + i.z * 17.13);
+  if (h < 0.972) return vec3(0.0);
+  vec3 c = vec3(azar(i.yz + 1.7), azar(i.zx + 4.3), azar(i.xy + 9.1)) * 0.6 + 0.2;
+  float b = smoothstep(0.16, 0.0, length(f - c)) * (h - 0.972) * 36.0;
+  float tw = 0.7 + 0.3 * sin(uTA * (1.0 + h * 6.0) + h * 40.0);
+  return mix(vec3(1.0, 0.86, 0.72), vec3(0.75, 0.86, 1.0), azar(i.xz)) * b * tw * 4.0;
+}
+vec3 cielo(vec3 ro, vec3 rd) {
+  float alt = max(ro.y, 0.01);
+  float dip = -acos(R / (R + alt));                 // a qué ángulo queda el horizonte desde esta altura
+  float sobre = asin(clamp(rd.y, -1.0, 1.0)) - dip;
+  float aire = exp(-alt / 9.0);                     // cuánta atmósfera queda encima
+  float s = max(dot(rd, uSol), 0.0);
+  vec3 col;
+  if (sobre >= 0.0) {
+    vec3 tarde = mix(vec3(1.0, 0.6, 0.3), vec3(0.14, 0.2, 0.42), smoothstep(0.0, 0.55, sobre));
+    tarde = mix(tarde, vec3(1.0, 0.78, 0.5), pow(s, 5.0) * 0.7);
+    col = tarde * aire + estrellas(rd) * uEstrellas * (1.0 - aire);
+  } else {
+    float bajo = -sobre;
+    vec3 noche = vec3(0.006, 0.009, 0.02) + vec3(0.03, 0.06, 0.14) * exp(-bajo / 0.035) * (1.0 - aire);
+    noche += vec3(0.5, 0.26, 0.1) * pow(s, 6.0) * exp(-bajo / 0.025) * (1.0 - aire);
+    col = mix(noche, vec3(0.07, 0.04, 0.025) * (0.4 + 0.6 * pow(s, 3.0)), aire);
+  }
+  // La curva de la Tierra: una banda azul fina justo encima del horizonte, cálida del lado del sol
+  float banda = exp(-pow(sobre / 0.014, 2.0)) * (1.0 - aire);
+  col += banda * mix(vec3(0.2, 0.45, 1.0), vec3(1.0, 0.55, 0.28), pow(s, 2.5)) * 1.3;
+  col += vec3(1.0, 0.9, 0.75) * (pow(s, 2200.0) * 40.0 + pow(s, 90.0) * 0.5 + pow(s, 9.0) * 0.18 * (0.4 + aire));
+  return col;
+}
+
+// --- 3 · La aurora: cortinas de luz en volumen, entre 100 y 330 km --------------------------------------------------
+vec3 colorAurora(float h) {
+  vec3 c = mix(vec3(1.0, 0.3, 0.62), vec3(0.36, 1.0, 0.44), smoothstep(0.004, 0.03, h));    // borde rosa, cuerpo verde
+  c = mix(c, vec3(1.0, 0.22, 0.24), smoothstep(0.4, 0.8, h));                                 // rojo arriba
+  return mix(c, uTinte * (0.85 + 0.3 * h), uTinteK * smoothstep(0.01, 0.06, h));             // el punto al que apuntas
+}
+float densidad(vec3 p, out float h) {
+  float base = 100.0 + 7.0 * ruido(p.xz * 0.008 + uT * 0.03);
+  h = (p.y - base) / 220.0;
+  if (h < -0.02 || h > 1.15) return 0.0;
+  // El borde de abajo, nítido y más brillante; los rayos se apagan hacia arriba
+  float perfil = smoothstep(-0.012, 0.004, h) * (exp(-h * 3.2) * 0.85 + 0.1 * exp(-h) + exp(-h * 45.0) * 0.9);
+  float d = 0.0;
+  // Cortinas a lo largo del viaje: un pasillo de luz que se pliega, con rayos finos a lo largo (las estrías de una
+  // aurora de verdad) y zonas más y menos encendidas. Empiezan un poco por delante, para verlas venir. Lejos de una
+  // cortina no se calcula su ruido
+  float empieza = smoothstep(-30.0, -110.0, p.z);
+  for (int i = 0; i < 4; i++) {
+    float fi = float(i);
+    float xc = (fi - 1.5) * 56.0 + 26.0 * sin(p.z * 0.019 + uT * 0.22 + fi * 1.7) + 8.0 * sin(p.z * 0.051 - uT * 0.37 + fi * 2.3);
+    float g = (p.x - xc) * (p.x - xc) * 0.065;
+    if (g > 7.0) continue;
+    float zona = smoothstep(0.15, 0.75, ruido(vec2(p.z * 0.018 + fi * 9.0, uT * 0.12)));
+    float rayos = pow(ruido(vec2(p.z * 0.75 + fi * 31.0, uT * 0.5 + fi)), 2.0) * 0.85 + ruido(vec2(p.z * 0.23 + fi * 7.0, uT * 0.3)) * 0.35;
+    d += exp(-g) * rayos * (0.25 + 0.75 * zona) * 1.5;
+  }
+  d *= empieza;
+  // Dos arcos que cruzan: uno se atraviesa en el viaje; el otro queda al fondo, detrás de los puntos
+  for (int j = 0; j < 2; j++) {
+    float fj = float(j);
+    float zc = mix(-140.0, -440.0, fj) + mix(15.0, 30.0, fj) * sin(p.x * 0.013 + uT * 0.2 + fj * 2.0);
+    float g = (p.z - zc) * (p.z - zc) * mix(0.06, 0.012, fj);   // el del fondo, más ancho: se ve de lejos
+    if (g > 7.0) continue;
+    float rayos = pow(ruido(vec2(p.x * 0.75 + fj * 13.0, uT * 0.5)), 2.0) * 0.85 + ruido(vec2(p.x * 0.23 + fj * 5.0, uT * 0.3)) * 0.35;
+    d += exp(-g) * rayos * mix(1.2, 2.2, fj);
+  }
+  return d * perfil;
+}
+vec3 aurora(vec3 ro, vec3 rd) {
+  float t0, t1;
+  if (abs(rd.y) < 1e-4) {
+    if (ro.y < 95.0 || ro.y > 340.0) return vec3(0.0);
+    t0 = 0.0; t1 = 900.0;
+  } else {
+    float ta = (95.0 - ro.y) / rd.y, tb = (340.0 - ro.y) / rd.y;
+    t0 = max(min(ta, tb), 0.0); t1 = min(max(ta, tb), 900.0);
+  }
+  if (t1 <= t0) return vec3(0.0);
+  vec3 acc = vec3(0.0);
+  float ign = fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))));
+  float t = t0 + ign * 0.9;
+  for (int i = 0; i < 72; i++) {
+    if (float(i) >= uPasos || t > t1) break;
+    float dt = max(0.8, t * 0.058);
+    float h;
+    float d = densidad(ro + rd * t, h);
+    acc += colorAurora(h) * d * dt;
+    t += dt;
+  }
+  return acc * 0.055;
+}
+
+// --- 4 · Los puntos: una luz con su halo, en su color ---------------------------------------------------------------
+vec3 punto(vec3 ro, vec3 rd, vec3 P, vec3 c, float luz) {
+  vec3 v = P - ro;
+  float t = dot(v, rd);
+  if (t <= 0.0) return vec3(0.0);
+  float a = length(v - rd * t) / t;                  // separación angular
+  float latido = 0.85 + 0.15 * sin(uTA * 2.2 + P.x);
+  return (c * exp(-a * 34.0) * 0.55 + mix(c, vec3(1.0), 0.6) * exp(-a * a * 9000.0) * 1.6) * luz * latido;
+}
+
 void main() {
-  float lado = 1.0 - abs(vU); lado *= lado;
-  float abajo = smoothstep(0.0, 0.05, vV);
-  float arriba = pow(1.0 - vV, 1.8);
-  vec3 col = mix(uBorde, uColor, smoothstep(0.03, 0.22, vV));
-  col += vec3(0.22) * (1.0 - smoothstep(0.0, 0.1, vV));   // el borde de abajo, más blanco: ahí es más intensa
-  float a = lado * abajo * arriba * vLuz * (0.44 + uBrillo * 0.48) * uAlfa;
-  a *= 1.0 - smoothstep(uAparece - 0.12, uAparece, vV);     // se dibuja de abajo arriba
-  gl_FragColor = vec4(col, a);
+  vec2 uv = vUv;
+  vec3 col = vec3(0.0);
+  if (uMezcla < 1.0) col = puesta(uv);
+  if (uMezcla > 0.0) {
+    vec2 q = (gl_FragCoord.xy * 2.0 - uRes) / uRes.y;
+    vec3 rd = normalize(q.x * uDer + q.y * uArr + uFoco * uFre);
+    vec3 e = cielo(uCam, rd);
+    if (uAurora > 0.0) e += aurora(uCam, rd) * uAurora;
+    e += punto(uCam, rd, uP0, uC0, uLuzP.x) + punto(uCam, rd, uP1, uC1, uLuzP.y) + punto(uCam, rd, uP2, uC2, uLuzP.z) + punto(uCam, rd, uP3, uC3, uLuzP.w);
+    // Estelas al volar hacia un punto
+    float r = length(q), ang = atan(q.y, q.x);
+    e += mix(vec3(1.0), uTinte, 0.5) * pow(ruido(vec2(ang * 70.0, 0.0)), 7.0) * smoothstep(0.2, 1.3, r) * uVel * 1.6;
+    e = 1.0 - exp(-e * 1.25);                        // revelado suave, sin quemar los blancos
+    col = mix(col, e, uMezcla);
+  }
+  float vig = smoothstep(1.45, 0.45, length((uv - 0.5) * vec2(1.2, 1.0)));
+  col *= mix(0.72, 1.0, vig);
+  col += (azar(gl_FragCoord.xy + fract(uTA) * 37.0) - 0.5) * 0.018;   // grano
+  salida = vec4(col, 1.0);
 }`;
-// Líneas del suelo y de las nubes: se apagan a lo lejos y muy cerca de la cámara
-const LINEA_V = /* glsl */ `
-attribute vec3 position;
-uniform mat4 modelViewMatrix;
-uniform mat4 projectionMatrix;
-varying float vD;
-void main() { vec4 mv = modelViewMatrix * vec4(position, 1.0); vD = -mv.z; gl_Position = projectionMatrix * mv; }`;
-const LINEA_F = /* glsl */ `
-precision highp float;
-uniform vec3 uColor;
-uniform float uAlfa, uLejos, uCerca;
-varying float vD;
-void main() { gl_FragColor = vec4(uColor, uAlfa * (1.0 - smoothstep(uLejos * 0.35, uLejos, vD)) * smoothstep(0.3, uCerca, vD)); }`;
-const ESTRELLA_V = /* glsl */ `
-attribute vec3 position;
-attribute float semilla;
-uniform mat4 modelViewMatrix;
-uniform mat4 projectionMatrix;
-uniform float uT, uDpr, uEstrellas;
-varying float vA;
-void main() {
-  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-  gl_PointSize = (1.0 + semilla * 1.7) * uDpr;
-  vA = uEstrellas * (0.3 + 0.7 * semilla) * (0.72 + 0.28 * sin(uT * (1.5 + semilla * 2.5) + semilla * 50.0));
-}`;
-const ESTRELLA_F = /* glsl */ `
-precision highp float;
-varying float vA;
-void main() { float d = length(gl_PointCoord - 0.5); gl_FragColor = vec4(1.0, 0.97, 0.93, vA * smoothstep(0.5, 0.0, d)); }`;
 
 export function crear(raiz, { datos, reducido, sonido, ir }) {
   const lienzo = raiz.querySelector('[data-au-lienzo]');
   const movil = !matchMedia('(hover: hover) and (pointer: fine)').matches;
   let renderer;
   try {
-    renderer = new Renderer({ canvas: lienzo, dpr: Math.min(devicePixelRatio || 1, movil ? 1.5 : 1.75), alpha: false, antialias: true });
+    renderer = new Renderer({ canvas: lienzo, webgl: 2, dpr: Math.min(devicePixelRatio || 1, movil ? 0.6 : 1), alpha: false, antialias: false });
   } catch (e) { return null; }
   const gl = renderer.gl;
-  if (!gl) return null;
-  gl.clearColor(18 / 255, 13 / 255, 10 / 255, 1);
-  const camara = new Camera(gl, { fov: 52, near: 0.1, far: 400 });
-  const escena = new Transform();
-  const CREMA = rgb('#E7E2DA');
+  if (!gl || !renderer.isWebgl2) return null;
 
-  // --- El suelo: filas de alambre, casi llano cerca y montañas al fondo ------------------------------------------
-  const suelo = [];
-  for (let z = 9; z > -80; z -= 1.4) {
-    const monte = suave(Math.min(1, Math.max(0, (-z - 18) / 45))) * 6;
-    for (let x = -70; x < 70; x += 1.3) {
-      const h = (a) => ruido2(a * 0.09, z * 0.09) * monte + ruido2(a * 0.35, z * 0.35) * 0.25;
-      suelo.push(x, h(x), z, x + 1.3, h(x + 1.3), z);
-    }
-  }
-  // Las nubes: trazos sueltos en una capa que la cámara atraviesa al subir
-  const nubes = [];
-  for (let i = 0; i < 320; i++) {
-    const x = (Math.random() - 0.5) * 60, y = 0.9 + Math.random() * 0.9, z = 8 - Math.random() * 40, l = 1 + Math.random() * 4;
-    nubes.push(x, y, z, x + l, y, z);
-  }
-  // Las estrellas, en una cúpula delante y por encima
-  const estrellas = [], semillas = [];
-  for (let i = 0; i < (movil ? 900 : 1600); i++) {
-    const az = (Math.random() - 0.5) * Math.PI * 1.3, el = Math.asin(0.02 + Math.random() * 0.96) * 0.95;
-    estrellas.push(Math.sin(az) * Math.cos(el) * 180, Math.sin(el) * 180, -Math.cos(az) * Math.cos(el) * 180);
-    semillas.push(Math.random() ** 2);
-  }
+  const foto = new Texture(gl, { generateMipmaps: false, minFilter: gl.LINEAR, wrapS: gl.CLAMP_TO_EDGE, wrapT: gl.CLAMP_TO_EDGE });
+  const img = new Image();
+  img.onload = () => { foto.image = img; uni.uFotoTam.value = [img.naturalWidth, img.naturalHeight]; };
+  img.src = `${window.ADS_BASE || '/'}assets/hero/Fondo-Hero_adsPartners.webp`;
 
-  const lineas = (datos3, uniforms, orden) => {
-    const p = new Program(gl, { vertex: LINEA_V, fragment: LINEA_F, transparent: true, depthTest: false, depthWrite: false, uniforms });
-    const m = new Mesh(gl, { geometry: new Geometry(gl, { position: { size: 3, data: new Float32Array(datos3) } }), program: p, mode: gl.LINES, frustumCulled: false });
-    m.renderOrder = orden; m.setParent(escena);
-    return p;
+  // En vertical (el móvil), los puntos se juntan hacia el centro para que quepan
+  const junta = () => (innerWidth < innerHeight ? 0.55 : 1);
+  const enMundo = (rel) => REPOSO.map((v, i) => v + rel[i] * (i === 0 ? junta() : 1));
+  const puntos = datos.map((d) => ({ d, rel: PUNTOS[d.slug], color: luz(d.color), etq: raiz.querySelector(`[data-au-dest="${d.slug}"]`), pant: [0, 0, false] }));
+  const uni = {
+    uRes: { value: [1, 1] }, uT: { value: 0 }, uTA: { value: 0 },
+    tFoto: { value: foto }, uFotoTam: { value: [1600, 900] }, uSolUv: { value: SOL_UV }, uZoom: { value: 0 }, uMezcla: { value: 0 },
+    uCam: { value: [0, 2, 0] }, uDer: { value: [1, 0, 0] }, uArr: { value: [0, 1, 0] }, uFre: { value: [0, 0, -1] }, uFoco: { value: 1.7 },
+    uSol: { value: [0.9998, 0.02, 0] }, uEstrellas: { value: 0 }, uAurora: { value: 0 }, uPasos: { value: movil ? 40 : 64 }, uVel: { value: 0 },
+    uTinte: { value: [0.3, 1, 0.55] }, uTinteK: { value: 0 }, uLuzP: { value: [0, 0, 0, 0] },
   };
-  const pSuelo = lineas(suelo, { uColor: { value: CREMA }, uAlfa: { value: 0.15 }, uLejos: { value: 90 }, uCerca: { value: 1.5 } }, 1);
-  const pNubes = lineas(nubes, { uColor: { value: CREMA }, uAlfa: { value: 0.3 }, uLejos: { value: 40 }, uCerca: { value: 2.5 } }, 2);
-  const pEstrellas = new Program(gl, {
-    vertex: ESTRELLA_V, fragment: ESTRELLA_F, transparent: true, depthTest: false, depthWrite: false,
-    uniforms: { uT: { value: 0 }, uDpr: { value: renderer.dpr }, uEstrellas: { value: 0 } },
-  });
-  const mEstrellas = new Mesh(gl, {
-    geometry: new Geometry(gl, { position: { size: 3, data: new Float32Array(estrellas) }, semilla: { size: 1, data: new Float32Array(semillas) } }),
-    program: pEstrellas, mode: gl.POINTS, frustumCulled: false,
-  });
-  mEstrellas.renderOrder = 0; mEstrellas.setParent(escena);
+  puntos.forEach((p, i) => { uni[`uP${i}`] = { value: enMundo(p.rel) }; uni[`uC${i}`] = { value: p.color }; });
+  const program = new Program(gl, { vertex: VERT, fragment: FRAG, uniforms: uni, depthTest: false, depthWrite: false });
+  const mesh = new Mesh(gl, { geometry: new Triangle(gl), program });
 
-  // --- Las cortinas: rayos verticales que se suman (como la luz) ---------------------------------------------------
-  const cortinas = datos.map((d, k) => {
-    const c = CORTINAS[d.slug];
-    const n = Math.round(c.rayos * (movil ? 0.55 : 1));
-    const pos = new Float32Array(n * 12), sem = new Float32Array(n * 4), idx = new Uint16Array(n * 6);
-    for (let i = 0; i < n; i++) {
-      const s = -1 + (2 * (i + Math.random() * 0.8)) / n, r = Math.random();
-      [[-1, 0], [1, 0], [-1, 1], [1, 1]].forEach(([u, v], j) => { pos.set([s, u, v], (i * 4 + j) * 3); sem[i * 4 + j] = r; });
-      idx.set([i * 4, i * 4 + 1, i * 4 + 2, i * 4 + 2, i * 4 + 1, i * 4 + 3], i * 6);
-    }
-    const color = rgb(d.color);
-    const program = new Program(gl, {
-      vertex: CORTINA_V, fragment: CORTINA_F, transparent: true, depthTest: false, depthWrite: false,
-      uniforms: {
-        uT: { value: 0 }, uX: { value: c.x }, uZ: { value: c.z }, uLargo: { value: c.largo }, uBase: { value: c.base },
-        uAlto: { value: c.alto }, uFase: { value: c.fase }, uAncho: { value: (c.largo * 2 / n) * 4.2 },
-        uColor: { value: color }, uBorde: { value: c.borde ? rgb(c.borde) : mezcla(color, [1, 1, 1], 0.15) },
-        uBrillo: { value: 0 }, uAparece: { value: 0 }, uAlfa: { value: 1 },
-      },
-    });
-    program.setBlendFunc(gl.SRC_ALPHA, gl.ONE);
-    const mesh = new Mesh(gl, { geometry: new Geometry(gl, { position: { size: 3, data: pos }, semilla: { size: 1, data: sem }, index: { data: idx } }), program, frustumCulled: false });
-    mesh.renderOrder = 3 + k; mesh.setParent(escena);
-    return { d, c, program, brillo: 0, poligono: [], ancla: [0, 0], etq: raiz.querySelector(`[data-au-dest="${d.slug}"]`) };
-  });
-  addEventListener('resize', () => medir());
-
-  // --- La cámara: del horizonte a mirar la aurora; con el ratón, un poco de paralaje -------------------------------
-  const st = { subida: 1, aparece: 1.15, estrellas: 1, zambullida: 0, destino: null, T: 0, racha: 0 };
-  const raton = { x: 0, y: 0, px: null, py: 0, t: 0, sobre: null };
-  let viento = 0.5, vientoKm = 500;
-  // En vertical (el móvil), cada cortina va a su sitio de «vertical»; en una pantalla algo estrecha, se juntan en
-  // horizontal para que quepan
-  let enVertical = false;
   const medir = () => {
     renderer.setSize(innerWidth, innerHeight);
-    enVertical = innerWidth < innerHeight;
-    camara.perspective({ aspect: innerWidth / innerHeight, fov: enVertical ? 70 : 52 });
-    raiz.classList.toggle('vertical', enVertical);
-    const junta = Math.min(1, Math.max(0.42, innerWidth / innerHeight / 1.6));
-    for (const k of cortinas) {
-      const c = k.c, o = enVertical ? { ...c, ...c.vertical } : c;
-      c.cx = enVertical ? o.x : o.x * junta; c.clargo = c.largo * (enVertical ? 0.6 : Math.max(0.6, junta));
-      c.cbase = o.base; c.calto = o.alto; c.cnombre = o.nombre; c.csNombre = o.sNombre;
-      const u = k.program.uniforms;
-      u.uX.value = c.cx; u.uLargo.value = c.clargo; u.uBase.value = c.cbase; u.uAlto.value = c.calto;
-    }
+    uni.uRes.value = [gl.drawingBufferWidth, gl.drawingBufferHeight];
+    puntos.forEach((p, i) => { uni[`uP${i}`].value = enMundo(p.rel); });
   };
+  addEventListener('resize', medir);
   medir();
-  const fovBase = () => (innerWidth < innerHeight ? 70 : 52);
 
-  const colocarCamara = () => {
-    const k = reducido ? 1 : suave(Math.min(1, st.subida));
-    const pos = mezcla(SALIDA.pos, REPOSO.pos, k), mira = mezcla(SALIDA.mira, REPOSO.mira, k);
-    pos[0] += raton.x * 1.2 * k; pos[1] += -raton.y * 0.4 * k;
-    mira[1] += -raton.y * 1.5 * k;
-    // Al pinchar, la cámara se mete en la cortina
-    if (st.destino && st.zambullida > 0) {
-      const c = st.destino.c, z = suave(st.zambullida) * 0.72;
-      const centro = [c.cx, c.cbase + c.calto * 0.4, c.z];
-      for (let i = 0; i < 3; i++) { pos[i] += (centro[i] - pos[i]) * z; mira[i] += (centro[i] - mira[i]) * z * 0.5; }
-      camara.perspective({ fov: fovBase() + suave(st.zambullida) * 22 });
-    }
-    camara.position.set(...pos);
-    camara.lookAt(mira);
-    camara.updateMatrixWorld();
-  };
+  // --- El estado del viaje (lo mueve la línea de tiempo) y la cámara ------------------------------------------------
+  // zoom: hacia el sol (2D); mezcla: de la foto al cielo; alt: altura en km; yaw: hacia dónde mira (90 = el sol,
+  // 0 = la aurora); z: lo que ha avanzado; puntos: cuánto se ven los cuatro puntos; dive: el vuelo hacia uno
+  const st = { zoom: 0, mezcla: 0, alt: 2, yaw: 90, pitch: 1, z: 0, fov: 56, aurora: 0, estrellas: 0, puntos: 0, vel: 0, dive: 0, T: 0 };
+  const raton = { x: 0, y: 0, nx: 0, ny: 0, px: null, py: 0, t: 0, dentro: false };
+  const mira = { yaw: 0, pitch: 0 };
+  let apuntado = null, peso = 0, racha = 0, viento = 0.5, vientoKm = 500, destino = null;
+  let deriva = [0, 0, 0];
 
-  // Dónde cae en pantalla un punto de la cortina (con los mismos pliegues que el shader)
-  const v3 = new Vec3();
-  const proyectar = (c, s, alto) => {
-    const z = c.z + 2.4 * Math.sin(s * 3.1 + st.T * 0.7 + c.fase) + 1.2 * Math.sin(s * 7.3 - st.T * 1.3 + c.fase * 2);
-    v3.set(c.cx + s * c.clargo, c.cbase + alto, z);
-    camara.project(v3);
-    return [(v3.x * 0.5 + 0.5) * innerWidth, (-v3.y * 0.5 + 0.5) * innerHeight, v3.z < 1];
+  const camara = () => {
+    const yaw = ((st.yaw + mira.yaw) * Math.PI) / 180, pitch = ((st.pitch + mira.pitch) * Math.PI) / 180;
+    const fre = [Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), -Math.cos(yaw) * Math.cos(pitch)];
+    const der = [Math.cos(yaw), 0, Math.sin(yaw)];
+    const arr = [der[1] * fre[2] - der[2] * fre[1], der[2] * fre[0] - der[0] * fre[2], der[0] * fre[1] - der[1] * fre[0]];
+    let pos = [deriva[0], st.alt + deriva[1], st.z + deriva[2]];
+    if (destino && st.dive > 0) pos = mezcla(pos, enMundo(destino.rel), suave(st.dive) * 0.86);
+    // En vertical (el móvil), más ángulo: si no, los puntos de los lados se salen de la pantalla
+    const fov = (st.fov + suave(st.dive) * 26) * (innerWidth < innerHeight ? 1.38 : 1);
+    return { pos, fre, der, arr, foco: 1 / Math.tan((fov * Math.PI) / 360) };
   };
-  const dentro = (pt, pol) => {
-    let si = false;
-    for (let i = 0, j = pol.length - 1; i < pol.length; j = i++) {
-      const [xi, yi] = pol[i], [xj, yj] = pol[j];
-      if ((yi > pt[1]) !== (yj > pt[1]) && pt[0] < ((xj - xi) * (pt[1] - yi)) / (yj - yi) + xi) si = !si;
-    }
-    return si;
+  // Dónde cae en pantalla un punto del mundo (la misma cuenta que el shader)
+  const proyectar = (c, P) => {
+    const v = P.map((x, i) => x - c.pos[i]);
+    const z = v[0] * c.fre[0] + v[1] * c.fre[1] + v[2] * c.fre[2];
+    if (z <= 0.1) return [0, 0, false];
+    const x = ((v[0] * c.der[0] + v[1] * c.der[1] + v[2] * c.der[2]) / z) * c.foco;
+    const y = ((v[0] * c.arr[0] + v[1] * c.arr[1] + v[2] * c.arr[2]) / z) * c.foco;
+    return [(x * innerHeight + innerWidth) / 2, (innerHeight - y * innerHeight) / 2, true];
   };
 
-  // --- Pasar el ratón: ráfagas de viento y la cortina de debajo, encendida -----------------------------------------
-  const elegir = (slug) => {
-    raton.sobre = slug;
-    lienzo.style.cursor = slug ? 'pointer' : '';
-    cortinas.forEach((k) => k.etq.classList.toggle('on', k.d.slug === slug));
-  };
+  // --- Apuntar y pinchar ------------------------------------------------------------------------------------------
   raiz.addEventListener('pointermove', (e) => {
-    raton.x = e.clientX / innerWidth - 0.5; raton.y = e.clientY / innerHeight - 0.5;
+    raton.x = e.clientX; raton.y = e.clientY; raton.dentro = true;
+    raton.nx = (e.clientX / innerWidth) * 2 - 1; raton.ny = (e.clientY / innerHeight) * 2 - 1;
     const t = performance.now();
-    if (raton.px !== null && t - raton.t < 100) st.racha = Math.min(1, st.racha + Math.hypot(e.clientX - raton.px, e.clientY - raton.py) / 900);
+    if (raton.px !== null && t - raton.t < 100) racha = Math.min(1, racha + Math.hypot(e.clientX - raton.px, e.clientY - raton.py) / 900);
     raton.px = e.clientX; raton.py = e.clientY; raton.t = t;
-    if (e.target === lienzo) mirarEncima(e);
   });
-  // Qué cortina hay debajo (también al tocar, que en el móvil no hay «pasar por encima» antes del clic)
-  const mirarEncima = (e) => {
-    // Encima del nombre de una, esa. Si no, como se solapan en pantalla: de las que tienen el ratón dentro, la que
-    // tiene el nombre más cerca
-    const enNombre = cortinas.find((k) => {
-      const r = k.etq.getBoundingClientRect();
-      return e.clientX > r.left - 12 && e.clientX < r.right + 12 && e.clientY > r.top - 12 && e.clientY < r.bottom + 12;
-    });
-    const encima = enNombre || cortinas.filter((k) => dentro([e.clientX, e.clientY], k.poligono))
-      .sort((a, b) => Math.hypot(a.ancla[0] - e.clientX, a.ancla[1] - e.clientY) - Math.hypot(b.ancla[0] - e.clientX, b.ancla[1] - e.clientY))[0];
-    if ((encima?.d.slug ?? null) !== raton.sobre) { elegir(encima?.d.slug ?? null); if (encima) sonido.tic(0.6); }
+  raiz.addEventListener('pointerleave', () => { raton.dentro = false; });
+  const masCerca = (x, y, max) => {
+    let mejor = null, dist = max;
+    for (const p of puntos) {
+      if (!p.pant[2]) continue;
+      const d = Math.hypot(p.pant[0] - x, p.pant[1] - y);
+      if (d < dist) { dist = d; mejor = p; }
+    }
+    return [mejor, dist];
   };
-  lienzo.addEventListener('pointerdown', mirarEncima);
-  lienzo.addEventListener('pointerleave', () => elegir(null));
-  lienzo.addEventListener('click', () => { if (raton.sobre) lanzar(raton.sobre); });
 
-  // --- Pinchar: te mete en la cortina, se inunda de su color y vas a la página --------------------------------------
+  // --- La línea de tiempo del viaje (un clic durante el viaje lo acelera) ----------------------------------------------
+  let viaje = null;
+  const enViaje = () => !!viaje && viaje.isActive();
+  const acelerar = () => { if (viaje) gsap.to(viaje, { timeScale: 5, duration: 0.4 }); };
+
+  lienzo.addEventListener('click', (e) => {
+    if (enViaje()) { acelerar(); return; }
+    const [p] = masCerca(e.clientX, e.clientY, movil ? 140 : 200);
+    if (p) lanzar(p.d.slug);
+  });
+
   const inundar = raiz.querySelector('[data-au-inundar]');
   function lanzar(slug) {
-    const k = cortinas.find((c) => c.d.slug === slug);
-    if (!k || st.destino) return;
-    if (!k.d.ruta) {
-      elegir(slug);
-      const luz = k.etq.querySelector('.au__luz');
+    const p = puntos.find((q) => q.d.slug === slug);
+    if (!p || destino) return;
+    if (!p.d.ruta) {
+      const luz = p.etq.querySelector('.au__luz');
       clearTimeout(luz._t);
       luz.textContent = 'en obras · llega pronto';
-      if (!reducido) gsap.fromTo(k.etq.querySelector('.au__nombre'), { x: -8 }, { x: 0, duration: 0.5, ease: 'elastic.out(1, 0.3)', clearProps: 'x' });
+      if (!reducido) gsap.fromTo(p.etq.querySelector('.au__nombre'), { x: -8 }, { x: 0, duration: 0.5, ease: 'elastic.out(1, 0.3)', clearProps: 'x' });
       setTimeout(() => { luz.textContent = luz.dataset.texto; }, 1800);
       return;
     }
-    elegir(slug);
-    st.destino = k;
+    if (enViaje()) viaje.progress(1);
+    destino = p;
+    apuntado = p;
     raiz.classList.add('zambullendo');
-    sonido.viaje(1.1, 1);
-    if (reducido) { ir(k.d); return; }
-    inundar.style.setProperty('--c', k.d.color);
-    gsap.timeline({ onComplete: () => ir(k.d) })
-      .to(st, { zambullida: 1, duration: 1.15, ease: 'power2.in' }, 0)
-      .fromTo(inundar, { opacity: 0 }, { opacity: 1, duration: 0.55, ease: 'power1.in' }, 0.6);
+    sonido.viaje(1.4, 1);
+    if (reducido) { ir(p.d); return; }
+    inundar.style.setProperty('--c', p.d.color);
+    gsap.timeline({ onComplete: () => ir(p.d) })
+      .to(st, { dive: 1, duration: 1.4, ease: 'power2.in' }, 0)
+      .to(st, { vel: 1, duration: 1.1, ease: 'power1.in' }, 0.1)
+      .fromTo(inundar, { opacity: 0 }, { opacity: 1, duration: 0.5, ease: 'power1.in' }, 0.95);
   }
   raiz.querySelectorAll('[data-au-ir]').forEach((a) => {
     a.addEventListener('click', (e) => { e.preventDefault(); lanzar(a.dataset.auIr); });
-    a.addEventListener('pointerenter', () => elegir(a.dataset.auIr));
-    a.addEventListener('focus', () => elegir(a.dataset.auIr));
   });
 
-  // --- El inspector: la altitud mientras se sube; después, el viento solar de tu visita ------------------------------
+  // --- El inspector: la altitud al subir; después, el viento solar de la visita ---------------------------------------
   const hudAltitud = raiz.querySelector('[data-au-altitud]');
   const hudViento = raiz.querySelector('[data-au-viento]');
   const escribir = (el, texto, demora = 0) => {
@@ -331,85 +342,127 @@ export function crear(raiz, { datos, reducido, sonido, ir }) {
   };
   const tiempo = (s) => (s < 60 ? `${Math.round(s)} s` : `${Math.floor(s / 60)} min ${Math.round(s % 60)} s`);
 
-  // --- El bucle, solo con el menú abierto -------------------------------------------------------------------------------
-  let raf = 0, antes = 0, vivo = false;
+  function llegar() {
+    puntos.forEach((p, i) => { p.etq.classList.add('visto'); escribir(p.etq.querySelector('.au__luz'), p.etq.querySelector('.au__luz').dataset.texto, i * 150); });
+    escribir(hudAltitud, 'dentro de la aurora · de unos 100 a más de 300 km de altura');
+    const r = rastro();
+    escribir(hudViento, `viento solar · ${vientoKm} km/s · sale de tu visita: ${tiempo(r.segundos)} y ${r.metros.toFixed(1).replace('.', ',')} m de ratón`, 400);
+    sonido.coro(viento);
+  }
+
+  function montarViaje(primera) {
+    viaje?.kill();
+    const tl = gsap.timeline({ onComplete: llegar });
+    if (primera) {
+      const alt = { km: 2 };
+      const capa = () => [...CAPAS].reverse().find(([km]) => alt.km >= km)[1];
+      Object.assign(st, { zoom: 0, mezcla: 0, alt: 2, yaw: 90, pitch: 1.5, z: 0, fov: 56, aurora: 0, estrellas: 0, puntos: 0 });
+      tl.to(st, { zoom: 1, duration: 2.3, ease: 'power2.in' }, 0.35)
+        .call(() => sonido.viaje(2.4, 1), null, 0.4)
+        .to(st, { mezcla: 1, duration: 0.55, ease: 'power1.inOut' }, 2.45)
+        .to(alt, {
+          km: REPOSO[1], duration: 3.6, ease: 'power2.inOut',
+          onUpdate: () => { st.alt = alt.km; hudAltitud.textContent = `altitud · ${Math.round(alt.km)} km · ${capa()}`; },
+        }, 2.6)
+        .to(st, { pitch: -3, duration: 3.6, ease: 'power1.inOut' }, 2.6)
+        .to(st, { estrellas: 1, duration: 2.2, ease: 'power1.out' }, 3.4)
+        .to(st, { yaw: 0, duration: 2.8, ease: 'power2.inOut' }, 3.8)
+        .to(st, { aurora: 1, duration: 2.0, ease: 'power1.out' }, 4.4)
+        .call(() => sonido.viaje(3, -1), null, 5.8)
+        .to(st, { z: REPOSO[2], duration: 3.2, ease: 'power2.inOut' }, 5.8)
+        .to(st, { fov: 68, duration: 1.6, ease: 'power2.in', yoyo: true, repeat: 1 }, 5.8)
+        .to(st, { pitch: 6, duration: 2.2, ease: 'power1.inOut' }, 7)
+        .to(st, { puntos: 1, duration: 1.2, ease: 'power1.out' }, 8.2);
+    } else {
+      // Las siguientes veces se llega ya dentro: un tramo corto del vuelo
+      Object.assign(st, { zoom: 1, mezcla: 1, alt: REPOSO[1], yaw: 0, pitch: 6, z: REPOSO[2] + 110, fov: 56, aurora: 1, estrellas: 1, puntos: 0 });
+      tl.to(st, { z: REPOSO[2], duration: 1.6, ease: 'power2.out' }, 0)
+        .to(st, { puntos: 1, duration: 0.8, ease: 'power1.out' }, 0.9);
+    }
+    viaje = tl;
+  }
+
+  // --- El bucle, solo con el menú abierto ----------------------------------------------------------------------------
+  let raf = 0, antes = 0, vivo = false, cuadros = 0, sumaDt = 0;
   function pintar(ahora) {
     raf = requestAnimationFrame(pintar);
     const dt = Math.min(0.05, (ahora - (antes || ahora)) / 1000);
     antes = ahora;
-    st.racha *= Math.exp(-dt * 1.2);
-    const fuerza = Math.min(1, viento + st.racha * 0.6);
-    if (!reducido) st.T += dt * (0.3 + fuerza * 0.9);
-    colocarCamara();
-    pEstrellas.uniforms.uT.value = ahora / 1000;
-    pEstrellas.uniforms.uEstrellas.value = st.estrellas;
-    pNubes.uniforms.uAlfa.value = 0.3 * (1 - st.zambullida);
-    pSuelo.uniforms.uAlfa.value = 0.15 * (1 - st.zambullida);
-    for (const k of cortinas) {
-      const objetivo = raton.sobre === k.d.slug ? 1 : raton.sobre ? -0.12 : 0;
-      k.brillo += (objetivo - k.brillo) * Math.min(1, dt * 6);
-      const u = k.program.uniforms;
-      u.uT.value = st.T; u.uAparece.value = st.aparece;
-      u.uBrillo.value = k.brillo + (st.destino === k ? st.zambullida * 2 : 0) + st.racha * 0.25;
-      u.uAlfa.value = st.destino && st.destino !== k ? 1 - st.zambullida : 1;
-      // Su silueta en pantalla (para saber si el ratón está encima) y dónde va su nombre
-      const abajo = [], arriba = [];
-      for (let i = 0; i <= 16; i++) {
-        const s = -0.85 + (1.7 * i) / 16;
-        abajo.push(proyectar(k.c, s, 0));
-        arriba.push(proyectar(k.c, s, k.c.calto * 0.7));
-      }
-      k.poligono = [...abajo, ...arriba.reverse()];
-      // El nombre, sin salirse de la pantalla (con su ancho de verdad)
-      const [x, y, delante] = proyectar(k.c, k.c.csNombre, k.c.calto * k.c.cnombre);
-      const medio = (k.etq.offsetWidth || 180) / 2 + 12;
-      k.ancla = [Math.min(innerWidth - medio, Math.max(medio, x)), Math.min(innerHeight - 150, Math.max(130, y))];
-      k.etq.style.transform = `translate(${k.ancla[0].toFixed(1)}px, ${k.ancla[1].toFixed(1)}px)`;
-      k.etq.style.visibility = delante ? '' : 'hidden';
+    // Si va sobrado, más resolución (una sola vez, al principio)
+    if (cuadros < 90) {
+      cuadros++; sumaDt += dt;
+      if (cuadros === 90 && !movil && sumaDt / 90 < 0.011 && devicePixelRatio > 1) { renderer.dpr = Math.min(devicePixelRatio, 1.5); medir(); }
     }
-    renderer.render({ scene: escena, camera: camara });
+    racha *= Math.exp(-dt * 1.2);
+    const fuerza = Math.min(1, viento + racha * 0.6);
+    if (!reducido) { st.T += dt * (0.3 + fuerza * 0.8); uni.uTA.value = ahora / 1000; }
+
+    // Dentro, la cámara mira un poco hacia el ratón, y apunta al punto que tiene más cerca
+    const dentro = st.puntos > 0.5 && !destino;
+    const conRaton = dentro && raton.dentro && !movil;
+    mira.yaw += ((conRaton ? raton.nx * 9 : 0) - mira.yaw) * Math.min(1, dt * 2.5);
+    mira.pitch += ((conRaton ? -raton.ny * 6 : 0) - mira.pitch) * Math.min(1, dt * 2.5);
+    let c = camara();
+    puntos.forEach((p) => { p.pant = proyectar(c, enMundo(p.rel)); });
+    if (!destino) {
+      const [p, d] = conRaton ? masCerca(raton.x, raton.y, 260) : [null, 260];
+      peso += ((p ? 1 - d / 260 : 0) - peso) * Math.min(1, dt * 4);
+      if (p !== apuntado) {
+        if (p) sonido.tic(0.6);
+        apuntado = p;
+        puntos.forEach((q) => q.etq.classList.toggle('on', q === apuntado));
+        lienzo.style.cursor = apuntado ? 'pointer' : '';
+      }
+    }
+    // La cámara se acerca al punto al que apuntas, y la aurora se tiñe de su color
+    const objetivo = apuntado && !destino ? enMundo(apuntado.rel).map((v, i) => (v - REPOSO[i]) * 0.16 * suave(Math.min(1, peso * 1.4))) : [0, 0, 0];
+    deriva = mezcla(deriva, objetivo, Math.min(1, dt * 1.6));
+    // (el color cambia deprisa y con decisión: a medio camino entre dos colores la aurora se ensucia)
+    if (apuntado) uni.uTinte.value = mezcla(uni.uTinte.value, apuntado.color, Math.min(1, dt * 6));
+    const k = destino ? 1 : apuntado ? Math.min(1, peso * 2.2) * 0.9 : 0;
+    uni.uTinteK.value += (k - uni.uTinteK.value) * Math.min(1, dt * 4);
+
+    c = camara();
+    uni.uCam.value = c.pos; uni.uDer.value = c.der; uni.uArr.value = c.arr; uni.uFre.value = c.fre; uni.uFoco.value = c.foco;
+    uni.uT.value = st.T; uni.uZoom.value = st.zoom; uni.uMezcla.value = st.mezcla;
+    uni.uEstrellas.value = st.estrellas; uni.uAurora.value = st.aurora; uni.uVel.value = st.vel;
+    uni.uLuzP.value = puntos.map((p) => st.puntos * (p === apuntado ? 1.7 : 0.9) * (p.d.ruta ? 1 : 0.6));
+
+    // Los nombres, debajo de su punto (sin salirse de la pantalla, con su ancho de verdad)
+    puntos.forEach((p) => {
+      p.pant = proyectar(c, enMundo(p.rel));
+      const medio = (p.etq.offsetWidth || 120) / 2 + 10;
+      const x = Math.min(innerWidth - medio, Math.max(medio, p.pant[0]));
+      p.etq.style.transform = `translate(${x.toFixed(1)}px, ${p.pant[1].toFixed(1)}px)`;
+      p.etq.style.visibility = p.pant[2] && st.puntos > 0.2 ? '' : 'hidden';
+    });
+    renderer.render({ scene: mesh });
   }
 
   return {
-    // primera: si es la primera vez en esta visita (el viaje entero); si no, se llega casi arriba
+    // primera: si es la primera vez en esta visita (el viaje entero, desde la puesta de sol)
     abrir(primera) {
       const r = rastro();
       vientoKm = r.viento;
       viento = (r.viento - 300) / 500;
-      st.destino = null; st.zambullida = 0; st.racha = 0;
+      destino = null; apuntado = null; peso = 0; racha = 0; deriva = [0, 0, 0];
+      Object.assign(st, { dive: 0, vel: 0 });
+      uni.uTinteK.value = 0;
       raiz.classList.remove('zambullendo');
       inundar.style.opacity = 0;
-      camara.perspective({ fov: fovBase() });
-      cortinas.forEach((k) => { k.etq.querySelector('.au__luz').textContent = ''; k.etq.classList.remove('visto'); });
-      elegir(null);
+      puntos.forEach((p) => { p.etq.classList.remove('visto', 'on'); p.etq.querySelector('.au__luz').textContent = ''; });
+      hudAltitud.textContent = ''; hudViento.textContent = '';
       if (!vivo) { vivo = true; antes = 0; raf = requestAnimationFrame(pintar); }
-      sonido.coro(viento);
-      const dur = reducido ? 0 : primera ? SUBIDA : 1.3;
-      const desde = primera ? 0 : 0.72;
-      gsap.killTweensOf(st);
-      Object.assign(st, { subida: desde, aparece: primera ? 0 : 0.4, estrellas: primera ? 0 : 0.6 });
-      const fin = () => {
-        cortinas.forEach((k, i) => { k.etq.classList.add('visto'); escribir(k.etq.querySelector('.au__luz'), k.etq.querySelector('.au__luz').dataset.texto, i * 140); });
-        escribir(hudAltitud, 'las auroras · de unos 90 a más de 300 km de altura');
-        escribir(hudViento, `viento solar · ${vientoKm} km/s · sale de tu visita: ${tiempo(r.segundos)} y ${r.metros.toFixed(1).replace('.', ',')} m de ratón`, 500);
-      };
-      if (!dur) { Object.assign(st, { subida: 1, aparece: 1.15, estrellas: 1 }); fin(); return; }
-      // La altitud mientras sube (de 0 a 12 km, con la capa que se cruza)
-      const alt = { km: desde * 12 };
-      gsap.to(alt, {
-        km: 12, duration: dur * 0.85, ease: 'power1.inOut',
-        onUpdate: () => {
-          const capa = [...CAPAS].reverse().find(([km]) => alt.km >= km)[1];
-          hudAltitud.textContent = `altitud · ${alt.km.toFixed(1).replace('.', ',')} km · ${capa}`;
-        },
-      });
-      hudViento.textContent = '';
-      gsap.to(st, { subida: 1, duration: dur, ease: 'power2.inOut' });
-      gsap.to(st, { estrellas: 1, duration: dur * 0.8, delay: dur * 0.2, ease: 'power1.out' });
-      gsap.to(st, { aparece: 1.15, duration: dur * 0.75, delay: dur * 0.3, ease: 'power2.out', onComplete: fin });
+      if (reducido) {
+        Object.assign(st, { zoom: 1, mezcla: 1, alt: REPOSO[1], yaw: 0, pitch: 6, z: REPOSO[2], fov: 56, aurora: 1, estrellas: 1, puntos: 1 });
+        llegar();
+        return;
+      }
+      montarViaje(primera);
     },
     cerrar() {
       sonido.pararCoro();
+      viaje?.kill();
       gsap.killTweensOf(st);
       cancelAnimationFrame(raf);
       vivo = false;

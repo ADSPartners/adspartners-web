@@ -1,6 +1,7 @@
-// El menú (components/Menu.astro): el botón de la cabecera lo abre y pasa a «Cerrar»; Esc también lo cierra. Mientras
-// está abierto, la página no se mueve. Dentro, la aurora (menu/aurora.js), que se carga la primera vez que se abre: el
-// viaje entero la primera vez de cada visita y, las siguientes, se llega casi arriba. Sin WebGL, solo la lista.
+// El menú (components/Menu.astro): el botón de la cabecera lo abre y pasa a «Cerrar»; Esc también lo cierra. Al abrir,
+// las letras de la página se difuminan y se pierden; mientras está abierto, la página no se mueve. Dentro, el viaje a la
+// aurora (menu/aurora.js), que se carga la primera vez que se abre: entero la primera vez de cada visita (desde la
+// puesta de sol) y, las siguientes, se llega ya dentro. Sin WebGL, solo la lista.
 import { gsap } from 'gsap';
 import * as sonido from './sonido.js';
 
@@ -11,6 +12,7 @@ export function montarMenu({ lenis, reducido }) {
   const html = document.documentElement;
   const datos = JSON.parse(raiz.querySelector('[data-menu-datos]').textContent);
   const textoBoton = boton.querySelector('[data-menu-txt]');
+  const pagina = document.querySelector('main');
   let aurora = null, abierto = false;
 
   // Ir a una página desde el menú: Hablemos baja al contacto (en la home) y lo demás navega; Brand, aún no
@@ -33,7 +35,10 @@ export function montarMenu({ lenis, reducido }) {
     if (textoBoton) textoBoton.textContent = 'Cerrar';
     raiz.hidden = false;
     sonido.abrir();
-    if (!reducido) gsap.fromTo(raiz, { opacity: 0 }, { opacity: 1, duration: 0.5, ease: 'power2.out' });
+    if (!reducido) {
+      gsap.to(pagina, { filter: 'blur(18px)', opacity: 0, duration: 0.9, ease: 'power2.in', overwrite: true });
+      gsap.fromTo(raiz, { opacity: 0 }, { opacity: 1, duration: 0.7, delay: 0.15, ease: 'power1.inOut' });
+    }
     if (aurora === null) {
       try { aurora = (await import('./menu/aurora.js')).crear(raiz, { datos, reducido, sonido, ir }); } catch (e) { console.warn('Menú sin aurora:', e); }
       if (!aurora) { aurora = false; raiz.classList.add('sin-gl'); }
@@ -55,8 +60,9 @@ export function montarMenu({ lenis, reducido }) {
     boton.focus({ preventScroll: true });
     return new Promise((listo) => {
       const fin = () => { aurora?.cerrar(); raiz.hidden = true; lenis?.start(); listo(); };
-      if (reducido) fin();
-      else gsap.to(raiz, { opacity: 0, duration: 0.35, ease: 'power2.in', onComplete: fin });
+      if (reducido) { fin(); return; }
+      gsap.to(raiz, { opacity: 0, duration: 0.4, ease: 'power2.in', onComplete: fin });
+      gsap.to(pagina, { filter: 'blur(0px)', opacity: 1, duration: 0.7, delay: 0.15, ease: 'power2.out', overwrite: true, clearProps: 'filter,opacity,scale,transform' });
     });
   }
 

@@ -49,8 +49,9 @@ src/scripts/
   pagina.js             arranque de las subpáginas: lo mismo menos el umbral y la portada, más el montaje propio de cada una
   comun.js              lo compartido: los imanes y la barra que se esconde (y se pone en tinta sobre lo claro)
   menu.js               el menú (components/Menu.astro, datos en data/menu.js): abrir y cerrar
-  menu/aurora.js        el menú es un viaje hasta una aurora: cada cortina es una página, con el color de una emisión
-                        real; pinchar te mete dentro. Viento solar sacado de la visita, y su «coro del amanecer»
+  menu/aurora.js        el menú es un viaje, todo en un shader: de la puesta de sol de la portada (la cámara va al sol),
+                        subiendo por la atmósfera hasta dentro de una aurora volumétrica, con cuatro puntos (uno por
+                        página) que la tiñen de su color al apuntarlos. Viento solar de la visita; su «coro del amanecer»
   rastro.js             el rastro de la visita (tiempo, metros de ratón, velocidad), del que sale el viento solar
   cinta.js              el archivo de proyectos
   tech.js               la página Tech: slider, artículo y misiones (las tres vistas y sus pasos)
