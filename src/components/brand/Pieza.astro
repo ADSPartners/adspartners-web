@@ -1,0 +1,19 @@
+---
+// Una pieza de la mesa de Brand: su marco con el nombre de archivo encima (como los marcos de Figma), lo que se ve (la
+// marca) y, debajo, el código que la pinta (lo tech). brand/dentro.js pasa de una capa a otra con una línea de escáner.
+// Los estilos están en pages/brand/index.astro.
+import { codigoHTML } from '../../scripts/brand/codigo.js';
+
+interface Props { id: string; nombre: string; meta?: string; codigo: string[]; prof?: number; cursor?: string }
+const { id, nombre, meta, codigo, prof = 1, cursor } = Astro.props;
+---
+<figure class={`pz pz--${id}`} data-pz={id} data-mesa-pieza data-prof={prof} data-pz-cursor={cursor}>
+  <figcaption class="pz__nombre"><span>{nombre}</span>{meta && <span class="pz__meta" data-pz-meta>{meta}</span>}</figcaption>
+  <div class="pz__marco">
+    <div class="pz__cara"><slot /></div>
+    <div class="pz__codigo" aria-hidden="true"><div class="cod" data-cod set:html={codigoHTML(codigo)}></div></div>
+    <i class="pz__linea" aria-hidden="true"></i>
+    <i class="pz__asa pz__asa--a" aria-hidden="true"></i>
+    <i class="pz__asa pz__asa--b" aria-hidden="true"></i>
+  </div>
+</figure>

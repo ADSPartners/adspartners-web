@@ -1,15 +1,16 @@
 ---
-// Brand, «El manual que se defiende» (la idea del 29-oct; la eligió Álvaro el 30-oct). El manual de marca de adsPartners
-// abierto en la web, con su maqueta de verdad: la portada de papel doblado, el índice, los folios y la p. 29 del
-// logotipo. Intentas romperlo y se defiende: el inspector mide lo que has hecho y lo deshace (tech), y el manual se queja
-// al margen en Quetine, como un diseñador que corrige una prueba (brand). Primera ronda: portada, índice, logotipo y
-// cierre. Lo mueve scripts/brand.js; aquí está lo que se ve sin él (las reglas, en texto).
+// Brand, «El manual vivo» (segunda ronda, 30-oct; la primera era el manual en PDF y a Álvaro no le gustó ni el aire de
+// PDF ni la portada). La marca de adsPartners entera, en una mesa de trabajo: el logo, la paleta, la letra, la voz, un
+// post y una web. Todo se puede romper; al soltar, se abre por debajo el código que la pinta, la regla entra como
+// comentario y el código reescribe lo roto delante de ti. Brand por fuera, tech por dentro. Lo mueve scripts/brand.js;
+// aquí está lo que se ve sin él.
 import Base from '../../layouts/Base.astro';
 import Cursor from '../../components/Cursor.astro';
 import Marca from '../../components/Marca.astro';
+import Pieza from '../../components/brand/Pieza.astro';
 import logoRaw from '../../../public/assets/logos/logotipo_marron.svg?raw';
 import { nodos, nodosComoTrazo } from '../../scripts/brand/trazado.js';
-import { FOLIOS, INDICE, LOGO, CIERRE, remate } from '../../data/brand.js';
+import { MESA, PALETA, LETRAS, LOGO, REGLAS, POST, WEB, CODIGO, CIERRE, remate } from '../../data/brand.js';
 
 const base = import.meta.env.BASE_URL;
 // El logotipo oficial, trazado a trazado, y sus nodos (se sacan aquí, al compilar)
@@ -17,10 +18,11 @@ const viewBox = logoRaw.match(/viewBox="([^"]+)"/)[1];
 const trazos = [...logoRaw.matchAll(/\sd="([^"]+)"/g)].map((m) => m[1]);
 const puntos = trazos.flatMap(nodos);
 const proporcion = LOGO.proporcion.toFixed(2).replace('.', ',');
+const trazo = trazos[0].slice(0, 20).trim();
 ---
 <Base
   titulo="Brand · adsPartners®"
-  descripcion="El manual de marca de adsPartners, abierto. Intenta romperlo: se defiende solo. Así trabajamos la identidad, las webs, la dirección de arte y el contenido de tu marca."
+  descripcion="La marca de adsPartners, entera y a la vista. Intenta romperla: está escrita en código y se arregla sola. Así trabajamos la identidad, las webs, la dirección de arte y el contenido de tu marca."
 >
   <!-- Arriba, fija: el logotipo, el sonido, la hora y la vuelta a la página principal -->
   <div class="bm-barra">
@@ -30,120 +32,119 @@ const proporcion = LOGO.proporcion.toFixed(2).replace('.', ',');
     <a class="bm-barra__volver" href={base} data-sonido-hover><span class="bm-flecha" aria-hidden="true">◀</span> <span class="bm-subraya">Página principal</span></a>
   </div>
 
-  <!-- Abajo, fijo (aparece al llegar al logotipo): lo que llevas intentado y lo que has conseguido, que no se mueve -->
-  <p class="bm-contador" data-bm-contador>
-    <span>Intentos <b data-bm-intentos>00</b></span>
-    <span>Conseguidos <b>00</b></span>
-  </p>
-
   <main class="bm" data-brand data-cursor="manual">
-    <h1 class="oculto-accesible">Brand: el manual de marca de adsPartners</h1>
+    <h1 class="oculto-accesible">Brand: la marca de adsPartners, entera</h1>
 
-    <!-- p. 01 · La portada del manual, tal cual: papel doblado, «Brand guide» y el isotipo en rosa -->
-    <section class="bm-pag bm-portada" aria-label="Portada del manual" style={`--papel: url('${base}assets/brand/papel.webp'); --papel-movil: url('${base}assets/brand/papel-movil.webp')`}>
-      <p class="bm-portada__titulo" data-vivo>Brand guide</p>
-      <p class="bm-portada__esq bm-portada__esq--a">Est. 2025</p>
-      <p class="bm-portada__esq bm-portada__esq--b">Based in Madrid / Available worldwide</p>
-      <div class="bm-portada__iso" aria-hidden="true"><Marca tipo="iso" /></div>
-      <p class="bm-portada__mano bm-mano" aria-hidden="true">Intenta romperlo.</p>
-      <p class="bm-portada__pie bm-portada__pie--a"><span class="bm-nombre">adsPartners<sup>®</sup></span><br />Brand · Tech<br />Octubre 2026</p>
-      <p class="bm-portada__pie bm-portada__pie--b">ads-partners.com<br />adsgroup@ads-partners.com</p>
-    </section>
-
-    <!-- p. 04 · El índice -->
-    <section class="bm-pag bm-indice" aria-labelledby="bm-indice-t">
-      <p class="bm-doc">
-        <span class="bm-doc__iso"><Marca tipo="iso" /></span>
-        <span class="bm-doc__t">Documento de uso <s>interno</s><span class="bm-doc__mano bm-mano">externo, por una vez</span></span>
-      </p>
-      <h2 class="bm-indice__t" id="bm-indice-t">Lo que verás por aquí:</h2>
-      <ol class="bm-indice__lista">
-        {INDICE.map((it) => (
-          <li class={it.id ? '' : 'bm-indice__luego'}>
-            {it.id
-              ? <a href={`#${it.id}`} data-sonido-hover><span class="bm-indice__n">{it.n}.</span>{it.t}</a>
-              : <span><span class="bm-indice__n">{it.n}.</span>{it.t}<span class="bm-indice__nota bm-mano" aria-hidden="true">en la próxima ronda</span></span>}
-          </li>
-        ))}
-      </ol>
-      <p class="bm-indice__intro">
-        Esto es el manual de nuestra marca, el de verdad: las reglas que la mantienen entera en todos los sitios. Están
-        hechas para cumplirse solas. Compruébalo: intenta romperla.
-      </p>
-      <p class="bm-folio"><span class="bm-nombre">adsPartners<sup>®</sup></span><br />Brand guide<span class="bm-folio__p bm-mano">p. {FOLIOS.indice}</span></p>
-    </section>
-
-    <!-- p. 29 · El logotipo: estíralo, aplástalo o gíralo; vuelve a su sitio -->
-    <section class="bm-pag bm-logo" id="logotipo" aria-labelledby="bm-logo-t">
-      <header class="bm-cab">
-        <p class="bm-kicker">Identidad visual</p>
-        <h2 class="bm-cab__t" id="bm-logo-t">Logotipo</h2>
+    <!-- La mesa de trabajo: toda la marca a la vista, y todo se rompe -->
+    <section class="mesa" data-mesa aria-labelledby="mesa-t">
+      <header class="mesa__cab" data-mesa-pieza data-mesa-revela data-prof="0.4">
+        <p class="mesa__ante">Brand · <span class="bm-nombre">adsPartners</span></p>
+        <h2 class="mesa__t titular" id="mesa-t" data-vivo>{MESA.titulo}</h2>
+        <p class="mesa__intro">{MESA.intro}</p>
       </header>
-      <p class="bm-doc"><span class="bm-doc__iso"><Marca tipo="iso" /></span><span class="bm-doc__t">Documento de uso externo</span></p>
 
-      <div class="bl" data-bl>
-        <!-- El plano: dónde va el logo de verdad (guías solo en algunas esquinas, cotas con su medida) -->
-        <div class="bl__plano" aria-hidden="true">
-          <i class="bl__guia bl__guia--h bl__guia--arriba"></i>
-          <i class="bl__guia bl__guia--h bl__guia--abajo"></i>
-          <i class="bl__guia bl__guia--v bl__guia--izq"></i>
-          <i class="bl__guia bl__guia--v bl__guia--dcha"></i>
-          <span class="bl__cota bl__cota--x mono"><span data-bl-cota="x">—</span></span>
-          <span class="bl__cota bl__cota--y mono"><span data-bl-cota="y">—</span></span>
-        </div>
-        <svg class="bl__svg" viewBox={viewBox} role="img" aria-label="adsPartners" data-bl-svg>
-          <g data-bl-g>
-            <g class="bl__relleno">{trazos.map((d) => <path d={d} />)}</g>
-            <g class="bl__contorno">{trazos.map((d) => <path d={d} />)}</g>
-            <path class="bl__nodos" d={nodosComoTrazo(puntos)} />
-          </g>
-        </svg>
-        <span class="bl__asa" data-bl-asa="ne" aria-hidden="true"></span>
-        <span class="bl__asa" data-bl-asa="so" aria-hidden="true"></span>
-        <span class="bl__asa bl__asa--giro" data-bl-asa="giro" aria-hidden="true"></span>
-        <i class="bl__brazo" data-bl-brazo aria-hidden="true"></i>
-        <div class="bl__caja" data-bl-caja aria-hidden="true"></div>
-        <span class="insp bl__etq" data-bl-etq aria-hidden="true"></span>
-        <p class="bl__queja bm-mano" data-bl-queja aria-live="polite">
-          <span data-bl-queja-t></span>
-          <svg class="bl__flecha" viewBox="0 0 120 70" aria-hidden="true"><path d="M114 6C92 10 70 22 54 38S26 60 8 62M8 62l15-11M8 62l17 4" pathLength="1" /></svg>
-        </p>
-      </div>
+      <Pieza id="paleta" nombre="paleta.css" meta="5 colores" codigo={CODIGO.paleta()} prof={0.8} cursor="Arrástralo">
+        <ul class="paleta" aria-label="Paleta de colores">
+          {PALETA.map((c) => (
+            <li class={`paleta__m${c.claro ? ' paleta__m--claro' : ''}`} data-color={c.id} data-hex-bueno={c.hex} style={`--c: var(--${c.id})`}>
+              <span class="paleta__n">{c.nombre}</span>
+              <span class="paleta__hex" data-hex>{c.hex}</span>
+            </li>
+          ))}
+        </ul>
+        <span class="insp paleta__etq" data-paleta-etq aria-hidden="true"></span>
+      </Pieza>
 
-      <div class="bm-regla">
-        <h3 class="bm-regla__t">Logotipo principal</h3>
-        <p>{LOGO.regla}</p>
-        <p class="bm-regla__datos mono">Proporción {proporcion} : 1 · {trazos.length} trazados · {puntos.length} nodos</p>
-      </div>
-      <p class="bm-pista mono" aria-hidden="true"><span class="bm-pista__raton">Agarra una esquina y estíralo</span><span class="bm-pista__dedo">Arrastra una esquina</span></p>
-      <p class="bm-folio"><span class="bm-nombre">adsPartners<sup>®</sup></span><br />Brand guide<span class="bm-folio__p bm-mano">p. {FOLIOS.logo}</span></p>
-    </section>
-
-    <!-- p. 43 · Lo que hacemos con la tuya -->
-    <section class="bm-pag bm-cierre" id="la-tuya" aria-labelledby="bm-cierre-t">
-      <header class="bm-cab">
-        <p class="bm-kicker">Resumen operativo</p>
-        <p class="bm-cab__t">Brand</p>
-      </header>
-      <p class="bm-doc"><span class="bm-doc__iso"><Marca tipo="iso" /></span><span class="bm-doc__t">Documento de uso externo</span></p>
-
-      <div class="bm-cierre__rejilla">
-        <div class="bm-cierre__izq">
-          <h2 class="bm-cierre__t" id="bm-cierre-t" data-vivo>{CIERRE.titulo}</h2>
-          <p class="bm-cierre__remate" data-bm-remate>{remate(0)}</p>
-        </div>
-        <div class="bm-cierre__dcha">
-          <div class="bm-cierre__texto">
-            {CIERRE.texto.map((p) => <p>{p}</p>)}
+      <Pieza id="logo" nombre="logotipo.svg" meta={`${proporcion} : 1`} codigo={CODIGO.logo({ trazo, trazados: trazos.length, nodos: puntos.length })} prof={1.1} cursor="Estíralo">
+        <div class="bl" data-bl data-trazados={trazos.length} data-nodos={puntos.length}>
+          <!-- El plano: guías solo en algunas esquinas y la cota con su medida -->
+          <div class="bl__plano" aria-hidden="true">
+            <i class="bl__guia bl__guia--h bl__guia--arriba"></i>
+            <i class="bl__guia bl__guia--h bl__guia--abajo"></i>
+            <i class="bl__guia bl__guia--v bl__guia--izq"></i>
+            <span class="bl__cota mono"><span data-bl-cota>—</span></span>
           </div>
-          <ul class="bm-cierre__servicios mono">
-            {CIERRE.servicios.map((s) => <li>{s}</li>)}
-          </ul>
-          <p class="bm-cierre__quien bm-mano">{CIERRE.quien}</p>
-          <a class="bm-cierre__carta" href={`${base}#contacto`} data-sonido-hover><span class="bm-subraya">Cuéntanos la tuya</span> <span class="bm-flecha" aria-hidden="true">▶</span></a>
+          <svg class="bl__svg" viewBox={viewBox} role="img" aria-label="adsPartners" data-bl-svg>
+            <g data-bl-g>
+              <g class="bl__relleno">{trazos.map((d) => <path d={d} />)}</g>
+              <g class="bl__contorno">{trazos.map((d) => <path d={d} />)}</g>
+              <path class="bl__nodos" d={nodosComoTrazo(puntos)} />
+            </g>
+          </svg>
+          <span class="bl__asa" data-bl-asa="ne" aria-hidden="true"></span>
+          <span class="bl__asa" data-bl-asa="so" aria-hidden="true"></span>
+          <span class="bl__asa bl__asa--giro" data-bl-asa="giro" aria-hidden="true"></span>
+          <i class="bl__brazo" data-bl-brazo aria-hidden="true"></i>
+          <span class="insp bl__etq" data-bl-etq aria-hidden="true"></span>
         </div>
+      </Pieza>
+
+      <Pieza id="letra" nombre="letra.css" meta="3 familias" codigo={CODIGO.letra()} prof={0.7}>
+        <div class="letra">
+          <ul class="letra__familias">
+            {LETRAS.map((l) => (
+              <li><span class={`letra__aa ${l.clase}`}>Aa</span><span class="letra__n">{l.nombre}</span><span class="letra__p">{l.papel}</span></li>
+            ))}
+          </ul>
+          <p class="letra__tent"><span class="letra__tent-t">Ponle otra:</span><span class="letra__chips" data-letra-chips></span></p>
+        </div>
+      </Pieza>
+
+      <Pieza id="voz" nombre="voz.txt" meta="0 palabras fuera" codigo={CODIGO.voz()} prof={0.9}>
+        <label class="voz">
+          <span class="voz__t">Escribe como una agencia:</span>
+          <span class="voz__campo">
+            <span class="voz__espejo titular" data-voz-espejo aria-hidden="true"></span>
+            <textarea class="voz__area titular" data-voz-area rows="2" maxlength="90" spellcheck="false" autocomplete="off" autocapitalize="sentences" placeholder="Soluciones integrales con sinergias…"></textarea>
+          </span>
+        </label>
+      </Pieza>
+
+      <Pieza id="post" nombre="post.png" meta="1080 × 1080" codigo={CODIGO.post()} prof={1.25}>
+        <div class="post">
+          <span class="post__iso"><Marca tipo="iso" /></span>
+          <span class="post__firma"><span class="bm-nombre">adsPartners</span>®</span>
+          <p class="post__claim titular">{POST.claim}</p>
+        </div>
+      </Pieza>
+
+      <Pieza id="web" nombre="web/index.html" meta={WEB.dominio} codigo={CODIGO.web()} prof={1}>
+        <div class="miniweb">
+          <p class="miniweb__url"><i></i>{WEB.dominio}</p>
+          <p class="miniweb__nav"><span class="miniweb__logo"><Marca tipo="logo" /></span><span class="miniweb__links">Brand · Tech · Trabajo</span></p>
+          <p class="miniweb__t titular">{WEB.claim}</p>
+          <span class="miniweb__boton">{WEB.boton} <span aria-hidden="true">▶</span></span>
+          <span class="miniweb__iso"><Marca tipo="iso" /></span>
+        </div>
+      </Pieza>
+
+      <!-- La barra de estado: lo que llevas intentado, lo conseguido (que no se mueve) y las reglas, en vivo -->
+      <p class="mesa__estado" data-mesa-pieza data-mesa-revela data-estado>
+        <span>Intentos <b data-intentos>00</b></span>
+        <span>Conseguidos <b>00</b></span>
+        <span>Reglas en su sitio <b data-reglas>{REGLAS.length}/{REGLAS.length}</b></span>
+        <span class="mesa__pista" data-pista>{MESA.pista}</span>
+      </p>
+      <div class="mesa__insp" data-mesa-insp aria-hidden="true"></div>
+    </section>
+
+    <!-- Lo que hacemos con la tuya -->
+    <section class="bm-cierre" id="la-tuya" aria-labelledby="bm-cierre-t">
+      <div class="bm-cierre__izq">
+        <p class="bm-cierre__ante">{CIERRE.antetitulo}</p>
+        <h2 class="bm-cierre__t titular" id="bm-cierre-t" data-vivo>{CIERRE.titulo}</h2>
+        <p class="bm-cierre__remate" data-bm-remate>{remate(0)}</p>
       </div>
-      <p class="bm-folio"><span class="bm-nombre">adsPartners<sup>®</sup></span><br />Brand guide<span class="bm-folio__p bm-mano">p. {FOLIOS.cierre}</span></p>
+      <div class="bm-cierre__dcha">
+        <div class="bm-cierre__texto">
+          {CIERRE.texto.map((p) => <p>{p}</p>)}
+        </div>
+        <ul class="bm-cierre__servicios">
+          {CIERRE.servicios.map((s) => <li>{s}</li>)}
+        </ul>
+        <p class="bm-cierre__quien">{CIERRE.quien}</p>
+        <a class="bm-cierre__carta" href={`${base}#contacto`} data-sonido-hover><span class="bm-subraya">Cuéntanos la tuya</span> <span class="bm-flecha" aria-hidden="true">▶</span></a>
+      </div>
     </section>
   </main>
   <Cursor />
@@ -155,28 +156,38 @@ const proporcion = LOGO.proporcion.toFixed(2).replace('.', ',');
 </Base>
 
 <style is:global>
-  /* Las letras del manual que la home no usa: Open Sauce en negrita (los antetítulos) y Quetine (la de detalle) */
+  /* Las letras de la marca que la home no usa: Open Sauce en negrita y Quetine (la de detalle) */
   @font-face { font-family: 'Open Sauce'; src: url('/assets/fonts/OpenSauceSans-Bold.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
   @font-face { font-family: 'Quetine'; src: url('/assets/fonts/Quetine.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
-  /* La página es papel: en claro, y el cursor propio en tinta */
+  /* Las de global.css, otra vez: Astro mete ese CSS en el HTML sin la carpeta de la copia de prueba (ADS_BASE) y en
+     /ads-v5-brand/ salían en Georgia. Aquí sí se le pone; en producción es el mismo archivo y no se baja dos veces */
+  @font-face { font-family: 'Apple Garamond'; src: url('/assets/fonts/AppleGaramond-Light.woff2') format('woff2'); font-weight: 300; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'Apple Garamond'; src: url('/assets/fonts/AppleGaramond.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'Apple Garamond'; src: url('/assets/fonts/AppleGaramond-Italic.woff2') format('woff2'); font-weight: 400; font-style: italic; font-display: swap; }
+  @font-face { font-family: 'Open Sauce'; src: url('/assets/fonts/OpenSauceSans-Regular.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'Open Sauce'; src: url('/assets/fonts/OpenSauceSans-Medium.woff2') format('woff2'); font-weight: 500; font-style: normal; font-display: swap; }
+  /* La página es clara, y el cursor propio va en tinta */
   html:has(main.bm), html:has(main.bm) body { background: var(--crema); color: var(--tinta); }
   html:has(main.bm) .cursor__iso, html:has(main.bm) .cursor__texto { color: var(--tinta); }
   html:has(main.bm) .cursor__pista { stroke: rgba(25, 9, 0, .3); }
-</style>
 
-<style>
+  /* Los colores de la marca son variables: romper uno (brand/color.js) es cambiar la variable en main.bm */
   .bm {
     --marron: #34190A;
-    --gris: rgba(25, 9, 0, .46);
-    --raya: rgba(25, 9, 0, .14);
-    --arriba: 72px;
+    --blanco: #F5F3F1;
+    --titular: 'Apple Garamond', Georgia, serif;
+    --gris: color-mix(in srgb, var(--tinta) 50%, transparent);
+    --raya: color-mix(in srgb, var(--tinta) 15%, transparent);
+    --mal: #FF4078;
     color: var(--tinta); background: var(--crema);
   }
-  .bm-mano { font-family: 'Quetine', 'Apple Garamond', cursive; font-weight: 400; letter-spacing: 0; text-transform: none; }
+  .bm .titular { font-family: var(--titular); font-weight: 300; }
+  .bm-nombre { text-transform: none; }
   .bm-subraya { text-decoration: underline; text-underline-offset: 2px; }
   .bm-flecha { display: inline-block; font-size: 10px; transition: transform .4s var(--curva); }
+  .bm .mono-p { font-family: var(--mono); font-size: 10px; line-height: 1.3; letter-spacing: .02em; }
 
-  /* --- La barra de arriba -------------------------------------------------------------------------------------- */
+  /* --- La barra de arriba ---------------------------------------------------------------------------------------- */
   .bm-barra {
     position: fixed; left: 0; right: 0; top: 0; z-index: 30;
     display: flex; align-items: center; gap: 32px; padding: 16px var(--margen);
@@ -184,216 +195,288 @@ const proporcion = LOGO.proporcion.toFixed(2).replace('.', ',');
   }
   .bm-barra > * { pointer-events: auto; }
   .bm-barra__logo { width: 104px; }
-  .bm-barra__logo :global(svg) { width: 100%; height: auto; }
+  .bm-barra__logo svg { width: 100%; height: auto; }
   .bm-barra__donde { margin: 0; display: flex; gap: 8px; }
   .bm-barra__hora { opacity: .58; font-variant-numeric: tabular-nums; }
   .bm-barra__volver { margin-left: auto; }
   .bm-barra__volver .bm-flecha { margin-right: 4px; }
   .bm-barra__volver:hover .bm-flecha, .bm-barra__volver:focus-visible .bm-flecha { transform: translateX(-4px); }
 
-  /* --- El contador ---------------------------------------------------------------------------------------------- */
-  .bm-contador {
-    position: fixed; right: var(--margen); bottom: var(--margen); z-index: 30; margin: 0;
-    display: grid; justify-items: end; gap: 4px;
-    font-family: var(--mono); font-size: 10px; line-height: 1; letter-spacing: .04em; text-transform: uppercase;
-    opacity: 0; transform: translateY(8px); transition: opacity .5s var(--curva), transform .5s var(--curva); pointer-events: none;
+  /* --- La mesa ----------------------------------------------------------------------------------------------------- */
+  /* Tres filas con su alto medido (el post tiene que ser cuadrado), y el reparto, asimétrico */
+  /* Lo que se sale de la mesa (el logo estirado) se corta en el borde de la pantalla: no ensancha la página */
+  .mesa { position: relative; overflow-x: clip; }
+  .mesa__cab { position: relative; z-index: 1; }
+  @media (min-width: 761px) {
+    .mesa {
+      --hueco: clamp(30px, 4.8vh, 50px);
+      --alto: calc(max(100vh, 620px) - 78px - 56px - 2 * var(--hueco));
+      --f1: calc(var(--alto) * .28); --f2: calc(var(--alto) * .39); --f3: calc(var(--alto) * .33);
+      display: grid; grid-template-columns: repeat(24, minmax(0, 1fr)); grid-template-rows: var(--f1) var(--f2) var(--f3);
+      column-gap: clamp(12px, 1.2vw, 22px); row-gap: var(--hueco);
+      padding: 78px var(--margen) 56px;
+    }
+    @supports (height: 100svh) { .mesa { --alto: calc(max(100svh, 620px) - 78px - 56px - 2 * var(--hueco)); } }
+    .mesa__cab { grid-column: 1 / 11; grid-row: 1; padding-top: 6px; }
+    .pz--paleta { grid-column: 12 / 24; grid-row: 1; margin-top: 14px; }
+    .pz--logo { grid-column: 1 / 16; grid-row: 2; }
+    .pz--letra { grid-column: 17 / 25; grid-row: 2; margin-top: -18px; margin-bottom: 18px; }
+    .pz--voz { grid-column: 2 / 11; grid-row: 3; margin-top: 10px; }
+    .pz--post { grid-column: 12 / 17; grid-row: 3; width: calc(var(--f3) - 17px); max-width: 100%; }
+    .pz--web { grid-column: 17 / 25; grid-row: 3; margin-top: -8px; margin-bottom: 8px; }
   }
-  .bm-contador.on { opacity: 1; transform: none; }
-  .bm-contador span { display: flex; align-items: baseline; gap: 10px; }
-  .bm-contador b { font-family: var(--sans); font-weight: 500; font-size: 22px; letter-spacing: -.02em; font-variant-numeric: tabular-nums; display: inline-block; }
-  .bm-contador b.salta { animation: bm-salta .5s var(--curva); }
+
+  .mesa__ante { margin: 0 0 12px; font-family: var(--mono); font-size: 10px; line-height: 1; letter-spacing: .04em; text-transform: uppercase; color: var(--gris); }
+  .mesa__t { margin: 0; font-size: clamp(46px, 8.4vh, 96px); line-height: .9; letter-spacing: -.03em; }
+  .mesa__intro { margin: 16px 0 0; max-width: 50ch; font-size: 14px; line-height: 1.42; }
+
+  /* La barra de estado, abajo */
+  .mesa__estado {
+    position: absolute; left: var(--margen); right: var(--margen); bottom: 18px; z-index: 2; margin: 0;
+    display: flex; align-items: baseline; gap: 26px;
+    font-family: var(--mono); font-size: 10px; line-height: 1; letter-spacing: .04em; text-transform: uppercase; color: var(--gris);
+  }
+  .mesa__estado b { display: inline-block; margin-left: 7px; font-family: var(--sans); font-weight: 500; font-size: 14px; letter-spacing: 0; color: var(--tinta); font-variant-numeric: tabular-nums; transition: color .3s; }
+  .mesa__estado b.salta { animation: bm-salta .5s var(--curva); }
+  .mesa__estado b.mal { color: var(--mal); }
   @keyframes bm-salta { 0% { transform: translateY(-40%); opacity: 0; } 100% { transform: none; opacity: 1; } }
+  .mesa__pista { margin-left: auto; text-transform: none; letter-spacing: .02em; color: var(--tinta); }
 
-  /* --- Lo común de cada página del manual: antetítulo y título, el «documento de uso» y el folio ---------------- */
-  .bm-pag { position: relative; min-height: 100vh; min-height: 100svh; padding: var(--arriba) var(--margen) var(--margen); overflow: hidden; }
-  .bm-pag + .bm-pag { border-top: 1px solid var(--raya); }
-  .bm-cab { position: absolute; left: var(--margen); top: var(--arriba); }
-  .bm-kicker { margin: 0; font-size: 10px; line-height: 1.2; font-weight: 700; letter-spacing: .01em; text-transform: uppercase; }
-  .bm-cab__t { margin: 3px 0 0; font-family: var(--serif); font-weight: 400; font-size: clamp(26px, 2.3vw, 38px); line-height: 1; letter-spacing: -.015em; }
-  .bm-doc {
-    position: absolute; right: var(--margen); top: var(--arriba); margin: 0;
-    display: grid; justify-items: end; gap: 8px; font-size: 10px; line-height: 1.2; font-weight: 500; text-transform: uppercase;
-  }
-  .bm-doc__iso { width: 44px; }
-  .bm-doc__iso :global(svg) { width: 100%; height: auto; }
-  .bm-doc__t { position: relative; }
-  .bm-doc__t s { text-decoration-thickness: 1.5px; }
-  /* «externo, por una vez», a boli debajo de lo tachado (encima va el isotipo) */
-  .bm-doc__mano { position: absolute; right: 0; top: calc(100% + 4px); font-size: 26px; line-height: 1; white-space: nowrap; color: var(--marron); transform: rotate(-4deg); transform-origin: 100% 0; }
-  /* El nombre, siempre «adsPartners», aunque el resto vaya en mayúsculas (regla del manual) */
-  .bm-nombre { text-transform: none; }
-  .bm-folio { position: absolute; left: var(--margen); bottom: var(--margen); margin: 0; font-size: 11px; line-height: 1.1; font-weight: 700; text-transform: uppercase; }
-  .bm-folio sup, .bm-portada__pie sup { font-size: .55em; }
-  .bm-folio__p { display: block; margin-top: 6px; font-size: 20px; line-height: 1; }
+  /* La línea que cruza la mesa entera (dentro.js) y el fondo roto que se queda detrás */
+  .mesa__barrido { position: absolute; z-index: 7; pointer-events: none; background: var(--rosa); box-shadow: 0 0 16px 2px color-mix(in srgb, var(--rosa) 75%, transparent); }
+  .mesa__barrido--x { top: 0; bottom: 0; left: 0; width: 1px; }
+  .mesa__barrido--y { position: fixed; left: 0; right: 0; top: 0; height: 1px; }
+  .mesa__velo { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+  .mesa__insp { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
 
-  /* --- p. 01 · La portada ---------------------------------------------------------------------------------------- */
-  .bm-portada {
-    padding-top: calc(var(--arriba) - 8px);
-    background: #8E8074 var(--papel) center / cover no-repeat; background-blend-mode: multiply;
+  /* --- Cada pieza: el nombre de archivo encima, el marco, la cara y el código ------------------------------------- */
+  .pz { position: relative; z-index: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; margin: 0; }
+  .pz.tirando { z-index: 5; }
+  .pz__nombre { display: flex; justify-content: space-between; gap: 12px; margin: 0 0 7px; font-family: var(--mono); font-size: 10px; line-height: 1; letter-spacing: .02em; color: var(--gris); white-space: nowrap; }
+  .pz__nombre > span:first-child { color: var(--tinta); }
+  .pz__nombre > span:first-child::before { content: '#'; margin-right: 6px; color: var(--gris); }
+  .pz__marco { position: relative; flex: 1 1 0; min-height: 0; outline: 1px solid var(--raya); transition: outline-color .3s var(--curva); }
+  .pz__cara { position: absolute; inset: 0; }
+  /* El código: noche, en mono, con el número de línea; la regla (los comentarios) en rosa y lo roto, marcado */
+  .pz__codigo {
+    position: absolute; inset: 0; z-index: 2; overflow: hidden; padding: 12px 14px 12px 0;
+    background: var(--noche); color: var(--crema); clip-path: inset(0 100% 0 0);
   }
-  .bm-portada__titulo {
-    margin: 0; text-align: center; white-space: nowrap;
-    font-weight: 700; font-size: 13.4vw; line-height: .78; letter-spacing: -.05em; text-transform: uppercase;
-    color: rgba(25, 9, 0, .74); mix-blend-mode: multiply;
+  .cod { font-family: var(--mono); font-size: clamp(9.5px, .72vw, 11px); line-height: 1.6; letter-spacing: 0; counter-reset: l; }
+  .pz--logo .cod, .pz--letra .cod { font-size: clamp(10px, .86vw, 13px); }
+  .pz--logo .pz__codigo { padding-top: 18px; }
+  .cod__l { position: relative; display: block; min-height: 1.6em; padding-left: 3.6em; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .cod__l::before { counter-increment: l; content: counter(l); position: absolute; left: 0; width: 2.5em; text-align: right; color: color-mix(in srgb, var(--crema) 26%, transparent); }
+  .cod__c { color: var(--rosa); }
+  .cod mark { background: var(--rosa); color: var(--noche); }
+  .cod__cursor { display: inline-block; width: .6em; height: 1.15em; margin-right: -.6em; vertical-align: -.22em; background: var(--crema); animation: cod-parpadeo 1s steps(1) infinite; }
+  @keyframes cod-parpadeo { 50% { opacity: 0; } }
+  /* La línea de escáner de cada pieza */
+  .pz__linea {
+    position: absolute; left: 0; top: -9px; bottom: -9px; z-index: 4; width: 1px; pointer-events: none; opacity: 0;
+    background: var(--rosa); box-shadow: 0 0 14px 2px color-mix(in srgb, var(--rosa) 75%, transparent);
   }
-  .bm-portada__esq { position: absolute; top: calc(var(--arriba) + 11.4vw); margin: 0; font-size: 11px; font-weight: 500; text-transform: uppercase; }
-  .bm-portada__esq--a { left: var(--margen); }
-  .bm-portada__esq--b { right: var(--margen); }
-  .bm-portada__iso { position: absolute; left: 50%; bottom: -.5vw; width: min(94vw, 230vh); color: var(--rosa); transform: translateX(-50%); }
-  .bm-portada__iso :global(svg) { width: 100%; height: auto; }
-  .bm-portada__mano { position: absolute; right: 9vw; top: calc(var(--arriba) + 16vw); margin: 0; font-size: clamp(40px, 4.6vw, 80px); line-height: 1; color: var(--tinta); transform: rotate(-6deg); }
-  .bm-portada__pie { position: absolute; bottom: var(--margen); z-index: 1; margin: 0; font-size: 11px; line-height: 1.15; font-weight: 500; text-transform: uppercase; }
-  .bm-portada__pie--a { left: var(--margen); }
-  .bm-portada__pie--b { right: var(--margen); text-align: right; text-transform: none; font-size: 12px; }
+  .pz__linea::before, .pz__linea::after { content: ''; position: absolute; left: -2px; width: 5px; height: 5px; background: var(--rosa); }
+  .pz__linea::before { top: 0; }
+  .pz__linea::after { bottom: 0; }
+  /* Al pasar por encima se selecciona, como en una herramienta de diseño: dos asas y una guía que sobresale */
+  .pz__asa { position: absolute; z-index: 3; width: 7px; height: 7px; border: 1px solid var(--tinta); background: var(--crema); opacity: 0; pointer-events: none; transition: opacity .3s var(--curva); }
+  .pz__asa--a { left: -4px; top: -4px; }
+  .pz__asa--b { right: -4px; bottom: -4px; }
+  .pz__marco::after { content: ''; position: absolute; top: -1px; left: 100%; width: 34px; height: 1px; background: repeating-linear-gradient(90deg, var(--tinta) 0 3px, transparent 3px 6px); opacity: 0; transition: opacity .3s var(--curva); pointer-events: none; }
+  html.con-raton .pz:hover .pz__marco, .pz.tirando .pz__marco { outline-color: var(--tinta); }
+  html.con-raton .pz:hover .pz__asa, html.con-raton .pz:hover .pz__marco::after, .pz.tirando .pz__asa { opacity: 1; }
+  .pz--web .pz__marco::after, .pz--paleta .pz__marco::after, .pz--letra .pz__marco::after { left: auto; right: 100%; }
 
-  /* --- p. 04 · El índice ----------------------------------------------------------------------------------------- */
-  .bm-indice__t { position: absolute; left: 5.6%; top: 12%; margin: 0; font-family: var(--serif); font-weight: 400; font-size: clamp(32px, 3vw, 52px); line-height: 1; letter-spacing: -.015em; }
-  .bm-indice__lista { position: absolute; left: 7.6%; top: 38%; margin: 0; padding: 0; list-style: none; font-family: var(--serif); font-size: clamp(18px, 1.4vw, 24px); line-height: 1.18; }
-  .bm-indice__lista a:hover { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
-  .bm-indice__n { display: inline-block; min-width: 1.1em; }
-  .bm-indice__luego { color: rgba(25, 9, 0, .36); }
-  .bm-indice__nota { margin-left: 14px; font-size: 1.15em; color: var(--marron); opacity: .8; }
-  .bm-indice__intro { position: absolute; left: 50%; top: 38%; margin: 0; max-width: 40ch; font-size: 15px; line-height: 1.45; }
+  /* Antes de la entrada (con JS), las piezas se ven por dentro; la línea de la mesa las pasa a marca. Si el JS no
+     llega, a los 3,5 s se ven por fuera igualmente */
+  html.js .mesa:not(.lista) .pz__codigo { clip-path: none; animation: mesa-falla 0s 3.5s forwards; }
+  html.js .mesa:not(.lista) .pz__cara, html.js .mesa:not(.lista) [data-mesa-revela] { clip-path: inset(0 100% 0 0); animation: mesa-falla-cara 0s 3.5s forwards; }
+  @keyframes mesa-falla { to { clip-path: inset(0 100% 0 0); } }
+  @keyframes mesa-falla-cara { to { clip-path: none; } }
 
-  /* --- p. 29 · El logotipo --------------------------------------------------------------------------------------- */
-  .bl {
-    position: absolute; left: 50%; top: 47%; width: min(64vw, 1180px); aspect-ratio: 2500 / 363.858;
-    transform: translate(-50%, -50%); touch-action: none;
+  /* --- paleta.css ---------------------------------------------------------------------------------------------------- */
+  .paleta { display: flex; height: 100%; margin: 0; padding: 0; list-style: none; }
+  .paleta__m {
+    position: relative; flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px;
+    padding: 10px; background: var(--c); color: var(--blanco); touch-action: none; user-select: none;
+    transition: flex-grow .6s var(--curva);
   }
-  .bl__svg { width: 100%; height: 100%; overflow: visible; color: var(--tinta); }
-  /* Sin el cursor propio (que ya dice qué hacer), los del sistema */
-  :global(html:not(.cursor-propio)) .bl__svg { cursor: grab; }
-  :global(html:not(.cursor-propio)) .bl.tirando .bl__svg { cursor: grabbing; }
-  :global(html:not(.cursor-propio)) .bl__asa { cursor: nesw-resize; }
-  :global(html:not(.cursor-propio)) .bl__asa--giro { cursor: grab; }
+  .paleta__m:nth-child(1) { flex-grow: 1.7; }
+  .paleta__m:nth-child(2) { flex-grow: 1.25; box-shadow: inset 0 0 0 1px var(--raya); }
+  .paleta__m:nth-child(4) { flex-grow: .85; }
+  .paleta__m:nth-child(5) { flex-grow: .75; }
+  .paleta__m.tirando { flex-grow: 2.6; }
+  .paleta__m--claro { color: var(--tinta); }
+  .paleta__m.oscuro { color: var(--blanco); }
+  .paleta__m.claro { color: var(--tinta); }
+  .paleta__n { font-size: 12px; font-weight: 500; line-height: 1; white-space: nowrap; }
+  .paleta__hex { font-family: var(--mono); font-size: 10px; line-height: 1; letter-spacing: .02em; opacity: .78; white-space: nowrap; }
+  :root:not(.cursor-propio) .paleta__m { cursor: move; }
+  .paleta__etq { position: absolute; left: 0; top: calc(100% + 8px); z-index: 3; opacity: 0; transition: opacity .25s; pointer-events: none; }
+  .paleta__etq.on { opacity: 1; }
+
+  /* --- logotipo.svg (el de la primera ronda: se estira como una goma y enseña contornos y nodos) ------------------ */
+  .bl { position: absolute; left: 50%; top: 52%; width: 74%; aspect-ratio: 2500 / 363.858; transform: translate(-50%, -50%); touch-action: none; }
+  .bl__svg { display: block; width: 100%; height: 100%; overflow: visible; color: var(--marron); }
+  :root:not(.cursor-propio) .bl__svg { cursor: grab; }
+  :root:not(.cursor-propio) .bl.tirando .bl__svg { cursor: grabbing; }
+  :root:not(.cursor-propio) .bl__asa { cursor: nesw-resize; }
+  :root:not(.cursor-propio) .bl__asa--giro { cursor: grab; }
   .bl__relleno path { fill: currentColor; }
   .bl__relleno { transition: opacity .4s var(--curva); }
   .bl__contorno path { fill: none; stroke: var(--tinta); stroke-width: 1; vector-effect: non-scaling-stroke; }
   .bl__nodos { fill: none; stroke: var(--tinta); stroke-width: 3.5; stroke-linecap: square; vector-effect: non-scaling-stroke; }
   .bl__contorno, .bl__nodos { opacity: 0; transition: opacity .4s var(--curva); }
-  /* Al tirar, el logo enseña cómo está hecho: contornos y nodos, como en Illustrator */
   .bl.tirando .bl__relleno { opacity: .07; }
   .bl.tirando .bl__contorno, .bl.tirando .bl__nodos { opacity: 1; }
-
-  /* El plano: aparece al acercarse (en el móvil, siempre, más tenue) */
   .bl__plano { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .6s var(--curva); }
   .bl.cerca .bl__plano, .bl.tirando .bl__plano { opacity: 1; }
   .bl__guia { position: absolute; display: block; }
-  .bl__guia--h { height: 1px; background: repeating-linear-gradient(90deg, rgba(25, 9, 0, .42) 0 3px, transparent 3px 7px); }
-  .bl__guia--v { width: 1px; background: repeating-linear-gradient(0deg, rgba(25, 9, 0, .42) 0 3px, transparent 3px 7px); }
-  .bl__guia--arriba { top: 0; left: -44px; right: -110px; }
-  .bl__guia--abajo { bottom: 0; left: -22px; right: -36px; }
-  .bl__guia--izq { left: 0; top: -84px; bottom: -40px; background: rgba(25, 9, 0, .5); }
-  .bl__guia--dcha { right: 0; top: -30px; bottom: -64px; }
-  .bl__cota { position: absolute; display: flex; align-items: center; justify-content: center; color: var(--gris); font-size: 10px; }
+  .bl__guia--h { height: 1px; background: repeating-linear-gradient(90deg, var(--gris) 0 3px, transparent 3px 7px); }
+  .bl__guia--v { width: 1px; background: var(--gris); }
+  .bl__guia--arriba { top: 0; left: -30px; right: -70px; }
+  .bl__guia--abajo { bottom: 0; left: -16px; right: -24px; }
+  .bl__guia--izq { left: 0; top: -40px; bottom: -22px; }
+  .bl__cota { position: absolute; left: 0; right: 0; bottom: -24px; height: 1px; display: flex; align-items: center; justify-content: center; background: var(--gris); color: var(--gris); font-size: 10px; }
+  .bl__cota::before, .bl__cota::after { content: ''; position: absolute; top: -4px; width: 1px; height: 9px; background: var(--gris); }
+  .bl__cota::before { left: 0; }
+  .bl__cota::after { right: 0; }
   .bl__cota span { padding: 0 6px; background: var(--crema); }
-  .bl__cota--x { left: 0; right: 0; bottom: -34px; height: 1px; background: var(--gris); }
-  .bl__cota--x::before, .bl__cota--x::after { content: ''; position: absolute; top: -4px; width: 1px; height: 9px; background: var(--gris); }
-  .bl__cota--x::before { left: 0; }
-  .bl__cota--x::after { right: 0; }
-  .bl__cota--y { top: 0; bottom: 0; left: -30px; width: 1px; background: var(--gris); }
-  .bl__cota--y span { transform: rotate(-90deg); white-space: nowrap; }
-
-  /* Las asas (dos esquinas y el giro): las coloca brand/logo.js donde estén las esquinas de verdad */
   .bl__asa {
     position: absolute; left: 0; top: 0; z-index: 2; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px;
-    border: 1px solid var(--tinta); background: var(--crema); touch-action: none;
-    opacity: 0; transition: opacity .5s var(--curva);
+    border: 1px solid var(--tinta); background: var(--crema); touch-action: none; opacity: 0; transition: opacity .5s var(--curva);
   }
   .bl__asa::before { content: ''; position: absolute; inset: -14px; }
   .bl__asa--giro { border-radius: 50%; }
   .bl__brazo { position: absolute; left: 0; top: 0; width: 1px; background: var(--tinta); transform-origin: 50% 0; opacity: 0; transition: opacity .5s var(--curva); }
   .bl.cerca .bl__asa, .bl.tirando .bl__asa, .bl.cerca .bl__brazo, .bl.tirando .bl__brazo { opacity: 1; }
-  :global(html:not(.js)) .bl__asa, :global(html:not(.js)) .bl__brazo { display: none; }
-
-  /* La caja del inspector (se abre como una persiana) y su etiqueta */
-  .bl__caja { position: absolute; left: 0; top: 0; pointer-events: none; outline: 1px solid var(--tinta); background: rgba(245, 203, 215, .16); clip-path: inset(50% 0 50% 0); }
+  html:not(.js) .bl__asa, html:not(.js) .bl__brazo { display: none; }
   .bl__etq { position: absolute; left: 0; top: 0; z-index: 3; opacity: 0; transition: opacity .25s; pointer-events: none; }
   .bl__etq.on { opacity: 1; }
 
-  /* La queja, a boli, en el margen: se escribe de izquierda a derecha y una flecha señala el logo */
-  .bl__queja {
-    position: absolute; right: 4%; bottom: calc(100% + 78px); z-index: 2; margin: 0;
-    font-size: clamp(28px, 2.6vw, 46px); line-height: 1; color: var(--marron); white-space: nowrap;
-    transform: rotate(-4deg); transform-origin: 100% 100%; pointer-events: none;
+  /* --- letra.css ----------------------------------------------------------------------------------------------------- */
+  .letra { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-between; gap: 10px; padding: clamp(12px, 2vh, 20px) clamp(12px, 1.2vw, 18px); }
+  .letra__familias { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 0; padding: 0; list-style: none; }
+  .letra__aa { display: block; margin-bottom: 8px; font-size: clamp(38px, 6.6vh, 74px); line-height: 1; letter-spacing: -.02em; white-space: nowrap; }
+  .letra__aa--sauce { font-family: 'Open Sauce', var(--sans); font-weight: 700; }
+  .letra__aa--quetine { font-family: 'Quetine', cursive; font-weight: 400; letter-spacing: 0; }
+  .letra__n { display: block; font-size: 12px; font-weight: 500; line-height: 1.2; }
+  .letra__p { display: block; margin-top: 2px; font-family: var(--mono); font-size: 10px; line-height: 1.2; color: var(--gris); }
+  .letra__tent { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin: 0; padding-top: 10px; border-top: 1px solid var(--raya); }
+  .letra__tent-t { font-family: var(--mono); font-size: 10px; color: var(--gris); }
+  .letra__chips { display: contents; }
+  .letra__chip {
+    padding: 5px 9px 4px; border: 1px solid var(--raya); border-radius: 0; background: none; color: var(--tinta);
+    font-size: 14px; line-height: 1.1; cursor: pointer; transition: border-color .3s var(--curva), background .3s var(--curva), color .3s var(--curva);
   }
-  .bl__queja span { display: block; clip-path: inset(-30% 100% -40% 0); }
-  .bl__flecha { position: absolute; left: -2.4em; top: 55%; width: 2em; overflow: visible; }
-  .bl__flecha path { fill: none; stroke: var(--marron); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; }
+  .letra__chip:hover, .letra__chip:focus-visible { border-color: var(--tinta); }
+  .letra__chip.on { background: var(--tinta); color: var(--crema); border-color: var(--tinta); }
 
-  .bm-regla { position: absolute; left: var(--margen); bottom: 17%; max-width: 38ch; }
-  .bm-regla__t { margin: 0 0 10px; font-family: var(--serif); font-weight: 400; font-size: 24px; line-height: 1.05; }
-  .bm-regla p { margin: 0; font-size: 14px; line-height: 1.45; }
-  .bm-regla .bm-regla__datos { margin-top: 12px; color: var(--gris); font-size: 10px; }
-  .bm-pista { position: absolute; left: 50%; bottom: var(--margen); margin: 0; color: var(--gris); transform: translateX(-50%); white-space: nowrap; }
-  .bm-pista__dedo { display: none; }
-  @media (hover: none), (pointer: coarse) {
-    .bm-pista__raton { display: none; }
-    .bm-pista__dedo { display: inline; }
-    .bl .bl__plano { opacity: .55; }
-    .bl .bl__asa, .bl .bl__brazo { opacity: 1; }
-    .bl__asa { width: 13px; height: 13px; margin: -6.5px 0 0 -6.5px; }
+  /* --- voz.txt ------------------------------------------------------------------------------------------------------- */
+  .voz { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-between; padding: 14px 16px; cursor: text; }
+  .voz__t { font-family: var(--mono); font-size: 10px; line-height: 1; color: var(--gris); }
+  .voz__campo { position: relative; display: block; }
+  .voz__area, .voz__espejo {
+    display: block; box-sizing: border-box; width: 100%; height: 2.3em; margin: 0; padding: 0; border: 0;
+    font-size: clamp(20px, 3.1vh, 30px); line-height: 1.15; letter-spacing: -.01em; white-space: pre-wrap; overflow-wrap: break-word;
   }
+  .voz__area { position: relative; z-index: 1; resize: none; overflow: hidden; background: transparent; color: var(--tinta); caret-color: var(--tinta); outline: none; }
+  .voz__area::placeholder { color: var(--gris); opacity: 1; }
+  html.js .voz__area::placeholder { color: transparent; }
+  .voz__espejo { position: absolute; left: 0; top: 0; color: transparent; pointer-events: none; }
+  .voz__espejo.fantasma { color: var(--gris); }
+  .voz__espejo mark { background: none; color: inherit; text-decoration: underline wavy var(--mal); text-decoration-thickness: 1.5px; text-decoration-skip-ink: none; text-underline-offset: 5px; }
+  .voz__espejo .voz__cursor { display: inline-block; width: 1px; height: 1em; margin-left: 1px; vertical-align: -.12em; background: var(--gris); animation: cod-parpadeo 1s steps(1) infinite; }
+  .pz--voz .pz__meta.mal { color: var(--mal); }
 
-  /* --- p. 43 · Lo que hacemos con la tuya ------------------------------------------------------------------------ */
-  .bm-cierre__rejilla {
-    display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); column-gap: 5vw; align-items: stretch;
-    min-height: calc(100svh - var(--arriba) - var(--margen)); padding: 15vh 4vw 12vh 0;
+  /* --- post.png ------------------------------------------------------------------------------------------------------ */
+  .post { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-between; padding: 8%; background: var(--marron); color: var(--blanco); }
+  .post__iso { display: block; width: 34%; color: var(--rosa); }
+  .post__iso svg { display: block; width: 100%; height: auto; }
+  .post__firma { position: absolute; top: 8%; right: 8%; font-size: 9px; font-weight: 500; line-height: 1; opacity: .7; }
+  .post__claim { margin: 0; font-size: clamp(16px, 2.6vh, 26px); line-height: 1.02; letter-spacing: -.015em; }
+
+  /* --- web/index.html ------------------------------------------------------------------------------------------------ */
+  .miniweb { position: absolute; inset: 0; overflow: hidden; display: flex; flex-direction: column; background: var(--blanco); color: var(--tinta); }
+  .miniweb p { margin: 0; }
+  .miniweb__url { display: flex; align-items: center; gap: 7px; height: 22px; flex: none; padding: 0 10px; border-bottom: 1px solid var(--raya); font-family: var(--mono); font-size: 9px; color: var(--gris); }
+  .miniweb__url i { width: 5px; height: 5px; background: var(--rosa); }
+  .miniweb__nav { display: flex; justify-content: space-between; align-items: center; flex: none; padding: 10px 14px 0; }
+  .miniweb__logo { display: block; width: 66px; color: var(--marron); }
+  .miniweb__logo svg { display: block; width: 100%; height: auto; }
+  .miniweb__links { font-family: var(--mono); font-size: 8px; letter-spacing: .04em; text-transform: uppercase; color: var(--gris); }
+  .miniweb .miniweb__t { position: relative; z-index: 1; margin-top: auto; padding: 0 14px; max-width: 15ch; font-size: clamp(18px, 3.1vh, 30px); line-height: 1; letter-spacing: -.02em; }
+  .miniweb__boton { position: relative; z-index: 1; align-self: flex-start; margin: 10px 14px 14px; padding: 6px 10px 5px; background: var(--rosa); color: var(--tinta); font-size: 10px; font-weight: 500; line-height: 1; }
+  .miniweb__boton span { font-size: 7px; }
+  .miniweb__iso { position: absolute; right: 14px; bottom: 14px; width: 30%; color: var(--rosa); }
+  .miniweb__iso svg { display: block; width: 100%; height: auto; }
+
+  /* --- El inspector, quieto (brand/inspector.js) ---------------------------------------------------------------------- */
+  .mi__caja { position: absolute; left: 0; top: 0; outline: 1px solid var(--tinta); background: color-mix(in srgb, var(--rosa) 18%, transparent); clip-path: inset(50% 0 50% 0); }
+  .mi__etq { position: absolute; left: 0; top: 0; opacity: 0; transition: opacity .25s; }
+  .mi__etq.on { opacity: 1; }
+
+  /* --- Lo que hacemos con la tuya ----------------------------------------------------------------------------------- */
+  .bm-cierre {
+    position: relative; display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); column-gap: 5vw;
+    min-height: 100vh; min-height: 100svh; padding: 16vh calc(var(--margen) + 4vw) 12vh var(--margen); border-top: 1px solid var(--raya);
   }
-  .bm-cierre__izq { display: flex; flex-direction: column; justify-content: space-between; gap: 6vh; }
-  .bm-cierre__dcha { padding-top: 1.2vw; }
-  .bm-cierre__t { margin: 0; max-width: 11ch; font-family: var(--serif); font-weight: 300; font-size: clamp(46px, 6.2vw, 112px); line-height: .94; letter-spacing: -.025em; }
+  .bm-cierre__izq { display: flex; flex-direction: column; gap: 4vh; }
+  .bm-cierre__ante { margin: 0; font-family: var(--mono); font-size: 10px; line-height: 1; letter-spacing: .04em; text-transform: uppercase; color: var(--gris); }
+  .bm-cierre__t { margin: 0; max-width: 11ch; font-size: clamp(46px, 6.4vw, 116px); line-height: .92; letter-spacing: -.03em; }
+  .bm-cierre__remate { margin: auto 0 0; font-family: var(--serif); font-style: italic; font-size: clamp(20px, 1.7vw, 28px); line-height: 1.2; }
+  .bm-cierre__dcha { padding-top: calc(4vh + 10px); }
   .bm-cierre__texto { font-size: 16px; line-height: 1.5; }
   .bm-cierre__texto p { margin: 0 0 1em; }
-  .bm-cierre__servicios { margin: 3vh 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 20px; }
+  .bm-cierre__servicios { margin: 3vh 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 20px; font-family: var(--mono); font-size: 11px; line-height: 1.4; letter-spacing: .04em; text-transform: uppercase; }
   .bm-cierre__servicios li { padding-top: 8px; border-top: 1px solid var(--raya); }
-  .bm-cierre__quien { margin: 4vh 0 0; font-size: 34px; line-height: 1; color: var(--marron); transform: rotate(-3deg); transform-origin: 0 50%; }
-  .bm-cierre__remate { margin: 0; font-family: var(--serif); font-style: italic; font-size: clamp(20px, 1.7vw, 28px); line-height: 1.2; }
+  .bm-cierre__quien { margin: 4vh 0 0; font-family: 'Quetine', cursive; font-size: 34px; line-height: 1; color: var(--marron); transform: rotate(-3deg); transform-origin: 0 50%; }
   .bm-cierre__carta { display: inline-block; margin-top: 5vh; font-weight: 500; }
   .bm-cierre__carta .bm-flecha { margin-left: 4px; }
   .bm-cierre__carta:hover .bm-flecha, .bm-cierre__carta:focus-visible .bm-flecha { transform: translateX(4px); }
 
-  /* --- Móvil ----------------------------------------------------------------------------------------------------- */
+  /* --- Móvil: las piezas en columna, a lo ancho ------------------------------------------------------------------------ */
   @media (max-width: 760px) {
-    .bm { --arriba: 58px; }
-    .bm-barra { gap: 18px; padding: 14px var(--margen); font-size: 12px; }
+    .bm-barra { gap: 18px; padding: 14px var(--margen); font-size: 12px; background: var(--crema); box-shadow: 0 1px 0 rgba(25, 9, 0, .1); }
     .bm-barra__logo { width: 84px; }
     .bm-barra__donde { display: none; }
-    .bm-contador b { font-size: 18px; }
 
-    .bm-portada__titulo { white-space: normal; font-size: 25vw; line-height: .8; margin-top: 4px; }
-    .bm-portada { background-image: var(--papel-movil); }
-    .bm-portada__esq { top: calc(var(--arriba) + 46vw); font-size: 10px; }
-    .bm-portada__esq--b { max-width: 20ch; text-align: right; }
-    .bm-portada__iso { width: 94vw; bottom: 16vh; }
-    .bm-portada__mano { right: auto; left: var(--margen); top: auto; bottom: calc(16vh + 46vw); font-size: 40px; }
-    .bm-portada__pie { font-size: 10px; }
-    .bm-portada__pie--b { font-size: 11px; }
-
-    .bm-indice__t { position: static; margin-top: 18vh; }
-    .bm-indice__lista { position: static; margin-top: 6vh; padding-left: 2px; }
-    .bm-indice__nota { display: block; margin: -2px 0 6px 1.1em; }
-    .bm-indice__intro { position: static; margin-top: 6vh; padding-bottom: 80px; }
-    .bm-doc__mano { font-size: 22px; }
-
-    .bl { top: 44%; width: calc(100vw - var(--margen) * 2 - 24px); }
-    .bl__guia--arriba { right: -16px; }
-    .bl__guia--abajo { right: -12px; }
-    .bl__queja { right: 0; bottom: calc(100% + 56px); width: 74vw; font-size: 28px; line-height: 1.05; white-space: normal; text-align: right; }
-    .bl__flecha { left: -1.6em; top: 70%; width: 1.5em; }
+    .mesa { display: flex; flex-direction: column; gap: 36px; padding: 74px var(--margen) 80px; }
+    .mesa__t { font-size: 15vw; }
+    .mesa__intro { font-size: 15px; }
+    .pz__marco { flex: none; }
+    .pz--logo { order: 1; } .pz--logo .pz__marco { height: 132px; }
+    .pz--paleta { order: 2; } .pz--paleta .pz__marco { height: 120px; }
+    .pz--letra { order: 3; } .pz--letra .pz__marco { height: 196px; }
+    .pz--voz { order: 4; } .pz--voz .pz__marco { height: 132px; }
+    .pz--post { order: 5; width: 72%; } .pz--post .pz__marco { aspect-ratio: 1; }
+    .pz--web { order: 6; } .pz--web .pz__marco { height: 230px; }
+    .bl { width: 84%; }
+    .bl__asa { width: 13px; height: 13px; margin: -6.5px 0 0 -6.5px; }
+    .bl .bl__plano { opacity: .55; }
+    .bl .bl__asa, .bl .bl__brazo { opacity: 1; }
     .bl__etq { white-space: normal; max-width: calc(100vw - 24px); }
-    .bm-regla { left: var(--margen); right: var(--margen); bottom: 13%; }
-    .bm-regla__t { font-size: 20px; }
-    .bm-pista { bottom: calc(var(--margen) + 4px); left: var(--margen); transform: none; }
-    .bm-logo .bm-folio, .bl__cota--y { display: none; }
+    .paleta__m { padding: 8px 6px; }
+    .paleta__n { font-size: 11px; }
+    .paleta__hex { font-size: 9px; }
+    .letra__aa { font-size: 46px; }
+    .voz__area, .voz__espejo { font-size: 22px; }
+    .cod { font-size: 10px; }
+    /* La barra de estado, fija abajo mientras se ve la mesa */
+    .mesa__estado {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; gap: 16px; padding: 12px var(--margen) calc(12px + env(safe-area-inset-bottom));
+      background: var(--crema); border-top: 1px solid var(--raya); transform: translateY(102%); transition: transform .5s var(--curva);
+    }
+    .mesa__estado.on { transform: none; }
+    .mesa__estado b { font-size: 13px; margin-left: 5px; }
+    .mesa__pista { display: none; }
 
-    /* En columna: el título, lo que hacemos y, al final, el remate */
-    .bm-cierre__rejilla { display: flex; flex-direction: column; min-height: 0; padding: 14vh 0 18vh; }
+    .bm-cierre { display: flex; flex-direction: column; min-height: 0; padding: 14vh var(--margen) 18vh; }
     .bm-cierre__izq { display: contents; }
-    .bm-cierre__dcha { order: 2; padding-top: 5vh; }
+    .bm-cierre__dcha { order: 2; padding-top: 4vh; }
     .bm-cierre__remate { order: 3; margin-top: 6vh; }
     .bm-cierre__texto { font-size: 15px; }
     .bm-cierre__quien { font-size: 30px; }
-    .bm-cierre__carta { margin-top: 4vh; }
   }
 </style>
