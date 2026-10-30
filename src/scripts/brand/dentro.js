@@ -78,14 +78,17 @@ export function crearDentro(pz, { reducido }) {
       t.call(() => sonido.tic(0.6));
       t.to(st, { p: 1, duration: reducido ? 0 : 0.55, ease: 'power2.inOut', onUpdate: () => poner(st.p, true) });
       let cambios = op.cambios.map((c) => ({ ...c }));
-      // La regla, como comentario: una línea nueva que se escribe encima de lo roto
+      // La regla, como comentario: líneas nuevas que se escriben encima de lo roto (una, o varias en la voz)
       if (op.comentario) {
-        const { en, texto } = op.comentario;
-        cambios = cambios.map((c) => (c.l >= en ? { ...c, l: c.l + 1 } : c));
-        t.call(() => { lineas.splice(en, 0, ''); pintar(lineas); });
+        const { en } = op.comentario;
+        const textos = [].concat(op.comentario.texto);
+        cambios = cambios.map((c) => (c.l >= en ? { ...c, l: c.l + textos.length } : c));
         const sangria = (op.lineas[en] || '').match(/^\s*/)[0];
-        teclear(t, en, sangria, texto, '', 0.017);
-        t.call(() => pintarLinea(en, sangria + texto));
+        textos.forEach((texto, k) => {
+          t.call(() => { lineas.splice(en + k, 0, ''); pintar(lineas); });
+          teclear(t, en + k, sangria, texto, '', textos.length > 1 ? 0.012 : 0.017);
+          t.call(() => pintarLinea(en + k, sangria + texto));
+        });
         t.to({}, { duration: 0.25 });
       }
       // Cada cambio: se marca lo roto, se borra letra a letra y se escribe lo bueno (si hay varios en una línea, lo

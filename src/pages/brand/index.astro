@@ -93,9 +93,13 @@ const trazo = trazos[0].slice(0, 20).trim();
       <Pieza id="voz" nombre="voz.txt" meta="0 palabras fuera" codigo={CODIGO.voz()} prof={0.9}>
         <label class="voz">
           <span class="voz__t">Escribe como una agencia:</span>
-          <span class="voz__campo">
-            <span class="voz__espejo titular" data-voz-espejo aria-hidden="true"></span>
-            <textarea class="voz__area titular" data-voz-area rows="2" maxlength="90" spellcheck="false" autocomplete="off" autocapitalize="sentences" placeholder="Soluciones integrales con sinergias…"></textarea>
+          <span class="voz__abajo">
+            <span class="voz__campo">
+              <span class="voz__espejo titular" data-voz-espejo aria-hidden="true"></span>
+              <textarea class="voz__area titular" data-voz-area rows="2" maxlength="90" spellcheck="false" autocomplete="off" autocapitalize="sentences" placeholder="Somos una consultora 360…"></textarea>
+            </span>
+            <!-- Lo que no somos: lo escribe brand/voz.js después del arreglo -->
+            <span class="voz__nota" data-voz-nota aria-live="polite"></span>
           </span>
         </label>
       </Pieza>
@@ -376,7 +380,13 @@ const trazo = trazos[0].slice(0, 20).trim();
   /* --- voz.txt ------------------------------------------------------------------------------------------------------- */
   .voz { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-between; padding: 14px 16px; cursor: text; }
   .voz__t { font-family: var(--mono); font-size: 10px; line-height: 1; color: var(--gris); }
+  .voz__abajo { display: block; }
   .voz__campo { position: relative; display: block; }
+  .voz__nota { display: block; }
+  .voz__nota:not(:empty) { margin-top: 10px; }
+  .voz__no { position: relative; display: block; padding-left: 13px; font-size: 12px; line-height: 1.35; }
+  .voz__no + .voz__no { margin-top: 3px; }
+  .voz__no::before { content: ''; position: absolute; left: 0; top: .5em; width: 5px; height: 5px; background: var(--tinta); }
   .voz__area, .voz__espejo {
     display: block; box-sizing: border-box; width: 100%; height: 2.3em; margin: 0; padding: 0; border: 0;
     font-size: clamp(20px, 3.1vh, 30px); line-height: 1.15; letter-spacing: -.01em; white-space: pre-wrap; overflow-wrap: break-word;
@@ -449,7 +459,7 @@ const trazo = trazos[0].slice(0, 20).trim();
     .pz--logo { order: 1; } .pz--logo .pz__marco { height: 132px; }
     .pz--paleta { order: 2; } .pz--paleta .pz__marco { height: 120px; }
     .pz--letra { order: 3; } .pz--letra .pz__marco { height: 196px; }
-    .pz--voz { order: 4; } .pz--voz .pz__marco { height: 132px; }
+    .pz--voz { order: 4; } .pz--voz .pz__marco { height: 196px; }
     .pz--post { order: 5; width: 72%; } .pz--post .pz__marco { aspect-ratio: 1; }
     .pz--web { order: 6; } .pz--web .pz__marco { height: 230px; }
     .bl { width: 84%; }
