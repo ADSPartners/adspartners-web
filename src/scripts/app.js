@@ -12,6 +12,7 @@ import { montarUmbral } from './umbral.js';
 import { montarGlobo } from './secciones/fresa.js';
 import { montarVivo } from './vivo.js';
 import { montarCabecera, montarImanes } from './comun.js';
+import { montarMenu } from './menu.js';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -49,6 +50,7 @@ export async function arrancar() {
 
   const cursor = crearCursor({ reducido });
   montarCabecera();
+  montarMenu({ lenis, reducido });
   montarGlobo({ lenis, reducido });
   const entran = [...document.querySelectorAll('[data-entra]')];
   if (enUmbral && !reducido) gsap.set(entran, { opacity: 0, y: 24 });

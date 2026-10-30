@@ -1,14 +1,14 @@
 ---
 // Barra fija: logotipo con el botón del menú debajo, las barras del sonido (se pulsan para callarlo o encenderlo) y
-// contacto. Se esconde al bajar y vuelve al subir. El menú aún no existe: el botón está, pero no abre nada.
+// contacto. Se esconde al bajar y vuelve al subir. El botón del menú lo abre (scripts/menu.js) y pasa a «Cerrar».
 import Marca from './Marca.astro';
 const base = import.meta.env.BASE_URL;
 ---
 <header class="cab" data-cab>
   <div class="cab__izq">
     <a class="cab__logo" href={base} aria-label="adsPartners, inicio"><Marca tipo="logo" /></a>
-    <button class="cab__menu mono" type="button" aria-expanded="false" data-menu-btn data-sonido-hover>
-      <span class="cab__menu-i" aria-hidden="true"><i></i><i></i></span>Menú
+    <button class="cab__menu mono" type="button" aria-expanded="false" aria-controls="menu" data-menu-btn data-sonido-hover>
+      <span class="cab__menu-i" aria-hidden="true"><i></i><i></i></span><span data-menu-txt>Menú</span>
     </button>
   </div>
 
@@ -65,6 +65,13 @@ const base = import.meta.env.BASE_URL;
   .cab__menu-i i:last-child { width: 55%; }
   .cab__menu:hover .cab__menu-i i:first-child, .cab__menu:focus-visible .cab__menu-i i:first-child { width: 55%; transform: translateX(45%); }
   .cab__menu:hover .cab__menu-i i:last-child, .cab__menu:focus-visible .cab__menu-i i:last-child { width: 100%; }
+  /* Con el menú abierto, la barra se queda a la vista y en crema, y las dos rayas hacen una X */
+  :global(html.menu-abierto) .cab { transform: none; opacity: 1; pointer-events: none; color: var(--crema); }
+  :global(html.menu-abierto) .cab::before { opacity: 0; }
+  :global(html.menu-abierto) .cab__menu-i { gap: 0; }
+  :global(html.menu-abierto) .cab__menu-i i { width: 100% !important; }
+  :global(html.menu-abierto) .cab__menu-i i:first-child { transform: translateY(.5px) rotate(45deg) !important; }
+  :global(html.menu-abierto) .cab__menu-i i:last-child { transform: translateY(-.5px) rotate(-45deg); }
   .cab__dcha { display: flex; align-items: center; gap: 22px; }
 
   /* Sonido: con sonido, las barras se mueven; sin sonido, se quedan planas */

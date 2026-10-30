@@ -48,6 +48,9 @@ src/scripts/
   app.js                arranque: Lenis + ScrollTrigger, sonido, cursor, umbral, portada, fondo, textos vivos y secciones bajo demanda
   pagina.js             arranque de las subpáginas: lo mismo menos el umbral y la portada, más el montaje propio de cada una
   comun.js              lo compartido: los imanes y la barra que se esconde (y se pone en tinta sobre lo claro)
+  menu.js               el menú (components/Menu.astro, datos en data/menu.js): abrir, cerrar y el selector del prototipo
+  menu/inspector.js     versión «inspector»: cada página es una caja con sus datos medidos que crece hasta ser la página
+  menu/workflow.js      versión «workflow»: nodos y cables de «Tú» a cada página y a Hablemos, con su panel de datos
   cinta.js              el archivo de proyectos
   tech.js               la página Tech: slider, artículo y misiones (las tres vistas y sus pasos)
   tech/escena.js        la escena en alambre con OGL: el viaje por el valle (montañas, camino, antenas y polvo, calculados en
