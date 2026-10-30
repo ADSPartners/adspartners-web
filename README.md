@@ -53,12 +53,14 @@ src/scripts/
   tech/escena.js        la escena en alambre con OGL: el viaje por el valle (montañas, camino, antenas y polvo, calculados en
                         los shaders), los modelos que se dibujan al llegar y la sala de las misiones
   tech/modelos.js       los modelos, hechos en código (portátil, tienda + Excel, escáner, microscopio), la peana, la antena y la sala
-  tech/glitch.js        las letras de Tech notan el ratón: se mueven, se separan en rojo y azul y se rasgan en franjas pixeladas
+  tech/glitch.js        las letras de Tech notan el ratón, solo en su zona: saltan, se separan en rojo y azul, se pixelan y se rasgan
   tech/pregunta.js      misión de «Observa»: mantienes pulsado para preguntar y el asistente (grabado) consulta y contesta
   tech/conecta.js       misión «Conecta»: el cable de la tienda al Excel, y los pedidos que pasan solos
   tech/factura.js       misión «Automatiza»: el lector que lee la factura y apunta la línea en el Excel
   tech/tejido.js        misión «A medida» (Tysiu): Otsu + regiones medidas, de verdad, en el navegador
-  vivo.js               los textos grandes notan el ratón (rojo y azul que se separan y se inclinan); solo con ratón
+  vivo.js               los textos grandes notan el ratón, solo en su zona (rojo y azul que se separan); solo con ratón
+  letras.js             el motor de los dos de arriba: parte el texto en letras y le da un muelle a cada una, y solo se
+                        mueven las de la zona por la que pasa el ratón
   gl/portada.js         el shader de la portada y del final de la carga (uUmbral): pincel, linterna, inspector, mantener, salida al bajar
   gl/fondo.js           el fondo vivo (solo con ratón): los glifos se excitan donde pasa el ratón, sin tapar nada
   gl/fluido.js, gl/capas.js

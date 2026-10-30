@@ -1,4 +1,4 @@
-import{E as e}from"./preload-helper.D93ujLFU.js";import{a as t,i as n,t as r}from"./Mesh.D48iXpEj.js";import{c as i,i as a,l as o,s}from"./capas.BXwimVS-.js";var c=` .·:-=+10#@`,l={sim:64,tinte:256,iteraciones:10,curl:4,disipVel:1.2,disipTinte:2.4},u=2e3,d=2.6,f=`#version 300 es
+import{D as e}from"./preload-helper.BBAFwTil.js";import{a as t,i as n,t as r}from"./Mesh.D48iXpEj.js";import{c as i,i as a,l as o,s}from"./capas.BXwimVS-.js";var c=` .·:-=+10#@`,l={sim:64,tinte:256,iteraciones:10,curl:4,disipVel:1.2,disipTinte:2.4},u=2e3,d=2.6,f=`#version 300 es
 in vec2 position; in vec2 uv; out vec2 vUv;
 void main () { vUv = uv; gl_Position = vec4(position, 0.0, 1.0); }`,p=`#version 300 es
 precision highp float;

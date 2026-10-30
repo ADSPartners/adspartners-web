@@ -333,20 +333,21 @@ const primero = TECH[0];
   .tec[data-vista='mision'] .tec__mision { visibility: visible; opacity: 1; }
   .tec:not([data-vista='slider']) .tec__slider { visibility: hidden; }
 
-  /* --- Las letras que notan el ratón (tech/glitch.js): se mueven, se separan en rojo y azul y se rasgan en franjas
-     pixeladas (el ::before tapa su franja y la pinta movida; el ::after es una raya fina de color) ---------------- */
+  /* --- Las letras que notan el ratón (tech/glitch.js), solo las de la zona por la que pasa: saltan de sitio, se
+     separan en rojo y azul y se pixelan; y en esa zona el texto se rasga en franjas pixeladas (el ::before tapa su
+     franja y la pinta movida; el ::after es una raya fina de color). Las letras son en línea: se mueven con left -- */
   .tec :global([data-glitch]) { position: relative; }
   .tec__entrar span, .tec__cifra { display: inline-block; }
-  .tec :global(.glitch-on) {
-    translate: calc(var(--gk) * 8px) 0;   /* translate y no transform: GSAP deja transform en línea en algunas */
-    text-shadow: calc(var(--gk) * -6px) 0 rgba(255, 64, 120, .55), calc(var(--gk) * 6px) 0 rgba(64, 196, 255, .5);
+  .tec :global(.letra.glitch-on) {
+    position: relative; left: var(--gx);
+    text-shadow: calc(var(--gk) * -6px) 0 rgb(255 64 120 / calc(var(--ga) * .55)), calc(var(--gk) * 6px) 0 rgb(64 196 255 / calc(var(--ga) * .5));
   }
+  .tec :global(.letra.glitch-pixel) { filter: url(#tec-pixel); }
   .tec :global(.glitch-rasgo::before), .tec :global(.glitch-rasgo::after) {
     content: attr(data-texto); position: absolute; inset: 0; padding: inherit; pointer-events: none; text-shadow: none;
   }
   .tec :global(.glitch-rasgo::before) { clip-path: var(--g1); transform: translateX(var(--g1x)); background: var(--noche); filter: url(#tec-pixel); }
   .tec :global(.glitch-rasgo::after) { clip-path: var(--g2); transform: translateX(var(--g2x)); color: var(--rosa); filter: url(#tec-pixel); }
-  .tec :global(.glitch-pixel) { filter: url(#tec-pixel-g); }
   .tec__entrar :global(.glitch-rasgo::before) { background: var(--crema); }
 
   /* Sin JS: los cuatro artículos, uno detrás de otro */

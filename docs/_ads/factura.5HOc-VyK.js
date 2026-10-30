@@ -1,4 +1,4 @@
-import{E as e}from"./preload-helper.D93ujLFU.js";import{n as t,t as n}from"./index.astro_astro_type_script_index_0_lang.D24xpV9w.js";var r=`
+import{D as e}from"./preload-helper.BBAFwTil.js";import{n as t,t as n}from"./index.astro_astro_type_script_index_0_lang.miLtjdyh.js";var r=`
 .mfac { position: absolute; inset: 0; display: grid; place-items: center; touch-action: none; user-select: none; -webkit-user-select: none; }
 .mfac__hoja { position: relative; aspect-ratio: .78; padding: 7% 8%; display: flex; flex-direction: column; gap: 4.2%;
   border: 1px solid rgba(231,226,218,.55); background: rgba(231,226,218,.035); color: var(--crema-2);
