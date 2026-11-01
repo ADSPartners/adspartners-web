@@ -1,0 +1,466 @@
+---
+// Las legales, «el libro»: un libro abierto en Garamond sobre la mesa (a doble página en el ordenador y a una en el
+// móvil), con sus tres capítulos (aviso legal, privacidad y cookies), su sumario, sus guardas y su colofón. Cada
+// capítulo tiene su dirección y el libro se abre por esa página. Lo pagina el navegador (columnas CSS) y lo mueve
+// scripts/libro.js: pasar página, los folios, el inspector de cada párrafo y lo que tu navegador tiene guardado.
+// Sin JS (o antes de que llegue), es un artículo que se lee bajando: todo lo del libro va bajo .lib[data-modo].
+// Los textos, en data/legal.js.
+import Base from '../../layouts/Base.astro';
+import Marca from '../Marca.astro';
+import Cursor from '../Cursor.astro';
+import { CAPITULOS, CAMINOS, ALMACEN, COOKIES, REVISION, TITULAR } from '../../data/legal.js';
+
+interface Props { capitulo: string }
+const { capitulo } = Astro.props;
+const cap = CAPITULOS.find((c) => c.slug === capitulo) ?? CAPITULOS[0];
+const base = import.meta.env.BASE_URL;
+const claves = [...ALMACEN, ...COOKIES].map((a) => a.clave);
+---
+<Base titulo={`${cap.titulo} · adsPartners®`} descripcion={cap.descripcion}>
+  <main class="lib" data-libro data-abrir={cap.slug} data-base={base}>
+    <h1 class="oculto-accesible">{cap.titulo} · adsPartners</h1>
+    <div class="lib__rejilla" aria-hidden="true"></div>
+
+    <!-- Fijo: arriba, dónde estás y, a la derecha, la hora, el sonido y la vuelta (como en Tech); abajo, el logotipo,
+         los capítulos y el paso de página -->
+    <p class="lib__donde"><span class="lib__barra" aria-hidden="true"></span><span>Legales · <span class="lib__marca">adsPartners</span></span></p>
+    <div class="lib__arriba">
+      <p class="lib__madrid" aria-hidden="true">Desde Madrid <span class="lib__hora" data-lib-hora></span></p>
+      <button class="lib__sonido" type="button" aria-pressed="false" aria-label="Sonido" data-sonido-btn data-sonido-hover>
+        <span class="lib__ondas" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        <span class="oculto-accesible" data-sonido-txt>Sonido off</span>
+      </button>
+      <a class="lib__volver" href={base} data-sonido-hover><span aria-hidden="true">◀</span> Página principal</a>
+    </div>
+    <a class="lib__logo" href={base} aria-label="adsPartners, inicio" data-sonido-hover><Marca tipo="logo" /></a>
+
+    <div class="lib__mesa">
+      <div class="lib__libro" data-lib-libro>
+        <div class="lib__canto lib__canto--izq" aria-hidden="true"></div>
+        <div class="lib__canto lib__canto--der" aria-hidden="true"></div>
+
+        <div class="lib__ventana" data-lib-ventana>
+          <div class="lib__tira" data-lib-tira>
+            <!-- Guarda: el papel rosa del principio, con el CSS que pagina este libro, medido en tu pantalla -->
+            <section class="lib__pag lib__guarda" data-pag="guarda" aria-hidden="true">
+              <pre class="lib__guarda-css" data-lib-css>{`/* Así se pagina este libro */
+.lib__cols {
+  column-count: 1;
+  column-fill: auto;
+}`}</pre>
+            </section>
+
+            <nav class="lib__pag lib__sumario" data-pag="sumario" aria-label="Sumario">
+              <div class="lib__sum" data-lib-sumario>
+                <p class="lib__sum-tit">Sumario</p>
+                <ol class="lib__sum-caps">
+                  {CAPITULOS.map((c) => (
+                    <li>
+                      <a class="lib__sum-cap" href={`${base}${c.slug}/`} data-ir={c.slug}><span class="lib__sum-num">{c.num}</span>{c.titulo}<i aria-hidden="true"></i><b data-folio-de={c.slug}></b></a>
+                      <ol class="lib__sum-aps">
+                        {c.apartados.map((a, j) => (
+                          <li><a href={`${base}${c.slug}/#${c.slug}-${j + 1}`} data-ir={`${c.slug}-${j + 1}`}>{a.titulo}<i aria-hidden="true"></i><b data-folio-de={`${c.slug}-${j + 1}`}></b></a></li>
+                        ))}
+                      </ol>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </nav>
+
+            {CAPITULOS.map((c) => (
+              <Fragment>
+                <header class="lib__pag lib__portadilla" data-pag="portadilla" data-cap={c.slug} id={c.slug}>
+                  <p class="lib__port-num" aria-hidden="true"><span data-vivo>{c.num}</span></p>
+                  <h2 class="lib__port-tit">{c.titulo}</h2>
+                  <p class="lib__port-entr">{c.entradilla}</p>
+                  <p class="lib__port-medida mono" aria-hidden="true" data-lib-port-medida></p>
+                </header>
+                <article class="lib__cap" data-pag="texto" data-cap={c.slug} data-num={c.num} data-titulo={c.titulo} aria-label={c.titulo}>
+                  <div class="lib__cols">
+                    {c.apartados.map((a, j) => (
+                      <section class="lib__ap" id={`${c.slug}-${j + 1}`}>
+                        <h3><span class="lib__ap-num">{c.num}.{j + 1}</span> {a.titulo}</h3>
+                        {a.bloques.map((b) => (
+                          b.p ? <p class="lib__p" data-nota={b.nota} set:html={b.p} />
+                          : b.lista ? <ul class="lib__lista" data-nota={b.nota}>{b.lista.map((li) => <li set:html={li} />)}</ul>
+                          : b.datos ? <dl class="lib__datos" data-nota={b.nota}>{b.datos.map(([k, v]) => <div><dt>{k}</dt><dd set:html={v} /></div>)}</dl>
+                          : b.tabla ? (
+                            <table class="lib__tabla" data-nota={b.nota}>
+                              <thead><tr>{b.tabla.cab.map((h) => <th scope="col">{h}</th>)}</tr></thead>
+                              <tbody>{b.tabla.filas.map((f) => <tr>{f.map((celda) => <td set:html={celda} />)}</tr>)}</tbody>
+                            </table>
+                          )
+                          : b.camino ? (
+                            <figure class="lib__camino" data-nota={b.nota} aria-label={CAMINOS[b.camino].titulo}>
+                              <div class="lib__camino-pasos">
+                                <p class="lib__fig-tit mono" aria-hidden="true">{CAMINOS[b.camino].titulo}</p>
+                                <ol class="lib__pasos">
+                                  {CAMINOS[b.camino].pasos.map(([quien, que]) => <li><b>{quien}</b><span>{que}</span></li>)}
+                                </ol>
+                              </div>
+                              <div class="lib__codigo-caja">
+                                <pre class="lib__codigo"><code>{CAMINOS[b.camino].codigo.join('\n')}</code></pre>
+                                <p class="lib__fuente mono">{CAMINOS[b.camino].fuente}</p>
+                              </div>
+                            </figure>
+                          )
+                          : b.almacen ? (
+                            <figure class="lib__almacen" data-nota={b.nota} data-lib-almacen data-claves={JSON.stringify(claves)}>
+                              <figcaption class="lib__fig-tit mono">localStorage · sessionStorage · document.cookie</figcaption>
+                              <div class="lib__almacen-caja">
+                                <table class="lib__tabla lib__tabla--vivo">
+                                  <thead><tr><th scope="col">Nombre</th><th scope="col">Valor</th><th scope="col">Bytes</th></tr></thead>
+                                  <tbody data-lib-almacen-filas><tr><td colspan="3">Para leerlo hace falta JavaScript, y lo tienes apagado: así que ahora mismo no podemos guardar nada.</td></tr></tbody>
+                                </table>
+                              </div>
+                              <p class="lib__almacen-pie"><span class="mono" data-lib-almacen-total></span><button type="button" class="lib__boton" data-lib-borrar data-sonido-hover>Borrar lo vuestro</button></p>
+                            </figure>
+                          )
+                          : b.eleccion ? (
+                            <div class="lib__eleccion" data-nota={b.nota}>
+                              <p class="lib__eleccion-estado" data-lib-eleccion>Aún no has elegido.</p>
+                              <button type="button" class="lib__boton" data-lib-elegir data-sonido-hover>Cambiar mi elección</button>
+                            </div>
+                          )
+                          : null
+                        ))}
+                      </section>
+                    ))}
+                    <span class="lib__fin" aria-hidden="true"></span>
+                  </div>
+                </article>
+              </Fragment>
+            ))}
+
+            <!-- Colofón: cómo se hizo este libro (los datos de la paginación los pone libro.js) -->
+            <section class="lib__pag lib__colofon" data-pag="colofon">
+              <div class="lib__colofon-dentro">
+                <span class="lib__colofon-iso"><Marca tipo="iso" /></span>
+                <p data-lib-colofon>Este libro se compuso en Apple Garamond y Geist Mono y se pagina en tu navegador. Ninguna de sus páginas se ha impreso.</p>
+                <p class="lib__colofon-rev">Última revisión del texto: {REVISION}.</p>
+                <p class="lib__colofon-pie mono">{TITULAR.razon} · Madrid</p>
+              </div>
+            </section>
+            <section class="lib__pag lib__guarda lib__guarda--fin" data-pag="guarda" aria-hidden="true"></section>
+          </div>
+        </div>
+
+        <!-- Titulillo y folio de las páginas a la vista -->
+        <p class="lib__cab" data-lib-cab="0" aria-hidden="true"></p>
+        <p class="lib__folio" data-lib-folio="0" aria-hidden="true"></p>
+        <p class="lib__cab lib__cab--der" data-lib-cab="1" aria-hidden="true"></p>
+        <p class="lib__folio lib__folio--der" data-lib-folio="1" aria-hidden="true"></p>
+
+        <!-- Los bordes de las páginas: pinchar en ellos pasa la página (el cursor lo dice) -->
+        <div class="lib__borde lib__borde--atras" data-lib-borde="-1" data-cursor="pasar" aria-hidden="true"></div>
+        <div class="lib__borde lib__borde--sig" data-lib-borde="1" data-cursor="pasar" aria-hidden="true"></div>
+
+        <!-- La hoja que gira y la página que deja ver (copias de la tira; las rellena libro.js) -->
+        <div class="lib__debajo lib__cara" data-lib-debajo aria-hidden="true" inert><div class="lib__vista"></div><p class="lib__cab"></p><p class="lib__folio"></p><i class="lib__sombra"></i></div>
+        <div class="lib__hoja" data-lib-hoja aria-hidden="true" inert>
+          <div class="lib__cara lib__cara--frente"><div class="lib__vista"></div><p class="lib__cab"></p><p class="lib__folio"></p><i class="lib__sombra"></i></div>
+          <div class="lib__cara lib__cara--dorso"><div class="lib__vista"></div><p class="lib__cab"></p><p class="lib__folio"></p><i class="lib__sombra"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="lib__caps" aria-label="Capítulos">
+      {CAPITULOS.map((c) => (
+        <a href={`${base}${c.slug}/`} data-ir={c.slug} data-lib-cap-nav={c.slug} aria-current={c.slug === cap.slug ? 'page' : undefined} data-sonido-hover>
+          <span class="lib__caps-num">{c.num}</span><span class="lib__caps-tit">{c.titulo}</span>
+        </a>
+      ))}
+    </nav>
+    <div class="lib__paso">
+      <button type="button" class="lib__flecha" data-lib-paso="-1" aria-label="Página anterior" data-sonido-hover><span aria-hidden="true">◀</span></button>
+      <span class="lib__cuenta" data-lib-cuenta aria-live="polite"></span>
+      <button type="button" class="lib__flecha" data-lib-paso="1" aria-label="Página siguiente" data-sonido-hover><span aria-hidden="true">▶</span></button>
+    </div>
+
+    <!-- El inspector de cada párrafo: su marco, la guía y la caja con la nota en cristiano y lo medido -->
+    <div class="lib__marco" data-lib-marco aria-hidden="true"><i></i><i></i></div>
+    <svg class="lib__guia" data-lib-guia aria-hidden="true"><path d="" /></svg>
+    <div class="lib__insp" data-lib-insp aria-hidden="true">
+      <span class="insp">En cristiano</span>
+      <p class="lib__insp-nota" data-lib-insp-nota></p>
+      <p class="lib__insp-medida" data-lib-insp-medida></p>
+    </div>
+  </main>
+  <Cursor />
+
+  <script>
+    import { arrancarPagina } from '../../scripts/pagina.js';
+    import { montarLibro } from '../../scripts/libro.js';
+    arrancarPagina(montarLibro);
+  </script>
+</Base>
+
+<style is:global>
+  /* Las de global.css, otra vez: Astro mete ese CSS en el HTML sin la carpeta de la copia de prueba (ADS_BASE) y ahí
+     salían en Georgia (lo mismo que en Brand). Aquí sí se le pone; en producción es el mismo archivo */
+  @font-face { font-family: 'Apple Garamond'; src: url('/assets/fonts/AppleGaramond-Light.woff2') format('woff2'); font-weight: 300; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'Apple Garamond'; src: url('/assets/fonts/AppleGaramond.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'Apple Garamond'; src: url('/assets/fonts/AppleGaramond-Italic.woff2') format('woff2'); font-weight: 400; font-style: italic; font-display: swap; }
+  @font-face { font-family: 'Open Sauce'; src: url('/assets/fonts/OpenSauceSans-Regular.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'Open Sauce'; src: url('/assets/fonts/OpenSauceSans-Medium.woff2') format('woff2'); font-weight: 500; font-style: normal; font-display: swap; }
+</style>
+
+<style>
+  /* --- Sin libro (sin JS, antes de que llegue o al imprimir): un artículo que se lee bajando --------------------- */
+  .lib {
+    --lado: clamp(18px, 3.8vw, 56px);
+    --arriba: clamp(18px, 4.6vh, 44px);
+    --tenue: rgba(231, 226, 218, .07);
+    --papel: #EDE8DF;
+    --tinta-2: rgba(25, 9, 0, .58);
+    --tinta-3: rgba(25, 9, 0, .28);
+    --raya: rgba(25, 9, 0, .14);
+    position: relative; min-height: 100vh; padding: calc(var(--arriba) + 70px) var(--lado) 120px;
+  }
+  .lib__mesa { max-width: 680px; margin: 0 auto; }
+  .lib__libro { background: var(--papel); color: var(--tinta); padding: clamp(24px, 5vw, 64px); }
+  .lib__pag:not(.lib__sumario):not(.lib__portadilla), .lib__cab, .lib__folio, .lib__borde, .lib__hoja, .lib__debajo,
+  .lib__canto, .lib__marco, .lib__guia, .lib__insp, .lib__paso, .lib__almacen-pie, .lib__eleccion, .lib__port-medida { display: none; }
+  .lib__portadilla { margin: 64px 0 24px; }
+
+  /* --- Lo fijo, como en Tech ------------------------------------------------------------------------------------ */
+  .lib__rejilla {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      linear-gradient(90deg, transparent calc(15.4% - .5px), var(--tenue) calc(15.4% - .5px), var(--tenue) calc(15.4% + .5px), transparent calc(15.4% + .5px)),
+      linear-gradient(90deg, transparent calc(84.6% - .5px), var(--tenue) calc(84.6% - .5px), var(--tenue) calc(84.6% + .5px), transparent calc(84.6% + .5px)),
+      linear-gradient(transparent calc(50% - .5px), var(--tenue) calc(50% - .5px), var(--tenue) calc(50% + .5px), transparent calc(50% + .5px));
+  }
+  .lib__donde, .lib__madrid, .lib__volver, .lib__caps, .lib__cuenta {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--crema-2);
+  }
+  .lib__donde { position: absolute; left: var(--lado); top: var(--arriba); z-index: 6; margin: 0; display: flex; align-items: center; gap: 14px; pointer-events: none; }
+  .lib__barra { width: 4px; height: 18px; background: var(--rosa); }
+  .lib__marca { text-transform: none; letter-spacing: .04em; }
+  .lib__arriba { position: absolute; right: var(--lado); top: var(--arriba); z-index: 6; height: 18px; display: flex; align-items: center; gap: 30px; }
+  .lib__madrid { margin: 0; pointer-events: none; }
+  .lib__hora { margin-left: 6px; opacity: .58; font-variant-numeric: tabular-nums; }
+  .lib__volver { transition: color .3s; }
+  .lib__volver:hover { color: var(--crema); }
+  .lib__logo { position: absolute; left: var(--lado); bottom: calc(var(--arriba) - 4px); z-index: 6; width: 128px; color: var(--crema); }
+  .lib__sonido { display: block; padding: 6px; margin: -6px -6px -6px 0; }
+  .lib__ondas { display: flex; align-items: center; gap: 3px; height: 16px; }
+  .lib__ondas i { width: 2px; height: 3px; background: var(--crema); transition: height .3s var(--curva); }
+  :global(html.sonido-on) .lib__ondas i { animation: lib-onda 1.1s ease-in-out infinite; }
+  :global(html.sonido-on) .lib__ondas i:nth-child(2) { animation-delay: -.3s; }
+  :global(html.sonido-on) .lib__ondas i:nth-child(3) { animation-delay: -.7s; }
+  :global(html.sonido-on) .lib__ondas i:nth-child(4) { animation-delay: -.5s; }
+  @keyframes lib-onda { 0%, 100% { height: 3px; } 50% { height: 15px; } }
+
+  .lib__caps { position: absolute; left: 50%; bottom: var(--arriba); z-index: 6; transform: translateX(-50%); display: flex; gap: 28px; }
+  .lib__caps a { display: flex; gap: 8px; align-items: baseline; transition: color .3s; }
+  .lib__caps a:hover, .lib__caps a[aria-current] { color: var(--crema); }
+  .lib__caps a[aria-current] .lib__caps-num { color: var(--rosa); }
+  .lib__paso { position: absolute; right: var(--lado); bottom: calc(var(--arriba) - 6px); z-index: 6; align-items: center; gap: 14px; }
+  .lib__flecha { width: 30px; height: 30px; display: grid; place-items: center; font-size: 10px; color: var(--crema-2); border: 1px solid var(--linea); transition: color .3s, border-color .3s; }
+  .lib__flecha:hover:not(:disabled) { color: var(--tinta); background: var(--rosa); border-color: var(--rosa); }
+  .lib__flecha:disabled { opacity: .3; cursor: default; }
+  .lib__cuenta { min-width: 90px; text-align: center; font-variant-numeric: tabular-nums; }
+
+  /* --- El texto (vale con libro y sin él) ------------------------------------------------------------------------ */
+  .lib__cols { font-family: var(--serif); font-size: var(--fs, 17px); line-height: 1.45; color: var(--tinta); hyphens: auto; -webkit-hyphens: auto; text-align: justify; orphans: 2; widows: 2; font-variant-numeric: oldstyle-nums; }
+  .lib__cols :global(a) { border-bottom: 1px solid var(--tinta-3); }
+  .lib__cols :global(a:hover) { border-bottom-color: var(--tinta); }
+  .lib__cols :global(code) { font-family: var(--mono); font-size: .72em; letter-spacing: 0; }
+  .lib__ap h3 { margin: 1.5em 0 .55em; font-family: var(--serif); font-weight: 400; font-style: italic; font-size: 1.24em; line-height: 1.2; text-align: left; break-after: avoid; }
+  .lib__ap:first-child h3 { margin-top: 0; }
+  .lib__ap-num { margin-right: .45em; font-family: var(--mono); font-style: normal; font-size: .5em; letter-spacing: .1em; vertical-align: .32em; color: var(--tinta-2); }
+  .lib__p { margin: 0; }
+  .lib__p + .lib__p { text-indent: 1.4em; }
+  .lib__p :global(b) { font-weight: 400; font-style: italic; }
+  .lib__ap:first-child .lib__p:first-of-type::first-letter { float: left; font-size: 3.35em; line-height: .78; padding: .07em .07em 0 0; font-weight: 300; }
+  .lib__lista { margin: .5em 0; padding: 0 0 0 1.2em; text-align: left; }
+  .lib__lista li { margin: .25em 0; }
+  .lib__lista li::marker { content: '— '; color: var(--tinta-3); }
+  .lib__lista :global(b) { font-weight: 400; font-style: italic; }
+  .lib__datos { margin: .4em 0 .6em; text-align: left; }
+  .lib__datos div { display: grid; grid-template-columns: 6.2em 1fr; gap: .8em; padding: .2em 0; border-bottom: 1px solid var(--raya); break-inside: avoid; }
+  .lib__datos dt { font-family: var(--mono); font-size: .6em; letter-spacing: .1em; text-transform: uppercase; color: var(--tinta-2); padding-top: .55em; }
+  .lib__datos dd { margin: 0; }
+  .lib__tabla { width: 100%; margin: .6em 0 .9em; border-collapse: collapse; font-family: var(--sans); font-size: .66em; line-height: 1.4; text-align: left; break-inside: avoid; }
+  .lib__tabla th { font-family: var(--mono); font-weight: 400; font-size: .86em; letter-spacing: .1em; text-transform: uppercase; color: var(--tinta-2); padding: 0 .8em .5em 0; border-bottom: 1px solid var(--tinta); }
+  .lib__tabla td { padding: .5em .8em .5em 0; border-bottom: 1px solid var(--raya); vertical-align: top; }
+  .lib__tabla td :global(code) { display: block; font-size: 1em; color: var(--tinta); }
+  .lib__tabla td :global(small) { display: block; font-family: var(--mono); font-size: .82em; color: var(--tinta-2); }
+  .lib__fig-tit { margin: 0 0 .7em; font-size: 9px; color: var(--tinta-2); }
+  .lib__camino, .lib__almacen { margin: .8em 0 1em; padding: .9em 1em; border: 1px solid var(--raya); break-inside: avoid; text-align: left; position: relative; }
+  /* El recorrido se puede partir entre los pasos y el código (entero dejaba media página en blanco) */
+  .lib__camino { break-inside: auto; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+  .lib__camino-pasos, .lib__codigo-caja { break-inside: avoid; }
+  .lib__camino::before, .lib__almacen::before { content: ''; position: absolute; left: -1px; top: -1px; width: 7px; height: 7px; background: var(--tinta); }
+  .lib__pasos { margin: 0; padding: 0; list-style: none; counter-reset: paso; }
+  .lib__pasos li { display: grid; grid-template-columns: 1.6em 1fr; column-gap: .4em; font-size: .72em; line-height: 1.3; padding: .2em 0; position: relative; counter-increment: paso; }
+  .lib__pasos li::before { content: counter(paso, decimal-leading-zero); grid-row: span 2; font-family: var(--mono); font-size: .8em; color: var(--tinta-2); padding-top: .15em; }
+  .lib__pasos li + li::after { content: '↓'; position: absolute; left: .3em; top: -.75em; font-family: var(--mono); font-size: .8em; color: var(--tinta-3); }
+  .lib__pasos b { font-family: var(--mono); font-weight: 400; font-size: .92em; }
+  .lib__pasos span { color: var(--tinta-2); font-style: italic; }
+  .lib__codigo { margin: .8em 0 0; padding: .7em .8em; background: rgba(25, 9, 0, .055); overflow: hidden; font-family: var(--mono); font-size: .55em; line-height: 1.6; white-space: pre-wrap; word-break: break-word; color: var(--tinta); }
+  .lib__fuente { margin: .5em 0 0; font-size: 8px; color: var(--tinta-2); text-align: right; }
+  .lib__almacen-caja { max-height: 8.6em; overflow: auto; }
+  .lib__tabla--vivo { margin: 0; }
+  /* Las filas en vivo las mete libro.js: sin el atributo del componente, van con :global */
+  .lib__tabla--vivo :global(td) { padding: .5em .8em .5em 0; border-bottom: 1px solid var(--raya); vertical-align: top; }
+  .lib__tabla--vivo :global(td code) { display: block; font-size: 1em; color: var(--tinta); }
+  .lib__tabla--vivo :global(td small) { display: block; font-family: var(--mono); font-size: .82em; color: var(--tinta-2); }
+  .lib__tabla--vivo :global(td:nth-child(2)) { font-family: var(--mono); font-size: .9em; word-break: break-all; color: var(--tinta-2); }
+  .lib__tabla--vivo :global(td:nth-child(3)) { font-family: var(--mono); font-size: .9em; text-align: right; padding-right: 0; }
+  .lib__tabla--vivo th:nth-child(3) { text-align: right; padding-right: 0; }
+  .lib__almacen-pie { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: .7em 0 0; }
+  .lib__almacen-pie .mono { font-size: 9px; color: var(--tinta-2); }
+  .lib__boton {
+    font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--tinta);
+    padding: 7px 11px; border: 1px solid var(--tinta); transition: background .25s, color .25s; white-space: nowrap; flex: none;
+  }
+  .lib__boton:hover { background: var(--tinta); color: var(--papel); }
+  .lib__eleccion { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: .4em 0 1em; padding: .7em 0; border-top: 1px solid var(--raya); border-bottom: 1px solid var(--raya); break-inside: avoid; text-align: left; }
+  .lib__eleccion-estado { margin: 0; font-style: italic; font-size: .9em; }
+
+  /* El sumario, la portadilla y el colofón */
+  .lib__sum { font-family: var(--serif); color: var(--tinta); font-size: var(--fs-sum, 15px); line-height: 1.35; }
+  .lib__sum-tit { margin: 0 0 1.4em; font-family: var(--mono); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--tinta-2); }
+  .lib__sum ol { margin: 0; padding: 0; list-style: none; }
+  .lib__sum a { display: flex; align-items: baseline; gap: .5em; }
+  .lib__sum i { flex: 1; min-width: 1em; border-bottom: 1px dotted var(--tinta-3); transform: translateY(-.25em); }
+  .lib__sum b { font-weight: 400; font-variant-numeric: oldstyle-nums; min-width: 1.4em; text-align: right; }
+  .lib__sum-caps > li { margin-bottom: 1em; }
+  .lib__sum-cap { font-size: 1.3em; font-style: italic; margin-bottom: .25em; }
+  .lib__sum-num { font-family: var(--mono); font-style: normal; font-size: .46em; letter-spacing: .1em; color: var(--tinta-2); min-width: 2.6em; }
+  .lib__sum-aps { padding-left: calc(1.3em * .46 * 2.6 + .65em) !important; font-size: .82em; color: var(--tinta-2); }
+  .lib__sum-aps a:hover, .lib__sum-cap:hover { color: var(--tinta); }
+  .lib__port-num { margin: 0; font-family: var(--serif); font-weight: 300; font-size: clamp(90px, calc(var(--H, 600px) * .3), 260px); line-height: .9; letter-spacing: -.02em; }
+  .lib__port-tit { margin: .3em 0 0; font-family: var(--serif); font-weight: 400; font-style: italic; font-size: calc(var(--fs, 16px) * 2.4); line-height: 1.05; }
+  .lib__port-entr { margin: 1em 0 0; max-width: 22em; font-family: var(--sans); font-size: calc(var(--fs, 16px) * .8); line-height: 1.55; color: var(--tinta-2); }
+  .lib__colofon-dentro { text-align: center; font-family: var(--serif); font-size: calc(var(--fs, 16px) * .92); line-height: 1.55; color: var(--tinta); }
+  .lib__colofon-iso { display: block; width: 34px; margin: 0 auto 1.6em; color: var(--tinta); }
+  .lib__colofon-iso :global(svg) { width: 100%; height: auto; }
+  .lib__colofon-dentro p { margin: 0 auto .9em; max-width: 21em; font-style: italic; }
+  .lib__colofon-rev { font-size: .86em; color: var(--tinta-2); }
+  .lib__colofon-pie { margin-top: 2em !important; font-style: normal !important; font-size: 9px; color: var(--tinta-2); }
+
+  /* === El libro ================================================================================================ */
+  .lib[data-modo] { position: fixed; inset: 0; overflow: hidden; padding: 0; min-height: 0; touch-action: pinch-zoom; }
+  .lib[data-modo] .lib__paso { display: flex; }
+  .lib[data-modo] .lib__mesa { position: absolute; inset: 0; max-width: none; margin: 0; display: grid; place-items: center; padding-top: var(--mesa-arriba, 0px); pointer-events: none; }
+  .lib[data-modo] .lib__libro {
+    position: relative; width: calc(var(--P) * var(--hojas)); height: var(--H); padding: 0; background: none;
+    perspective: calc(var(--P) * 4.6); pointer-events: auto;
+    filter: drop-shadow(0 30px 40px rgba(0, 0, 0, .45)) drop-shadow(0 6px 10px rgba(0, 0, 0, .3));
+  }
+  .lib[data-modo] .lib__ventana { position: absolute; inset: 0; overflow: hidden; overflow: clip; background: var(--papel); }
+  /* El lomo: la sombra donde se juntan las dos páginas (y, a una página, en el borde de la izquierda) */
+  .lib[data-modo] .lib__ventana::after {
+    content: ''; position: absolute; inset: 0; z-index: 3; pointer-events: none;
+    background: linear-gradient(90deg, transparent 44%, rgba(25, 9, 0, .05) 48.4%, rgba(25, 9, 0, .2) 50%, rgba(25, 9, 0, .05) 51.6%, transparent 56%);
+  }
+  .lib[data-modo='simple'] .lib__ventana::after { background: linear-gradient(90deg, rgba(25, 9, 0, .2), rgba(25, 9, 0, .04) 3.5%, transparent 9%); }
+  .lib[data-modo] .lib__tira { position: absolute; left: 0; top: 0; height: 100%; will-change: transform; }
+  .lib[data-modo] .lib__pag, .lib[data-modo] .lib__cap { display: block; position: absolute; top: 0; height: var(--H); width: var(--P); margin: 0; }
+  .lib[data-modo] .lib__pag:not(.lib__guarda) { padding: var(--mt) var(--m) var(--mb); }
+  .lib[data-modo] .lib__cols { position: absolute; left: var(--m); top: var(--mt); width: var(--W); height: var(--Hc); column-count: 1; column-gap: calc(var(--m) * 2); column-fill: auto; }
+  .lib[data-modo] .lib__fin { display: inline-block; width: 1px; height: 1px; }
+
+  /* La guarda: papel rosa con el CSS que pagina el libro */
+  .lib[data-modo] .lib__guarda { display: block; background: var(--rosa); overflow: hidden; }
+  .lib[data-modo] .lib__guarda::before {
+    content: ''; position: absolute; inset: 0; opacity: .5;
+    background-image: radial-gradient(circle at 1px 1px, rgba(25, 9, 0, .16) 1px, transparent 1.2px); background-size: 14px 14px;
+  }
+  .lib__guarda-css { position: absolute; left: var(--m); right: var(--m); bottom: var(--mb); margin: 0; font-family: var(--mono); font-size: 10.5px; line-height: 1.7; color: var(--tinta); white-space: pre-wrap; }
+  .lib__guarda-css :global(.c) { color: rgba(25, 9, 0, .5); }
+  .lib__guarda-css :global(.v) { background: rgba(25, 9, 0, .08); padding: 0 .2em; }
+  .lib[data-modo] .lib__guarda--fin .lib__guarda-css { display: none; }
+
+  .lib[data-modo] .lib__sumario { display: flex; flex-direction: column; justify-content: center; }
+  .lib[data-modo] .lib__portadilla { display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: calc(var(--mb) * 2); }
+  .lib[data-modo] .lib__port-medida { display: block; position: absolute; right: var(--m); top: var(--mt); margin: 0; font-size: 9px; color: var(--tinta-2); text-align: right; line-height: 1.6; }
+  .lib[data-modo] .lib__colofon { display: flex; align-items: center; justify-content: center; }
+  .lib[data-modo] .lib__almacen-pie, .lib[data-modo] .lib__eleccion { display: flex; }
+  .lib[data-modo] .lib__marco, .lib[data-modo] .lib__guia, .lib[data-modo] .lib__insp { display: block; }
+
+  /* Titulillo y folio */
+  .lib[data-modo] .lib__cab, .lib[data-modo] .lib__folio { display: block; position: absolute; z-index: 4; margin: 0; pointer-events: none; color: var(--tinta-2); }
+  .lib__cab { left: var(--m); top: calc(var(--mt) * .42); width: var(--W); font-family: var(--mono); font-size: 8.5px; letter-spacing: .16em; text-transform: uppercase; text-align: left; }
+  .lib__folio { left: var(--m); bottom: calc(var(--mb) * .38); font-family: var(--serif); font-size: calc(var(--fs, 16px) * .86); font-variant-numeric: oldstyle-nums; }
+  .lib__cab--der { left: calc(var(--P) + var(--m)); text-align: right; }
+  .lib__folio--der { left: auto; right: var(--m); }
+  .lib[data-modo='simple'] .lib__cab--der, .lib[data-modo='simple'] .lib__folio--der { display: none; }
+  .lib[data-modo='simple'] .lib__folio:not(.lib__folio--der) { left: auto; right: var(--m); }
+
+  /* El canto de las páginas: más grueso del lado donde quedan más */
+  .lib[data-modo] .lib__canto {
+    display: block; position: absolute; top: 3px; bottom: 3px; z-index: -1; width: var(--canto, 4px);
+    background: repeating-linear-gradient(90deg, #D9D2C6 0 1px, #EDE8DF 1px 2.4px);
+    transition: width .5s var(--curva);
+  }
+  .lib__canto--izq { right: 100%; --canto: var(--canto-izq); border-radius: 2px 0 0 2px; }
+  .lib__canto--der { left: 100%; --canto: var(--canto-der); border-radius: 0 2px 2px 0; }
+
+  /* Los bordes que pasan la página */
+  .lib[data-modo] .lib__borde { display: block; position: absolute; top: 0; bottom: 0; z-index: 5; width: calc(var(--P) * .11); cursor: pointer; }
+  .lib__borde--atras { left: 0; }
+  .lib__borde--sig { right: 0; }
+  :global(html.cursor-propio) .lib__borde { cursor: none; }
+  .lib__borde::after { content: ''; position: absolute; top: 0; bottom: 0; width: 100%; opacity: 0; transition: opacity .4s; }
+  .lib__borde--atras::after { left: 0; background: linear-gradient(90deg, rgba(25, 9, 0, .07), transparent); }
+  .lib__borde--sig::after { right: 0; background: linear-gradient(-90deg, rgba(25, 9, 0, .07), transparent); }
+  .lib__borde:hover::after { opacity: 1; }
+  .lib__borde[hidden] { display: none !important; }
+
+  /* La hoja que gira (sus dos caras) y la página que queda debajo */
+  .lib[data-modo] .lib__hoja { display: block; position: absolute; top: 0; width: var(--P); height: var(--H); z-index: 7; transform-style: preserve-3d; visibility: hidden; pointer-events: none; }
+  .lib[data-modo] .lib__debajo { display: block; position: absolute; top: 0; width: var(--P); height: var(--H); z-index: 2; visibility: hidden; pointer-events: none; }
+  .lib__cara { background: var(--papel); overflow: hidden; }
+  .lib__hoja .lib__cara { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+  .lib__cara--dorso { transform: rotateY(180deg); }
+  .lib__vista { position: absolute; inset: 0; overflow: hidden; }
+  .lib__vista > :global(.lib__tira) { transform: none; }
+  .lib__cara[data-vacia] .lib__vista { visibility: hidden; }
+  .lib__cara .lib__cab--cara-der { text-align: right; }
+  .lib__cara[data-lado='der'] .lib__folio { left: auto; right: var(--m); }
+  .lib__cara[data-lado='der'] .lib__cab { text-align: right; }
+  /* La luz: la hoja se oscurece al levantarse y su sombra cae sobre la página de debajo */
+  .lib__sombra { position: absolute; inset: 0; pointer-events: none; opacity: var(--sombra, 0); }
+  .lib__cara[data-lado='izq'] .lib__sombra { background: linear-gradient(-90deg, rgba(25, 9, 0, .5), rgba(25, 9, 0, .12) 30%, rgba(25, 9, 0, .04)); }
+  .lib__cara[data-lado='der'] .lib__sombra { background: linear-gradient(90deg, rgba(25, 9, 0, .5), rgba(25, 9, 0, .12) 30%, rgba(25, 9, 0, .04)); }
+  .lib__debajo .lib__sombra { background: rgba(25, 9, 0, .35); }
+
+  /* El inspector */
+  .lib__marco { position: fixed; left: 0; top: 0; z-index: 8; pointer-events: none; border: 1px solid var(--rosa); opacity: 0; transition: opacity .25s; mix-blend-mode: multiply; }
+  .lib__marco i { position: absolute; width: 5px; height: 5px; background: var(--papel); border: 1px solid #C8361F; }
+  .lib__marco i:first-child { left: -3px; top: -3px; }
+  .lib__marco i:last-child { right: -3px; bottom: -3px; }
+  .lib__marco.es-visible { opacity: 1; }
+  .lib__guia { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 8; pointer-events: none; overflow: visible; }
+  .lib__guia path { fill: none; stroke: var(--rosa); stroke-width: 1; stroke-dasharray: 2 3; opacity: 0; transition: opacity .25s; }
+  .lib__guia.es-visible path { opacity: .9; }
+  .lib__insp {
+    position: fixed; left: 0; top: 0; z-index: 9; width: 176px; padding: 12px 14px 12px;
+    background: var(--noche-2); border: 1px solid rgba(231, 226, 218, .16); pointer-events: none;
+    opacity: 0; transform: translateY(6px); transition: opacity .25s, transform .35s var(--curva);
+  }
+  .lib__insp.es-visible { opacity: 1; transform: none; }
+  .lib__insp::before { content: ''; position: absolute; right: -1px; top: -1px; width: 7px; height: 7px; background: var(--rosa); }
+  .lib__insp-nota { margin: 10px 0 0; font-family: var(--serif); font-style: italic; font-size: 17px; line-height: 1.25; color: var(--crema); }
+  .lib__insp-medida { margin: 10px 0 0; font-family: var(--mono); font-size: 9px; line-height: 1.6; letter-spacing: .06em; text-transform: uppercase; color: var(--crema-3); white-space: pre-line; }
+  .lib__insp.es-abajo { width: auto; max-width: 420px; }
+
+  :global(html.mov-reducido) .lib__canto { transition: none; }
+
+  /* --- Móvil: el libro a una página, el logo arriba y abajo los capítulos (solo su número) y el paso ------------- */
+  @media (max-width: 760px) {
+    .lib__donde, .lib__madrid { display: none; }
+    .lib__arriba { gap: 18px; }
+    .lib__logo { top: var(--arriba); bottom: auto; width: 112px; }
+    .lib__caps { left: var(--lado); transform: none; gap: 20px; }
+    .lib__caps-tit { display: none; }
+    .lib__caps a[aria-current] .lib__caps-tit { display: inline; }
+    .lib__cuenta { min-width: 64px; }
+    .lib__insp.es-abajo { left: 12px !important; right: 12px; max-width: none; }
+  }
+</style>
