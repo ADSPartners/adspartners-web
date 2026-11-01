@@ -1,8 +1,9 @@
-// Lo que sale en el menú, un viaje hasta una aurora: los cuatro puntos de luz que te esperan dentro (sin «Inicio»: a
-// la home se vuelve con el logo; Hablemos va siempre arriba). Cada uno tiñe la aurora con el color de una emisión real
-// (lo que se dice de física es verdad: líneas de emisión del oxígeno y del nitrógeno, y a qué altura brillan). Los
-// datos de cada página salen de sus propios ficheros. Brand la monta otra rama y About aún no existe: mientras no estén
-// aquí, salen «en obras» y no enlazan.
+// Lo que sale en el menú, que baja de la web a la placa que la ejecuta: las cuatro piezas que te esperan abajo, una por
+// página (sin «Inicio»: a la home se vuelve con el logo; Hablemos va siempre arriba). Cada página es la pieza que hace
+// en una placa lo mismo que ella en ads: Tech, el procesador; Proyectos, el almacenamiento; Brand, la gráfica (lo que se
+// ve), y About, la BIOS (lo primero que arranca, y la placa sabe quién es). El color es el de su LED. Los datos de cada
+// página salen de sus propios ficheros. Brand la monta otra rama y About aún no existe: mientras no estén aquí, salen
+// «en obras» y no enlazan.
 import { PROYECTOS } from './proyectos.js';
 import { TECH } from './tech.js';
 
@@ -12,21 +13,21 @@ export const DESTINOS = [
   {
     slug: 'proyectos', nombre: 'Proyectos', ruta: 'proyectos/',
     frase: `${PROYECTOS.length} proyectos, de ${Math.min(...anios)} a ${Math.max(...anios)}`,
-    color: '#ff5c5c', luz: 'oxígeno · 630,0 nm · por encima de 200 km',
+    color: '#ff5c5c', pieza: 'ssd', ficha: 'almacenamiento · M.2 2280',
   },
   {
     slug: 'tech', nombre: 'Tech', ruta: 'tech/',
     frase: `${TECH.length} servicios, una misión en cada uno`,
-    color: '#5cff9d', luz: 'oxígeno · 557,7 nm · de 100 a 250 km',
+    color: '#5cff9d', pieza: 'cpu', ficha: 'procesador · zócalo U1',
   },
   {
     slug: 'brand', nombre: 'Brand', ruta: null,
     frase: 'en obras',
-    color: '#ff8fc8', luz: 'nitrógeno · el borde rosa de abajo · unos 100 km',
+    color: '#ff8fc8', pieza: 'vga', ficha: 'gráfica · PCIe ×16',
   },
   {
     slug: 'about', nombre: 'About', ruta: null,
     frase: 'en obras',
-    color: '#8f7dff', luz: 'nitrógeno ionizado · 427,8 nm',
+    color: '#8f7dff', pieza: 'bios', ficha: 'BIOS · pila CR2032',
   },
 ];

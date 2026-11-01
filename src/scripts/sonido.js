@@ -460,60 +460,35 @@ export function glitch(fuerza = 1, x = 0.5) {
   s.start(t, Math.random() * 3, 0.03);
 }
 
-// La aurora del menú suena a su «coro del amanecer»: las ondas de radio de la magnetosfera que, pasadas a sonido,
-// suenan a pájaros (tonos que suben deprisa). Aquí, trinos que suben desde notas de la pentatónica, más seguidos cuanto
-// más viento (0..1), sobre un siseo de radio muy bajo; todo va a la sala con eco. coro() lo arranca o le cambia el
-// viento; pararCoro() lo apaga.
-const coroEstado = { vivo: false, viento: 0.5, id: 0, siseo: null };
-function trino() {
-  const t = ctx.currentTime + 0.01;
-  const f0 = hz(PENTA[Math.floor(Math.random() * PENTA.length)] + 12);
-  const dur = 0.16 + Math.random() * 0.22;
-  const o = ctx.createOscillator(); o.type = 'sine';
-  o.frequency.setValueAtTime(f0, t);
-  o.frequency.exponentialRampToValueAtTime(f0 * (1.6 + Math.random() * 0.9), t + dur);
+// La placa del menú, encendida: un zumbido eléctrico muy flojo (los 50 Hz de la red y sus armónicos, como un
+// transformador) con el siseo de la fuente por encima. zumbido() lo enciende al llegar a la placa y pararZumbido() lo
+// apaga al salir.
+let zumbidoNodos = null;
+export function zumbido() {
+  if (!activo || !ctx || zumbidoNodos) return;
+  const t = ctx.currentTime;
   const g = ctx.createGain();
-  g.gain.setValueAtTime(0.0001, t);
-  g.gain.exponentialRampToValueAtTime(0.018 + coroEstado.viento * 0.02, t + dur * 0.35);
-  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-  const p = panner((Math.random() - 0.5) * 1.6);
-  o.connect(g).connect(p);
-  p.connect(busEfectos);
-  p.connect(eco.entrada);
-  o.start(t); o.stop(t + dur + 0.02);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.05, t + 1.4);
+  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1100;
+  lp.connect(g).connect(busEfectos);
+  const fuentes = [50, 100, 150, 250, 350].map((f, i) => {
+    const o = ctx.createOscillator(); o.type = i ? 'triangle' : 'sine'; o.frequency.value = f;
+    const og = ctx.createGain(); og.gain.value = [0.5, 0.42, 0.22, 0.12, 0.06][i];
+    o.connect(og).connect(lp); o.start(t);
+    return o;
+  });
+  const s = ctx.createBufferSource(); s.buffer = ruido; s.loop = true;
+  const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 4200; bp.Q.value = 0.8;
+  const sg = ctx.createGain(); sg.gain.value = 0.05;
+  s.connect(bp).connect(sg).connect(g); s.start(t);
+  zumbidoNodos = { g, fuentes: [...fuentes, s] };
 }
-function siguienteTrino() {
-  if (!coroEstado.vivo) return;
-  if (activo && ctx) {
-    trino();
-    // A veces vienen en racimo, como en las grabaciones
-    if (Math.random() < 0.35) setTimeout(() => coroEstado.vivo && activo && trino(), 70 + Math.random() * 90);
-  }
-  const espera = (0.75 - coroEstado.viento * 0.5) * (0.5 + Math.random());
-  coroEstado.id = setTimeout(siguienteTrino, espera * 1000);
-}
-export function coro(viento = 0.5) {
-  coroEstado.viento = Math.max(0, Math.min(1, viento));
-  if (!ctx) return;
-  if (!coroEstado.siseo) {
-    const s = ctx.createBufferSource(); s.buffer = ruido; s.loop = true;
-    const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 3200; bp.Q.value = 0.6;
-    const g = ctx.createGain(); g.gain.value = 0.0001;
-    s.connect(bp).connect(g).connect(busEfectos);
-    s.start();
-    coroEstado.siseo = { s, g };
-  }
-  coroEstado.siseo.g.gain.setTargetAtTime(0.008 + coroEstado.viento * 0.01, ctx.currentTime, 0.6);
-  if (!coroEstado.vivo) { coroEstado.vivo = true; siguienteTrino(); }
-}
-export function pararCoro() {
-  coroEstado.vivo = false;
-  clearTimeout(coroEstado.id);
-  if (!ctx || !coroEstado.siseo) return;
-  const { s, g } = coroEstado.siseo;
-  g.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.3);
-  s.stop(ctx.currentTime + 1.5);
-  coroEstado.siseo = null;
+export function pararZumbido() {
+  if (!ctx || !zumbidoNodos) return;
+  const { g, fuentes } = zumbidoNodos;
+  g.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.12);
+  fuentes.forEach((f) => f.stop(ctx.currentTime + 0.8));
+  zumbidoNodos = null;
 }
 
 // Un proyecto que se acerca (abrir) o vuelve a su sitio (cerrar)

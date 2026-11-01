@@ -1,7 +1,8 @@
 // El menú (components/Menu.astro): el botón de la cabecera lo abre y pasa a «Cerrar»; Esc también lo cierra. Al abrir,
-// las letras de la página se difuminan y se pierden; mientras está abierto, la página no se mueve. Dentro, el viaje a la
-// aurora (menu/aurora.js), que se carga la primera vez que se abre: entero la primera vez de cada visita (desde la
-// puesta de sol) y, las siguientes, se llega ya dentro. Sin WebGL, solo la lista.
+// la página se cambia de golpe por su propio código y empieza la bajada hasta la placa (menu/placa.js): entera la
+// primera vez de cada visita y, las siguientes, más deprisa. Al cerrar, el viaje de vuelta acaba en la página tal cual
+// estaba; mientras está abierto, la página no se mueve. La placa se prepara antes (al acercar el ratón al botón o, en
+// el móvil, cuando la página está quieta), para que al abrir no haya espera. Sin WebGL, solo la lista.
 import { gsap } from 'gsap';
 import * as sonido from './sonido.js';
 
@@ -13,9 +14,17 @@ export function montarMenu({ lenis, reducido }) {
   const datos = JSON.parse(raiz.querySelector('[data-menu-datos]').textContent);
   const textoBoton = boton.querySelector('[data-menu-txt]');
   const pagina = document.querySelector('main');
-  let aurora = null, abierto = false;
+  let modulo = null, placa = null, abierto = false, cerrando = false;
 
-  // Ir a una página desde el menú: Hablemos baja al contacto (en la home) y lo demás navega; Brand, aún no
+  const cargar = () => (modulo ||= import('./menu/placa.js'));
+  const precargar = () => cargar().then((m) => m.preparar(datos)).catch((e) => console.warn('Menú sin placa:', e));
+  boton.addEventListener('pointerenter', precargar, { once: true });
+  boton.addEventListener('focus', precargar, { once: true });
+  if (!matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    setTimeout(() => (window.requestIdleCallback || setTimeout)(precargar), 4000);
+  }
+
+  // Ir a una página desde el menú: lo que empieza por # baja a esa sección de la home y lo demás navega
   const ir = (d) => {
     if (!d.ruta) return;
     if (d.ruta.startsWith('#')) {
@@ -27,42 +36,53 @@ export function montarMenu({ lenis, reducido }) {
   };
 
   async function abrir() {
-    if (abierto) return;
+    if (abierto || cerrando) return;
     abierto = true;
     lenis?.stop();
     html.classList.add('menu-abierto');
     boton.setAttribute('aria-expanded', 'true');
     if (textoBoton) textoBoton.textContent = 'Cerrar';
-    raiz.hidden = false;
-    sonido.abrir();
-    if (!reducido) {
-      gsap.to(pagina, { filter: 'blur(18px)', opacity: 0, duration: 0.9, ease: 'power2.in', overwrite: true });
-      gsap.fromTo(raiz, { opacity: 0 }, { opacity: 1, duration: 0.7, delay: 0.15, ease: 'power1.inOut' });
+    if (placa === null) {
+      try { placa = (await cargar()).crear(raiz, { datos, reducido, sonido, ir }); } catch (e) { console.warn('Menú sin placa:', e); }
+      if (!placa) { placa = false; raiz.classList.add('sin-gl'); }
     }
-    if (aurora === null) {
-      try { aurora = (await import('./menu/aurora.js')).crear(raiz, { datos, reducido, sonido, ir }); } catch (e) { console.warn('Menú sin aurora:', e); }
-      if (!aurora) { aurora = false; raiz.classList.add('sin-gl'); }
-    }
+    if (!abierto) return;   // se cerró mientras cargaba
     let primera = true;
-    try { primera = !sessionStorage.getItem('ads-aurora'); sessionStorage.setItem('ads-aurora', '1'); } catch (e) { /* nada */ }
-    if (abierto && aurora) aurora.abrir(primera);
-    raiz.querySelector('[data-au-ir]:not([aria-disabled])')?.focus({ preventScroll: true });
+    try { primera = !sessionStorage.getItem('ads-placa'); sessionStorage.setItem('ads-placa', '1'); } catch (e) { /* nada */ }
+    raiz.hidden = false;
+    if (placa) {
+      // El código de la página y su primer fotograma se pintan aquí mismo: la página se esconde en el mismo instante
+      placa.abrir(primera);
+      pagina.style.visibility = 'hidden';
+    } else {
+      sonido.abrir();
+      if (!reducido) gsap.fromTo(raiz, { opacity: 0 }, { opacity: 1, duration: 0.5, ease: 'power1.inOut' });
+    }
+    raiz.querySelector('[data-pl-ir]:not([aria-disabled])')?.focus({ preventScroll: true });
   }
 
   // Devuelve una promesa que se cumple cuando el menú ya se ha ido y la página vuelve a moverse
   function cerrar() {
     if (!abierto) return Promise.resolve();
     abierto = false;
+    cerrando = true;
     html.classList.remove('menu-abierto');
     boton.setAttribute('aria-expanded', 'false');
     if (textoBoton) textoBoton.textContent = 'Menú';
-    sonido.cerrar();
     boton.focus({ preventScroll: true });
+    const fin = () => {
+      placa?.parar();
+      raiz.hidden = true;
+      pagina.style.visibility = '';
+      gsap.set(raiz, { clearProps: 'opacity' });
+      lenis?.start();
+      cerrando = false;
+    };
+    if (placa) return placa.salir().then(fin);
+    sonido.cerrar();
     return new Promise((listo) => {
-      const fin = () => { aurora?.cerrar(); raiz.hidden = true; lenis?.start(); listo(); };
-      if (reducido) { fin(); return; }
-      gsap.to(raiz, { opacity: 0, duration: 0.4, ease: 'power2.in', onComplete: fin });
-      gsap.to(pagina, { filter: 'blur(0px)', opacity: 1, duration: 0.7, delay: 0.15, ease: 'power2.out', overwrite: true, clearProps: 'filter,opacity,scale,transform' });
+      if (reducido) { fin(); listo(); return; }
+      gsap.to(raiz, { opacity: 0, duration: 0.35, ease: 'power2.in', onComplete: () => { fin(); listo(); } });
     });
   }
 

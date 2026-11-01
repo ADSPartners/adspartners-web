@@ -1,93 +1,104 @@
 ---
-// El menú, que abre el botón «Menú» de la cabecera (se queda encima y pasa a «Cerrar»): un viaje desde la puesta de sol
-// de la portada hasta dentro de una aurora (scripts/menu/aurora.js), donde esperan cuatro puntos de luz, uno por
-// página, con su nombre debajo. Abajo, siempre a mano, la lista de las páginas (para ir directo, con teclado o con
-// lector de pantalla), la altitud y el viento solar, que sale de la visita. Sin «Inicio»: a la home se vuelve con el
-// logo. Los datos salen de data/menu.js.
+// El menú, que abre el botón «Menú» de la cabecera (se queda encima y pasa a «Cerrar»): la web se vuelve de repente el
+// código que la construye y la cámara baja por sus capas (lo que ves, el código que lo pinta y sus bytes) hasta la placa
+// que lo ejecuta (scripts/menu/placa.js). Cada página es una pieza de la placa, con su nombre al lado y, al apuntarla,
+// la caja del inspector con lo que mide. Abajo, siempre a mano, la lista de las páginas (para ir directo, con teclado o
+// con lector de pantalla), la capa por la que vas y cuánto lleva encendida (tu visita). Sin «Inicio»: a la home se
+// vuelve con el logo. Los datos salen de data/menu.js.
 import { DESTINOS } from '../data/menu.js';
 const base = import.meta.env.BASE_URL;
 const enlace = (d) => (d.ruta === null ? undefined : `${base}${d.ruta}`);
 ---
 <div class="menu" id="menu" data-menu role="dialog" aria-modal="true" aria-label="Menú" hidden data-lenis-prevent>
-  <canvas class="au__lienzo" data-au-lienzo aria-hidden="true"></canvas>
+  <canvas class="pl__lienzo" data-pl-lienzo aria-hidden="true"></canvas>
 
-  <div class="au__nombres" aria-hidden="true">
+  <div class="pl__nombres" aria-hidden="true">
     {DESTINOS.map((d) => (
-      <span class="au__dest" data-au-dest={d.slug} style={`--c: ${d.color}`}>
-        <span class="au__nombre">{d.nombre}</span>
-        <span class="au__frase mono">{d.frase}</span>
-        <span class="insp au__luz" data-texto={d.luz}></span>
+      <span class="pl__dest" data-pl-dest={d.slug} style={`--c: ${d.color}`}>
+        <span class="pl__nombre">{d.nombre}</span>
+        <span class="pl__frase mono">{d.frase}</span>
       </span>
     ))}
   </div>
+  <div class="pl__caja" data-pl-caja aria-hidden="true"><span class="insp" data-pl-caja-etq></span></div>
 
-  <p class="au__altitud mono" data-au-altitud aria-hidden="true"></p>
-  <p class="au__viento mono" data-au-viento aria-hidden="true"></p>
+  <p class="pl__capa mono" data-pl-capa aria-hidden="true"></p>
+  <p class="pl__encendida mono" data-pl-encendida aria-hidden="true"></p>
 
-  <nav class="au__lista mono" aria-label="Páginas">
+  <nav class="pl__lista mono" aria-label="Páginas">
     {DESTINOS.map((d) => (
-      <a href={enlace(d)} aria-disabled={d.ruta === null ? 'true' : undefined} data-au-ir={d.slug} style={`--c: ${d.color}`}>
+      <a href={enlace(d)} aria-disabled={d.ruta === null ? 'true' : undefined} data-pl-ir={d.slug} style={`--c: ${d.color}`}>
         <i aria-hidden="true"></i>{d.nombre}
       </a>
     ))}
   </nav>
 
-  <div class="au__inundar" data-au-inundar aria-hidden="true"></div>
+  <div class="pl__inundar" data-pl-inundar aria-hidden="true"></div>
   <script type="application/json" data-menu-datos set:html={JSON.stringify(DESTINOS)} />
 </div>
 
 <style>
   .menu { position: fixed; inset: 0; z-index: 28; overflow: hidden; background: var(--noche); color: var(--crema); }
   .menu[hidden] { display: none; }
-  .au__lienzo { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+  .pl__lienzo { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
 
-  /* El nombre de cada página, colgando debajo de su punto (aurora.js lo lleva a su sitio); no tapa el ratón */
-  .au__dest {
+  /* El nombre de cada página, junto a su pieza (placa.js lo lleva a su sitio); no tapa el ratón */
+  .pl__dest {
     position: absolute; left: 0; top: 0; z-index: 2; pointer-events: none;
-    display: grid; justify-items: center; gap: 6px; width: max-content; translate: -50% 30px;
-    opacity: 0; transition: opacity .8s var(--curva);
+    display: grid; justify-items: center; gap: 5px; width: max-content; translate: -50% 0;
+    opacity: 0; transition: opacity .6s var(--curva);
   }
-  .au__dest:global(.visto) { opacity: .82; }
-  .au__dest:global(.visto.on) { opacity: 1; }
-  .au__nombre {
-    font-family: var(--serif); font-weight: 300; font-size: clamp(28px, 2.9vw, 50px); line-height: 1; letter-spacing: -.01em;
-    text-shadow: 0 0 10px rgba(18, 13, 10, .55), 0 0 28px color-mix(in srgb, var(--c) 55%, transparent);
-    transition: transform .6s var(--curva), color .4s;
+  .pl__dest:global(.visto) { opacity: .86; }
+  .pl__dest:global(.visto.on) { opacity: 1; }
+  .pl__nombre {
+    font-family: var(--serif); font-weight: 300; font-size: clamp(26px, 2.6vw, 46px); line-height: 1; letter-spacing: -.01em;
+    text-shadow: 0 0 10px rgba(18, 13, 10, .8), 0 0 26px rgba(18, 13, 10, .7);
+    transition: transform .5s var(--curva), color .3s;
   }
-  .au__dest:global(.on) .au__nombre { color: #fff; transform: scale(1.08); }
-  .au__frase { color: var(--crema); text-shadow: 0 0 6px var(--noche), 0 0 14px var(--noche); opacity: 0; transform: translateY(-4px); transition: opacity .4s, transform .5s var(--curva); }
-  .au__dest:global(.on) .au__frase { opacity: 1; transform: none; }
-  .au__luz { background: var(--c); }
-  .au__luz:empty { visibility: hidden; }
+  .pl__dest:global(.on) .pl__nombre { color: #fff; transform: scale(1.06); }
+  .pl__frase { color: var(--crema-2); text-shadow: 0 0 6px var(--noche), 0 0 14px var(--noche); transition: color .3s; }
+  .pl__dest:global(.on) .pl__frase { color: var(--c); }
 
-  /* El inspector del viaje: la altitud (abajo a la izquierda, encima de la lista) y el viento (abajo a la derecha) */
-  .au__altitud, .au__viento { position: absolute; z-index: 3; margin: 0; color: var(--crema-2); pointer-events: none; min-height: 1.4em; }
-  .au__altitud { left: var(--margen); bottom: calc(var(--margen) + 34px); }
-  .au__viento { right: var(--margen); bottom: var(--margen); max-width: 46ch; text-align: right; }
+  /* La caja del inspector sobre la pieza apuntada: solo dos esquinas, y su ficha encima (como en la portada) */
+  .pl__caja { position: absolute; left: 0; top: 0; z-index: 2; pointer-events: none; opacity: 0; transition: opacity .25s; }
+  .pl__caja:global(.on) { opacity: 1; }
+  .pl__caja::before, .pl__caja::after { content: ''; position: absolute; width: 16px; height: 16px; border: 1px solid var(--c, var(--rosa)); }
+  .pl__caja::before { left: 0; top: 0; border-right: 0; border-bottom: 0; }
+  .pl__caja::after { right: 0; bottom: 0; border-left: 0; border-top: 0; }
+  .pl__caja .insp { position: absolute; left: 0; bottom: calc(100% + 8px); background: var(--c, var(--rosa)); }
+
+  /* El inspector del viaje: la capa (abajo a la izquierda, encima de la lista) y lo que lleva encendida (abajo a la derecha) */
+  .pl__capa, .pl__encendida { position: absolute; z-index: 3; margin: 0; color: var(--crema-2); pointer-events: none; min-height: 1.4em; }
+  .pl__capa { left: var(--margen); bottom: calc(var(--margen) + 34px); }
+  .pl__encendida { right: var(--margen); bottom: var(--margen); max-width: 52ch; text-align: right; }
 
   /* La lista de siempre: para ir directo */
-  .au__lista { position: absolute; left: var(--margen); bottom: var(--margen); z-index: 3; display: flex; flex-wrap: wrap; gap: 6px 22px; }
-  .au__lista a { display: inline-flex; align-items: center; gap: 8px; color: var(--crema-2); transition: color .3s; }
-  .au__lista a:hover, .au__lista a:focus-visible { color: var(--crema); }
-  .au__lista i { width: 7px; height: 7px; border-radius: 50%; background: var(--c); box-shadow: 0 0 10px var(--c); }
-  .au__lista a[aria-disabled='true'] { opacity: .55; }
+  .pl__lista { position: absolute; left: var(--margen); bottom: var(--margen); z-index: 3; display: flex; flex-wrap: wrap; gap: 6px 22px; }
+  .pl__lista a { display: inline-flex; align-items: center; gap: 8px; color: var(--crema-2); transition: color .3s; }
+  .pl__lista a:hover, .pl__lista a:focus-visible { color: var(--crema); }
+  .pl__lista i { width: 7px; height: 7px; background: var(--c); box-shadow: 0 0 10px var(--c); }
+  .pl__lista a[aria-disabled='true'] { opacity: .55; }
 
-  /* Al entrar en una cortina, los textos se apagan y todo se inunda de su color */
-  .menu:global(.zambullendo) :is(.au__dest, .au__lista, .au__altitud, .au__viento) { opacity: 0 !important; transition: opacity .5s; }
-  .au__inundar {
+  /* Al bajar hasta una pieza, los textos se apagan y todo se inunda de su color */
+  .menu:global(.zambullendo) :is(.pl__dest, .pl__caja, .pl__lista, .pl__capa, .pl__encendida) { opacity: 0 !important; transition: opacity .5s; }
+  .pl__inundar {
     position: absolute; inset: 0; z-index: 5; pointer-events: none; opacity: 0;
-    background: radial-gradient(ellipse at 50% 55%, color-mix(in srgb, var(--c, #fff) 85%, white) 0%, var(--c, #fff) 45%, color-mix(in srgb, var(--c, #fff) 40%, var(--noche)) 100%);
+    background: radial-gradient(ellipse at 50% 50%, color-mix(in srgb, var(--c, #fff) 85%, white) 0%, var(--c, #fff) 45%, color-mix(in srgb, var(--c, #fff) 40%, var(--noche)) 100%);
   }
 
   /* Sin WebGL: la lista, grande y en el centro */
-  .menu:global(.sin-gl) .au__lista { inset: 0; flex-direction: column; justify-content: center; align-items: center; gap: 18px; font-family: var(--serif); font-size: 44px; text-transform: none; letter-spacing: 0; }
+  .menu:global(.sin-gl) .pl__lista { inset: 0; flex-direction: column; justify-content: center; align-items: center; gap: 18px; font-family: var(--serif); font-size: 44px; text-transform: none; letter-spacing: 0; }
+
+  /* En vertical (el móvil), el nombre va a la derecha de su pieza, centrado en su altura, y la frase se parte */
+  .menu:global(.en-vertical) .pl__dest { translate: 0 -50%; justify-items: start; width: auto; }
+  .menu:global(.en-vertical) .pl__frase { white-space: normal; line-height: 1.35; }
 
   @media (max-width: 760px) {
-    /* En el móvil, solo los nombres (las etiquetas de la emisión no caben) */
-    .au__luz, .au__frase { display: none; }
-    .au__nombre { font-size: 30px; }
-    .au__viento { left: var(--margen); right: var(--margen); bottom: calc(var(--margen) + 64px); text-align: left; max-width: none; }
-    .au__altitud { bottom: calc(var(--margen) + 100px); }
-    .au__lista { gap: 8px 18px; }
+    .pl__nombre { font-size: 26px; }
+    .pl__frase { font-size: 10px; }
+    .pl__capa, .pl__encendida { right: var(--margen); font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pl__encendida { left: var(--margen); bottom: calc(var(--margen) + 34px); text-align: left; max-width: none; }
+    .pl__capa { bottom: calc(var(--margen) + 54px); }
+    .pl__lista { gap: 8px 18px; }
   }
 </style>

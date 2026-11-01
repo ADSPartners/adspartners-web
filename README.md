@@ -49,10 +49,15 @@ src/scripts/
   pagina.js             arranque de las subpáginas: lo mismo menos el umbral y la portada, más el montaje propio de cada una
   comun.js              lo compartido: los imanes y la barra que se esconde (y se pone en tinta sobre lo claro)
   menu.js               el menú (components/Menu.astro, datos en data/menu.js): abrir y cerrar
-  menu/aurora.js        el menú es un viaje, todo en un shader: de la puesta de sol de la portada (la cámara va al sol),
-                        subiendo por la atmósfera hasta dentro de una aurora volumétrica, con cuatro puntos (uno por
-                        página) que la tiñen de su color al apuntarlos. Viento solar de la visita; su «coro del amanecer»
-  rastro.js             el rastro de la visita (tiempo, metros de ratón, velocidad), del que sale el viento solar
+  menu/placa.js         el menú baja de la web a la placa que la ejecuta: la página se vuelve de golpe su código y la
+                        cámara atraviesa las capas (lo que ves, el código que lo pinta, sus bytes) hasta la placa base,
+                        donde cada página es una pieza (Tech, el procesador; Proyectos, el SSD; Brand, la gráfica;
+                        About, la BIOS). Apuntar enciende sus pistas; pinchar baja hasta ella. Escena 3D con OGL
+  menu/codigo.js        las capas de código: la página en pantalla pasada a su HTML (medido del DOM), el shader de la
+                        portada y este menú (con ?raw) y sus bytes en hexadecimal y en pistas
+  menu/circuito.js      la placa: dónde va cada pieza (en horizontal y en vertical), la textura de la placa, la de la
+                        señal de los buses y las caras con dibujo de las piezas
+  rastro.js             el rastro de la visita (tiempo y metros de ratón): lo que lleva encendida la placa del menú
   cinta.js              el archivo de proyectos
   tech.js               la página Tech: slider, artículo y misiones (las tres vistas y sus pasos)
   tech/escena.js        la escena en alambre con OGL: el viaje por el valle (montañas, camino, antenas y polvo, calculados en
