@@ -1,7 +1,7 @@
 ---
-// La 404, «Fe de erratas»: la hoja suelta que trae un libro con sus erratas. La primera fila es la tuya: dice la
-// dirección que escribiste (se tacha) y debe decir la página buena, que se calcula de verdad en scripts/erratas.js
-// (sinónimos, las fichas de proyecto que ya no existen y, si no, la distancia de edición contra las páginas que hay).
+// La 404: un 404 enorme en Garamond, roto a glitchazos (scripts/erratas-glitch.js), con la capa tech asomando por
+// las grietas: la petición que ha fallado, escrita en código. Debajo, la dirección que escribiste se repara delante de
+// ti, paso a paso, con los pasos de verdad de la distancia de edición hasta la página buena (scripts/erratas.js).
 // GitHub Pages la sirve como docs/404.html para cualquier dirección que no exista. En la copia de prueba se prueba con
 // 404.html?donde=/ruta (su nginx no la sirve sola).
 import Base from '../layouts/Base.astro';
@@ -21,47 +21,45 @@ const rutas = Object.keys(import.meta.glob('./**/index.astro'))
   .map((slug) => ({ slug, nombre: NOMBRES[slug], href: `${base}${slug ? `${slug}/` : ''}` }));
 const proyectos = PROYECTOS.map((p) => ({ slug: p.slug, nombre: p.nombre }));
 ---
-<Base titulo="Fe de erratas · adsPartners®" descripcion="Esta dirección no existe en ads-partners.com. Te decimos cuál es la buena.">
+<Base titulo="404 · adsPartners®" descripcion="Esta dirección no existe en ads-partners.com. Te decimos cuál es la buena.">
   <main class="err" data-erratas data-base={base} data-rutas={JSON.stringify(rutas)} data-proyectos={JSON.stringify(proyectos)}>
-    <div class="err__rejilla" aria-hidden="true"></div>
-    <p class="err__donde"><span class="err__barra" aria-hidden="true"></span><span>404 · <span class="err__marca">adsPartners</span></span></p>
-    <div class="err__arriba">
-      <button class="err__sonido" type="button" aria-pressed="false" aria-label="Sonido" data-sonido-btn data-sonido-hover>
-        <span class="err__ondas" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-        <span class="oculto-accesible" data-sonido-txt>Sonido off</span>
-      </button>
-      <a class="err__volver" href={base} data-sonido-hover><span aria-hidden="true">◀</span> Página principal</a>
-    </div>
-    <a class="err__logo" href={base} aria-label="adsPartners, inicio" data-sonido-hover><Marca tipo="logo" /></a>
+    <div class="err__zona" data-err-zona>
+      <canvas class="err__lienzo" data-err-lienzo aria-hidden="true"></canvas>
+      <div class="err__rejilla" aria-hidden="true"></div>
 
-    <article class="err__hoja" aria-labelledby="err-titulo">
-      <p class="err__cab mono"><span>adsPartners® · Legales</span><span>Hoja suelta</span></p>
-      <h1 class="err__titulo" id="err-titulo">Fe de erratas</h1>
-      <p class="err__intro">En la dirección que has escrito se ha deslizado una errata. Corríjase como sigue:</p>
-
-      <table class="err__tabla">
-        <thead>
-          <tr><th scope="col">Pág.</th><th scope="col">Lín.</th><th scope="col">Dice</th><th scope="col">Debe decir</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="err__num">404</td>
-            <td class="err__num">1</td>
-            <td class="err__dice"><s data-err-dice>esta dirección</s><i class="err__tachon" aria-hidden="true" data-err-tachon></i></td>
-            <td class="err__debe"><a href={base} data-err-debe data-sonido-hover>/</a></td>
-          </tr>
-        </tbody>
-      </table>
-      <p class="err__calculo mono" data-err-calculo aria-live="polite"></p>
-
-      <div class="err__otras">
-        <p class="err__otras-tit mono">Las páginas que sí existen</p>
-        <ul>
-          {rutas.map((r) => <li><a href={r.href} data-sonido-hover>{r.nombre}</a></li>)}
-        </ul>
+      <p class="err__donde"><span class="err__barra" aria-hidden="true"></span><span>Error 404 · <span class="err__marca">adsPartners</span></span></p>
+      <div class="err__arriba">
+        <button class="err__sonido" type="button" aria-pressed="false" aria-label="Sonido" data-sonido-btn data-sonido-hover>
+          <span class="err__ondas" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+          <span class="oculto-accesible" data-sonido-txt>Sonido off</span>
+        </button>
+        <a class="err__volver" href={base} data-sonido-hover><span aria-hidden="true">◀</span> Página principal</a>
       </div>
-      <p class="err__firma">— El editor</p>
-    </article>
+      <a class="err__logo" href={base} aria-label="adsPartners, inicio" data-sonido-hover><Marca tipo="logo" /></a>
+
+      <div class="err__centro">
+        <!-- El 404 de verdad, en el DOM: el canvas lo pinta encima, roto (sin JS se ve este, con el rojo y el azul quietos) -->
+        <p class="err__cuatro" data-err-404 aria-hidden="true">404</p>
+        <h1 class="err__titulo" data-glitch>Esta página no existe.</h1>
+        <p class="err__sub" data-glitch>Se ha colado una errata en la dirección. La arreglamos:</p>
+        <a class="err__dir" href={base} data-err-dir data-sonido-hover><span class="err__host" data-err-host>ads-partners.com</span><span class="err__ruta" data-err-ruta>/</span></a>
+        <p class="err__calculo" data-err-calculo></p>
+        <a class="err__ir" href={base} data-err-ir data-sonido-hover><span data-err-ir-txt data-glitch>Ir a la página principal</span><i aria-hidden="true">→</i></a>
+        <p class="oculto-accesible" aria-live="polite" data-err-anuncio></p>
+      </div>
+
+      <nav class="err__otras" aria-label="Las páginas que sí existen">
+        <span class="err__otras-tit">Las que sí existen</span>
+        {rutas.map((r) => <a href={r.href} data-sonido-hover><span data-glitch>{r.nombre}</span></a>)}
+      </nav>
+    </div>
+    <!-- El pixelado de las letras de la dirección que fallan (el mismo truco que el de Tech) -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <filter id="err-pixel" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB">
+        <feFlood x="1" y="1" width="2" height="2" /><feComposite width="4" height="4" /><feTile result="r" />
+        <feComposite in="SourceGraphic" in2="r" operator="in" /><feMorphology operator="dilate" radius="2" />
+      </filter>
+    </svg>
   </main>
 
   <script>
@@ -84,22 +82,24 @@ const proyectos = PROYECTOS.map((p) => ({ slug: p.slug, nombre: p.nombre }));
     --lado: clamp(18px, 3.8vw, 56px);
     --arriba: clamp(18px, 4.6vh, 44px);
     --tenue: rgba(231, 226, 218, .07);
-    --papel: #EDE8DF;
-    --tinta-2: rgba(25, 9, 0, .58);
-    --tinta-3: rgba(25, 9, 0, .28);
-    --raya: rgba(25, 9, 0, .14);
-    --rojo: #C8361F;
-    position: relative; min-height: 100vh; min-height: 100svh;
-    display: grid; place-items: center; padding: calc(var(--arriba) + 64px) var(--lado) calc(var(--arriba) + 72px);
+    --r: rgb(255 64 120);
+    --a: rgb(64 196 255);
   }
+  .err__zona {
+    position: relative; overflow: hidden; min-height: 100vh; min-height: 100svh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: calc(var(--arriba) + 46px) var(--lado) calc(var(--arriba) + 64px); text-align: center;
+  }
+  .err__lienzo { position: absolute; left: 0; top: 0; z-index: 0; pointer-events: none; }
   .err__rejilla {
-    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    position: absolute; inset: 0; z-index: 0; pointer-events: none;
     background:
       linear-gradient(90deg, transparent calc(15.4% - .5px), var(--tenue) calc(15.4% - .5px), var(--tenue) calc(15.4% + .5px), transparent calc(15.4% + .5px)),
-      linear-gradient(90deg, transparent calc(84.6% - .5px), var(--tenue) calc(84.6% - .5px), var(--tenue) calc(84.6% + .5px), transparent calc(84.6% + .5px)),
-      linear-gradient(transparent calc(50% - .5px), var(--tenue) calc(50% - .5px), var(--tenue) calc(50% + .5px), transparent calc(50% + .5px));
+      linear-gradient(90deg, transparent calc(84.6% - .5px), var(--tenue) calc(84.6% - .5px), var(--tenue) calc(84.6% + .5px), transparent calc(84.6% + .5px));
   }
-  .err__donde, .err__volver { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--crema-2); }
+
+  /* --- Lo fijo, como en el resto ------------------------------------------------------------------------------- */
+  .err__donde, .err__volver, .err__otras { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--crema-2); }
   .err__donde { position: absolute; left: var(--lado); top: var(--arriba); z-index: 6; margin: 0; display: flex; align-items: center; gap: 14px; }
   .err__barra { width: 4px; height: 18px; background: var(--rosa); }
   .err__marca { text-transform: none; letter-spacing: .04em; }
@@ -116,66 +116,95 @@ const proyectos = PROYECTOS.map((p) => ({ slug: p.slug, nombre: p.nombre }));
   :global(html.sonido-on) .err__ondas i:nth-child(4) { animation-delay: -.5s; }
   @keyframes err-onda { 0%, 100% { height: 3px; } 50% { height: 15px; } }
 
-  /* La hoja: papel suelto, un poco torcido, como cae de entre las páginas */
-  .err__hoja {
-    position: relative; z-index: 2; width: min(600px, 100%); padding: clamp(26px, 5vw, 48px) clamp(22px, 5vw, 50px) clamp(24px, 4vw, 38px);
-    background: var(--papel); color: var(--tinta); transform: rotate(-1.4deg);
-    box-shadow: 0 34px 60px rgba(0, 0, 0, .5), 0 4px 10px rgba(0, 0, 0, .3);
+  /* --- El centro: el 404, lo que ha pasado y la dirección que se repara ------------------------------------------ */
+  .err__centro { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; max-width: 100%; }
+  .err__cuatro {
+    margin: 0; font-family: var(--serif); font-weight: 300; font-size: min(40vh, 34vw); line-height: .82; letter-spacing: -.04em;
+    color: var(--crema); text-shadow: -4px 0 rgb(255 64 120 / .55), 4px 0 rgb(64 196 255 / .5); user-select: none;
   }
-  .err__hoja::before {
-    content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .35;
-    background: linear-gradient(115deg, transparent 40%, rgba(25, 9, 0, .05) 41%, transparent 60%);
+  /* Con el lienzo, el 404 del DOM solo guarda el sitio: lo pinta el canvas */
+  .err.con-lienzo .err__cuatro { color: transparent; text-shadow: none; }
+  .err__titulo { position: relative; margin: 3.4vh 0 0; font-family: var(--serif); font-weight: 300; font-size: clamp(26px, 2.6vw, 38px); line-height: 1.1; letter-spacing: -.01em; }
+  .err__sub { position: relative; margin: 10px 0 0; font-size: 14px; color: var(--crema-2); }
+  .err__dir {
+    position: relative; display: inline-flex; flex-wrap: wrap; justify-content: center; align-items: baseline; margin-top: 22px; padding: 10px 18px;
+    max-width: 100%; font-family: var(--mono); font-size: clamp(17px, 1.9vw, 26px); letter-spacing: .02em; color: var(--crema);
+    border: 1px solid rgba(231, 226, 218, .16); transition: border-color .4s, background .4s;
   }
-  .err__hoja :focus-visible { outline-color: var(--tinta); }
-  .err__hoja ::selection { background: var(--tinta); color: var(--papel); }
-  .err__cab { display: flex; justify-content: space-between; margin: 0 0 26px; font-size: 9px; color: var(--tinta-2); }
-  .err__titulo { margin: 0; font-family: var(--serif); font-weight: 300; font-size: clamp(44px, 8vw, 74px); line-height: .95; letter-spacing: -.02em; }
-  .err__intro { margin: 18px 0 0; max-width: 30em; font-family: var(--serif); font-style: italic; font-size: clamp(17px, 2.1vw, 20px); line-height: 1.35; color: var(--tinta); }
-
-  .err__tabla { width: 100%; margin: 28px 0 0; border-collapse: collapse; text-align: left; table-layout: fixed; }
-  .err__tabla th { padding: 0 10px 8px 0; font-family: var(--mono); font-weight: 400; font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--tinta-2); border-bottom: 1px solid var(--tinta); }
-  .err__tabla th:nth-child(1), .err__tabla th:nth-child(2) { width: 13%; }
-  .err__tabla td { padding: 14px 10px 14px 0; vertical-align: baseline; border-bottom: 1px solid var(--raya); }
-  .err__num { font-family: var(--serif); font-size: 19px; font-variant-numeric: oldstyle-nums; }
-  .err__dice { position: relative; font-family: var(--mono); font-size: 13px; color: var(--tinta-2); word-break: break-all; }
-  .err__dice s { text-decoration: none; }
-  :global(html:not(.js)) .err__dice s { text-decoration: line-through; text-decoration-color: var(--rojo); }
-  /* El tachón, en píxeles rojos que se pintan de izquierda a derecha y luego se glitchean (como el visto de la carta) */
-  .err__tachon {
-    position: absolute; left: 0; top: calc(50% - 1px); height: 3px; width: var(--tachon, 0%); max-width: calc(100% - 10px);
-    background: repeating-linear-gradient(90deg, var(--rojo) 0 3px, transparent 3px 4px); pointer-events: none;
+  .err__dir::before { content: ''; position: absolute; left: -1px; top: -1px; width: 7px; height: 7px; background: var(--rosa); }
+  .err__host { color: var(--crema-3); }
+  .err__ruta { word-break: break-all; }
+  .err__dir.es-arreglada { border-color: var(--rosa); }
+  .err__dir.es-arreglada .err__ruta { color: var(--rosa); }
+  .err__dir:hover { background: rgba(245, 203, 215, .06); }
+  /* Cada letra de la dirección: las que fallan saltan, se separan en rojo y azul y se pixelan; las que sobran se
+     cierran; las que faltan se abren */
+  .err__ruta :global(.err__l) { display: inline-block; white-space: pre; max-width: 3ch; overflow: hidden; vertical-align: bottom; transition: max-width .16s steps(3), opacity .16s steps(2); }
+  .err__ruta :global(.err__l.es-hueco) { max-width: 0; }
+  .err__ruta :global(.err__l.es-fuera) { max-width: 0; opacity: 0; }
+  .err__ruta :global(.err__l.es-fallo) {
+    color: var(--rosa); position: relative; transform: translate(var(--fx, 0), var(--fy, 0));
+    text-shadow: -3px 0 rgb(255 64 120 / .85), 3px 0 rgb(64 196 255 / .8); filter: url(#err-pixel);
   }
-  .err__dice.es-tachada s { text-decoration: none; }
-  .err__dice.es-tachada .err__tachon { animation: err-glitch 3.6s steps(1, end) 1s infinite; }
-  @keyframes err-glitch {
-    0%, 86% { transform: none; box-shadow: none; }
-    87% { transform: translate(2px, -1px); box-shadow: -3px 0 0 rgba(64, 196, 255, .7); }
-    88% { transform: translate(-1px, 1px); }
-    89%, 93% { transform: none; box-shadow: none; }
-    94% { transform: translate(1px, 0) skewX(-12deg); box-shadow: 3px 0 0 rgba(64, 196, 255, .7); }
-    95%, 100% { transform: none; box-shadow: none; }
-  }
-  :global(html.mov-reducido) .err__tachon { animation: none !important; }
-  .err__debe { font-family: var(--serif); font-style: italic; font-size: clamp(20px, 2.6vw, 26px); line-height: 1.15; }
-  .err__debe a { border-bottom: 1px solid var(--tinta); transition: background .25s, color .25s; }
-  .err__debe a:hover { background: var(--tinta); color: var(--papel); }
-  .err__debe a.es-escribiendo::after { content: '▌'; font-style: normal; font-family: var(--mono); font-size: .6em; vertical-align: .2em; animation: err-cursor .8s steps(1) infinite; }
-  @keyframes err-cursor { 50% { opacity: 0; } }
-  .err__calculo { min-height: 1.4em; margin: 12px 0 0; font-size: 9.5px; color: var(--tinta-2); }
+  .err__calculo { position: relative; min-height: 1.6em; margin: 12px 0 0; max-width: 640px; font-family: var(--mono); font-size: 9.5px; line-height: 1.6; letter-spacing: .06em; text-transform: uppercase; color: var(--crema-3); }
   .err__calculo :global(.insp) { margin-right: 10px; }
+  .err__ir {
+    position: relative; display: inline-flex; gap: 12px; align-items: baseline; margin-top: 14px;
+    font-family: var(--serif); font-style: italic; font-size: clamp(20px, 2vw, 26px); color: var(--crema);
+    opacity: 0; transform: translateY(6px); transition: opacity .4s, transform .5s var(--curva);
+  }
+  .err__ir i { font-style: normal; font-family: var(--mono); font-size: .6em; color: var(--rosa); transition: transform .3s var(--curva); }
+  .err__ir:hover i { transform: translateX(5px); }
+  .err__ir.es-visible { opacity: 1; transform: none; }
+  :global(html:not(.js)) .err__ir { opacity: 1; transform: none; }
 
-  .err__otras { margin-top: 34px; }
-  .err__otras-tit { margin: 0 0 10px; font-size: 9px; color: var(--tinta-2); }
-  .err__otras ul { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 0; padding: 0; list-style: none; font-family: var(--serif); font-size: 17px; }
-  .err__otras a { border-bottom: 1px solid var(--tinta-3); }
-  .err__otras a:hover { border-bottom-color: var(--tinta); }
-  .err__firma { margin: 30px 0 0; text-align: right; font-family: var(--serif); font-style: italic; font-size: 16px; color: var(--tinta-2); }
+  .err__otras { position: absolute; left: 50%; bottom: var(--arriba); z-index: 6; transform: translateX(-50%); display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 22px; width: max-content; max-width: calc(100% - 2 * var(--lado) - 300px); font-size: 10px; }
+  .err__otras-tit { color: var(--crema-3); }
+  .err__otras a { position: relative; transition: color .3s; }
+  .err__otras a:hover { color: var(--crema); }
+
+  /* --- La tormenta: al llegar (y al hacer clic) toda la página salta, a golpes de señal ---------------------------- */
+  .err.es-tormenta .err__centro, .err.es-tormenta .err__otras, .err.es-tormenta .err__donde { animation: err-tormenta .9s steps(1, end); }
+  @keyframes err-tormenta {
+    0% { transform: translate(-6px, 2px); text-shadow: -5px 0 var(--r), 5px 0 var(--a); clip-path: inset(0 0 40% 0); }
+    8% { transform: translate(9px, -1px); clip-path: inset(30% 0 10% 0); }
+    16% { transform: translate(-3px, 0); text-shadow: 7px 0 var(--r), -7px 0 var(--a); clip-path: none; }
+    24% { transform: translate(4px, 3px) skewX(-6deg); clip-path: inset(0 0 70% 0); }
+    32% { transform: none; text-shadow: none; clip-path: none; }
+    44% { transform: translate(-8px, 0); text-shadow: -3px 0 var(--r), 3px 0 var(--a); clip-path: inset(55% 0 0 0); }
+    52% { transform: translate(2px, -2px); clip-path: none; }
+    64% { transform: none; text-shadow: none; }
+    78% { transform: translate(3px, 0); clip-path: inset(20% 0 60% 0); }
+    86%, 100% { transform: none; text-shadow: none; clip-path: none; }
+  }
+  .err__otras { animation-name: none; }
+  .err.es-tormenta .err__otras { animation-name: err-tormenta-pie; }
+  @keyframes err-tormenta-pie {
+    0% { transform: translate(calc(-50% - 6px), 2px); } 16% { transform: translate(calc(-50% + 8px), 0); }
+    32%, 100% { transform: translateX(-50%); }
+  }
+  :global(html.mov-reducido) .err.es-tormenta * { animation: none !important; }
+
+  /* --- Las letras que notan el ratón, como en Tech (tech/glitch.js) --------------------------------------------- */
+  .err :global([data-glitch]) { position: relative; }
+  .err :global(.letra.glitch-on) {
+    position: relative; left: var(--gx);
+    text-shadow: calc(var(--gk) * -6px) 0 rgb(255 64 120 / calc(var(--ga) * .55)), calc(var(--gk) * 6px) 0 rgb(64 196 255 / calc(var(--ga) * .5));
+  }
+  .err :global(.letra.glitch-pixel) { filter: url(#tec-pixel); }
+  .err :global(.glitch-rasgo::before), .err :global(.glitch-rasgo::after) {
+    content: attr(data-texto); position: absolute; inset: 0; padding: inherit; pointer-events: none; text-shadow: none;
+  }
+  .err :global(.glitch-rasgo::before) { clip-path: var(--g1); transform: translateX(var(--g1x)); background: var(--noche); filter: url(#tec-pixel); }
+  .err :global(.glitch-rasgo::after) { clip-path: var(--g2); transform: translateX(var(--g2x)); color: var(--rosa); filter: url(#tec-pixel); }
 
   @media (max-width: 760px) {
     .err__donde { display: none; }
     .err__logo { top: var(--arriba); bottom: auto; width: 112px; }
     .err__arriba { gap: 18px; }
-    .err__hoja { transform: rotate(-.8deg); }
-    .err__tabla th:nth-child(1), .err__tabla th:nth-child(2) { width: 15%; }
+    .err__cuatro { font-size: min(32vh, 54vw); }
+    .err__zona { padding-bottom: 110px; }
+    .err__otras { max-width: calc(100% - 2 * var(--lado)); gap: 6px 16px; }
+    .err__otras-tit { width: 100%; }
   }
 </style>
