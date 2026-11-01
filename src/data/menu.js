@@ -31,3 +31,12 @@ export const DESTINOS = [
     color: '#8f7dff', pieza: 'bios', ficha: 'BIOS · pila CR2032',
   },
 ];
+
+// Las capas por las que baja el menú, de lo que ves a lo que lo ejecuta, con lo que es cada una dicho para alguien que
+// no sabe de código. Salen al lado de cada hoja en la vista explotada y en el inspector de abajo
+export const CAPAS = [
+  { nombre: 'Lo que ves', frase: 'HTML y CSS: el texto, las fotos y dónde va cada cosa' },
+  { nombre: 'El código que lo pinta', frase: 'JavaScript y shaders: las órdenes que dibujan cada fotograma' },
+  { nombre: 'Lo que entiende la máquina', frase: 'bytes: ese mismo código, número a número' },
+  { nombre: 'La placa que lo ejecuta', frase: 'procesador, memoria y gráfica: donde pasa de verdad' },
+];
