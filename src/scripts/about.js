@@ -217,7 +217,7 @@ function montarFlujo(raiz, reducido) {
       if (img.complete && img.naturalWidth) ir();
       else img.addEventListener('load', ir, { once: true });
     }, { threshold: 0.35 });
-    io.observe(fig);
+    io.observe(fig.querySelector('.ab__papel'));   // en el móvil la figura no tiene caja (display: contents)
   });
 }
 

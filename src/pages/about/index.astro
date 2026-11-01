@@ -87,6 +87,7 @@ const foto = (src: string) => `${base}assets/about/${src}`;
               </div>
               <figcaption class="ab__pie ab__pie--sebas">
                 {c.sebas.foto.pie}
+                {c.sebas.foto.nota && <span class="ab__pie-nota">{c.sebas.foto.nota}</span>}
                 {c.sebas.foto.cuando
                   ? <span class="ab__pie-dato">{[c.sebas.foto.donde, c.sebas.foto.cuando].filter(Boolean).join(' · ')}</span>
                   : <span class="ab__hueco-mini mono">Sitio y año · pendiente</span>}
@@ -315,6 +316,9 @@ const foto = (src: string) => `${base}assets/about/${src}`;
   .ab__cota--foto { left: -6px; right: auto; top: calc(100% + 12px); }
   .ab__pie { margin-top: 44px; }
   .ab__pie--sebas { font-family: var(--serif); font-style: italic; font-size: 19px; line-height: 1.3; color: var(--crema-2); }
+  .ab__pie-nota { display: block; margin-top: 6px; font-style: normal; font-size: 15px; line-height: 1.4; color: var(--crema-3); }
+  /* El texto de Sebas, en la letra de la marca; el de Álvaro, en la de la interfaz */
+  .ab__txt--sebas .ab__txt-p, .ab__col--sebas .ab__txt-p { font-family: var(--serif); font-size: 19px; line-height: 1.45; }
   .ab__pie-dato { display: block; margin-top: 6px; font-family: var(--mono); font-style: normal; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--crema-3); }
   .ab__pie--alvaro dl { margin: 0; display: grid; gap: 6px; }
   .ab__pie--alvaro dl div { display: grid; grid-template-columns: 70px 1fr; gap: 10px; }
@@ -346,7 +350,7 @@ const foto = (src: string) => `${base}assets/about/${src}`;
   :global(html.ab-escena) .ab__quien { display: flex; position: absolute; top: 31vh; transition: opacity .6s var(--curva); }
   :global(html.ab-escena) .ab__quien--sebas { left: var(--lado); }
   :global(html.ab-escena) .ab__quien--alvaro { right: var(--lado); flex-direction: row-reverse; }
-  :global(html.ab-escena) .ab__txt-quien { display: none; }
+  :global(html.ab-escena) .ab__escena .ab__txt-quien { display: none; }
   :global(html.ab-escena) .ab__txt {
     position: absolute; top: calc(31vh + 58px); width: min(300px, 21vw); margin: 0; padding: 0;
     opacity: 0; visibility: hidden; transition: opacity .45s var(--curva), transform .8s var(--curva), visibility 0s .45s;
@@ -434,9 +438,17 @@ const foto = (src: string) => `${base}assets/about/${src}`;
     .ab__cap { grid-template-columns: 1fr 1fr; column-gap: 0; margin-bottom: 12vh; }
     .ab__cap-t { margin-bottom: 4vh; font-size: 38px; }
     .ab__foto--sebas .ab__papel { padding: 6px 6px 20px; }
-    .ab__foto--alvaro { transform: translate(-8%, 12%) rotate(2.5deg); }
+    /* Las dos fotos, una al lado de otra; sus pies, debajo y a todo el ancho, uno detrás de otro (con las notas no
+       caben lado a lado). La figura se deshace en la rejilla del capítulo: el giro va en el papel */
+    .ab__foto { display: contents; }
+    .ab__cap-t { grid-row: 1; }
+    .ab__foto > .ab__papel { grid-row: 2; position: relative; }
+    .ab__foto--sebas > .ab__papel { grid-column: 1; z-index: 1; transform: rotate(-3deg); }
+    .ab__foto--alvaro > .ab__papel { grid-column: 2; z-index: 2; transform: translate(-8%, 12%) rotate(2.5deg); }
     .ab__foto--alvaro .ab__pie { transform: none; }
-    .ab__pie { margin-top: 34px; }
+    .ab__pie { grid-column: 1 / -1; }
+    .ab__pie--sebas { grid-row: 3; margin-top: 48px; }
+    .ab__pie--alvaro { grid-row: 4; margin-top: 22px; }
     .ab__pie--sebas { font-size: 16px; padding-right: 10px; }
     .ab__pie--alvaro dl div { grid-template-columns: 1fr; gap: 0; }
     .ab__insp { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
@@ -518,6 +530,7 @@ const foto = (src: string) => `${base}assets/about/${src}`;
     .ab__txt--sebas .ab__hueco .mono, .ab__col--sebas .ab__hueco .mono { color: var(--tinta); }
     .ab__foto--sebas .ab__pie { color: var(--t2); }
     .ab__foto--sebas .ab__pie-dato { color: var(--t3); }
+    .ab__foto--sebas .ab__pie-nota { color: var(--t2); }
     .ab__foto--sebas .ab__hueco-mini { color: var(--tinta); }
     /* La copia en papel sobre el papel: más blanca, y la sombra más suave */
     .ab__foto--sebas .ab__papel { background: #FBF9F5; box-shadow: 0 14px 34px rgba(25, 9, 0, .26), 0 2px 5px rgba(25, 9, 0, .16); }
