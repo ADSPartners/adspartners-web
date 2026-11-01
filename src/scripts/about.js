@@ -8,6 +8,7 @@
 import { gsap } from 'gsap';
 import * as sonido from './sonido.js';
 import { BAYER, medirPaleta, pesoKB } from './cinta.js';
+import { letrasQueNotan } from './letras.js';
 
 // Cómo queda cada foto en su montón: el giro (grados) y lo que se aparta del centro (px)
 const GIROS = { sebas: [-5, 3.5, -2.5, 6, -3.5], alvaro: [2.5, -3, 4, -1.5, 3] };
@@ -55,6 +56,25 @@ export function montarAbout({ reducido, conRaton }) {
     if (img.complete && img.naturalWidth) vestir();
     else img.addEventListener('load', vestir, { once: true });
   });
+
+  // Las letras de Sebas notan el ratón a lo brand: se levantan y se tiñen de rosa (las de Álvaro, como en toda la web)
+  if (conRaton && !reducido) {
+    letrasQueNotan([...raiz.querySelectorAll('[data-tinta]')], {
+      velMax: 1100,
+      radio: (fs) => Math.min(240, Math.max(70, fs * 2.2)),
+      estela: 3.5,                                             // la tinta tarda algo más en volver que el rojo y azul
+      pintar(l, k) {
+        if (!l.classList.contains('tinta-on')) l.classList.add('tinta-on');
+        l.style.setProperty('--tk', k.toFixed(3));
+        l.style.setProperty('--tk-a', Math.min(1, Math.abs(k) * 2.5).toFixed(2));
+      },
+      apagar(l) {
+        l.classList.remove('tinta-on');
+        l.style.removeProperty('--tk');
+        l.style.removeProperty('--tk-a');
+      },
+    });
+  }
 
   if (html.classList.contains('ab-escena') && (reducido || !conRaton)) html.classList.remove('ab-escena');
   if (html.classList.contains('ab-escena')) montarEscena(raiz);

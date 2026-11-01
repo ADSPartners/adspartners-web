@@ -4,6 +4,9 @@
 //   poco más claros y rosados) con una niebla rosa casi invisible. Se nota que algo se ha movido, no tapa nada.
 //   Los textos grandes reaccionan aparte (vivo.js).
 // - Nada se mueve solo: si nadie mueve el ratón, no se pinta (el canvas se queda con el último fotograma).
+// - Con data-papel (el About), la mitad izquierda es el papel de la marca: grano y fibras quietos, y por donde pasa el
+//   ratón, acuarela rosa. La costura no es una línea: el papel se deshace en píxeles (matriz de Bayer) a lo largo de
+//   una franja, con el borde algo irregular, y el mismo fluido la empuja.
 import { Renderer, Program, Mesh, Triangle, Texture } from 'ogl';
 import { gsap } from 'gsap';
 import { Fluido } from './fluido.js';
@@ -24,12 +27,17 @@ in vec2 vUv; out vec4 color;
 uniform sampler2D tTinte; uniform sampler2D tVel; uniform sampler2D tGlifos;
 uniform vec2 uRes; uniform float uDpr; uniform float uCelda; uniform float uGlifosN; uniform float uIntro;
 uniform vec3 cNoche; uniform vec3 cCrema; uniform vec3 cRosa;
+uniform float uPapel; uniform vec3 cPapel; uniform vec3 cPigmento;
 
 float hash (vec2 p) { p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
 float ruido (vec2 p) {
   vec2 i = floor(p), f = fract(p); vec2 u = f * f * (3.0 - 2.0 * f);
   return mix(mix(hash(i), hash(i + vec2(1, 0)), u.x), mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), u.x), u.y);
 }
+// La matriz de Bayer de 8 × 8, de 0 a 1 (la misma que la cinta y «se enciende la luz»)
+float bayer2 (vec2 a) { a = floor(a); return fract(a.x / 2.0 + a.y * a.y * 0.75); }
+float bayer4 (vec2 a) { return bayer2(0.5 * a) * 0.25 + bayer2(a); }
+float bayer8 (vec2 a) { return bayer4(0.5 * a) * 0.25 + bayer2(a); }
 
 void main () {
   vec2 uv = vUv;
@@ -57,7 +65,30 @@ void main () {
   col = mix(col, mix(cCrema, cRosa, luz * 0.7), glifo * (0.03 + v * 0.07 + luz * 0.26));
   col = mix(col, cRosa, luz * 0.045);
 
-  color = vec4(mix(cNoche, col, uIntro), 1.0);
+  vec3 maquina = mix(cNoche, col, uIntro);
+  if (uPapel < 0.5) { color = vec4(maquina, 1.0); return; }
+
+  // El papel (About): la costura, a media pantalla, con el borde algo irregular y empujada por el fluido. A lo largo
+  // del 12 % del ancho el papel se funde con la máquina (lo brand) con una trama fina de Bayer encima (lo tech), en
+  // celdas de 2 px. La rampa pasa de −0,3 a 1,3 para que, fuera de la franja, ninguna celda de la trama quede a medias
+  float sx = q.x - vel.x * 0.05 * uDpr;
+  float borde = uRes.x * (0.5 + (ruido(vec2(q.y / (140.0 * uDpr), 4.7)) - 0.5) * 0.05);
+  float zona = uRes.x * 0.06;
+  float m = 1.0 - smoothstep(borde - zona, borde + zona, sx);
+  float b = bayer8(floor(q / (2.0 * uDpr)));
+  float papel = clamp((m - 0.5) * 1.6 + 0.5 + (b - 0.5) * 0.55, 0.0, 1.0);
+
+  // Grano y fibras, quietos
+  float grano = hash(floor(q / uDpr));
+  float fibra = ruido(q / (220.0 * uDpr)) * 0.6 + ruido(q / (38.0 * uDpr)) * 0.4;
+  vec3 hoja = cPapel * (0.965 + grano * 0.05) * (0.985 + fibra * 0.03);
+
+  // Por donde pasa el ratón, acuarela rosa: se posa con grano (más en los poros) y el borde queda algo más oscuro
+  float aguada = smoothstep(0.015, 0.4, tinte) * (0.75 + ruido(q / (5.0 * uDpr)) * 0.5);
+  float filo = smoothstep(0.02, 0.09, tinte) - smoothstep(0.09, 0.3, tinte);
+  hoja *= mix(vec3(1.0), cPigmento, clamp(aguada * 0.55 + filo * 0.35, 0.0, 0.85));
+
+  color = vec4(mix(maquina, hoja, papel), 1.0);
 }`;
 
 const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
@@ -89,6 +120,7 @@ export async function crearFondo() {
     uRes: { value: [gl.canvas.width, gl.canvas.height] }, uDpr: { value: renderer.dpr },
     uCelda: { value: 12 * renderer.dpr }, uGlifosN: { value: GLIFOS.length }, uIntro: { value: 0 },
     cNoche: { value: hex('#120D0A') }, cCrema: { value: hex('#E7E2DA') }, cRosa: { value: hex('#F5CBD7') },
+    uPapel: { value: canvas.hasAttribute('data-papel') ? 1 : 0 }, cPapel: { value: hex('#E7E2DA') }, cPigmento: { value: hex('#E2A0B6') },
   };
   const malla = new Mesh(gl, { geometry: new Triangle(gl), program: new Program(gl, { vertex: VERT, fragment: FRAG, uniforms: u, depthTest: false, depthWrite: false }) });
 
@@ -132,6 +164,7 @@ export async function crearFondo() {
   // Primer fotograma: la máquina en reposo, que aparece con un fundido
   gsap.to(u.uIntro, { value: 1, duration: 1.2, ease: 'power2.out', onUpdate: pintar });
   html.classList.add('fondo-gl');
+  if (u.uPapel.value) html.classList.add('papel-gl');
 
   let espera = null;
   window.addEventListener('resize', () => {

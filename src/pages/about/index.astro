@@ -22,11 +22,20 @@ const foto = (src: string) => `${base}assets/about/${src}`;
     // Antes de pintar: con ratón y sin «movimiento reducido», los montones van en escena fija
     (function () { var h = document.documentElement; if (h.classList.contains('con-raton') && !h.classList.contains('mov-reducido')) h.classList.add('ab-escena'); })();
   </script>
-  <Fondo />
+  <Fondo papel />
   <main class="ab" data-about>
     <h1 class="oculto-accesible">About · adsPartners: Sebas y Álvaro</h1>
-    <!-- El fondo, partido en dos: la mitad de Sebas es papel (brand); la de Álvaro, la rejilla y los glifos (tech) -->
+    <!-- El fondo, partido en dos: la mitad de Sebas es papel (brand); la de Álvaro, la rejilla y los glifos (tech). Con
+         ratón lo pinta el fondo vivo (gl/fondo.js, data-papel); esto es el papel quieto, para cuando no lo hay -->
     <div class="ab__mitad" aria-hidden="true"></div>
+    <!-- Lo que tiene un pliego de imprenta, en el lado de la marca: la marca de registro y la carta de colores de ads -->
+    <div class="ab__imprenta" aria-hidden="true">
+      <span class="ab__registro"></span>
+      <span class="ab__carta">
+        <i style="--c: #F5CBD7"></i><i style="--c: #E7E2DA"></i><i style="--c: #190900"></i><i style="--c: #120D0A"></i>
+        <span>Rosa · Crema · Tinta · Noche</span>
+      </span>
+    </div>
 
     <!-- Fijo, como en Tech: dónde estás; a la derecha, la hora de aquí, el sonido y la vuelta; abajo, el logo y el correo -->
     <p class="ab__donde"><span class="ab__barra" aria-hidden="true"></span><span>About · <span class="ab__marca">adsPartners</span></span></p>
@@ -43,7 +52,7 @@ const foto = (src: string) => `${base}assets/about/${src}`;
 
     <!-- 1. Arriba: los dos, a cada lado de su foto (de momento, el marco vacío) -->
     <section class="ab__portada" aria-label="Quiénes somos">
-      <p class="ab__nombre ab__nombre--sebas" data-vivo>{PERSONAS.sebas.nombre}</p>
+      <p class="ab__nombre ab__nombre--sebas" data-tinta>{PERSONAS.sebas.nombre}</p>
       <figure class="ab__marco ab__marco--portada" data-ab-marco>
         <span class="ab__guia ab__guia--a" aria-hidden="true"></span>
         <span class="ab__guia ab__guia--b" aria-hidden="true"></span>
@@ -63,7 +72,7 @@ const foto = (src: string) => `${base}assets/about/${src}`;
     <section class="ab__montones" data-ab-montones aria-label="De dónde venimos">
       <div class="ab__escena" data-ab-escena>
         <p class="ab__contador ab__dos mono" aria-hidden="true"><span data-ab-actual>01</span><i></i><span>{dos(CAPITULOS.length)}</span></p>
-        <p class="ab__quien ab__quien--sebas" aria-hidden="true"><span class="ab__quien-n">{PERSONAS.sebas.nombre}</span><span class="mono">{PERSONAS.sebas.lado}</span></p>
+        <p class="ab__quien ab__quien--sebas" aria-hidden="true"><span class="ab__quien-n" data-tinta>{PERSONAS.sebas.nombre}</span><span class="mono">{PERSONAS.sebas.lado}</span></p>
         <p class="ab__quien ab__quien--alvaro" aria-hidden="true"><span class="ab__quien-n">{PERSONAS.alvaro.nombre}</span><span class="mono">{PERSONAS.alvaro.lado}</span></p>
         <div class="ab__pila ab__pila--sebas" data-ab-pila="sebas"></div>
         <div class="ab__pila ab__pila--alvaro" data-ab-pila="alvaro"></div>
@@ -142,7 +151,7 @@ const foto = (src: string) => `${base}assets/about/${src}`;
           <p class="ab__txt-p">{CIERRE.alvaro.texto}</p>
         </div>
       </div>
-      <p class="ab__frase ab__frase--a" data-vivo>Por separado, cada uno hace bien lo suyo.</p>
+      <p class="ab__frase ab__frase--a" data-tinta>Por separado, cada uno hace bien lo suyo.</p>
       <p class="ab__frase ab__frase--b ab__dos"><em>Juntos, lo que ninguno haría solo.</em></p>
       <a class="ab__hablemos" href={`${base}#contacto`} data-sonido-hover data-iman><span>Hablemos</span> <span aria-hidden="true">→</span></a>
     </section>
@@ -273,6 +282,25 @@ const foto = (src: string) => `${base}assets/about/${src}`;
   .ab__papel img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 40%; }
   /* Sebas: una copia en papel, con su borde y su sombra */
   .ab__foto--sebas .ab__papel { padding: 9px 9px 30px; background: #EFEAE2; box-shadow: 0 18px 40px rgba(0, 0, 0, .45), 0 2px 6px rgba(0, 0, 0, .3); }
+  /* Cada copia de Sebas va sujeta con un trozo de cinta (rosa, medio transparente y con los bordes rotos), cada una
+     puesta a su manera */
+  .ab__foto--sebas .ab__papel::before {
+    content: ''; position: absolute; z-index: 1; left: 50%; top: -13px; width: 92px; height: 26px; margin-left: -46px;
+    background: rgba(245, 203, 215, .62); mix-blend-mode: multiply; transform: rotate(-4deg);
+    clip-path: polygon(0 8%, 6% 0, 12% 10%, 20% 2%, 30% 9%, 42% 0, 55% 8%, 66% 1%, 78% 9%, 88% 0, 100% 7%, 97% 50%, 100% 93%, 90% 100%, 80% 91%, 68% 100%, 56% 92%, 44% 100%, 32% 91%, 20% 100%, 9% 92%, 0 100%, 3% 50%);
+  }
+  .ab__foto--sebas[data-ab-i='1'] .ab__papel::before { left: 30%; transform: rotate(7deg); }
+  .ab__foto--sebas[data-ab-i='2'] .ab__papel::before { left: 68%; transform: rotate(-9deg); width: 74px; }
+  .ab__foto--sebas[data-ab-i='3'] .ab__papel::before { left: 40%; transform: rotate(3deg); }
+  .ab__foto--sebas[data-ab-i='4'] .ab__papel::before { left: 58%; transform: rotate(-2deg); width: 104px; }
+  /* Las letras de Sebas notan el ratón a lo brand (about.js): en vez de separarse en rojo y azul, se levantan un poco
+     y se tiñen de rosa, como tinta que aún no ha secado */
+  :global(html.con-raton) .ab :global([data-tinta] .tinta-on) {
+    position: relative; left: calc(var(--tk) * 5px); top: calc(var(--tk-a) * -7px);
+    color: color-mix(in srgb, currentColor, #D9819F calc(var(--tk-a) * 70%));
+    text-shadow: 0 calc(var(--tk-a) * 4px) calc(var(--tk-a) * 18px) rgb(226 160 182 / calc(var(--tk-a) * .9));
+  }
+
   /* Álvaro: la foto desnuda, con la caja del inspector, su etiqueta, su paleta y su cota */
   .ab__pix { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; pointer-events: none; }
   .ab__foto--alvaro.pix-espera img { visibility: hidden; }
@@ -374,7 +402,7 @@ const foto = (src: string) => `${base}assets/about/${src}`;
   }
   .ab__frase em { font-style: italic; font-weight: 400; color: var(--rosa); }
   .ab__frase--b { margin-top: .12em; max-width: none; }
-  .ab__mitad { display: none; }
+  .ab__mitad, .ab__imprenta { display: none; }
   .ab__hablemos {
     display: inline-flex; align-items: center; gap: 22px; margin-top: 8vh; padding: 0 30px 0 34px; height: 54px;
     font-family: var(--mono); font-size: 13px; letter-spacing: .2em; text-transform: uppercase; color: var(--tinta);
@@ -427,12 +455,32 @@ const foto = (src: string) => `${base}assets/about/${src}`;
      dos tintas, partido justo por la mitad de su caja. En el móvil no se parte: el texto ocupa todo el ancho ------------ */
   @media (min-width: 761px) {
     .ab { --t2: rgba(25, 9, 0, .66); --t3: rgba(25, 9, 0, .44); --neutro: rgba(120, 108, 96, .45); }
+    /* El papel quieto (sin fondo vivo): la costura, un degradado del 43 al 57 %. Con el fondo vivo lo pinta el canvas
+       (con la costura a píxeles) y este se va cuando el canvas ya ha aparecido */
     .ab__mitad {
-      display: block; position: fixed; left: 0; top: 0; bottom: 0; width: 50%; z-index: -1; pointer-events: none;
+      display: block; position: fixed; left: 0; top: 0; bottom: 0; width: 100%; z-index: -1; pointer-events: none;
+      -webkit-mask-image: linear-gradient(90deg, #000 43%, transparent 57%); mask-image: linear-gradient(90deg, #000 43%, transparent 57%);
       background:
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .1 0 0 0 0 .04 0 0 0 0 0 .16 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E"),
         var(--crema);
     }
+    :global(html.papel-gl) .ab__mitad { visibility: hidden; transition: visibility 0s 1.2s; }
+
+    /* El pliego: la marca de registro arriba, cerca de la costura, y la carta de colores abajo, junto al logo */
+    .ab__imprenta { display: block; position: fixed; inset: 0; z-index: -1; pointer-events: none; color: var(--tinta); }
+    .ab__registro {
+      position: absolute; left: calc(50% - 11vw); top: calc(var(--arriba) - 3px); width: 22px; height: 22px; opacity: .55;
+      border: 1px solid currentColor; border-radius: 50%;
+      background: linear-gradient(currentColor, currentColor) 50% / 1px 140% no-repeat, linear-gradient(currentColor, currentColor) 50% / 140% 1px no-repeat;
+    }
+    .ab__registro::after { content: ''; position: absolute; inset: 6px; border-radius: 50%; background: currentColor; opacity: .5; }
+    .ab__carta {
+      position: absolute; left: calc(var(--lado) + 168px); bottom: calc(var(--arriba) + 2px); display: flex; align-items: center; gap: 3px;
+      font-family: var(--mono); font-size: 9px; letter-spacing: .16em; text-transform: uppercase; color: var(--t3);
+    }
+    .ab__carta i { width: 13px; height: 13px; background: var(--c); outline: 1px solid rgba(25, 9, 0, .18); outline-offset: -1px; }
+    .ab__carta span { margin-left: 12px; }
+
     /* A dos tintas: la izquierda de la caja en tinta y la derecha en claro (o en rosa) */
     .ab__dos {
       background-image: linear-gradient(90deg, var(--izq, var(--tinta)) 50%, var(--dcha, var(--crema)) 50%);
