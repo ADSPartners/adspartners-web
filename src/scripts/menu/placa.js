@@ -1,10 +1,12 @@
-// El menú baja de la web a la placa que la ejecuta. Al abrirlo, de repente, lo que tenías en pantalla se vuelve el código
-// que lo construye, cada cosa en su sitio (menu/codigo.js), y la cámara baja hacia el centro sin cortes: atraviesa esa
-// capa y las de debajo (el código que la pinta y sus bytes, que se estiran hasta ser pistas) hasta la placa base
+// El menú baja de la web a la placa que la ejecuta. Al abrirlo, del botón sale una ola que va convirtiendo lo que tenías
+// en pantalla en el código que lo construye, cada cosa en su sitio (menu/codigo.js); por delante de la ola se sigue
+// viendo la página de verdad. Cuando la ola lo cubre todo, la cámara baja hacia el centro sin cortes: atraviesa esa capa
+// y las de debajo (el código que la pinta y sus bytes, que se estiran hasta ser pistas) hasta la placa base
 // (menu/circuito.js). Allí suben las piezas, una por página, y arrancan como en una placa de verdad: primero la BIOS.
 // Apuntar a una pieza enciende sus pistas y la señal corre hacia ella; pinchar baja hasta ella y entra. Cerrar es el
-// mismo viaje hacia arriba. Es una escena 3D con OGL: las capas de código son planos apilados encima de la placa, que es
-// otro plano con su textura, y las piezas son cajas y cilindros que crecen desde ella.
+// mismo viaje hacia arriba, y la ola vuelve a meterse en el botón. Es una escena 3D con OGL: las capas de código son
+// planos apilados encima de la placa, que es otro plano con su textura, y las piezas son cajas y cilindros que crecen
+// desde ella. El lienzo es transparente (con el alfa premultiplicado) para que la página se vea fuera de la ola.
 import { Renderer, Camera, Transform, Program, Mesh, Plane, Box, Cylinder, Texture, Vec3 } from 'ogl';
 import { gsap } from 'gsap';
 import { rastro } from '../rastro.js';
@@ -16,6 +18,7 @@ const TAN = Math.tan((FOV * Math.PI) / 360);
 const D0 = 10;   // de la cámara de partida a la capa 1 (la que coincide con la pantalla)
 const SEP = 10;  // entre capa y capa
 const NOCHE = [18 / 255, 13 / 255, 10 / 255];
+const ROSA = [245 / 255, 203 / 255, 215 / 255];
 const CAPAS = [
   ['lo que ves', 'HTML y CSS'],
   ['el código que lo pinta', 'JS y GLSL'],
@@ -57,33 +60,47 @@ uniform mat4 modelMatrix, viewMatrix, projectionMatrix;
 out vec2 vUv; out vec3 vMundo;
 void main() { vUv = uv; vec4 m = modelMatrix * vec4(position, 1.0); vMundo = m.xyz; gl_Position = projectionMatrix * viewMatrix * m; }`;
 
-// Una capa de código: su textura con el golpe de glitch (franjas que saltan y el rojo y el azul que se separan), el
-// fondo de noche solo en la capa 1 al principio, y en la 3 las pistas que corren
+// Una capa de código: su textura, el fondo de noche solo en la capa 1 y en la 3 las pistas que corren. La capa 1 lleva
+// además la ola (uPant > 0): sale del botón del menú (uOrigen, en px desde arriba a la izquierda) con el borde ondulado;
+// dentro, el código; en el frente, el código se rasga (franjas que saltan, el rojo y el azul que se separan) y se tiñe
+// de rosa, con un hilo rosa por delante; fuera, nada, y se ve la página. Sale con el alfa premultiplicado
 const FRAG_CAPA = /* glsl */ `#version 300 es
 precision highp float;
 in vec2 vUv; out vec4 salida;
 uniform sampler2D tMapa, tPistas;
-uniform float uAlfa, uFondo, uGlitch, uPistas, uT, uBordes;
-uniform vec3 uNoche;
+uniform float uAlfa, uFondo, uPistas, uT, uBordes, uOla;
+uniform vec2 uOrigen, uPant;
+uniform vec3 uNoche, uRosa;
 float azar(vec2 p) { vec3 q = fract(vec3(p.xyx) * 0.1031); q += dot(q, q.yzx + 33.33); return fract((q.x + q.y) * q.z); }
+float ruido(float x) { float i = floor(x), f = fract(x); return mix(azar(vec2(i, 3.1)), azar(vec2(i + 1.0, 3.1)), f * f * (3.0 - 2.0 * f)); }
 vec4 leer(vec2 uv) {
   vec4 a = texture(tMapa, uv);
   if (uPistas > 0.001) a = mix(a, texture(tPistas, uv + vec2(uT * 0.025, 0.0)), uPistas);
   return a;
 }
 void main() {
+  float dentro = 1e5, frente = 0.0, ola = uPant.x > 0.0 ? 1.0 : 0.0;
+  if (ola > 0.5) {
+    vec2 px = vec2(vUv.x, 1.0 - vUv.y) * uPant - uOrigen;
+    float ang = atan(px.y, px.x);
+    float onda = (ruido(ang * 5.0 + uT * 1.7) - 0.5) * 70.0 + sin(ang * 11.0 - uT * 6.0) * 12.0;
+    dentro = uOla - length(px) + onda;
+    frente = exp(-abs(dentro) / 46.0);
+  }
   vec2 uv = vUv;
   float banda = floor(uv.y * 46.0);
   float r = azar(vec2(banda, floor(uT * 30.0)));
-  uv.x += (r - 0.5) * 0.07 * uGlitch * step(0.62, r);
-  float sep = 0.006 * uGlitch;
+  uv.x += (r - 0.5) * 0.07 * frente * step(0.45, r);
+  float sep = 0.008 * frente;
   vec4 c = leer(uv), cr = leer(uv + vec2(sep, 0.0)), cb = leer(uv - vec2(sep, 0.0));
-  vec3 col = vec3(cr.r, c.g, cb.b);
+  vec3 col = mix(vec3(cr.r, c.g, cb.b), uRosa, frente * 0.45);
   float a = max(c.a, max(cr.a, cb.a));
   float fa = uFondo * (1.0 - a), sale = a + fa;
   vec3 res = (col * a + uNoche * fa) / max(sale, 1e-4);
   float borde = smoothstep(0.0, 0.12, vUv.x) * smoothstep(1.0, 0.88, vUv.x) * smoothstep(0.0, 0.12, vUv.y) * smoothstep(1.0, 0.88, vUv.y);
-  salida = vec4(res, sale * uAlfa * mix(1.0, borde, uBordes));
+  float alfa = sale * uAlfa * mix(1.0, borde, uBordes) * smoothstep(-2.0, 4.0, dentro);
+  float hilo = ola * uAlfa * exp(-abs(dentro + 6.0) / 5.0);
+  salida = vec4(res * alfa + uRosa * hilo * (1.0 - alfa), alfa + hilo * (1.0 - alfa));
 }`;
 
 // La placa: su textura con la luz de una lámpara, el brillo de los LED y la señal que corre por los buses encendidos.
@@ -173,16 +190,17 @@ void main() {
   salida = vec4(0.0, 0.0, 0.0, (1.0 - smoothstep(0.0, uMargen, d)) * 0.82 * uSube);
 }`;
 
-export function crear(raiz, { datos, reducido, sonido, ir }) {
+// pagina: el <main>, que se esconde cuando la ola lo ha cubierto y vuelve antes de que la ola se retire
+export function crear(raiz, { datos, reducido, sonido, ir, pagina }) {
   const lienzo = raiz.querySelector('[data-pl-lienzo]');
+  const boton = document.querySelector('[data-menu-btn]');
   const movil = !matchMedia('(hover: hover) and (pointer: fine)').matches;
   let renderer;
   try {
-    renderer = new Renderer({ canvas: lienzo, webgl: 2, dpr: Math.min(devicePixelRatio || 1, movil ? 1.5 : 2), alpha: false, antialias: true });
+    renderer = new Renderer({ canvas: lienzo, webgl: 2, dpr: Math.min(devicePixelRatio || 1, movil ? 1.5 : 2), alpha: true, premultipliedAlpha: true, antialias: true });
   } catch (e) { return null; }
   const gl = renderer.gl;
   if (!gl || !renderer.isWebgl2) return null;
-  gl.clearColor(...NOCHE, 1);
 
   const camara = new Camera(gl, { fov: FOV, near: 0.05, far: 400 });
   camara.up.set(0, 0, -1);   // la parte de arriba de la pantalla es -z: lo de arriba de la página
@@ -199,8 +217,9 @@ export function crear(raiz, { datos, reducido, sonido, ir }) {
     const program = new Program(gl, {
       vertex: VERT_PLANO, fragment: FRAG_CAPA, transparent: true, depthTest: false, depthWrite: false,
       uniforms: {
-        tMapa: { value: vacia }, tPistas: { value: vacia }, uAlfa: { value: 0 }, uFondo: { value: 0 }, uGlitch: { value: 0 },
-        uPistas: { value: 0 }, uT: { value: 0 }, uBordes: { value: orden ? 1 : 0 }, uNoche: { value: NOCHE },
+        tMapa: { value: vacia }, tPistas: { value: vacia }, uAlfa: { value: 0 }, uFondo: { value: 0 }, uPistas: { value: 0 },
+        uT: { value: 0 }, uBordes: { value: orden ? 1 : 0 }, uNoche: { value: NOCHE }, uRosa: { value: ROSA },
+        uOla: { value: 1e5 }, uOrigen: { value: [0, 0] }, uPant: { value: [0, 0] },
       },
     });
     const m = new Mesh(gl, { geometry: plano, program, renderOrder: 3 - orden });
@@ -236,11 +255,11 @@ export function crear(raiz, { datos, reducido, sonido, ir }) {
 
   // --- El estado del viaje y la cámara -----------------------------------------------------------------------------
   // y: altura de la cámara mientras baja; k: de mirar recto hacia abajo a la vista final; sube: cuánto han crecido las
-  // piezas; glitch: el golpe del cambio; dive: la bajada hasta una pieza al pincharla
-  const st = { y: 0, k: 0, sube: 0, glitch: 0, dive: 0, T: 0 };
+  // piezas; ola: cuánto ha avanzado la ola desde el botón (1, lo cubre todo); dive: la bajada hasta una pieza al pincharla
+  const st = { y: 0, k: 0, sube: 0, ola: 1, dive: 0, T: 0 };
   const raton = { x: 0, y: 0, nx: 0, ny: 0, dentro: false };
   let piezas = [], mallas = [], alturas = null, final = null, disp = null, texturasPlaca = null;
-  let apuntado = null, peso = 0, destino = null, llegado = false, marco = 0;
+  let apuntado = null, peso = 0, destino = null, llegado = false;
   const leds = {};
   const bus = [0, 0, 0, 0], sentido = [1, 1, 1, 1];
   let deriva = [0, 0, 0];
@@ -277,10 +296,11 @@ export function crear(raiz, { datos, reducido, sonido, ir }) {
     const caras = {};
     for (const [k, c] of Object.entries(hecho.caras)) caras[k] = textura(c);
     uniPieza.tArriba.value = caras.ihs;   // para que el primer uso ya tenga algo válido
-    texturasPlaca = [tAspecto, tSenal, ...Object.values(caras)];
     capa2.program.uniforms.tMapa.value = textura(hecho.codigo);
     capa3.program.uniforms.tMapa.value = textura(hecho.bytes.texto);
     capa3.program.uniforms.tPistas.value = textura(hecho.bytes.pistas);
+    texturasPlaca = [tAspecto, tSenal, ...Object.values(caras), capa2.program.uniforms.tMapa.value,
+      capa3.program.uniforms.tMapa.value, capa3.program.uniforms.tPistas.value];
 
     mallas.forEach((m) => m.setParent(null));
     mallas = [];
@@ -474,17 +494,44 @@ export function crear(raiz, { datos, reducido, sonido, ir }) {
     sonido.zumbido();
   }
 
+  // La ola: sale del centro del botón del menú y tiene que llegar más allá de la esquina más lejana
+  let origen = [0, 0], alcance = 1, cubierta = true;
+  const medirOla = () => {
+    const r = boton?.getBoundingClientRect();
+    origen = r ? [r.left + r.width / 2, r.top + r.height / 2] : [0, 0];
+    alcance = Math.max(...[[0, 0], [innerWidth, 0], [0, innerHeight], [innerWidth, innerHeight]].map(([x, y]) => Math.hypot(x - origen[0], y - origen[1]))) + 140;
+  };
+  // Mientras avanza (o se retira) chisporrotea, del lado por el que va
+  const crepitar = (tl, desde, dur, dir) => {
+    for (let i = 0; i <= 8; i++) {
+      const k = dir > 0 ? i / 8 : 1 - i / 8;
+      tl.call(() => sonido.glitch(0.5 + Math.random() * 0.5, Math.min(1, (origen[0] + alcance * k * 0.6) / innerWidth)), null, desde + (i / 8) * dur);
+    }
+  };
+  // Cuando la ola lo tapa todo, la página se esconde y el menú enseña lo suyo (la lista y el inspector); mientras no,
+  // la página se ve fuera de la ola
+  function cubrir(si) {
+    cubierta = si;
+    raiz.classList.toggle('ola', !si);
+    if (pagina) pagina.style.visibility = si ? 'hidden' : '';
+  }
+
+  // Primero la ola y, cuando ha cubierto la página, la bajada (más despacio la primera vez de cada visita)
   function montarViaje(primera) {
     viaje?.kill();
     const A = alturas;
-    Object.assign(st, { y: A.y0, k: 0, sube: 0, glitch: 1, dive: 0 });
-    const dur = primera ? 2.9 : 1.15;
+    Object.assign(st, { y: A.y0, k: 0, sube: 0, ola: 0, dive: 0 });
+    cubrir(false);
+    const ola = primera ? 1.25 : 0.85, dur = primera ? 4.6 : 1.9, z = ola + 0.05;
     const tl = gsap.timeline({ onComplete: llegar });
-    tl.to(st, { glitch: 0, duration: 0.38, ease: 'power2.out' }, 0)
-      .call(() => sonido.viaje(dur, 1), null, primera ? 0.3 : 0.06)
-      .to(st, { y: A.yf, duration: dur, ease: primera ? 'power3.inOut' : 'power2.inOut' }, primera ? 0.28 : 0.06)
-      .to(st, { k: 1, duration: primera ? 1.3 : 0.62, ease: 'power2.inOut' }, primera ? 2.0 : 0.6)
-      .to(st, { sube: 1, duration: primera ? 1.05 : 0.5, ease: 'power2.out' }, primera ? 2.45 : 0.78);
+    tl.call(() => sonido.viaje(ola + 0.2, 1), null, 0)
+      .to(st, { ola: 1, duration: ola, ease: 'power1.inOut' }, 0)
+      .call(() => cubrir(true), null, ola)
+      .call(() => sonido.viaje(dur, 1), null, z)
+      .to(st, { y: A.yf, duration: dur, ease: 'power2.inOut' }, z)
+      .to(st, { k: 1, duration: primera ? 1.7 : 0.8, ease: 'power2.inOut' }, z + dur * 0.62)
+      .to(st, { sube: 1, duration: primera ? 1.2 : 0.6, ease: 'power2.out' }, z + dur * 0.74);
+    crepitar(tl, 0, ola, 1);
     viaje = tl;
   }
 
@@ -495,7 +542,6 @@ export function crear(raiz, { datos, reducido, sonido, ir }) {
     const dt = Math.min(0.05, (ahora - (antes || ahora)) / 1000);
     antes = ahora;
     st.T += dt;
-    marco++;
 
     // La pieza a la que apuntas (con ratón), y la cámara que se acerca un poco a ella
     if (llegado && !destino) {
@@ -550,12 +596,15 @@ export function crear(raiz, { datos, reducido, sonido, ir }) {
     const u1 = capa1.program.uniforms, u2 = capa2.program.uniforms, u3 = capa3.program.uniforms;
     u1.uFondo.value = 1 - entre(A.y0 - 0.15, A.y0 - 3.2, y);
     u1.uAlfa.value = entre(1.1, 3.2, dist[0]);
-    u1.uGlitch.value = st.glitch;
+    u1.uOla.value = st.ola >= 1 ? 1e5 : st.ola * alcance;
+    u1.uOrigen.value = origen; u1.uPant.value = [innerWidth, innerHeight];
     u2.uAlfa.value = entre(23, 15, dist[1]) * entre(1.1, 3.2, dist[1]);
     u3.uAlfa.value = entre(23, 15, dist[2]) * entre(2.4, 5.5, dist[2]);
     u3.uPistas.value = entre(13, 7, dist[2]);
     for (const u of [u1, u2, u3]) u.uT.value = st.T;
-    capa1.visible = u1.uAlfa.value > 0.002; capa2.visible = u2.uAlfa.value > 0.002; capa3.visible = u3.uAlfa.value > 0.002;
+    // (mientras la ola no lo cubre todo, solo la capa 1: fuera de la ola tiene que verse la página)
+    capa1.visible = u1.uAlfa.value > 0.002;
+    capa2.visible = cubierta && u2.uAlfa.value > 0.002; capa3.visible = cubierta && u3.uAlfa.value > 0.002;
     const luz = 0.3 + 0.7 * entre(A.yf + 30, A.yf + 6, y);
     uniPlaca.uLuz.value = luz; uniPieza.uLuz.value = luz;
 
@@ -590,9 +639,14 @@ export function crear(raiz, { datos, reducido, sonido, ir }) {
       pz.etq.style.transform = `translate(${x.toFixed(1)}px, ${yy.toFixed(1)}px)`;
     }
 
-    // El primer fotograma solo lleva la capa 1 (la placa, que pesa, se sube en el siguiente, ya con la capa encima)
-    if (marco > 1) renderer.render({ scene: mundo, camera: camara });
-    else gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    // Con la ola a medias, el lienzo es transparente y solo lleva la capa 1; después, la noche, la placa y las capas
+    if (cubierta) {
+      gl.clearColor(...NOCHE, 1);
+      renderer.render({ scene: mundo, camera: camara });
+    } else {
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    }
     renderer.render({ scene: capas, camera: camara, clear: false });
   }
 
@@ -614,14 +668,22 @@ export function crear(raiz, { datos, reducido, sonido, ir }) {
     }
   }
 
+  // Lo que pesa, antes de abrir: pintar la placa, sus caras y las capas 2 y 3, y subirlas a la tarjeta gráfica
+  function precalentar() {
+    if (!hecho || hecho.vertical !== vertical()) preparar(datos);
+    if (disp !== hecho.disp) montarPlaca();
+    texturasPlaca.forEach((t) => t.update());
+  }
+
   return {
+    precalentar,
     // primera: si es la primera vez en esta visita (el viaje entero, más despacio)
     abrir(primera) {
-      if (!hecho || hecho.vertical !== vertical()) preparar(datos);
-      if (disp !== hecho.disp) montarPlaca();
+      precalentar();
       raiz.classList.toggle('en-vertical', hecho.vertical);
       medir();
-      destino = null; apuntado = null; peso = 0; deriva = [0, 0, 0]; llegado = false; marco = 0;
+      medirOla();
+      destino = null; apuntado = null; peso = 0; deriva = [0, 0, 0]; llegado = false;
       raiz.classList.remove('zambullendo', 'llegado');
       inundar.style.opacity = 0;
       piezas.forEach((pz) => { pz.etq.classList.remove('visto', 'on'); pz.etq.querySelector('.pl__frase').textContent = pz.d.frase; });
@@ -629,19 +691,16 @@ export function crear(raiz, { datos, reducido, sonido, ir }) {
       hudEncendida.textContent = '';
       pintarCapa1();
       if (reducido) {
-        Object.assign(st, { y: alturas.yf, k: 1, sube: 1, glitch: 0, dive: 0 });
+        Object.assign(st, { y: alturas.yf, k: 1, sube: 1, ola: 1, dive: 0 });
+        cubrir(true);
         llegar();
-      } else {
-        montarViaje(primera);
-        sonido.glitch(1, 0.5);
-        setTimeout(() => sonido.glitch(0.8, 0.35), 55);
-        setTimeout(() => sonido.glitch(0.6, 0.65), 120);
-      }
-      // El primer fotograma, ahora mismo: así la página y su código se cambian de golpe, en el mismo instante
+      } else montarViaje(primera);
+      // El primer fotograma, ahora mismo, con la ola aún dentro del botón
       vivo = true; antes = 0;
       pintar(performance.now());
     },
-    // El viaje de vuelta hasta la capa 1 (que vuelve a ser la página); la promesa se cumple al llegar arriba
+    // El viaje de vuelta hasta la capa 1 y la ola, que se vuelve a meter en el botón y deja la página; la promesa se
+    // cumple cuando ya no queda nada
     salir() {
       viaje?.kill();
       gsap.killTweensOf(st);
@@ -651,14 +710,18 @@ export function crear(raiz, { datos, reducido, sonido, ir }) {
       clearTimeout(hudEncendida._t); hudEncendida.textContent = '';
       sonido.pararZumbido();
       if (reducido || !vivo) return Promise.resolve();
-      sonido.viaje(0.9, -1);
+      sonido.viaje(1, -1);
+      const arriba = st.y >= alturas.y0 - 0.01, desde = arriba ? 0 : 1.08, ola = 0.8;
       return new Promise((listo) => {
-        gsap.timeline({ onComplete: listo })
-          .to(st, { sube: 0, duration: 0.35, ease: 'power2.in' }, 0)
-          .to(st, { k: 0, dive: 0, duration: 0.55, ease: 'power2.inOut' }, 0)
-          .to(st, { y: alturas.y0, duration: 0.85, ease: 'power2.inOut' }, 0.05)
-          .to(st, { glitch: 1, duration: 0.12, ease: 'power1.in' }, 0.8)
-          .call(() => sonido.glitch(0.8, 0.5), null, 0.84);
+        const tl = gsap.timeline({ onComplete: listo });
+        if (!arriba) {
+          tl.to(st, { sube: 0, duration: 0.35, ease: 'power2.in' }, 0)
+            .to(st, { k: 0, dive: 0, duration: 0.6, ease: 'power2.inOut' }, 0)
+            .to(st, { y: alturas.y0, duration: 1, ease: 'power2.inOut' }, 0.05);
+        }
+        tl.call(() => { medirOla(); cubrir(false); }, null, desde)
+          .to(st, { ola: 0, duration: ola, ease: 'power1.inOut' }, desde);
+        crepitar(tl, desde, ola, -1);
       });
     },
     parar() {

@@ -1,6 +1,7 @@
 // El menú (components/Menu.astro): el botón de la cabecera lo abre y pasa a «Cerrar»; Esc también lo cierra. Al abrir,
-// la página se cambia de golpe por su propio código y empieza la bajada hasta la placa (menu/placa.js): entera la
-// primera vez de cada visita y, las siguientes, más deprisa. Al cerrar, el viaje de vuelta acaba en la página tal cual
+// del botón sale una ola que convierte la página en su propio código y después empieza la bajada hasta la placa
+// (menu/placa.js, que también esconde la página cuando la ola la cubre): entera la primera vez de cada visita y, las
+// siguientes, más deprisa. Al cerrar, el viaje de vuelta acaba con la ola metiéndose en el botón y la página tal cual
 // estaba; mientras está abierto, la página no se mueve. La placa se prepara antes (al acercar el ratón al botón o, en
 // el móvil, cuando la página está quieta), para que al abrir no haya espera. Sin WebGL, solo la lista.
 import { gsap } from 'gsap';
@@ -17,7 +18,15 @@ export function montarMenu({ lenis, reducido }) {
   let modulo = null, placa = null, abierto = false, cerrando = false;
 
   const cargar = () => (modulo ||= import('./menu/placa.js'));
-  const precargar = () => cargar().then((m) => m.preparar(datos)).catch((e) => console.warn('Menú sin placa:', e));
+  const crearPlaca = (m) => {
+    if (placa === null) placa = m.crear(raiz, { datos, reducido, sonido, ir, pagina }) || false;
+    if (!placa) raiz.classList.add('sin-gl');
+    return placa;
+  };
+  // (lo que pesa, cuando el navegador esté libre)
+  const precargar = () => cargar()
+    .then((m) => { m.preparar(datos); if (crearPlaca(m)) (window.requestIdleCallback || setTimeout)(() => placa.precalentar()); })
+    .catch((e) => console.warn('Menú sin placa:', e));
   boton.addEventListener('pointerenter', precargar, { once: true });
   boton.addEventListener('focus', precargar, { once: true });
   if (!matchMedia('(hover: hover) and (pointer: fine)').matches) {
@@ -43,18 +52,14 @@ export function montarMenu({ lenis, reducido }) {
     boton.setAttribute('aria-expanded', 'true');
     if (textoBoton) textoBoton.textContent = 'Cerrar';
     if (placa === null) {
-      try { placa = (await cargar()).crear(raiz, { datos, reducido, sonido, ir }); } catch (e) { console.warn('Menú sin placa:', e); }
-      if (!placa) { placa = false; raiz.classList.add('sin-gl'); }
+      try { crearPlaca(await cargar()); } catch (e) { console.warn('Menú sin placa:', e); placa = false; raiz.classList.add('sin-gl'); }
     }
     if (!abierto) return;   // se cerró mientras cargaba
     let primera = true;
     try { primera = !sessionStorage.getItem('ads-placa'); sessionStorage.setItem('ads-placa', '1'); } catch (e) { /* nada */ }
     raiz.hidden = false;
-    if (placa) {
-      // El código de la página y su primer fotograma se pintan aquí mismo: la página se esconde en el mismo instante
-      placa.abrir(primera);
-      pagina.style.visibility = 'hidden';
-    } else {
+    if (placa) placa.abrir(primera);
+    else {
       sonido.abrir();
       if (!reducido) gsap.fromTo(raiz, { opacity: 0 }, { opacity: 1, duration: 0.5, ease: 'power1.inOut' });
     }
