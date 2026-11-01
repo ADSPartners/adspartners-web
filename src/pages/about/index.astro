@@ -25,6 +25,8 @@ const foto = (src: string) => `${base}assets/about/${src}`;
   <Fondo />
   <main class="ab" data-about>
     <h1 class="oculto-accesible">About · adsPartners: Sebas y Álvaro</h1>
+    <!-- El fondo, partido en dos: la mitad de Sebas es papel (brand); la de Álvaro, la rejilla y los glifos (tech) -->
+    <div class="ab__mitad" aria-hidden="true"></div>
 
     <!-- Fijo, como en Tech: dónde estás; a la derecha, la hora de aquí, el sonido y la vuelta; abajo, el logo y el correo -->
     <p class="ab__donde"><span class="ab__barra" aria-hidden="true"></span><span>About · <span class="ab__marca">adsPartners</span></span></p>
@@ -46,7 +48,7 @@ const foto = (src: string) => `${base}assets/about/${src}`;
         <span class="ab__guia ab__guia--a" aria-hidden="true"></span>
         <span class="ab__guia ab__guia--b" aria-hidden="true"></span>
         <span class="insp ab__marco-insp" aria-hidden="true">img · los dos</span>
-        <figcaption class="ab__marco-t">Aquí va una foto de los dos.<span>Sesión pendiente</span></figcaption>
+        <figcaption class="ab__marco-t ab__dos">Aquí va una foto de los dos.<span>Sesión pendiente</span></figcaption>
         <span class="ab__cota" data-ab-cota aria-hidden="true"></span>
       </figure>
       <p class="ab__nombre ab__nombre--alvaro" data-vivo>{PERSONAS.alvaro.nombre}</p>
@@ -54,13 +56,13 @@ const foto = (src: string) => `${base}assets/about/${src}`;
         <p class="ab__etq mono">( About · de dónde venimos )</p>
         <p>adsPartners somos dos. Sebas diseña cómo se ve tu empresa y Álvaro construye lo que la hace funcionar por dentro. Esto es lo que traía cada uno antes de juntarnos.</p>
       </div>
-      <p class="ab__baja mono" aria-hidden="true"><i></i>Baja</p>
+      <p class="ab__baja ab__dos mono" aria-hidden="true"><i></i>Baja</p>
     </section>
 
     <!-- 2. Los dos montones: un capítulo por pantalla, con una foto de cada uno -->
     <section class="ab__montones" data-ab-montones aria-label="De dónde venimos">
       <div class="ab__escena" data-ab-escena>
-        <p class="ab__contador mono" aria-hidden="true"><span data-ab-actual>01</span><i></i><span>{dos(CAPITULOS.length)}</span></p>
+        <p class="ab__contador ab__dos mono" aria-hidden="true"><span data-ab-actual>01</span><i></i><span>{dos(CAPITULOS.length)}</span></p>
         <p class="ab__quien ab__quien--sebas" aria-hidden="true"><span class="ab__quien-n">{PERSONAS.sebas.nombre}</span><span class="mono">{PERSONAS.sebas.lado}</span></p>
         <p class="ab__quien ab__quien--alvaro" aria-hidden="true"><span class="ab__quien-n">{PERSONAS.alvaro.nombre}</span><span class="mono">{PERSONAS.alvaro.lado}</span></p>
         <div class="ab__pila ab__pila--sebas" data-ab-pila="sebas"></div>
@@ -68,7 +70,7 @@ const foto = (src: string) => `${base}assets/about/${src}`;
 
         {CAPITULOS.map((c, j) => (
           <article class="ab__cap" data-ab-cap={j} aria-labelledby={`cap-${j}`}>
-            <h2 class="ab__cap-t" id={`cap-${j}`}><span class="ab__cap-n mono">{dos(j + 1)}</span><span data-vivo>{c.titulo}</span></h2>
+            <h2 class="ab__cap-t ab__dos" id={`cap-${j}`}><span class="ab__cap-n mono">{dos(j + 1)}</span><span>{c.titulo}</span></h2>
 
             <figure class="ab__foto ab__foto--sebas" data-ab-foto="sebas" data-ab-i={j}>
               <div class="ab__papel">
@@ -119,7 +121,7 @@ const foto = (src: string) => `${base}assets/about/${src}`;
           <span class="ab__guia ab__guia--a"></span>
           <span class="ab__guia ab__guia--b"></span>
           <span class="insp ab__marco-insp">img · los dos</span>
-          <figcaption class="ab__marco-t">Aquí va una foto de los dos.<span>Sesión pendiente</span></figcaption>
+          <figcaption class="ab__marco-t ab__dos">Aquí va una foto de los dos.<span>Sesión pendiente</span></figcaption>
           <span class="ab__cota" data-ab-cota></span>
         </figure>
       </div>
@@ -140,7 +142,8 @@ const foto = (src: string) => `${base}assets/about/${src}`;
           <p class="ab__txt-p">{CIERRE.alvaro.texto}</p>
         </div>
       </div>
-      <p class="ab__frase"><span data-vivo>Por separado, cada uno hace bien lo suyo.</span> <em data-vivo>Juntos, lo que ninguno haría solo.</em></p>
+      <p class="ab__frase ab__frase--a" data-vivo>Por separado, cada uno hace bien lo suyo.</p>
+      <p class="ab__frase ab__frase--b ab__dos"><em>Juntos, lo que ninguno haría solo.</em></p>
       <a class="ab__hablemos" href={`${base}#contacto`} data-sonido-hover data-iman><span>Hablemos</span> <span aria-hidden="true">→</span></a>
     </section>
   </main>
@@ -370,6 +373,8 @@ const foto = (src: string) => `${base}assets/about/${src}`;
     font-family: var(--serif); font-weight: 300; font-size: clamp(42px, 5.4vw, 92px); line-height: 1; letter-spacing: -.025em;
   }
   .ab__frase em { font-style: italic; font-weight: 400; color: var(--rosa); }
+  .ab__frase--b { margin-top: .12em; max-width: none; }
+  .ab__mitad { display: none; }
   .ab__hablemos {
     display: inline-flex; align-items: center; gap: 22px; margin-top: 8vh; padding: 0 30px 0 34px; height: 54px;
     font-family: var(--mono); font-size: 13px; letter-spacing: .2em; text-transform: uppercase; color: var(--tinta);
@@ -413,5 +418,67 @@ const foto = (src: string) => `${base}assets/about/${src}`;
     .ab__cierre { padding: 10vh var(--lado) 16vh; }
     .ab__cols { grid-template-columns: 1fr; gap: 40px; }
     .ab__frase { margin-top: 12vh; font-size: 44px; }
+    .ab__frase--b { margin-top: .12em; }
+  }
+
+  /* --- El fondo partido (desde 761 px): a la izquierda, el papel de Sebas (brand); a la derecha, la rejilla y los glifos
+     de Álvaro (tech), como en el resto de la web. La costura va en el centro de la pantalla: lo de Sebas pasa a tinta, y
+     lo que está centrado y la cruza (el contador, el título del capítulo, el marco, «Baja» y el «Juntos» del final) va a
+     dos tintas, partido justo por la mitad de su caja. En el móvil no se parte: el texto ocupa todo el ancho ------------ */
+  @media (min-width: 761px) {
+    .ab { --t2: rgba(25, 9, 0, .66); --t3: rgba(25, 9, 0, .44); --neutro: rgba(120, 108, 96, .45); }
+    .ab__mitad {
+      display: block; position: fixed; left: 0; top: 0; bottom: 0; width: 50%; z-index: -1; pointer-events: none;
+      background:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .1 0 0 0 0 .04 0 0 0 0 0 .16 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E"),
+        var(--crema);
+    }
+    /* A dos tintas: la izquierda de la caja en tinta y la derecha en claro (o en rosa) */
+    .ab__dos {
+      background-image: linear-gradient(90deg, var(--izq, var(--tinta)) 50%, var(--dcha, var(--crema)) 50%);
+      -webkit-background-clip: text; background-clip: text;
+    }
+    .ab__dos, .ab__dos :global(*) { color: transparent !important; }
+
+    /* Lo fijo de la izquierda */
+    .ab__donde { color: var(--t2); }
+    .ab__barra { background: var(--tinta); }
+    .ab__logo { color: var(--tinta); }
+
+    /* Arriba */
+    .ab__nombre--sebas { color: var(--tinta); }
+    .ab__intro .ab__etq { color: var(--t3); }
+    .ab__intro p:last-child { color: var(--tinta); }
+    .ab__baja { --izq: var(--tinta); --dcha: var(--rosa); }
+    .ab__marco { border-color: var(--neutro); background: repeating-linear-gradient(-45deg, rgba(120, 108, 96, .14) 0 1px, transparent 1px 7px); }
+    .ab__guia--a::before, .ab__guia--a::after { background: var(--tinta); }
+    .ab__marco-t { --izq: var(--t2); --dcha: var(--crema-2); }
+    .ab__marco--portada .ab__cota { color: var(--t3); }
+
+    /* Los montones: el contador y el título, a dos tintas; Sebas, en tinta sobre el papel */
+    .ab__cap-t { justify-content: center; text-align: center; --izq: var(--tinta); --dcha: var(--crema); }
+    /* (la regla de la escena le pone la trama con «background»: aquí se cambia por las dos tintas y vuelve el recorte) */
+    :global(html.ab-escena) .ab__contador {
+      background: linear-gradient(90deg, var(--tinta) 50%, var(--crema-2) 50%);
+      -webkit-background-clip: text; background-clip: text;
+    }
+    :global(html.ab-escena) .ab__contador i { background: linear-gradient(90deg, var(--tinta) 50%, var(--crema-2) 50%); }
+    .ab__quien--sebas .ab__quien-n, .ab__txt--sebas .ab__quien-n, .ab__col--sebas .ab__quien-n { color: var(--tinta); }
+    .ab__quien--sebas .mono, .ab__col--sebas .mono { color: var(--t3); }
+    .ab__txt--sebas .ab__txt-p, .ab__col--sebas .ab__txt-p { color: var(--t2); }
+    .ab__txt--sebas .ab__hueco, .ab__col--sebas .ab__hueco { border-color: rgba(25, 9, 0, .3); color: var(--t3); }
+    .ab__txt--sebas .ab__hueco .mono, .ab__col--sebas .ab__hueco .mono { color: var(--tinta); }
+    .ab__foto--sebas .ab__pie { color: var(--t2); }
+    .ab__foto--sebas .ab__pie-dato { color: var(--t3); }
+    .ab__foto--sebas .ab__hueco-mini { color: var(--tinta); }
+    /* La copia en papel sobre el papel: más blanca, y la sombra más suave */
+    .ab__foto--sebas .ab__papel { background: #FBF9F5; box-shadow: 0 14px 34px rgba(25, 9, 0, .26), 0 2px 5px rgba(25, 9, 0, .16); }
+
+    /* El final: «Por separado», en el lado de Sebas; «Juntos», a caballo de los dos */
+    .ab__cierre > .ab__etq { color: var(--t3); }
+    .ab__frase--a { max-width: calc(50% - 3vw); color: var(--tinta); }
+    .ab__frase--b { display: table; margin: 7vh auto 0; text-align: center; --izq: var(--tinta); --dcha: var(--rosa); }
+    .ab__hablemos { color: var(--crema); background: var(--tinta); }
+    .ab__hablemos:hover { background: #2E1A0C; }
   }
 </style>
