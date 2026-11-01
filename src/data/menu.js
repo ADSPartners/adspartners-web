@@ -2,10 +2,10 @@
 // página (sin «Inicio»: a la home se vuelve con el logo; Hablemos va siempre arriba). Cada página es la pieza que hace
 // en una placa lo mismo que ella en ads: Tech, el procesador; Proyectos, el almacenamiento; Brand, la gráfica (lo que se
 // ve), y About, la BIOS (lo primero que arranca, y la placa sabe quién es). El color es el de su LED. Los datos de cada
-// página salen de sus propios ficheros. Brand la monta otra rama y About aún no existe: mientras no estén aquí, salen
-// «en obras» y no enlazan.
+// página salen de sus propios ficheros. Brand la monta otra rama: mientras no esté aquí, sale «en obras» y no enlaza.
 import { PROYECTOS } from './proyectos.js';
 import { TECH } from './tech.js';
+import { CAPITULOS } from './about.js';
 
 const anios = PROYECTOS.map((p) => Number(p.anio)).filter(Boolean);
 
@@ -26,8 +26,8 @@ export const DESTINOS = [
     color: '#ff8fc8', pieza: 'vga', ficha: 'gráfica · PCIe ×16',
   },
   {
-    slug: 'about', nombre: 'About', ruta: null,
-    frase: 'en obras',
+    slug: 'about', nombre: 'About', ruta: 'about/',
+    frase: `los dos, en ${CAPITULOS.length * 2} fotos`,
     color: '#8f7dff', pieza: 'bios', ficha: 'BIOS · pila CR2032',
   },
 ];

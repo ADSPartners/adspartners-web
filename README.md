@@ -30,6 +30,10 @@ src/pages/tech/index.astro   Tech («Tech · adsPartners»): la maqueta del slid
                         cuarta, otra vez a la primera). «Entrar» abre su artículo y [+] su misión (scripts/tech.js; textos y datos en
                         src/data/tech.js; lo grabado con la API, en src/data/lectura.json y src/data/preguntas.json; la cafetería
                         de ejemplo, en src/data/negocio.js)
+src/pages/about/index.astro   About («About · adsPartners»): los dos que hacemos ads. Arriba, los dos nombres y el marco de su foto
+                        (vacío hasta la sesión); al bajar, dos montones de fotos de vida, cinco capítulos con una de cada uno, que
+                        se acercan hasta juntarse en el marco; al final, lo que hace cada uno (scripts/about.js; textos y fotos en
+                        src/data/about.js; lo que falta de Sebas sale como hueco marcado con su pregunta)
 src/layouts/Base.astro  <head>, metas, fuentes precargadas y el script que decide umbral, movimiento y ratón
 src/components/
   Umbral.astro          carga con humor, barra de 1 px y entrar con o sin sonido (el final lo pinta portada.js)
@@ -59,6 +63,8 @@ src/scripts/
                         señal de los buses y las caras con dibujo de las piezas
   rastro.js             el rastro de la visita (tiempo y metros de ratón): lo que lleva encendida la placa del menú
   cinta.js              el archivo de proyectos
+  about.js              About: con ratón, la escena fija de los montones (las fotos de Sebas caen en papel; las de Álvaro se
+                        montan a píxeles con la matriz de Bayer de cinta.js y el inspector las mide); sin ratón, de arriba abajo
   tech.js               la página Tech: slider, artículo y misiones (las tres vistas y sus pasos)
   tech/escena.js        la escena en alambre con OGL: el viaje por el valle (montañas, camino, antenas y polvo, calculados en
                         los shaders), los modelos que se dibujan al llegar y la sala de las misiones

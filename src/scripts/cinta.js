@@ -29,7 +29,7 @@ const POSES = {
 };
 
 // La matriz de Bayer de 8 × 8: el orden en que se encienden los píxeles (la misma idea que «se enciende la luz»)
-const BAYER = [0, 32, 8, 40, 2, 34, 10, 42, 48, 16, 56, 24, 50, 18, 58, 26, 12, 44, 4, 36, 14, 46, 6, 38, 60, 28, 52, 20, 62, 30, 54, 22,
+export const BAYER = [0, 32, 8, 40, 2, 34, 10, 42, 48, 16, 56, 24, 50, 18, 58, 26, 12, 44, 4, 36, 14, 46, 6, 38, 60, 28, 52, 20, 62, 30, 54, 22,
   3, 35, 11, 43, 1, 33, 9, 41, 51, 19, 59, 27, 49, 17, 57, 25, 15, 47, 7, 39, 13, 45, 5, 37, 63, 31, 55, 23, 61, 29, 53, 21];
 
 const modulo = (x, m) => ((x % m) + m) % m;
@@ -499,7 +499,7 @@ function crearPixelado(caja, rellenar, reducido) {
 }
 
 // Los tres colores que más ocupan en la foto, agrupados de 32 en 32 por canal y sin dos casi iguales
-function medirPaleta(img) {
+export function medirPaleta(img) {
   const m = document.createElement('canvas');
   m.width = 64; m.height = 48;
   const mc = m.getContext('2d', { willReadFrequently: true });
@@ -524,7 +524,7 @@ function medirPaleta(img) {
 
 // Lo que pesa la foto: lo dice el navegador si la bajó ahora; si salió de la memoria, se lee de la caché (sin red).
 // Si no se sabe, no se dice
-async function pesoKB(url) {
+export async function pesoKB(url) {
   try {
     const e = performance.getEntriesByName(new URL(url, location.href).href)[0];
     const b = e && (e.encodedBodySize || e.decodedBodySize);
