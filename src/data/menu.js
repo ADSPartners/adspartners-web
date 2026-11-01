@@ -37,6 +37,6 @@ export const DESTINOS = [
 export const CAPAS = [
   { nombre: 'Lo que ves', frase: 'HTML y CSS: el texto, las fotos y dónde va cada cosa' },
   { nombre: 'El código que lo pinta', frase: 'JavaScript y shaders: las órdenes que dibujan cada fotograma' },
-  { nombre: 'Lo que entiende la máquina', frase: 'bytes: ese mismo código, número a número' },
+  { nombre: 'Los píxeles', frase: 'tu pantalla, punto a punto: cada uno, tres luces (roja, verde y azul)' },
   { nombre: 'La placa que lo ejecuta', frase: 'procesador, memoria y gráfica: donde pasa de verdad' },
 ];

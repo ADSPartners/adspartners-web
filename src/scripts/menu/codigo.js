@@ -4,9 +4,9 @@
 //   fuente y el tamaño medidos); cada imagen, su <img> o su fondo CSS con sus medidas y lo que pesó al cargar, y su luz
 //   pasada a caracteres. De fondo, el HTML de la sección que estabas viendo.
 // - capa 2 · el código que lo pinta: dos ficheros reales de la web, el shader de la portada y este mismo menú.
-// - capa 3 · lo que entiende la máquina: los bytes del shader de la capa 2 en volcado hexadecimal y, aparte, las
-//   mismas filas en pistas (un tramo por byte, más largo cuanto mayor es), para que al acercarte se estiren hasta ser
-//   el cableado de la placa.
+// - capa 3 · los píxeles: la misma pantalla, reducida a un píxel por cada 12 px (los fondos de las secciones, las
+//   imágenes con su filtro y los textos con su letra y su color); el shader de menu/placa.js la dibuja como píxeles de
+//   pantalla, cada uno con sus tres luces.
 import { lienzo } from '../gl/capas.js';
 import portadaFuente from '../gl/portada.js?raw';
 import placaFuente from './placa.js?raw';
@@ -98,7 +98,7 @@ function pintarMuro(ctx, lineas, W, H) {
     for (let f = 0; f < filas; f++) {
       const [d, ln] = lineas[k++ % lineas.length];
       const sangria = Math.min(d, 12) * 2;
-      escribir(ctx, corta(' '.repeat(sangria) + ln, 58), c * (anchoCol + hueco) + 14, f * lh + 4, { tag: 0.3, txt: 0.17, com: 0.14 });
+      escribir(ctx, corta(' '.repeat(sangria) + ln, 58), c * (anchoCol + hueco) + 14, f * lh + 4, { tag: 0.2, txt: 0.11, com: 0.09 });
     }
   }
 }
@@ -302,10 +302,10 @@ export function capaCodigo(ancho, alto) {
   const c = lienzo(ancho, alto);
   const ctx = c.getContext('2d');
   ctx.textBaseline = 'top';
-  const tam = Math.max(9, Math.round(ancho / 165)), lh = Math.round(tam * 1.55);
+  const tam = Math.max(9, Math.round(ancho / 120)), lh = Math.round(tam * 1.55);
   ctx.font = `400 ${tam}px ${MONO}`;
   const cw = ctx.measureText('0').width;
-  const anchoCol = cw * 84, cols = Math.max(1, Math.floor(ancho / anchoCol)), margen = (ancho - cols * anchoCol) / 2;
+  const anchoCol = cw * 80, cols = Math.max(1, Math.floor(ancho / anchoCol)), margen = (ancho - cols * anchoCol) / 2;
   const filas = Math.floor((alto - lh * 2) / lh);
   for (let k = 0; k < cols; k++) {
     const [ruta, fuente, desde] = FICHEROS[k % FICHEROS.length];
@@ -317,54 +317,83 @@ export function capaCodigo(ancho, alto) {
       const i = (inicio + f) % lineas.length;
       ctx.fillStyle = crema(0.26);
       ctx.fillText(String(i + 1).padStart(4, ' '), x, lh * 2 + f * lh);
-      escribir(ctx, corta(lineas[i].replace(/\t/g, '  '), 78), x + cw * 6, lh * 2 + f * lh, { tag: 0.85, txt: 0.7, com: 0.38 });
+      escribir(ctx, corta(lineas[i].replace(/\t/g, '  '), 72), x + cw * 6, lh * 2 + f * lh, { tag: 0.9, txt: 0.78, com: 0.4 });
     }
   }
   return c;
 }
 
-// --- Capa 3 · lo que entiende la máquina -------------------------------------------------------------------------------
-// El volcado de los bytes (UTF-8) del shader, en filas de 16 como xxd: dirección, los bytes en hexadecimal y su texto.
-// pistas: las mismas filas, cada byte un tramo de cobre en el sitio de su par hexadecimal
-export function capaBytes(ancho, alto) {
-  const bytes = new TextEncoder().encode(portadaFuente.slice(portadaFuente.indexOf('precision highp float')));
-  const texto = lienzo(ancho, alto), pistas = lienzo(ancho, alto);
-  const ctx = texto.getContext('2d'), pc = pistas.getContext('2d');
+// --- Capa 3 · los píxeles -----------------------------------------------------------------------------------------------
+// Lo que se ve de verdad, pintado otra vez a tamaño real en un lienzo pequeño (se pinta a 3 por píxel y se reduce, para
+// que cada píxel sea la media de lo que tiene debajo): los fondos de las secciones, las imágenes (con su filtro CSS) y
+// los textos con su letra, su tamaño y su color. Un texto transparente es uno que repinta un lienzo (el título de la
+// portada): sale en crema, que es como se ve
+function pintarTextoReal(ctx, el, r) {
+  const cs = getComputedStyle(el);
+  const texto = limpio(el.innerText || el.textContent);
+  if (!texto) return;
+  const tam = parseFloat(cs.fontSize) || 16, lh = parseFloat(cs.lineHeight) || tam * 1.2;
+  ctx.font = `${cs.fontStyle} ${cs.fontWeight} ${tam}px ${cs.fontFamily}`;
+  ctx.fillStyle = /rgba\(.*,\s*0\)$/.test(cs.color) ? '#E7E2DA' : cs.color;
   ctx.textBaseline = 'top';
-  const tam = Math.max(9, Math.round(ancho / 150)), lh = Math.round(tam * 1.7);
-  ctx.font = `400 ${tam}px ${MONO}`;
-  const cw = ctx.measureText('0').width;
-  const anchoCol = cw * 76, cols = Math.max(1, Math.floor(ancho / anchoCol)), margen = (ancho - cols * anchoCol) / 2;
-  const filas = Math.floor(alto / lh);
-  const hex = (v, n) => v.toString(16).padStart(n, '0');
-  pc.lineCap = 'butt';
-  let fila = 0;
-  for (let k = 0; k < cols; k++) {
-    for (let f = 0; f < filas; f++, fila++) {
-      const off = (fila * 16) % bytes.length;
-      const x = margen + k * anchoCol, y = f * lh;
-      ctx.fillStyle = crema(0.3);
-      ctx.fillText(hex(off, 8), x, y);
-      let hx = x + cw * 10;
-      let asc = '';
-      for (let b = 0; b < 16; b++) {
-        const v = bytes[(off + b) % bytes.length];
-        ctx.fillStyle = v > 127 ? rosa(0.9) : crema(0.74);
-        ctx.fillText(hex(v, 2), hx, y);
-        // La pista: un tramo centrado en el par, más largo cuanto mayor es el byte; los tramos casi se tocan
-        const largo = cw * (0.6 + (v / 255) * 2.4);
-        pc.strokeStyle = rosa(0.55 + (v / 255) * 0.45);
-        pc.lineWidth = Math.max(1, tam * 0.12);
-        pc.beginPath(); pc.moveTo(hx + cw - largo / 2, y + tam * 0.55); pc.lineTo(hx + cw + largo / 2, y + tam * 0.55); pc.stroke();
-        asc += v >= 32 && v < 127 ? String.fromCharCode(v) : '.';
-        hx += cw * (b === 7 ? 4 : 3);
-      }
-      // Al final de cada fila, una vía: por ahí baja a la placa
-      pc.fillStyle = rosa(0.9);
-      pc.beginPath(); pc.arc(hx + cw * 0.6, y + tam * 0.55, tam * 0.2, 0, Math.PI * 2); pc.fill();
-      ctx.fillStyle = crema(0.4);
-      ctx.fillText(`|${asc}|`, hx + cw, y);
-    }
+  const alinear = cs.textAlign === 'center' ? 0.5 : cs.textAlign === 'right' || cs.textAlign === 'end' ? 1 : 0;
+  const lineas = [];
+  let ln = '';
+  for (const p of texto.split(' ')) {
+    const prueba = ln ? `${ln} ${p}` : p;
+    if (ln && ctx.measureText(prueba).width > r.width + 2) { lineas.push(ln); ln = p; } else ln = prueba;
   }
-  return { texto, pistas };
+  if (ln) lineas.push(ln);
+  lineas.forEach((l, i) => ctx.fillText(l, r.left + (r.width - ctx.measureText(l).width) * alinear, r.top + i * lh + (lh - tam) / 2));
+}
+function pintarImagen(ctx, fuente, r, ajuste, filtro) {
+  const iw = fuente.naturalWidth || fuente.videoWidth, ih = fuente.naturalHeight || fuente.videoHeight;
+  if (!iw || !ih) return;
+  const s = ajuste === 'contain' ? Math.min(r.width / iw, r.height / ih) : Math.max(r.width / iw, r.height / ih);
+  ctx.save();
+  ctx.beginPath(); ctx.rect(r.left, r.top, r.width, r.height); ctx.clip();
+  ctx.filter = filtro && filtro !== 'none' ? filtro : 'none';
+  try { ctx.drawImage(fuente, r.left + (r.width - iw * s) / 2, r.top + (r.height - ih * s) / 2, iw * s, ih * s); } catch (e) { /* nada */ }
+  ctx.restore();
+}
+
+export function capaPixeles(celda = 12) {
+  const W = innerWidth, H = innerHeight;
+  const cols = Math.max(24, Math.round(W / celda)), filas = Math.max(24, Math.round(H / celda));
+  const grande = lienzo(cols * 3, filas * 3), ctx = grande.getContext('2d');
+  ctx.scale((cols * 3) / W, (filas * 3) / H);
+  ctx.fillStyle = getComputedStyle(document.body).backgroundColor || '#120D0A';
+  ctx.fillRect(0, 0, W, H);
+  const main = document.querySelector('main'), pendientes = [];
+  if (main) {
+    const seVe = crearSeVe(main);
+    const transparente = (c) => !c || c === 'transparent' || /rgba\(.*,\s*0\)$/.test(c);
+    for (const sec of main.children) {
+      const r = sec.getBoundingClientRect(), bg = getComputedStyle(sec).backgroundColor;
+      if (enPantalla(r, W, H) && !transparente(bg)) { ctx.fillStyle = bg; ctx.fillRect(r.left, r.top, r.width, r.height); }
+    }
+    for (const el of main.querySelectorAll('*')) {
+      if (el.classList.contains('letra')) continue;
+      const tag = el.tagName, r = el.getBoundingClientRect();
+      if (!enPantalla(r, W, H)) continue;
+      if (tag === 'IMG' || tag === 'VIDEO') {
+        if (seVe(el) && (tag === 'IMG' ? el.complete && el.naturalWidth : el.readyState >= 2)) pintarImagen(ctx, el, r, getComputedStyle(el).objectFit, 'none');
+      } else if (tag === 'CANVAS') {
+        if (!seVe(el) || r.width * r.height < 20000) continue;
+        const hermano = [...(el.parentElement?.children || [])].find((h) => h !== el && urlDeFondo(h));
+        const img = hermano && imagenDe(urlDeFondo(hermano), pendientes);
+        if (img) pintarImagen(ctx, img, r, 'cover', getComputedStyle(hermano).filter);
+      } else if (r.width * r.height > 6400) {
+        const url = urlDeFondo(el);
+        if (!url || !seVe(el)) continue;
+        const img = imagenDe(url, pendientes);
+        if (img) pintarImagen(ctx, img, r, getComputedStyle(el).backgroundSize === 'contain' ? 'contain' : 'cover', getComputedStyle(el).filter);
+      }
+    }
+    for (const [el, r] of bloquesDeTexto(main, W, H, seVe)) pintarTextoReal(ctx, el, r);
+  }
+  const c = lienzo(cols, filas), pc = c.getContext('2d');
+  pc.imageSmoothingEnabled = true; pc.imageSmoothingQuality = 'high';
+  pc.drawImage(grande, 0, 0, cols, filas);
+  return { lienzo: c, cols, filas, pendientes };
 }

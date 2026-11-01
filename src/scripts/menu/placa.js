@@ -1,9 +1,10 @@
 // El menú baja de la web a la placa que la ejecuta, siguiendo un cable. Al abrirlo, del botón sale una ola que va
 // convirtiendo lo que tenías en pantalla en el código que lo construye, cada cosa en su sitio (menu/codigo.js); por
 // delante de la ola se sigue viendo la página de verdad. Cuando la ola lo cubre todo, la cámara se aparta y la página
-// queda como una hoja de una vista explotada: debajo, la hoja del código que la pinta y la de sus bytes, cada una con su
-// nombre al lado, y del botón sale un cable (menu/cable.js) que las atraviesa y baja hasta la placa base
-// (menu/circuito.js). La cámara baja por el cable detrás de un pulso de luz; el cable se conecta a un bus del
+// queda como una hoja de una vista explotada: debajo, la hoja del código que la pinta y la de sus píxeles, cada una con
+// su nombre al lado, y del botón sale un cable (menu/cable.js) que las atraviesa y baja hasta la placa base
+// (menu/circuito.js). La cámara baja por el cable detrás de un pulso de luz y se para un momento encima de cada hoja,
+// con su nombre en grande; el cable se conecta a un bus del
 // procesador, la señal entra en él y suben las piezas, una por página, que arrancan como en una placa de verdad: primero
 // la BIOS. Apuntar a una pieza enciende sus pistas y la señal corre hacia ella; pinchar baja hasta ella y entra. Cerrar
 // es subir por el cable, y la ola vuelve a meterse en el botón. Es una escena 3D con OGL: las hojas son planos, la
@@ -12,7 +13,7 @@
 import { Renderer, Camera, Transform, Program, Mesh, Plane, Box, Cylinder, Texture, Vec3 } from 'ogl';
 import { gsap } from 'gsap';
 import { rastro } from '../rastro.js';
-import { capaVisible, capaCodigo, capaBytes } from './codigo.js';
+import { capaVisible, capaCodigo, capaPixeles } from './codigo.js';
 import { LADO, BUS, disposicion, huella, pintarPlaca, pintarCaras } from './circuito.js';
 import { crearCable, tubo } from './cable.js';
 
@@ -33,7 +34,7 @@ const entre = (a, b, x) => suave(Math.min(1, Math.max(0, (x - a) / (b - a))));
 const vertical = () => innerWidth < innerHeight;
 const coma = (v, d = 1) => v.toFixed(d).replace('.', ',');
 
-// --- Lo que se pinta antes de abrir (sin WebGL): la placa, sus caras y las capas 2 y 3 ----------------------------
+// --- Lo que se pinta antes de abrir (sin WebGL): la placa, sus caras y la hoja del código --------------------------
 let hecho = null;
 export function preparar(datos) {
   const v = vertical();
@@ -46,7 +47,6 @@ export function preparar(datos) {
     placa: pintarPlaca(disp, movil ? 2048 : 4096),
     caras: pintarCaras(datos),
     codigo: capaCodigo(ancho, Math.round(ancho / proporcion)),
-    bytes: capaBytes(ancho, Math.round(ancho / proporcion)),
     proporcion,
   };
   return hecho;
@@ -59,25 +59,32 @@ uniform mat4 modelMatrix, viewMatrix, projectionMatrix;
 out vec2 vUv; out vec3 vMundo;
 void main() { vUv = uv; vec4 m = modelMatrix * vec4(position, 1.0); vMundo = m.xyz; gl_Position = projectionMatrix * viewMatrix * m; }`;
 
-// Una hoja de código: su textura sobre su fondo de noche, su marco, el agujero por el que pasa el cable (uVia) y, en la
-// de los bytes, las pistas que corren. La de arriba lleva
+// Una hoja: su textura sobre su fondo de noche, su marco y el agujero por el que pasa el cable (uVia). La de los píxeles
+// (uPixeles) no es una imagen ampliada: cada celda de la rejilla es un píxel de pantalla con sus tres luces (roja, verde
+// y azul, con su hueco); hasta que cada celda ocupa unos 20 px, solo su color, para que las franjas no hagan moiré. La de
+// arriba lleva
 // además la ola (uPant > 0): sale del botón del menú (uOrigen, en px desde arriba a la izquierda) con el borde ondulado;
 // dentro, el código; en el frente, el código se rasga (franjas que saltan, el rojo y el azul que se separan) y se tiñe
 // de rosa, con un hilo rosa por delante; fuera, nada, y se ve la página. Sale con el alfa premultiplicado
 const FRAG_CAPA = /* glsl */ `#version 300 es
 precision highp float;
 in vec2 vUv; out vec4 salida;
-uniform sampler2D tMapa, tPistas;
-uniform float uAlfa, uFondo, uPistas, uT, uOla, uMarco, uAsp;
-uniform vec2 uOrigen, uPant, uVia;
+uniform sampler2D tMapa;
+uniform float uAlfa, uFondo, uT, uOla, uMarco, uAsp, uPixeles;
+uniform vec2 uOrigen, uPant, uVia, uRejilla;
 uniform vec3 uNoche, uRosa, uCrema;
 float azar(vec2 p) { vec3 q = fract(vec3(p.xyx) * 0.1031); q += dot(q, q.yzx + 33.33); return fract((q.x + q.y) * q.z); }
 float ruido(float x) { float i = floor(x), f = fract(x); return mix(azar(vec2(i, 3.1)), azar(vec2(i + 1.0, 3.1)), f * f * (3.0 - 2.0 * f)); }
-vec4 leer(vec2 uv) {
-  vec4 a = texture(tMapa, uv);
-  if (uPistas > 0.001) a = mix(a, texture(tPistas, uv + vec2(uT * 0.025, 0.0)), uPistas);
-  return a;
+vec4 pixel(vec2 uv) {
+  vec2 c = uv * uRejilla, f = fract(c);
+  vec3 col = texture(tMapa, (floor(c) + 0.5) / uRejilla).rgb;
+  float tercio = floor(f.x * 3.0), g = fract(f.x * 3.0);
+  vec3 luz = vec3(equal(vec3(tercio), vec3(0.0, 1.0, 2.0)));
+  float hueco = smoothstep(0.04, 0.12, f.y) * smoothstep(0.96, 0.88, f.y) * smoothstep(0.06, 0.16, g) * smoothstep(0.94, 0.84, g);
+  float celda = 1.0 / max(max(fwidth(c.x), fwidth(c.y)), 1e-4);   // (lo que mide su lado más corto en pantalla)
+  return vec4(mix(col, col * luz * hueco * 2.0, smoothstep(10.0, 22.0, celda)), 1.0);
 }
+vec4 leer(vec2 uv) { return uPixeles > 0.5 ? pixel(uv) : texture(tMapa, uv); }
 void main() {
   float dentro = 1e5, frente = 0.0, ola = uPant.x > 0.0 ? 1.0 : 0.0;
   if (ola > 0.5) {
@@ -89,7 +96,7 @@ void main() {
   }
   vec2 uv = vUv;
   float banda = floor(uv.y * 46.0);
-  float r = azar(vec2(banda, floor(uT * 30.0)));
+  float r = azar(vec2(banda, floor(uT * 14.0)));
   uv.x += (r - 0.5) * 0.07 * frente * step(0.45, r);
   float sep = 0.008 * frente;
   vec4 c = leer(uv), cr = leer(uv + vec2(sep, 0.0)), cb = leer(uv - vec2(sep, 0.0));
@@ -111,27 +118,35 @@ void main() {
   salida = vec4(sal + uRosa * hilo * (1.0 - alfa), alfa + hilo * (1.0 - alfa));
 }`;
 
-// El cable: un rosa encendido, con la luz que baja por él (los datos, un pulso cada 3 unidades) y uno más fuerte, la
+// El cable: un rosa encendido, con la luz que baja por él (los datos, un pulso suave cada 4 unidades) y uno fuerte, la
 // cabeza, que es lo que sigue la cámara. El halo es otro tubo más ancho que suma luz (más por donde el tubo mira a la
 // cámara). Lo que pasa pegado a la cámara no se dibuja: sería un tubo enorme delante
+// (de lejos, el tubo se ensancha para no ser nunca más fino que uPx por unidad de distancia: si no, se rompe a trozos)
 const VERT_CABLE = /* glsl */ `#version 300 es
 in vec3 position; in vec3 normal; in float s;
 uniform mat4 modelMatrix, viewMatrix, projectionMatrix;
+uniform vec3 cameraPosition; uniform float uRadio, uPx;
 out vec3 vN; out vec3 vMundo; out float vS;
-void main() { vN = normal; vS = s; vec4 m = modelMatrix * vec4(position, 1.0); vMundo = m.xyz; gl_Position = projectionMatrix * viewMatrix * m; }`;
+void main() {
+  vec3 centro = position - normal * uRadio;
+  vec3 p = centro + normal * max(uRadio, distance(cameraPosition, centro) * uPx);
+  vN = normal; vS = s;
+  vec4 m = modelMatrix * vec4(p, 1.0); vMundo = m.xyz;
+  gl_Position = projectionMatrix * viewMatrix * m;
+}`;
 const FRAG_CABLE = /* glsl */ `#version 300 es
 precision highp float;
 in vec3 vN; in vec3 vMundo; in float vS; out vec4 salida;
 uniform vec3 cameraPosition, uSenal;
 uniform float uT, uCabeza, uAlfa, uHalo, uLargo;
 void main() {
-  float cerca = smoothstep(1.8, 4.0, distance(cameraPosition, vMundo));
+  float cerca = smoothstep(2.5, 5.0, distance(cameraPosition, vMundo)) * smoothstep(0.0, 0.03, vS);
   float frente = abs(dot(normalize(vN), normalize(cameraPosition - vMundo)));
-  float pulsos = pow(fract(vS * uLargo / 3.0 - uT * 1.4), 8.0);
-  float cabeza = exp(-abs(vS - uCabeza) * uLargo * 0.9);
-  float k = 0.6 + pulsos * 0.9 + cabeza * 2.5;
+  float pulsos = pow(fract(vS * uLargo / 4.0 - uT * 0.9), 3.0);
+  float cabeza = exp(-abs(vS - uCabeza) * uLargo * 0.8);
+  float k = 0.75 + pulsos * 0.45 + cabeza * 2.2;
   if (uHalo > 0.5) {
-    salida = vec4(uSenal * pow(frente, 2.0) * 0.32 * k * uAlfa * cerca, 0.0);
+    salida = vec4(uSenal * pow(frente, 2.0) * 0.28 * k * uAlfa * cerca, 0.0);
   } else {
     float a = uAlfa * cerca;
     salida = vec4(mix(uSenal, vec3(1.0, 0.93, 0.96), 0.3 + min(0.6, cabeza * 0.5)) * k * a, a);
@@ -233,14 +248,14 @@ export function crear(raiz, { datos, reducido, sonido, ir, pagina }) {
   const movil = !matchMedia('(hover: hover) and (pointer: fine)').matches;
   let renderer;
   try {
-    renderer = new Renderer({ canvas: lienzo, webgl: 2, dpr: Math.min(devicePixelRatio || 1, movil ? 1.5 : 2), alpha: true, premultipliedAlpha: true, antialias: true });
+    renderer = new Renderer({ canvas: lienzo, webgl: 2, dpr: Math.min(devicePixelRatio || 1, 1.5), alpha: true, premultipliedAlpha: true, antialias: true });
   } catch (e) { return null; }
   const gl = renderer.gl;
   if (!gl || !renderer.isWebgl2) return null;
 
   const camara = new Camera(gl, { fov: FOV, near: 0.05, far: 400 });
   camara.up.set(0, 0, -1);   // la parte de arriba de la pantalla es -z: lo de arriba de la página
-  const mundo = new Transform(), capas = new Transform();
+  const mundo = new Transform(), capas = new Transform(), cableT = new Transform();
   const textura = (image, { mip = true, filtro = gl.LINEAR } = {}) => new Texture(gl, {
     image, generateMipmaps: mip, minFilter: mip ? gl.LINEAR_MIPMAP_LINEAR : filtro, magFilter: filtro,
     wrapS: gl.CLAMP_TO_EDGE, wrapT: gl.CLAMP_TO_EDGE, anisotropy: mip ? 8 : 1,
@@ -248,13 +263,13 @@ export function crear(raiz, { datos, reducido, sonido, ir, pagina }) {
   const vacia = new Texture(gl, { image: new Uint8Array([0, 0, 0, 0]), width: 1, height: 1, generateMipmaps: false });
   const plano = new Plane(gl), caja = new Box(gl), cilindro = new Cylinder(gl, { radialSegments: 48 });
 
-  // --- Las hojas de código (de abajo arriba se dibujan en orden: primero la de los bytes) ---------------------------------------------------------------------------------------
+  // --- Las hojas (se dibujan de abajo arriba: primero la de los píxeles) ---------------------------------------------
   const capa = (orden) => {
     const program = new Program(gl, {
-      vertex: VERT_PLANO, fragment: FRAG_CAPA, transparent: true, depthWrite: false,
+      vertex: VERT_PLANO, fragment: FRAG_CAPA, transparent: true,
       uniforms: {
-        tMapa: { value: vacia }, tPistas: { value: vacia }, uAlfa: { value: 0 }, uFondo: { value: 0 }, uPistas: { value: 0 },
-        uT: { value: 0 }, uNoche: { value: NOCHE }, uRosa: { value: ROSA }, uCrema: { value: CREMA },
+        tMapa: { value: vacia }, uAlfa: { value: 0 }, uFondo: { value: 0 }, uPixeles: { value: orden === 2 ? 1 : 0 },
+        uRejilla: { value: [120, 75] }, uT: { value: 0 }, uNoche: { value: NOCHE }, uRosa: { value: ROSA }, uCrema: { value: CREMA },
         uOla: { value: 1e5 }, uOrigen: { value: [0, 0] }, uPant: { value: [0, 0] },
         uMarco: { value: 0 }, uAsp: { value: 1.6 }, uVia: { value: [-1, -1] },
       },
@@ -293,20 +308,22 @@ export function crear(raiz, { datos, reducido, sonido, ir, pagina }) {
 
   // El cable: el tubo y su halo comparten valores (la luz que baja, la cabeza y el alfa)
   const uniCable = { uSenal: { value: SENAL }, uT: { value: 0 }, uCabeza: { value: 0 }, uAlfa: { value: 1 }, uLargo: { value: 60 } };
-  const progNucleo = new Program(gl, { vertex: VERT_CABLE, fragment: FRAG_CABLE, uniforms: { ...uniCable, uHalo: { value: 0 } }, transparent: true });
-  const progHalo = new Program(gl, { vertex: VERT_CABLE, fragment: FRAG_CABLE, uniforms: { ...uniCable, uHalo: { value: 1 } }, transparent: true, depthWrite: false });
+  const progNucleo = new Program(gl, { vertex: VERT_CABLE, fragment: FRAG_CABLE, transparent: true, depthWrite: false,
+    uniforms: { ...uniCable, uHalo: { value: 0 }, uRadio: { value: 0.05 }, uPx: { value: 0.001 } } });
+  const progHalo = new Program(gl, { vertex: VERT_CABLE, fragment: FRAG_CABLE, transparent: true, depthWrite: false,
+    uniforms: { ...uniCable, uHalo: { value: 1 }, uRadio: { value: 0.35 }, uPx: { value: 0.004 } } });
   progHalo.setBlendFunc(gl.ONE, gl.ONE);
-  let cable = null, nucleo = null, halo = null, sCapas = [0, 0, 0], sFin = 1, senal = 0;
+  let cable = null, nucleo = null, halo = null, sCapas = [0, 0, 0], sFin = 1, senal = 0, paradas = [2, 2, 2];
 
   // --- El estado del viaje y la cámara -----------------------------------------------------------------------------
-  // f: por dónde va el viaje (0, recto sobre la hoja de arriba; 1, la vista explotada; 2, al final del tramo de cable que
-  // recorre la cámara; 3, la vista de la placa); sube: cuánto han crecido las piezas; ola: cuánto ha avanzado la ola
+  // f: por dónde va el viaje (0, recto sobre la hoja de arriba; 1, la vista explotada; 2, al principio del cable; de 2 a
+  // 3, bajando por él, con una parada encima de cada hoja (paradas); 4, la vista de la placa); sube: cuánto han crecido las piezas; ola: cuánto ha avanzado la ola
   // desde el botón (1, lo cubre todo); dive: la bajada hasta una pieza al pincharla
   const st = { f: 0, sube: 0, ola: 1, dive: 0, T: 0 };
   const raton = { x: 0, y: 0, nx: 0, ny: 0, dentro: false };
   let piezas = [], mallas = [], alturas = null, final = null, general = null, disp = null, texturasPlaca = null;
   let apuntado = null, peso = 0, destino = null, llegado = false, vistaGeneral = true, adelante = [0, -1, 0];
-  let hoja = { w: 1, h: 1 };
+  let hoja = { w: 1, h: 1 }, suave1 = null, altosHojas = [60, 60, 60, 60];
   const leds = {};
   const bus = [0, 0, 0, 0], sentido = [1, 1, 1, 1];
   let deriva = [0, 0, 0];
@@ -347,20 +364,22 @@ export function crear(raiz, { datos, reducido, sonido, ir, pagina }) {
   function montarCable() {
     const bx = (origen[0] / innerWidth - 0.5) * hoja.w, bz = (origen[1] / innerHeight - 0.5) * hoja.h;
     const [y1, y2, y3] = alturas.capas, [lx, lz] = disp.aterriza;
+    // (por las hojas va casi recto, en diagonal hacia el centro: así la cámara no da tirones)
+    const en3 = [bx * 0.15 + 0.4, y3, bz * 0.15 + 0.8];
+    const recta = (k) => [bx + (en3[0] - bx) * k, y1 + (y3 - y1) * k, bz + (en3[2] - bz) * k];
     cable = crearCable([
-      [bx, y1 + 0.02, bz],
-      [bx * 0.85, y1 - SEP * 0.45, bz * 0.85 + 0.2],
-      [bx * 0.55, y2, bz * 0.55 + 0.4],
-      [bx * 0.35 + 0.2, y2 - SEP * 0.5, bz * 0.35 + 0.6],
-      [bx * 0.2 + 0.4, y3, bz * 0.2 + 0.8],
-      [(bx * 0.2 + lx) / 2 + 1.2, y3 * 0.45, (bz * 0.2 + lz) / 2 + 1.5],
-      [lx, 1.4, lz + 0.5],
+      [bx, y1 + 2.6, bz],
+      [bx, y1, bz],
+      recta(0.5),
+      en3,
+      [(en3[0] + lx) / 2 + 1, y3 * 0.5, (en3[2] + lz) / 2 + 1.2],
+      [lx, 1.6, lz + 0.4],
       [lx, 0.03, lz],
     ]);
     [nucleo, halo].forEach((m) => { if (m) { m.setParent(null); m.geometry.remove(); } });
     nucleo = new Mesh(gl, { geometry: tubo(gl, cable.puntos, 0.05), program: progNucleo, renderOrder: 5, frustumCulled: false });
     halo = new Mesh(gl, { geometry: tubo(gl, cable.puntos, 0.35), program: progHalo, renderOrder: 6, frustumCulled: false });
-    nucleo.setParent(mundo); halo.setParent(mundo);
+    nucleo.setParent(cableT); halo.setParent(cableT);
     uniCable.uLargo.value = cable.total;
     // Dónde atraviesa cada hoja (su agujero) y hasta dónde lo recorre la cámara (justo por debajo de la última hoja)
     sCapas = alturas.capas.map((y) => cable.sEnAltura(y));
@@ -369,6 +388,8 @@ export function crear(raiz, { datos, reducido, sonido, ir, pagina }) {
       c.program.uniforms.uVia.value = [q[0] / hoja.w + 0.5, 0.5 - q[2] / hoja.h];
     });
     sFin = cable.sEnAltura(alturas.yf + 1);
+    // Las paradas: arriba del todo (encima de la hoja de arriba) y un poco antes de atravesar cada una de las otras dos
+    paradas = [0, ...sCapas.slice(1).map((sk) => sk - 1.2 / cable.total)].map((sk) => 2 + Math.max(0, sk) / sFin);
   }
 
   // Monta la placa y las piezas (la primera vez, o si el móvil ha girado)
@@ -381,10 +402,7 @@ export function crear(raiz, { datos, reducido, sonido, ir, pagina }) {
     for (const [k, c] of Object.entries(hecho.caras)) caras[k] = textura(c);
     uniPieza.tArriba.value = caras.ihs;   // para que el primer uso ya tenga algo válido
     capa2.program.uniforms.tMapa.value = textura(hecho.codigo);
-    capa3.program.uniforms.tMapa.value = textura(hecho.bytes.texto);
-    capa3.program.uniforms.tPistas.value = textura(hecho.bytes.pistas);
-    texturasPlaca = [tAspecto, tSenal, ...Object.values(caras), capa2.program.uniforms.tMapa.value,
-      capa3.program.uniforms.tMapa.value, capa3.program.uniforms.tPistas.value];
+    texturasPlaca = [tAspecto, tSenal, ...Object.values(caras), capa2.program.uniforms.tMapa.value];
 
     mallas.forEach((m) => m.setParent(null));
     mallas = [];
@@ -438,6 +456,9 @@ export function crear(raiz, { datos, reducido, sonido, ir, pagina }) {
   const medir = () => {
     renderer.setSize(innerWidth, innerHeight);
     camara.perspective({ aspect: gl.canvas.width / gl.canvas.height });
+    // El cable no baja de 1,5 px de grueso (y su halo, de 6)
+    progNucleo.uniforms.uPx.value = ((2 * TAN) / innerHeight) * 0.75;
+    progHalo.uniforms.uPx.value = ((2 * TAN) / innerHeight) * 3;
     if (disp) encuadrar();
   };
   addEventListener('resize', medir);
@@ -447,20 +468,28 @@ export function crear(raiz, { datos, reducido, sonido, ir, pagina }) {
   // de cada visita no hay vista explotada: se va derecho al cable
   const mezclaCam = (a, b, k) => ({ pos: mezcla(a.pos, b.pos, k), mira: mezcla(a.mira, b.mira, k) });
   const enCable = (s) => {
-    const p = cable.en(s), atras = cable.en(s - 0.05), mira = cable.en(s + 0.08);
-    return { pos: [atras[0] + (atras[0] - p[0]) * 0.4 + 1, atras[1] + 2.2, atras[2] + (atras[2] - p[2]) * 0.4 + 1.2], mira };
+    const u = 1 / cable.total, p = cable.en(s), atras = cable.en(s - 1.6 * u), mira = cable.en(s + 3.8 * u);
+    return { pos: [atras[0] + (atras[0] - p[0]) * 0.4 + 0.8, atras[1] + 1.4, atras[2] + (atras[2] - p[2]) * 0.4 + 1], mira };
   };
   const camaraBase = () => {
     const f = st.f, s = (x) => suave(Math.min(1, Math.max(0, x)));
-    const inicio = { pos: [0, alturas.y0, 0], mira: [0, alturas.capas[0], 0] };
-    const gen = vistaGeneral ? general : enCable(0);
-    if (f <= 1) return mezclaCam(inicio, gen, s(f));
-    if (f <= 2) return mezclaCam(gen, enCable(sFin * (f - 1)), s((f - 1) * 3));
-    return mezclaCam(enCable(sFin), final, s(f - 2));
+    const inicio = { pos: [0, alturas.y0, 0], mira: [0, alturas.capas[0], 0] }, arranque = enCable(0);
+    if (f <= 1) return mezclaCam(inicio, vistaGeneral ? general : arranque, s(f));
+    if (f <= 2) return vistaGeneral ? mezclaCam(general, arranque, s(f - 1)) : arranque;
+    if (f <= 3) return enCable(sFin * (f - 2));
+    return mezclaCam(enCable(sFin), final, s(f - 3));
   };
-  // Además, se acerca un poco a la pieza que apuntas, sigue al ratón un poco y, al pinchar, baja hasta la pieza
-  const camaraEn = () => {
+  // Además: mientras baja por el cable, un poco suavizada (sin tirones en las curvas); se acerca un poco a la pieza que
+  // apuntas, sigue al ratón un poco y, al pinchar, baja hasta la pieza
+  const camaraEn = (dt = 0) => {
     let { pos, mira } = camaraBase();
+    const w = entre(1.02, 1.3, st.f) * (1 - entre(3.3, 3.7, st.f));
+    if (!suave1 || w <= 0) suave1 = { pos, mira };
+    else {
+      const k = Math.min(1, dt * 7);
+      suave1 = mezclaCam(suave1, { pos, mira }, k);
+      ({ pos, mira } = mezclaCam({ pos, mira }, suave1, w));
+    }
     const conRaton = llegado && raton.dentro && !movil && !destino;
     pos = [pos[0] + deriva[0] + (conRaton ? raton.nx * 1.1 : 0), pos[1] + deriva[1], pos[2] + deriva[2] + (conRaton ? raton.ny * 0.8 : 0)];
     mira = [mira[0] + deriva[0] * 0.6, mira[1], mira[2] + deriva[2] * 0.6];
@@ -574,10 +603,11 @@ export function crear(raiz, { datos, reducido, sonido, ir, pagina }) {
   };
   const tiempo = (s) => (s < 60 ? `${Math.round(s)} s` : `${Math.floor(s / 60)} min ${Math.round(s % 60)} s`);
   const hojas = [...raiz.querySelectorAll('[data-pl-hoja]')];
-  function textoCapa() {
-    if (vistaGeneral && st.f > 0.5 && st.f < 1.3) return 'vista explotada · 4 capas, de lo que ves a lo que lo ejecuta';
-    const i = alturas.capas.findIndex((c) => camara.position.y > c + 0.3);
-    const n = i === -1 || st.f >= 2 ? 3 : i;
+  const columna = () => Math.round(innerWidth * 0.44);   // (en vertical, el ancho de la columna de los nombres)
+  function textoCapa(parada) {
+    if (vistaGeneral && st.f > 0.5 && st.f < 1.5) return 'vista explotada · 4 capas, de lo que ves a lo que lo ejecuta';
+    const i = parada >= 0 ? parada : alturas.capas.findIndex((c) => camara.position.y > c + 0.3);
+    const n = i === -1 || st.f >= 3 ? 3 : i;
     return `capa ${n + 1} de 4 · ${hojas[n].dataset.nombre.toLowerCase()}`;
   }
 
@@ -629,20 +659,28 @@ export function crear(raiz, { datos, reducido, sonido, ir, pagina }) {
     vistaGeneral = primera;
     Object.assign(st, { f: 0, sube: 0, ola: 0, dive: 0 });
     cubrir(false);
-    const ola = primera ? 1.2 : 0.85, abre = primera ? 1.5 : 0.45, lee = primera ? 0.8 : 0, baja = primera ? 3.4 : 1.6, llega = primera ? 1.5 : 0.9;
+    // (tiempos: la ola, abrir la vista explotada, leerla, ir al cable, cada tramo, cada parada y la llegada)
+    const T = primera
+      ? { ola: 1.2, abre: 1.5, lee: 0.9, alCable: 1.1, tramo: 0.95, para: 0.6, llega: 1.3 }
+      : { ola: 0.85, abre: 0.6, lee: 0, alCable: 0, tramo: 0.5, para: 0.2, llega: 0.8 };
     const tl = gsap.timeline({ onComplete: llegar });
-    tl.call(() => sonido.viaje(ola + 0.2, 1), null, 0)
-      .to(st, { ola: 1, duration: ola, ease: 'power1.inOut' }, 0)
-      .call(() => cubrir(true), null, ola);
-    let t = ola + 0.05;
-    tl.to(st, { f: 1, duration: abre, ease: primera ? 'power2.inOut' : 'power2.in' }, t);
-    t += abre + lee;
-    tl.call(() => sonido.viaje(baja + 0.4, 1), null, t)
-      .to(st, { f: 2, duration: baja, ease: primera ? 'power1.inOut' : 'none' }, t);
-    t += baja;
-    tl.to(st, { f: 3, duration: llega, ease: 'power2.inOut' }, t)
-      .to(st, { sube: 1, duration: primera ? 1.1 : 0.6, ease: 'power2.out' }, t + llega * 0.45);
-    crepitar(tl, 0, ola, 1);
+    tl.call(() => sonido.viaje(T.ola + 0.2, 1), null, 0)
+      .to(st, { ola: 1, duration: T.ola, ease: 'power1.inOut' }, 0)
+      .call(() => cubrir(true), null, T.ola);
+    let t = T.ola + 0.05;
+    tl.to(st, { f: 1, duration: T.abre, ease: 'power2.inOut' }, t);
+    t += T.abre + T.lee;
+    if (primera) { tl.to(st, { f: 2, duration: T.alCable, ease: 'power2.inOut' }, t); t += T.alCable; }
+    else tl.set(st, { f: 2 }, t);
+    t += T.para;
+    // Por el cable: de parada en parada y, de la última, hasta abajo
+    [...paradas.slice(1), 3].forEach((fk) => {
+      tl.call(() => sonido.viaje(T.tramo + 0.3, 1), null, t).to(st, { f: fk, duration: T.tramo, ease: 'power2.inOut' }, t);
+      t += T.tramo + (fk < 3 ? T.para : 0);
+    });
+    tl.to(st, { f: 4, duration: T.llega, ease: 'power2.inOut' }, t)
+      .to(st, { sube: 1, duration: primera ? 1.1 : 0.6, ease: 'power2.out' }, t + T.llega * 0.45);
+    crepitar(tl, 0, T.ola, 1);
     viaje = tl;
   }
 
@@ -669,7 +707,7 @@ export function crear(raiz, { datos, reducido, sonido, ir, pagina }) {
       ? [((apuntado.h.x0 + apuntado.h.x1) / 2 - final.mira[0]) * 0.14, -1.2, ((apuntado.h.z0 + apuntado.h.z1) / 2 - final.mira[2]) * 0.14]
       : [0, 0, 0];
     deriva = mezcla(deriva, objetivo.map((v) => v * suave(peso)), Math.min(1, dt * 2.2));
-    camaraEn();
+    camaraEn(dt);
 
     // Las piezas crecen desde la placa, primero las del centro
     for (const m of mallas) {
@@ -710,55 +748,65 @@ export function crear(raiz, { datos, reducido, sonido, ir, pagina }) {
     const A = alturas, y = camara.position.y;
     const dist = A.capas.map((c) => y - c);
     const u1 = capa1.program.uniforms, u2 = capa2.program.uniforms, u3 = capa3.program.uniforms;
-    u1.uFondo.value = 1; u2.uFondo.value = 0.86; u3.uFondo.value = 0.86;
+    u1.uFondo.value = 1; u2.uFondo.value = 1; u3.uFondo.value = 1;
     u1.uMarco.value = entre(0.05, 0.6, st.f); u2.uMarco.value = 1; u3.uMarco.value = 1;
-    u1.uAlfa.value = entre(1.1, 3.2, dist[0]);
+    u1.uAlfa.value = st.f < 0.5 ? 1 : entre(1, 2.6, dist[0]);
     u1.uOla.value = st.ola >= 1 ? 1e5 : st.ola * alcance;
     u1.uOrigen.value = origen; u1.uPant.value = [innerWidth, innerHeight];
-    u2.uAlfa.value = entre(1.1, 3.2, dist[1]);
-    u3.uAlfa.value = entre(1.1, 3.2, dist[2]);
-    u3.uPistas.value = entre(7, 2.5, dist[2]);
+    u2.uAlfa.value = entre(1, 2.6, dist[1]);
+    u3.uAlfa.value = entre(1, 2.6, dist[2]);
     for (const u of [u1, u2, u3]) u.uT.value = st.T;
     // (mientras la ola no lo cubre todo, solo la de arriba: fuera de la ola tiene que verse la página)
     capa1.visible = u1.uAlfa.value > 0.002;
     capa2.visible = cubierta && u2.uAlfa.value > 0.002; capa3.visible = cubierta && u3.uAlfa.value > 0.002;
+    // (una hoja que se está apartando no tapa lo que tiene detrás: solo deja su profundidad cuando es casi opaca)
+    [capa1, capa2, capa3].forEach((c) => { c.program.depthWrite = c.program.uniforms.uAlfa.value > 0.9; });
     const luz = 0.35 + 0.65 * entre(A.yf + 26, A.yf + 4, y);
     uniPlaca.uLuz.value = luz; uniPieza.uLuz.value = luz;
 
     // El cable: la cabeza va justo delante de la cámara mientras baja; al final corre sola hasta la placa, se conecta
     // (brilla donde aterriza y la señal entra por el bus en el procesador) y el cable se apaga
     if (cable) {
-      const cab = st.f < 1 ? 0 : st.f < 2 ? sFin * (st.f - 1) + 0.07 : Math.min(1, sFin + 0.07 + (1 - sFin) * (st.f - 2) * 1.7);
+      const cab = st.f < 2 ? 0.06 : st.f < 3 ? sFin * (st.f - 2) + 0.06 : Math.min(1, sFin + 0.06 + (1 - sFin) * (st.f - 3) * 1.8);
       uniCable.uCabeza.value = cab; uniCable.uT.value = st.T;
-      const alfa = 1 - entre(2.7, 3, st.f);
+      const alfa = 1 - entre(3.7, 4, st.f);
       uniCable.uAlfa.value = alfa;
       nucleo.visible = halo.visible = cubierta && alfa > 0.01;
-      const at = entre(2.45, 2.6, st.f);
-      uniPlaca.uAterriza.value = [disp.aterriza[0], disp.aterriza[1], at * (1.2 - 0.8 * entre(2.6, 3, st.f))];
+      const at = entre(3.42, 3.56, st.f);
+      uniPlaca.uAterriza.value = [disp.aterriza[0], disp.aterriza[1], at * (1.2 - 0.8 * entre(3.56, 4, st.f))];
       senal = llegado ? 0 : at;
     }
 
     // El inspector: la capa, y la caja de la pieza apuntada con lo que mide en pantalla
-    const txt = textoCapa();
+    const parada = st.f >= 2 && st.f <= 3 ? paradas.findIndex((fk) => Math.abs(st.f - fk) < 0.012) : -1;
+    const txt = textoCapa(parada);
     if (txt !== ultimaCapa) { ultimaCapa = txt; hudCapa.textContent = txt; }
-    // El nombre de cada hoja, a su derecha (o debajo, si ahí no cabe), en la vista explotada y mientras bajas; el de la
-    // placa, junto a donde se conecta el cable, al final del viaje. Si uno pisa al de encima, baja lo justo
+    // El nombre de cada hoja: en la vista explotada, a su derecha (o debajo, si ahí no cabe; si uno pisa al de encima, baja
+    // lo justo); en cada parada, el de esa hoja, en grande y quieto a la izquierda; el de la placa, junto a donde se
+    // conecta el cable, al final. Mientras la cámara se mueve por el cable, ninguno: así se lee cada uno a su tiempo
     let suelo = -Infinity;
     hojas.forEach((el, i) => {
-      let [x, yy, delante] = i < 3 ? aPantalla(hoja.w / 2, A.capas[i], 0) : aPantalla(disp.aterriza[0], 0, disp.aterriza[1]);
-      let debajo = false;
-      if (hecho.vertical) x = Math.min(x, innerWidth - 150);
-      else if (i < 3 && x + 230 > innerWidth) { [x, yy, delante] = aPantalla(0, A.capas[i], hoja.h / 2); debajo = true; }
-      el.style.maxWidth = hecho.vertical ? `${Math.round(innerWidth - x - 30)}px` : '';
-      const alfa = [u1, u2, u3][i]?.uAlfa.value ?? 1;
-      const alto = el.offsetHeight || 60;
-      if (!debajo && i < 3) { yy = Math.max(yy, suelo + 12 + alto / 2); }
-      const ve = cubierta && !llegado && !destino && delante && x > 0 && x < innerWidth && yy > 80 && yy < innerHeight - 110 &&
-        (i < 3 ? st.f > 0.55 && alfa > 0.6 : st.f > 2.1);
-      if (ve && i < 3) suelo = debajo ? yy + 14 + alto : yy + alto / 2;
+      let x = 0, yy = 0, delante = true, debajo = false, grande = false, ve = false;
+      if (i === parada) {
+        grande = true; ve = cubierta && !destino;
+        x = hecho.vertical ? 18 : 32; yy = innerHeight * (hecho.vertical ? 0.66 : 0.5);
+      } else if (i < 3 && vistaGeneral && st.f > 0.55 && st.f < 1.5) {
+        [x, yy, delante] = aPantalla(hoja.w / 2, A.capas[i], 0);
+        if (hecho.vertical) x = innerWidth - columna() - 12;
+        else if (x + 230 > innerWidth) { [x, yy, delante] = aPantalla(0, A.capas[i], hoja.h / 2); debajo = true; }
+        if (!debajo) yy = Math.max(yy, suelo + 12 + altosHojas[i] / 2);
+        ve = cubierta && delante && x > 0 && x < innerWidth && yy > 80 && yy < innerHeight - 110;
+        if (ve) suelo = debajo ? yy + 14 + altosHojas[i] : yy + altosHojas[i] / 2;
+      } else if (i === 3 && st.f > 3.15 && !llegado) {
+        [x, yy, delante] = aPantalla(disp.aterriza[0], 0, disp.aterriza[1]);
+        ve = cubierta && !destino && delante && x > 0 && x < innerWidth - 200 && yy > 80 && yy < innerHeight - 110;
+      }
       el.classList.toggle('on', ve);
       el.classList.toggle('debajo', debajo);
-      if (ve) el.style.transform = `translate(${(x + (debajo ? 0 : 18)).toFixed(1)}px, ${(yy + (debajo ? 14 : 0)).toFixed(1)}px)`;
+      el.classList.toggle('grande', grande);
+      if (!ve) return;
+      el.style.maxWidth = hecho.vertical && !grande ? `${columna()}px` : '';
+      el.style.transform = `translate(${(x + (debajo || grande ? 0 : 18)).toFixed(1)}px, ${(yy + (debajo ? 14 : 0)).toFixed(1)}px)`;
     });
     if (apuntado && !movil && !destino) {
       const r = apuntado.rect;
@@ -780,7 +828,7 @@ export function crear(raiz, { datos, reducido, sonido, ir, pagina }) {
         pz.etq.style.transform = `translate(${x.toFixed(1)}px, ${((r.y0 + r.y1) / 2).toFixed(1)}px)`;
         continue;
       }
-      const alto = pz.etq.offsetHeight || 60, medio = (pz.etq.offsetWidth || 120) / 2 + 10;
+      const [ancho, alto] = pz.tam || [120, 60], medio = ancho / 2 + 10;
       const abajo = r.y1 + 12 + alto < innerHeight - 96;
       const x = Math.min(innerWidth - medio, Math.max(medio, (r.x0 + r.x1) / 2));
       const yy = abajo ? r.y1 + 12 : r.y0 - 12 - alto;
@@ -788,7 +836,8 @@ export function crear(raiz, { datos, reducido, sonido, ir, pagina }) {
       pz.etq.style.transform = `translate(${x.toFixed(1)}px, ${yy.toFixed(1)}px)`;
     }
 
-    // Con la ola a medias, el lienzo es transparente y solo lleva la capa 1; después, la noche, la placa y las capas
+    // Con la ola a medias, el lienzo es transparente y solo lleva la hoja de arriba; después, la noche, la placa, las
+    // hojas y, lo último, el cable (las hojas ya han dejado su profundidad: el tramo que pasa por detrás de una no se ve)
     if (cubierta) {
       gl.clearColor(...NOCHE, 1);
       renderer.render({ scene: mundo, camera: camara });
@@ -797,16 +846,17 @@ export function crear(raiz, { datos, reducido, sonido, ir, pagina }) {
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     }
     renderer.render({ scene: capas, camera: camara, clear: false });
+    if (cubierta) renderer.render({ scene: cableT, camera: camara, clear: false });
   }
 
-  // La capa 1, con la página tal cual está ahora mismo; si alguna imagen aún cargaba, se repinta al llegar
-  let tCapa1 = null;
+  // La hoja de arriba, con la página tal cual está ahora mismo (con mipmaps: en la vista explotada se ve pequeña y, sin
+  // ellos, parpadea); si alguna imagen aún cargaba, se repinta al llegar
+  let tCapa1 = null, tCapa3 = null;
   function pintarCapa1() {
     const { lienzo: c, pendientes } = capaVisible(renderer.dpr);
     if (tCapa1) gl.deleteTexture(tCapa1.texture);
-    tCapa1 = textura(c, { mip: false });
+    tCapa1 = textura(c);
     capa1.program.uniforms.tMapa.value = tCapa1;
-    capa1.program.uniforms.tPistas.value = tCapa1;
     if (pendientes.length) {
       Promise.all(pendientes).then(() => {
         if (!vivo || camara.position.y < alturas.capas[0] + 3) return;
@@ -815,6 +865,16 @@ export function crear(raiz, { datos, reducido, sonido, ir, pagina }) {
         tCapa1.needsUpdate = true;
       });
     }
+  }
+  // La de los píxeles: la misma pantalla, un píxel por cada 12 px (se pinta en el fotograma siguiente: no hace falta
+  // hasta que la ola lo ha cubierto todo)
+  function pintarCapa3() {
+    const { lienzo: c, cols, filas, pendientes } = capaPixeles();
+    if (tCapa3) gl.deleteTexture(tCapa3.texture);
+    tCapa3 = textura(c, { mip: false, filtro: gl.NEAREST });
+    capa3.program.uniforms.tMapa.value = tCapa3;
+    capa3.program.uniforms.uRejilla.value = [cols, filas];
+    if (pendientes.length) Promise.all(pendientes).then(() => { if (vivo) { tCapa3.image = capaPixeles().lienzo; tCapa3.needsUpdate = true; } });
   }
 
   // Lo que pesa, antes de abrir: pintar la placa, sus caras y las capas 2 y 3, y subirlas a la tarjeta gráfica
@@ -839,7 +899,13 @@ export function crear(raiz, { datos, reducido, sonido, ir, pagina }) {
       piezas.forEach((pz) => { pz.etq.classList.remove('visto', 'on'); pz.etq.querySelector('.pl__frase').textContent = pz.d.frase; });
       Object.values(leds).forEach((l) => { l.on = 0; });
       hudEncendida.textContent = '';
+      suave1 = null;
       pintarCapa1();
+      requestAnimationFrame(pintarCapa3);
+      // Los tamaños de los nombres, una vez (en el bucle no se leen: obligaría a recolocar la página en cada fotograma)
+      hojas.forEach((el) => { el.style.maxWidth = hecho.vertical ? `${columna()}px` : ''; });
+      altosHojas = hojas.map((el) => el.offsetHeight || 60);
+      piezas.forEach((pz) => { pz.tam = [pz.etq.offsetWidth || 120, pz.etq.offsetHeight || 60]; });
       if (reducido) {
         Object.assign(st, { f: 3, sube: 1, ola: 1, dive: 0 });
         cubrir(true);
@@ -863,7 +929,7 @@ export function crear(raiz, { datos, reducido, sonido, ir, pagina }) {
       sonido.viaje(1, -1);
       // De vuelta se sube por el cable, sin la vista explotada (si ya se había pasado de ella)
       const arriba = st.f <= 0.001, desde = arriba ? 0 : 1.55, ola = 0.8;
-      if (st.f >= 1.34) vistaGeneral = false;
+      if (st.f >= 2) vistaGeneral = false;
       return new Promise((listo) => {
         const tl = gsap.timeline({ onComplete: listo });
         if (!arriba) {

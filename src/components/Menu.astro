@@ -82,6 +82,14 @@ const enlace = (d) => (d.ruta === null ? undefined : `${base}${d.ruta}`);
   }
   .pl__hoja:global(.on) { opacity: 1; }
   .pl__hoja:global(.debajo) { translate: -50% 0; justify-items: center; text-align: center; }
+  /* En cada parada, el de la hoja en la que estás, en grande, con un velo oscuro detrás para que se lea sobre el código */
+  .pl__hoja:global(.grande) {
+    max-width: min(36ch, calc(100vw - 36px)); gap: 8px; padding: 22px 64px 22px 0;
+    background: linear-gradient(90deg, rgba(18, 13, 10, .86) 0%, rgba(18, 13, 10, .7) 70%, rgba(18, 13, 10, 0) 100%);
+  }
+  .pl__hoja:global(.grande) .pl__hoja-n { font-size: 11px; }
+  .pl__hoja:global(.grande) .pl__hoja-nombre { font-size: clamp(38px, 4.6vw, 76px); }
+  .pl__hoja:global(.grande) .pl__hoja-frase { font-size: 13px; color: var(--crema); }
   .pl__hoja-n { color: var(--rosa); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
   .pl__hoja-nombre { font-family: var(--serif); font-weight: 300; font-size: clamp(22px, 2vw, 34px); line-height: 1.05; text-shadow: 0 0 12px var(--noche), 0 0 24px var(--noche); }
   .pl__hoja-frase { color: var(--crema-2); font-size: 11px; line-height: 1.4; text-shadow: 0 0 8px var(--noche); }
