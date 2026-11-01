@@ -13,8 +13,10 @@ import { letrasQueNotan } from './letras.js';
 // Cómo queda cada foto en su montón: el giro (grados) y lo que se aparta del centro (px)
 const GIROS = { sebas: [-5, 3.5, -2.5, 6, -3.5], alvaro: [2.5, -3, 4, -1.5, 3] };
 const DESVIOS = { sebas: [[-8, 6], [10, -8], [-12, -2], [6, 10], [0, -6]], alvaro: [[8, -6], [-10, 8], [6, 4], [-6, -10], [2, 4]] };
-// Dónde está el centro de cada montón (en anchos de pantalla): al empezar, al acabar los capítulos y al juntarse
-const CENTROS = { sebas: [0.36, 0.445, 0.5], alvaro: [0.64, 0.555, 0.5] };
+// Lo que separa los centros de los dos montones: al empezar, el 28 % del ancho de la pantalla; en el último capítulo,
+// el 86 % del ancho de una foto (se tocan y se pisan un 14 %, sin taparse). Se acercan cada vez más deprisa (curva
+// 1,6): el 04 aún deja un hueco y el 05 es el que se une. Al final, los dos van al centro, al marco de los dos
+const SEPARA = { inicio: 0.28, final: 0.86, curva: 1.6 };
 const UNIDAD = 90;          // vh de scroll por capítulo
 const GLIFOS = '01<>/{}[]#=+*_-~';
 
@@ -144,13 +146,13 @@ function montarEscena(raiz) {
     const vw = innerWidth, vh = innerHeight;
     // P: por qué capítulo va el scroll (0 = el primero entra cuando la escena llega arriba; N, se juntan)
     const P = (-r.top / Math.max(1, r.height - vh)) * (N + 1);
-    const junta = suave(limitar(P / (N - 1)));
+    const junta = Math.pow(limitar(P / (N - 1)), SEPARA.curva);
     const m = suave(limitar((P - (N - 0.35)) / 0.9));
+    const separa = mezclar(mezclar(SEPARA.inicio * vw, SEPARA.final * fw, junta), 0, m);
 
     for (const q of ['sebas', 'alvaro']) {
       // El montón, en su sitio: se acerca al otro capítulo a capítulo y al final se encoge hasta el marco
-      const [c0, c1, c2] = CENTROS[q];
-      const cx = mezclar(mezclar(c0, c1, junta), c2, m) * vw;
+      const cx = vw / 2 + (q === 'sebas' ? -1 : 1) * separa / 2;
       pilas[q].style.transform = `translate(${(cx - fw / 2).toFixed(1)}px, 0) scale(${(1 - 0.38 * m).toFixed(3)})`;
       pilas[q].style.opacity = (1 - limitar((m - 0.45) / 0.4)).toFixed(3);
 
