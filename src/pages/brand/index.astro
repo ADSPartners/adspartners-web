@@ -1,13 +1,14 @@
 ---
 // Brand, «Desmontada» (02-nov; la B del prototipo de tres direcciones, la que eligió Álvaro). La marca de adsPartners
-// despiezada en cinco planchas: arriba, el ads terminado; al bajar, la pila se pone en vista técnica, se abre y se
-// recorre capa a capa (la marca, la forma, el color, la letra y la voz), cada una con su cota, su regla y su juego; al
-// final se vuelve a montar. El ratón la ladea con un muelle, levanta la plancha que tienes debajo y deja coger la pila y
-// girarla (scripts/brand.js). CSS 3D, sin WebGL. Debajo, lo que hacemos con la tuya.
+// despiezada en seis planchas: arriba, el ads terminado; al bajar, la pila se pone en vista técnica, se abre y se
+// recorre capa a capa (la marca, la forma, el color, la letra, la voz y, debajo de todo, la idea). Cada capa es un
+// capítulo: su plancha crece y, al lado, qué es, qué efecto tiene en una empresa y un dato con su fuente; y tiene su
+// juego. Al final se vuelve a montar. El ratón la ladea con un muelle, levanta la plancha que tienes debajo y deja coger
+// la pila y girarla (scripts/brand.js). CSS 3D, sin WebGL. Debajo, lo que hace una marca bien hecha y el cierre.
 import Base from '../../layouts/Base.astro';
 import Cursor from '../../components/Cursor.astro';
 import Marca from '../../components/Marca.astro';
-import { PORTADA, CAPAS, PALETA, LETRAS, TITULAR_LETRA, CIERRE } from '../../data/brand.js';
+import { PORTADA, CAPAS, IDEA, PALETA, LETRAS, TITULAR_LETRA, EFECTOS, CIERRE } from '../../data/brand.js';
 
 const base = import.meta.env.BASE_URL;
 const cursiva = (s: string) => s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
@@ -33,7 +34,7 @@ const cursiva = (s: string) => s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
     <!-- El viaje: la escena se queda fija mientras bajas y lo bajado la despieza -->
     <section class="bd-viaje" data-viaje aria-label="La marca de adsPartners, desmontada">
       <div class="bd-escena" data-escena>
-        <div class="bd-texto">
+        <div class="bd-texto" data-texto>
           <p class="bd-etq">( {PORTADA.etiqueta} )</p>
           <h2 class="bd-t" data-vivo data-titulo set:html={cursiva(PORTADA.titulo)} />
           <p class="bd-p">{PORTADA.texto}</p>
@@ -51,9 +52,12 @@ const cursiva = (s: string) => s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
             <div class="bd-capa" data-capa="1">
               <div class="bd-capa__dentro">
                 <div class="bd-forma" data-forma>
+                  <span class="bd-forma__aire" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
                   <span class="bd-forma__fantasma"><Marca tipo="iso" /></span>
                   <span class="bd-forma__iso" data-forma-iso><Marca tipo="iso" /></span>
                 </div>
+                <span class="bd-forma__nota bd-forma__nota--aire">Área de respeto · x</span>
+                <span class="bd-forma__nota bd-forma__nota--min">Mínimo · 24 px</span>
                 <span class="bd-forma__cota" data-forma-cota></span>
               </div>
             </div>
@@ -67,6 +71,7 @@ const cursiva = (s: string) => s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
             <div class="bd-capa" data-capa="3">
               <div class="bd-capa__dentro bd-letra">
                 <p class="bd-letra__t" data-letra-t>{TITULAR_LETRA}</p>
+                <p class="bd-letra__escala"><span>Titular · 300</span><span>Texto · 400</span><span>Detalle</span></p>
                 <div class="bd-letra__chips">
                   {LETRAS.map((l, i) => (
                     <button type="button" data-letra={i} tabindex="-1" style={`font-family:${l.familia};font-weight:${l.peso}`}>Aa<span>{l.papel}</span></button>
@@ -76,8 +81,14 @@ const cursiva = (s: string) => s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
             </div>
             <div class="bd-capa" data-capa="4">
               <div class="bd-capa__dentro bd-vozcapa" data-voz-capa>
+                <p class="bd-voz__etq">Así no · así sí</p>
                 <p class="bd-voz" data-voz></p>
                 <p class="bd-voz__no" data-voz-no></p>
+              </div>
+            </div>
+            <div class="bd-capa bd-capa--idea" data-capa="5">
+              <div class="bd-capa__dentro bd-idea" data-idea>
+                {IDEA.map(([que, dice]) => <p class="bd-idea__linea"><span>{que}</span>{dice}</p>)}
               </div>
             </div>
           </div>
@@ -89,14 +100,36 @@ const cursiva = (s: string) => s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
           {CAPAS.map((c) => <span class="bd-cota"><b>{c.n}</b><span>{c.nombre} · {c.cota}</span></span>)}
         </div>
 
-        <!-- La regla de la capa que toca, y su juego -->
-        <div class="bd-regla" data-regla aria-live="polite">
-          <p class="bd-regla__n" data-regla-n></p>
-          <p class="bd-regla__t" data-regla-t></p>
-          <p class="bd-regla__juego" data-regla-juego></p>
-        </div>
+        <!-- El capítulo de la capa que toca: qué es, qué efecto tiene, el dato con su fuente y su juego -->
+        <article class="bd-cap" data-cap aria-live="polite">
+          <p class="bd-cap__n" data-cap-n></p>
+          <h3 class="bd-cap__t" data-cap-t></h3>
+          <p class="bd-cap__que" data-cap-que></p>
+          <p class="bd-cap__importa" data-cap-importa></p>
+          <div class="bd-cap__dato">
+            <p class="bd-cap__cifra" data-cap-cifra></p>
+            <div><p class="bd-cap__dice" data-cap-dice></p><p class="bd-cap__fuente" data-cap-fuente></p></div>
+          </div>
+          <p class="bd-cap__juego" data-cap-juego></p>
+        </article>
         <p class="bd-pista" data-pista><span>{PORTADA.pista}</span><i aria-hidden="true"></i></p>
       </div>
+    </section>
+
+    <!-- Lo que hace una marca bien hecha: tres efectos medidos, cada uno con su fuente y su pega -->
+    <section class="bd-efectos" data-efectos aria-labelledby="bd-efectos-t">
+      <p class="bd-efectos__ante">{EFECTOS.antetitulo}</p>
+      <h2 class="bd-efectos__t" id="bd-efectos-t" data-vivo set:html={cursiva(EFECTOS.titulo)} />
+      <ol class="bd-efectos__lista">
+        {EFECTOS.lista.map((e, i) => (
+          <li class="bd-efecto" style={`--i: ${i}`}>
+            <p class="bd-efecto__cifra"><b data-cuenta={e.cuenta} data-antes={e.menos ? '−' : e.cifra.startsWith('+') ? '+' : ''} data-sufijo={e.sufijo}>{e.cifra}</b>{e.unidad && <span>{e.unidad}</span>}</p>
+            <h3 class="bd-efecto__t">{e.titulo}</h3>
+            <p class="bd-efecto__texto">{e.texto}</p>
+            <p class="bd-efecto__fuente">{e.fuente}</p>
+          </li>
+        ))}
+      </ol>
     </section>
 
     <!-- Lo que hacemos con la tuya -->
@@ -153,16 +186,20 @@ const cursiva = (s: string) => s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
   @keyframes bd-onda { 0%, 100% { height: 3px; } 50% { height: 15px; } }
 
   /* --- El viaje ---------------------------------------------------------------------------------------------------- */
-  .bd-viaje { position: relative; height: 560vh; }
+  /* Largo: cada una de las seis capas tiene pantalla y media para ella */
+  .bd-viaje { position: relative; height: 1300vh; }
   .bd-escena { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; user-select: none; -webkit-user-select: none; }
-  .bd-texto { position: absolute; left: var(--lado); top: 15vh; z-index: 3; max-width: 36vw; pointer-events: none; }
+  .bd-texto { position: absolute; left: var(--lado); top: 15vh; z-index: 3; max-width: 36vw; pointer-events: none; transition: opacity .5s var(--curva), transform .5s var(--curva); }
+  /* Mientras hay un capítulo, la portada se aparta y la pila se va un poco a la derecha */
+  .bd-texto.fuera { opacity: 0; transform: translateY(-14px); }
   .bd-etq { margin: 0 0 3vh; font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--crema-2); }
   .bd-t { margin: 0; font-family: var(--serif); font-weight: 300; font-size: clamp(44px, 5vw, 92px); line-height: .94; letter-spacing: -.02em; }
   .bd-t em, .bd-cierre__t em { font-style: italic; }
   .bd-p { margin: 3vh 0 0; max-width: 34ch; font-size: 15px; line-height: 1.6; color: var(--crema-2); }
 
   /* La pila: el contenedor con perspectiva, el que gira y las planchas */
-  .bd-pila { position: absolute; left: 58%; top: 56%; width: 0; height: 0; perspective: 1800px; }
+  .bd-pila { position: absolute; left: 58%; top: 56%; width: 0; height: 0; perspective: 1800px; transition: left .9s var(--curva), top .9s var(--curva); }
+  .bd-escena.en-capitulo .bd-pila { left: 63%; }
   .bd-giro { position: absolute; left: 0; top: 0; transform-style: preserve-3d; }
   .bd-capa {
     --w: min(38vw, 58vh); --h: calc(var(--w) * .62);
@@ -193,6 +230,16 @@ const cursiva = (s: string) => s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
   .bd-forma::before { top: 0; } .bd-forma::after { bottom: 0; }
   .bd-forma__cota { position: absolute; right: 0; bottom: -2%; font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--rosa); opacity: 0; transition: opacity .3s; }
   .bd-forma__cota.on { opacity: 1; }
+  /* el área de respeto (el aire que lleva siempre alrededor), con sus esquinas, y el tamaño mínimo */
+  .bd-forma__aire { position: absolute; inset: -16% -9%; border: 1px dashed var(--rosa-2); }
+  .bd-forma__aire i { position: absolute; width: 9px; height: 9px; border-color: var(--rosa); border-style: solid; border-width: 0; }
+  .bd-forma__aire i:nth-child(1) { left: -1px; top: -1px; border-left-width: 1px; border-top-width: 1px; }
+  .bd-forma__aire i:nth-child(2) { right: -1px; top: -1px; border-right-width: 1px; border-top-width: 1px; }
+  .bd-forma__aire i:nth-child(3) { left: -1px; bottom: -1px; border-left-width: 1px; border-bottom-width: 1px; }
+  .bd-forma__aire i:nth-child(4) { right: -1px; bottom: -1px; border-right-width: 1px; border-bottom-width: 1px; }
+  .bd-forma__nota { position: absolute; font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--crema-2); }
+  .bd-forma__nota--aire { left: 0; top: -2%; }
+  .bd-forma__nota--min { left: 0; bottom: -2%; }
 
   /* 03 · Color: cinco franjas que se pueden tocar */
   .bd-colores { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(5, 1fr); }
@@ -204,6 +251,7 @@ const cursiva = (s: string) => s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
   /* 04 · Letra: el titular y las tres letras para ponérselas */
   .bd-letra { flex-direction: column; justify-content: space-between; inset: 10% 9% 9%; }
   .bd-letra__t { margin: 0; font-family: var(--serif); font-weight: 300; font-size: calc(var(--w) * .1); line-height: 1; transition: opacity .2s; }
+  .bd-letra__escala { margin: 0; width: 100%; display: flex; gap: 18px; font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--crema-3); }
   .bd-letra__chips { display: flex; gap: 10px; width: 100%; }
   .bd-letra__chips button { flex: 1; display: grid; justify-items: start; gap: 6px; padding: 10px 12px; border: 1px solid var(--rosa-2); font-size: calc(var(--w) * .07); line-height: 1; text-align: left; transition: border-color .3s, background-color .3s; }
   .bd-letra__chips button span { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--crema-2); }
@@ -215,6 +263,13 @@ const cursiva = (s: string) => s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
   .bd-voz s { color: var(--crema-3); text-decoration-thickness: 1px; }
   .bd-voz b { font-weight: 300; font-style: italic; color: var(--rosa); }
   .bd-voz__no { margin: 0; min-height: 3em; max-width: 34ch; font-family: var(--mono); font-size: 9px; line-height: 1.5; letter-spacing: .08em; text-transform: uppercase; text-align: center; color: var(--crema-2); }
+  .bd-voz__etq { margin: 0; font-family: var(--mono); font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: var(--rosa); }
+
+  /* 06 · Idea: las tres frases que lo sostienen todo */
+  .bd-capa--idea { background: rgba(28, 19, 15, .92); }
+  .bd-idea { flex-direction: column; align-items: stretch; justify-content: center; gap: 8%; }
+  .bd-idea__linea { margin: 0; display: grid; grid-template-columns: 26% 1fr; align-items: baseline; gap: 4%; padding-top: 3%; border-top: 1px solid var(--rosa-2); font-family: var(--serif); font-weight: 300; font-size: calc(var(--w) * .046); line-height: 1.1; }
+  .bd-idea__linea span { font-family: var(--mono); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--rosa); }
 
   /* Las cotas */
   .bd-cotas { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
@@ -224,14 +279,38 @@ const cursiva = (s: string) => s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
   .bd-cota b { font-weight: 400; color: var(--rosa); margin-right: 8px; }
   .bd-cota.activa { color: var(--crema); }
 
-  /* La regla de la capa que toca, y su juego */
-  .bd-regla { position: absolute; left: var(--lado); bottom: 12vh; z-index: 3; max-width: 34vw; pointer-events: none; opacity: 0; transform: translateY(12px); transition: opacity .5s var(--curva), transform .5s var(--curva); }
-  .bd-regla.on { opacity: 1; transform: none; }
-  .bd-regla p { margin: 0; }
-  .bd-regla__n { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--rosa); }
-  .bd-regla__t { margin-top: 12px !important; font-family: var(--serif); font-weight: 300; font-size: clamp(26px, 2.4vw, 42px); line-height: 1.05; }
-  .bd-regla__juego { margin-top: 18px !important; display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--crema-2); }
-  .bd-regla__juego::before { content: ''; width: 6px; height: 6px; background: var(--rosa); }
+  /* El capítulo de la capa que toca: entra al cambiar de capa (brand.js le quita y le pone .on) */
+  .bd-cap { position: absolute; left: var(--lado); top: 12vh; bottom: 9vh; z-index: 3; width: min(34vw, 530px); display: flex; flex-direction: column; justify-content: center; pointer-events: none;
+    opacity: 0; transform: translateY(16px); transition: opacity .45s var(--curva), transform .45s var(--curva); }
+  .bd-cap.on { opacity: 1; transform: none; transition-duration: .8s; }
+  .bd-cap p, .bd-cap h3 { margin: 0; }
+  .bd-cap__n { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--rosa); }
+  .bd-cap__t { margin-top: 2.2vh !important; font-family: var(--serif); font-weight: 300; font-size: clamp(34px, 3.3vw, 60px); line-height: .98; letter-spacing: -.02em; }
+  .bd-cap__t em { font-style: italic; }
+  .bd-cap__que { margin-top: 2.8vh !important; font-size: 15px; line-height: 1.6; }
+  .bd-cap__importa { margin-top: 1.4vh !important; font-size: 15px; line-height: 1.6; color: var(--crema-2); }
+  .bd-cap__dato { margin-top: 3.4vh; padding-top: 2.4vh; border-top: 1px solid var(--linea); display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 20px; align-items: start; }
+  .bd-cap__cifra { font-family: var(--serif); font-weight: 300; font-size: clamp(42px, 3.8vw, 70px); line-height: .88; letter-spacing: -.02em; color: var(--rosa); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .bd-cap__dice { font-size: 14px; line-height: 1.5; }
+  .bd-cap__fuente { margin-top: 10px !important; font-family: var(--mono); font-size: 9px; line-height: 1.55; letter-spacing: .08em; text-transform: uppercase; color: var(--crema-3); }
+  .bd-cap__juego { margin-top: 3.2vh !important; display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--crema-2); }
+  .bd-cap__juego::before { content: ''; width: 6px; height: 6px; background: var(--rosa); }
+
+  /* --- Lo que hace una marca bien hecha --------------------------------------------------------------------------- */
+  .bd-efectos { position: relative; z-index: 2; padding: 18vh calc(var(--lado) + 4vw) 6vh var(--lado); border-top: 1px solid var(--linea); }
+  .bd-efectos__ante { margin: 0 0 4vh; font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--rosa); }
+  .bd-efectos__t { margin: 0; max-width: 15ch; font-family: var(--serif); font-weight: 300; font-size: clamp(42px, 4.8vw, 88px); line-height: .94; letter-spacing: -.02em; }
+  .bd-efectos__t em { font-style: italic; }
+  .bd-efectos__lista { margin: 10vh 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3.4vw; }
+  .bd-efecto { padding-top: 3vh; border-top: 1px solid var(--linea); opacity: 0; transform: translateY(20px); transition: opacity .9s var(--curva) calc(var(--i) * 140ms), transform .9s var(--curva) calc(var(--i) * 140ms); }
+  .bd-efectos.on .bd-efecto { opacity: 1; transform: none; }
+  .bd-efecto p, .bd-efecto h3 { margin: 0; }
+  .bd-efecto__cifra { font-family: var(--serif); font-weight: 300; font-size: clamp(58px, 6vw, 112px); line-height: .9; letter-spacing: -.03em; color: var(--rosa); font-variant-numeric: tabular-nums; }
+  .bd-efecto__cifra b { font-weight: inherit; }
+  .bd-efecto__cifra span { margin-left: 10px; font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--crema-2); }
+  .bd-efecto__t { margin-top: 2.6vh !important; font-family: var(--serif); font-weight: 400; font-size: 28px; line-height: 1.1; }
+  .bd-efecto__texto { margin-top: 1.4vh !important; font-size: 15px; line-height: 1.6; color: var(--crema-2); }
+  .bd-efecto__fuente { margin-top: 2.4vh !important; font-family: var(--mono); font-size: 9px; line-height: 1.55; letter-spacing: .08em; text-transform: uppercase; color: var(--crema-3); }
 
   /* La pista del principio: se va en cuanto bajas */
   .bd-pista { position: absolute; right: var(--lado); bottom: 26px; z-index: 2; margin: 0; display: grid; justify-items: center; gap: 10px; font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--crema-2); transition: transform .8s var(--curva), opacity .8s; }
@@ -265,8 +344,17 @@ const cursiva = (s: string) => s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
     .bd-capa { --w: 76vw; }
     .bd-cota { font-size: 9px; }
     .bd-cota > span { display: none; }
-    .bd-regla { max-width: none; right: var(--lado); bottom: 8vh; }
-    .bd-regla__t { font-size: 24px; }
+    /* en el móvil, con capítulo: la pila arriba y el capítulo abajo (sin el segundo párrafo, que no cabe) */
+    .bd-escena.en-capitulo .bd-pila { left: 50%; top: 27%; }
+    .bd-cap { top: auto; bottom: 6vh; width: auto; right: var(--lado); justify-content: flex-end; }
+    .bd-cap__t { font-size: 28px; }
+    .bd-cap__que { font-size: 13px; }
+    .bd-cap__importa { display: none; }
+    .bd-cap__dato { gap: 14px; }
+    .bd-cap__cifra { font-size: 36px; }
+    .bd-cap__dice { font-size: 12px; }
+    .bd-efectos { padding: 14vh var(--lado) 4vh; }
+    .bd-efectos__lista { grid-template-columns: 1fr; gap: 6vh; }
     .bd-cierre { grid-template-columns: 1fr; padding: 14vh var(--lado) 18vh; }
     .bd-cierre__t { font-size: 46px; }
   }

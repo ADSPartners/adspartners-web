@@ -1,12 +1,13 @@
-// Brand, «Desmontada»: el montaje. La pila de cinco planchas (pages/brand) y lo que la mueve:
-// - El scroll: arriba, el ads terminado y de frente; al bajar, la pila se pone en vista técnica, se abre, se recorre
-//   capa a capa (la que toca sale un poco hacia un lado, con su cota y su regla) y al final se vuelve a montar.
-// - El ratón (Álvaro: «algo más de movimiento al movimiento del ratón»): la pila se ladea hacia él con un muelle que
-//   rebota un poco, cada plancha se desplaza según su profundidad, la que tienes debajo se levanta, un brillo recorre
-//   la marca y, quieto, todo flota un poco. Se puede coger la pila y girarla; al soltarla sigue por inercia y vuelve.
-// - El juego de cada plancha («un poco más de juego»): la forma no se deja estirar, la marca toma el color por el que
-//   pasas, el titular se pone la letra que eliges y la frase de agencia se corrige sola.
-// Debajo, el cierre, que entra al verse.
+// Brand, «Desmontada»: el montaje. La pila de seis planchas (pages/brand) y lo que la mueve:
+// - El scroll: arriba, el ads terminado y de frente; al bajar, la pila se pone en vista técnica, se abre y se recorre
+//   capa a capa. Cada capa es un capítulo (Álvaro: «dale más importancia a cada capa»): su plancha crece y sale hacia
+//   un lado, y a la izquierda entra qué es, qué efecto tiene y su dato, que sube contando. Al final se vuelve a montar.
+// - El ratón: la pila se ladea hacia él con un muelle que rebota un poco, cada plancha se desplaza según su
+//   profundidad, la que tienes debajo se levanta, un brillo recorre la marca y, quieto, todo flota un poco. Se puede
+//   coger la pila y girarla; al soltarla sigue por inercia y vuelve.
+// - El juego de cada plancha: la forma no se deja estirar, la marca toma el color por el que pasas, el titular se pone
+//   la letra que eliges, la frase de agencia se corrige sola y, si quitas la idea, las demás capas se descolocan.
+// Debajo, lo que hace una marca bien hecha (sus cifras suben contando al verse) y el cierre.
 import { gsap } from 'gsap';
 import * as sonido from './sonido.js';
 import { CAPAS, PALETA, LETRAS, VOZ, PORTADA } from '../data/brand.js';
@@ -17,16 +18,20 @@ const cursiva = (s) => s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
 // Un muelle: la velocidad tira hacia el objetivo (rigidez k) y se frena (c); con c bajo, rebota un poco
 const muelle = (s, objetivo, dt, k = 70, c = 11) => { s.v += ((objetivo - s.x) * k - s.v * c) * dt; s.x += s.v * dt; return s.x; };
 const nuevo = () => ({ x: 0, v: 0 });
+// Los tramos del recorrido: los capítulos van de INICIO a INICIO + n × PASO
+const INICIO = 0.17, PASO = 0.12;
 
 export function montarBrand({ reducido, conRaton, cursor }) {
   const raiz = document.querySelector('[data-brand]');
   const viaje = raiz?.querySelector('[data-viaje]');
   if (!viaje) return;
-  const escena = viaje.querySelector('[data-escena]'), giro = viaje.querySelector('[data-giro]');
-  const capas = [...viaje.querySelectorAll('[data-capa]')], marca = capas[0];
+  const $ = (s) => viaje.querySelector(s);
+  const escena = $('[data-escena]'), giro = $('[data-giro]'), texto = $('[data-texto]');
+  const capas = [...viaje.querySelectorAll('[data-capa]')], marca = capas[0], N = capas.length, MEDIO = (N - 1) / 2;
   const cotas = [...viaje.querySelectorAll('.bd-cota')], lineas = [...viaje.querySelectorAll('.bd-cotas line')];
-  const regla = viaje.querySelector('[data-regla]'), reglaN = viaje.querySelector('[data-regla-n]'), reglaT = viaje.querySelector('[data-regla-t]'), juego = viaje.querySelector('[data-regla-juego]');
-  const titulo = viaje.querySelector('[data-titulo]'), pista = viaje.querySelector('[data-pista]');
+  const cap = $('[data-cap]'), capN = $('[data-cap-n]'), capT = $('[data-cap-t]'), capQue = $('[data-cap-que]'), capImporta = $('[data-cap-importa]');
+  const capCifra = $('[data-cap-cifra]'), capDice = $('[data-cap-dice]'), capFuente = $('[data-cap-fuente]'), juego = $('[data-cap-juego]');
+  const titulo = $('[data-titulo]'), pista = $('[data-pista]');
 
   const hora = document.querySelector('[data-bd-hora]');
   const reloj = new Intl.DateTimeFormat('es-ES', { timeZone: 'Europe/Madrid', hour: '2-digit', minute: '2-digit' });
@@ -34,15 +39,24 @@ export function montarBrand({ reducido, conRaton, cursor }) {
   ponerHora();
   setInterval(ponerHora, 20000);
 
+  // Una cifra que sube contando (con su signo y su unidad)
+  const contar = (el, hasta, antes = '', sufijo = '') => {
+    const o = { v: 0 };
+    gsap.killTweensOf(el);
+    gsap.to(o, { v: hasta, duration: reducido ? 0 : 1.3, ease: 'power2.out', onUpdate: () => { el.textContent = `${antes}${Math.round(o.v).toLocaleString('es-ES')}${sufijo}`; } });
+  };
+
   let activa = -1;
   // Lo que dice la línea del juego: el de la capa que toca o, mientras juegas, lo que acabas de tocar
-  const decirJuego = (texto) => { juego.textContent = texto ?? (activa >= 0 ? CAPAS[activa].juego : ''); };
+  const decirJuego = (frase) => { juego.textContent = frase ?? (activa >= 0 ? CAPAS[activa].juego : ''); };
 
   // --- El ratón ----------------------------------------------------------------------------------------------------
   const raton = { x: 0, y: 0 };
   const inclina = { x: nuevo(), y: nuevo() };
   const libre = { z: 0, x: 0, vz: 0, vx: 0, cogida: false, px: 0, py: 0, t: 0 };
-  const levanta = capas.map(nuevo), saca = capas.map(nuevo);
+  const levanta = capas.map(nuevo), saca = capas.map(nuevo), crece = capas.map(nuevo);
+  // La pila se recoloca para que la capa que tiene su capítulo quede en medio (si no, la de arriba o la de abajo se salen)
+  const centro = nuevo();
   let encima = -1, abre = 0;
   // El cursor de la web dice qué se puede hacer: con la pila de frente, cogerla; abierta, el juego de cada plancha
   const decir = (frase) => cursor?.decir?.(frase);
@@ -93,7 +107,7 @@ export function montarBrand({ reducido, conRaton, cursor }) {
 
   // --- Los juegos ----------------------------------------------------------------------------------------------------
   // 02 · Forma: cuanto más empujas hacia la derecha, más se estira... un poco, se resiste, y vuelve de golpe
-  const forma = capas[1], formaIso = viaje.querySelector('[data-forma-iso]'), formaCota = viaje.querySelector('[data-forma-cota]');
+  const forma = capas[1], formaIso = $('[data-forma-iso]'), formaCota = $('[data-forma-cota]');
   const estira = nuevo();
   let estiraObjetivo = 0, estiraba = false;
   forma.addEventListener('pointermove', (e) => {
@@ -109,7 +123,7 @@ export function montarBrand({ reducido, conRaton, cursor }) {
   });
 
   // 03 · Color: la marca, arriba, toma el color por el que pasas (si es oscuro, la plancha se aclara para que se vea)
-  const colores = viaje.querySelector('.bd-colores');
+  const colores = $('.bd-colores');
   const ponerColor = (i) => {
     viaje.querySelectorAll('[data-color]').forEach((b) => b.classList.toggle('tocado', Number(b.dataset.color) === i));
     colores.classList.toggle('con-uno', i >= 0);
@@ -133,7 +147,7 @@ export function montarBrand({ reducido, conRaton, cursor }) {
   });
 
   // 04 · Letra: el titular se pone la letra que eliges, y vuelve a Garamond al irte
-  const letraT = viaje.querySelector('[data-letra-t]');
+  const letraT = $('[data-letra-t]');
   let letraPuesta = 0;
   const ponerLetra = (i) => {
     if (i === letraPuesta) return;
@@ -152,7 +166,7 @@ export function montarBrand({ reducido, conRaton, cursor }) {
   });
 
   // 05 · Voz: la frase de agencia se tacha y se escribe la nuestra, letra a letra; la siguiente vez, otra frase
-  const vozCapa = viaje.querySelector('[data-voz-capa]'), voz = viaje.querySelector('[data-voz]'), vozNo = viaje.querySelector('[data-voz-no]');
+  const vozCapa = $('[data-voz-capa]'), voz = $('[data-voz]'), vozNo = $('[data-voz-no]');
   let iv = 0, escribiendo = false;
   const frase = () => VOZ[iv % VOZ.length];
   const sinCorregir = () => { const [a, mal, , b] = frase(); voz.innerHTML = `${a} ${mal}${b ? ` ${b}` : '.'}`; vozNo.textContent = ''; };
@@ -178,12 +192,52 @@ export function montarBrand({ reducido, conRaton, cursor }) {
   vozCapa.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse' && abre > 0.4) corregir(); });
   vozCapa.addEventListener('click', corregir);
 
+  // 06 · Idea: si la quitas (pasas por ella), las demás capas se descolocan, cada una a su aire; al irte, vuelven
+  const idea = capas[N - 1];
+  const descoloca = capas.map(() => ({ x: nuevo(), y: nuevo(), r: nuevo(), ox: 0, oy: 0, or: 0 }));
+  let sinIdea = false;
+  const quitarIdea = (si) => {
+    if (si === sinIdea) return;
+    sinIdea = si;
+    descoloca.forEach((d, i) => {
+      const fuera = si && i !== N - 1;
+      d.ox = fuera ? (Math.random() - 0.5) * 0.9 : 0; d.oy = fuera ? (Math.random() - 0.5) * 0.6 : 0; d.or = fuera ? (Math.random() - 0.5) * 26 : 0;
+    });
+    decirJuego(si ? 'Sin idea, cada capa va a su aire' : undefined);
+    if (si) sonido.pasa(0.2);
+  };
+  idea.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse' && abre > 0.4) quitarIdea(true); });
+  idea.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') quitarIdea(false); });
+  idea.addEventListener('click', () => quitarIdea(!sinIdea));
+
+  // --- El capítulo: sale el que estaba y, un momento después, entra el nuevo con su dato contando ------------------
+  let turno = 0;
+  const ponerCapitulo = (i) => {
+    const mio = ++turno;
+    cap.classList.remove('on');
+    if (i < 0) return;
+    setTimeout(() => {
+      if (mio !== turno) return;
+      const c = CAPAS[i];
+      capN.textContent = `${c.n} — ${c.nombre}`;
+      capT.innerHTML = cursiva(c.titular);
+      capQue.textContent = c.que;
+      capImporta.textContent = c.importa;
+      capDice.textContent = c.dato.texto;
+      capFuente.textContent = c.dato.fuente;
+      if (c.dato.cuenta) contar(capCifra, c.dato.cuenta, '', c.dato.sufijo); else capCifra.textContent = c.dato.cifra;
+      decirJuego();
+      cap.classList.add('on');
+    }, reducido ? 0 : 260);
+  };
+
   // --- El recorrido, cada fotograma ----------------------------------------------------------------------------------
   const progreso = () => { const r = viaje.getBoundingClientRect(); return clamp(-r.top / Math.max(1, r.height - innerHeight), 0, 1); };
   let h = capas[0].offsetHeight;
   addEventListener('resize', () => { h = capas[0].offsetHeight; });
   let p = progreso(), antes = performance.now(), visible = true, cierreAntes = false;
   new IntersectionObserver(([e]) => { visible = e.isIntersecting; }).observe(viaje);
+  const FIN = INICIO + N * PASO;
 
   gsap.ticker.add(() => {
     const ahora = performance.now(), dt = Math.min(0.05, (ahora - antes) / 1000), t = ahora / 1000;
@@ -192,10 +246,11 @@ export function montarBrand({ reducido, conRaton, cursor }) {
     p += (progreso() - p) * (reducido ? 1 : 1 - Math.exp(-dt * 7));
     pista.classList.toggle('fuera', p > 0.01);
 
-    // De frente (0), vista técnica (0,04-0,2), se abre (0,1-0,32), capa a capa (0,33-0,87) y se vuelve a montar
-    const vista = liso(0.04, 0.2, p) * (1 - liso(0.88, 0.98, p));
-    abre = liso(0.1, 0.32, p) * (1 - liso(0.88, 0.98, p));
-    const ahoraActiva = p > 0.33 && p < 0.87 ? Math.min(4, Math.floor((p - 0.33) / 0.108)) : -1;
+    // De frente, vista técnica, se abre, capítulo a capítulo y se vuelve a montar
+    const monta = 1 - liso(FIN + 0.01, FIN + 0.09, p);
+    const vista = liso(0.02, 0.1, p) * monta;
+    abre = liso(0.05, 0.16, p) * monta;
+    const ahoraActiva = p > INICIO && p < FIN ? Math.min(N - 1, Math.floor((p - INICIO) / PASO)) : -1;
 
     // El ratón: la inclinación con muelle (sin ratón, un vaivén lento) y el giro libre, con inercia y de vuelta
     const ix = reducido ? 0 : muelle(inclina.x, conRaton ? raton.x : Math.sin(t * 0.4) * 0.14, dt);
@@ -207,15 +262,22 @@ export function montarBrand({ reducido, conRaton, cursor }) {
     }
     giro.style.transform = `rotateX(${vista * 56 - iy * 18 + libre.x}deg) rotateY(${ix * 22 * (1 - vista)}deg) rotateZ(${vista * -34 + ix * 18 * vista + libre.z}deg)`;
 
+    const movil = innerWidth < 760;
+    const z0 = muelle(centro, ahoraActiva >= 0 ? (MEDIO - ahoraActiva) * h * 0.4 * abre : 0, dt, 40, 10);
     capas.forEach((c, i) => {
       const lev = muelle(levanta[i], i === encima && abre > 0.4 ? h * 0.14 : 0, dt, 120, 13);
-      // (la que tiene su turno sale hacia un lado, lo bastante para que la de encima no la tape)
-      const sal = muelle(saca[i], i === ahoraActiva ? h * 0.5 : 0, dt, 60, 11);
+      // la que tiene su capítulo sale hacia un lado (lo bastante para que la de encima no la tape; en el móvil, menos,
+      // que no hay sitio) y crece
+      const sal = muelle(saca[i], i === ahoraActiva ? h * (movil ? 0.12 : 0.5) : 0, dt, 60, 11);
+      const esc = muelle(crece[i], i === ahoraActiva ? 0.18 : 0, dt, 60, 11);
+      const d = descoloca[i];
+      const dx = muelle(d.x, d.ox * h, dt, 50, 7), dy = muelle(d.y, d.oy * h, dt, 50, 7), dr = muelle(d.r, d.or, dt, 50, 7);
       const flota = reducido ? 0 : Math.sin(t * 0.9 + i * 1.3) * 5 * abre;
-      const hondo = (2 - i) * abre;
-      c.style.transform = `translate3d(${sal + ix * hondo * 18}px, ${iy * hondo * 14}px, ${(2 - i) * h * 0.46 * abre + (4 - i) * 0.6 + lev + flota}px)`;
-      // (en el turno del color, la marca sigue encendida: es la que toma el color que pasas)
-      c.classList.toggle('apagada', ahoraActiva >= 0 && i !== ahoraActiva && !(i === 0 && CAPAS[ahoraActiva].id === 'color'));
+      const hondo = (MEDIO - i) * abre;
+      c.style.transform = `translate3d(${sal + dx + ix * hondo * 18}px, ${dy + iy * hondo * 14}px, ${(MEDIO - i) * h * 0.4 * abre - z0 + (N - i) * 0.6 + lev + flota}px) rotateZ(${dr}deg) scale(${1 + esc})`;
+      // las demás, casi apagadas (salvo la marca en el turno del color, que es la que toma el color, y todas cuando
+      // se quita la idea, que es cuando se ve cómo se descolocan)
+      c.classList.toggle('apagada', ahoraActiva >= 0 && i !== ahoraActiva && !sinIdea && !(i === 0 && CAPAS[ahoraActiva].id === 'color'));
       c.classList.toggle('activa', i === ahoraActiva);
     });
 
@@ -228,10 +290,12 @@ export function montarBrand({ reducido, conRaton, cursor }) {
     if (estiraObjetivo === 0 && estiraba && s < 0.01) sonido.tic(0.5);
     estiraba = estiraObjetivo > 0;
 
-    // Las cotas, a la derecha de cada plancha
+    // Las cotas, a la derecha de cada plancha; si no caben (la plancha se sale por arriba o por abajo, o llega al borde
+    // derecho y la cota la pisaría), no se ponen
     cotas.forEach((cota, i) => {
-      const b = capas[i].getBoundingClientRect(), y = Math.max(64, b.top + b.height / 2), x = Math.min(innerWidth - cota.offsetWidth - 24, b.right + 36);
-      const se = abre > 0.5 ? 1 : 0;
+      const b = capas[i].getBoundingClientRect(), y = b.top + b.height / 2, x = b.right + 36;
+      const cabe = y > 64 && y < innerHeight - 40 && x + cota.offsetWidth < innerWidth - 16;
+      const se = abre > 0.5 && cabe ? 1 : 0;
       cota.style.opacity = se;
       cota.style.transform = `translate3d(${x}px, ${y - 7}px, 0)`;
       cota.classList.toggle('activa', i === ahoraActiva);
@@ -240,22 +304,31 @@ export function montarBrand({ reducido, conRaton, cursor }) {
       l.style.opacity = se;
     });
 
-    // La regla de la capa que toca
+    // El capítulo de la capa que toca
     if (ahoraActiva !== activa) {
       activa = ahoraActiva;
-      regla.classList.toggle('on', activa >= 0);
+      quitarIdea(false);
+      escena.classList.toggle('en-capitulo', activa >= 0);
+      texto.classList.toggle('fuera', activa >= 0);
+      ponerCapitulo(activa);
       if (activa >= 0) {
-        reglaN.textContent = `${CAPAS[activa].n} — ${CAPAS[activa].nombre}`;
-        reglaT.textContent = CAPAS[activa].regla;
-        decirJuego();
         sonido.pasa(0.5);
-        if (CAPAS[activa].id === 'voz') corregir();
+        if (CAPAS[activa].id === 'voz') setTimeout(corregir, 900);
       }
     }
     // Al final, montada otra vez: brand por fuera, tech por dentro
-    const cierre = p > 0.9;
+    const cierre = p > FIN + 0.05;
     if (cierre !== cierreAntes) { cierreAntes = cierre; titulo.innerHTML = cursiva(cierre ? PORTADA.final : PORTADA.titulo); }
   });
+
+  // Lo que hace una marca bien hecha: entra al verse y sus cifras suben contando
+  const efectos = raiz.querySelector('[data-efectos]');
+  new IntersectionObserver(([e], io) => {
+    if (!e.isIntersecting) return;
+    io.disconnect();
+    efectos.classList.add('on');
+    efectos.querySelectorAll('[data-cuenta]').forEach((n, i) => setTimeout(() => contar(n, Number(n.dataset.cuenta), n.dataset.antes ?? '', n.dataset.sufijo ?? ''), i * 140));
+  }, { threshold: 0.25 }).observe(efectos);
 
   // El cierre entra la primera vez que se ve bien
   const cierre = raiz.querySelector('[data-cierre]');
