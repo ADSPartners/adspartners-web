@@ -5,7 +5,8 @@
 // como copias en papel, las de Álvaro se montan a píxeles y el inspector las mide, y los dos montones se acercan
 // hasta juntarse en el marco del final. Sin ratón, sin JS o con «movimiento reducido», los capítulos se leen uno
 // detrás de otro. Lo mueve scripts/about.js; los textos y las fotos están en src/data/about.js.
-// La foto de los dos aún no existe (falta la sesión): el marco vacío del inspector ocupa su sitio, arriba y al final.
+// La foto de los dos va en el marco del inspector, arriba (el collage de oficina, hecho con ChatGPT) y al final (un
+// selfie de verdad); en public/assets/about/los-dos-*.webp, a 1440 px para que el marco salga nítido.
 import Base from '../../layouts/Base.astro';
 import Fondo from '../../components/Fondo.astro';
 import Marca from '../../components/Marca.astro';
@@ -50,14 +51,14 @@ const foto = (src: string) => `${base}assets/about/${src}`;
     <a class="ab__logo" href={base} aria-label="adsPartners, inicio" data-sonido-hover><Marca tipo="logo" /></a>
     <a class="ab__correo" href="mailto:adsgroup@ads-partners.com" data-sonido-hover>Escríbenos a <b>adsgroup@</b></a>
 
-    <!-- 1. Arriba: los dos, a cada lado de su foto (de momento, el marco vacío) -->
+    <!-- 1. Arriba: los dos, a cada lado de su foto -->
     <section class="ab__portada" aria-label="Quiénes somos">
       <p class="ab__nombre ab__nombre--sebas" data-tinta>{PERSONAS.sebas.nombre}</p>
       <figure class="ab__marco ab__marco--portada" data-ab-marco>
+        <img class="ab__marco-img" src={foto('los-dos-portada.webp')} width="1440" height="960" alt="Sebas y Álvaro en traje, en una oficina: un collage con las cabezas más grandes que el cuerpo, hecho con ChatGPT." decoding="async" fetchpriority="high" />
         <span class="ab__guia ab__guia--a" aria-hidden="true"></span>
         <span class="ab__guia ab__guia--b" aria-hidden="true"></span>
         <span class="insp ab__marco-insp" aria-hidden="true">img · los dos</span>
-        <figcaption class="ab__marco-t ab__dos">Aquí va una foto de los dos.<span>Sesión pendiente</span></figcaption>
         <span class="ab__cota" data-ab-cota aria-hidden="true"></span>
       </figure>
       <p class="ab__nombre ab__nombre--alvaro" data-vivo>{PERSONAS.alvaro.nombre}</p>
@@ -126,13 +127,13 @@ const foto = (src: string) => `${base}assets/about/${src}`;
           </article>
         ))}
 
-        <!-- El final de los montones: los dos se juntan en una sola foto (de momento, el marco vacío) -->
-        <figure class="ab__marco ab__marco--final" data-ab-marco data-ab-final aria-hidden="true">
-          <span class="ab__guia ab__guia--a"></span>
-          <span class="ab__guia ab__guia--b"></span>
-          <span class="insp ab__marco-insp">img · los dos</span>
-          <figcaption class="ab__marco-t ab__dos">Aquí va una foto de los dos.<span>Sesión pendiente</span></figcaption>
-          <span class="ab__cota" data-ab-cota></span>
+        <!-- El final de los montones: los dos se juntan en una sola foto -->
+        <figure class="ab__marco ab__marco--final" data-ab-marco data-ab-final>
+          <img class="ab__marco-img" src={foto('los-dos-final.webp')} width="1440" height="960" alt="Sebas y Álvaro, juntos en un selfie." loading="lazy" decoding="async" />
+          <span class="ab__guia ab__guia--a" aria-hidden="true"></span>
+          <span class="ab__guia ab__guia--b" aria-hidden="true"></span>
+          <span class="insp ab__marco-insp" aria-hidden="true">img · los dos</span>
+          <span class="ab__cota" data-ab-cota aria-hidden="true"></span>
         </figure>
       </div>
     </section>
@@ -231,12 +232,8 @@ const foto = (src: string) => `${base}assets/about/${src}`;
   .ab__guia--b { right: -1px; bottom: -1px; }
   .ab__guia--b::before { right: 0; bottom: 0; width: 38px; height: 1px; }
   .ab__guia--b::after { right: 0; bottom: 0; width: 1px; height: 118px; }
+  .ab__marco-img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; }
   .ab__marco-insp { position: absolute; left: -1px; bottom: calc(100% + 12px); }
-  .ab__marco-t {
-    position: absolute; inset: 0; display: grid; place-content: center; gap: 12px; text-align: center;
-    font-family: var(--serif); font-style: italic; font-size: clamp(20px, 1.7vw, 28px); color: var(--crema-2);
-  }
-  .ab__marco-t span { font-family: var(--mono); font-style: normal; font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--rosa); }
   .ab__cota {
     position: absolute; right: 0; top: calc(100% + 10px); display: flex; align-items: center; gap: 8px;
     font-family: var(--mono); font-size: 10px; letter-spacing: .1em; color: var(--crema-3); white-space: nowrap;
@@ -269,7 +266,9 @@ const foto = (src: string) => `${base}assets/about/${src}`;
 
   /* --- 2. Los montones, de arriba abajo (móvil, sin JS, movimiento reducido) ---------------------------------------- */
   .ab__montones { position: relative; padding: 14vh var(--lado) 6vh; }
-  .ab__contador, .ab__quien, .ab__pila, .ab__marco--final { display: none; }
+  .ab__contador, .ab__quien, .ab__pila { display: none; }
+  /* La foto de los dos, después del último capítulo (en la escena con ratón va en medio, encima de los montones) */
+  .ab__marco--final { position: relative; width: min(100%, 720px); margin: 0 auto; }
   .ab__cap { display: grid; grid-template-columns: 1fr 1fr; column-gap: 6vw; max-width: 1100px; margin: 0 auto 16vh; }
   .ab__cap-t {
     grid-column: 1 / -1; margin: 0 0 6vh; display: flex; align-items: baseline; gap: 18px;
@@ -389,7 +388,7 @@ const foto = (src: string) => `${base}assets/about/${src}`;
   :global(html.ab-escena) .ab__pila .ab__cota--foto { display: none; }
   /* El final: se van los textos, las pilas se juntan y queda el marco de los dos */
   :global(html.ab-escena) .ab__marco--final {
-    display: block; left: 50%; top: 50%; width: min(46vw, 720px); margin: 0;
+    display: block; position: absolute; left: 50%; top: 50%; width: min(46vw, 720px); margin: 0;
     transform: translate(-50%, -50%) scale(var(--marco-s, .92)); opacity: var(--marco-o, 0);
   }
   :global(html.ab-escena) .ab__escena.es-final .ab__quien,
@@ -512,7 +511,6 @@ const foto = (src: string) => `${base}assets/about/${src}`;
     .ab__baja { --izq: var(--tinta); --dcha: var(--rosa); }
     .ab__marco { border-color: var(--neutro); background: repeating-linear-gradient(-45deg, rgba(120, 108, 96, .14) 0 1px, transparent 1px 7px); }
     .ab__guia--a::before, .ab__guia--a::after { background: var(--tinta); }
-    .ab__marco-t { --izq: var(--t2); --dcha: var(--crema-2); }
     .ab__marco--portada .ab__cota { color: var(--t3); }
 
     /* Los montones: el contador y el título, a dos tintas; Sebas, en tinta sobre el papel */
