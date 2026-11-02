@@ -1,0 +1,195 @@
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["_ads/pregunta.EgEF7R-Y.js","_ads/preload-helper.BNRheB9E.js","_ads/preload-helper.ClVmhQ35.css","_ads/conecta.FcFwXPsX.js","_ads/factura.7fUOs9zn.js","_ads/tejido.BQP44k8L.js"])))=>i.map(i=>d[i]);
+import{_ as e,m as t,r as n,t as r,v as i}from"./sonido.DSTAgh4G.js";import{d as a,t as o}from"./preload-helper.BNRheB9E.js";import{t as s}from"./pagina.DzKOO3_H.js";import{t as c}from"./glitch.BD-Yz9jw.js";import{a as l,i as u,n as d,o as f,s as p,t as m}from"./Mesh.D48iXpEj.js";import{t as h}from"./Camera.DbFdqk_T.js";var g={grabada:!0,ms:4089,modelo:`claude-opus-5-5`,fecha:`2026-10-30T12:24:28.424Z`,tokens:{entrada:2228,salida:81},campos:{proveedor:`Huerta de Ejemplo, S.L.`,fecha:`2026-10-27`,base:113.2,iva:11.32,total:124.52},extra:{nif:`B00000000`,numero:`F-2026/0417`}},_={grabada:!0,modelo:`claude-opus-5-5`,fecha:`2026-10-30T12:38:54.505Z`,negocio:`Cafetería de Ejemplo`,preguntas:[{pregunta:`¿Cuánto vendimos en octubre?`,ms:5730,tokens:{entrada:2461,salida:319},pasos:[{entrada:{desde:`2026-09-01`,hasta:`2026-10-31`,agrupar_por:`mes`},consulta:`SELECT date_trunc('month', fecha) AS grupo, SUM(importe), SUM(unidades) FROM ventas WHERE fecha BETWEEN '2026-09-01' AND '2026-10-31' GROUP BY grupo`,filas:2,total:51686.7,ms:2761}],respuesta:{texto:`En octubre vendiste 26.843 €, un 8 % más que en septiembre (24.843 €).`,cifra:`26.843 €`,grafica:{titulo:`Ventas por mes (€)`,etiquetas:[`Sep`,`Oct`],valores:[24843.3,26843.4]}},msRespuesta:2967},{pregunta:`¿Qué fue lo que más vendimos en octubre?`,ms:4102,tokens:{entrada:2566,salida:362},pasos:[{entrada:{desde:`2026-10-01`,hasta:`2026-10-31`,agrupar_por:`producto`},consulta:`SELECT producto AS grupo, SUM(importe), SUM(unidades) FROM ventas WHERE fecha BETWEEN '2026-10-01' AND '2026-10-31' GROUP BY grupo`,filas:6,total:26843.4,ms:1503}],respuesta:{texto:`En octubre lo que más vendiste fue café: 7.914 € y 4.946 tazas, casi un 30 % de la facturación.`,cifra:`7.914 €`,grafica:{titulo:`Ventas por producto, octubre 2026 (€)`,etiquetas:[`Café`,`Bocadillos`,`Tostadas`,`Bollería`,`Tartas`,`Zumos`],valores:[7913.6,5994,4228.2,3767.4,2793,2147.2]}},msRespuesta:2598},{pregunta:`¿Vamos mejor que en septiembre?`,ms:5032,tokens:{entrada:2461,salida:390},pasos:[{entrada:{desde:`2026-09-01`,hasta:`2026-10-31`,agrupar_por:`mes`},consulta:`SELECT date_trunc('month', fecha) AS grupo, SUM(importe), SUM(unidades) FROM ventas WHERE fecha BETWEEN '2026-09-01' AND '2026-10-31' GROUP BY grupo`,filas:2,total:51686.7,ms:1874}],respuesta:{texto:`Sí: octubre cerró con 26.843 €, un 8 % más que septiembre (+2.000 €). Por día, que octubre tiene uno más, la subida es de un 4,6 %.`,cifra:`+8 %`,grafica:{titulo:`Ventas por mes (€)`,etiquetas:[`Sept.`,`Oct.`],valores:[24843.3,26843.4]}},msRespuesta:3158}]},v=g,y=[{slug:`observa`,servicio:`Asistentes de IA`,titulo:`Observa`,texto:`Tu negocio, en una conversación. Le preguntas y el asistente busca en tus datos y te contesta con la cifra y la gráfica.`,entradilla:`Un asistente personalizado e integrado en el negocio que ordena datos, ve oportunidades y resalta mejoras.`,puntos:[{p:[0,.95,-.42],t:`Respuesta · gráfica`},{p:[.55,0,.35],t:`Tus datos`}],articulo:{intro:[`Los datos de una empresa están repartidos: contabilidad, clientes, plazos, stock, etc.`,`Un asistente de IA conectado a esos datos contesta al momento, en lenguaje normal. Y no se inventa nada: cada respuesta sale de una consulta a tus datos, que puedes ver.`],permite:[`Preguntar por ventas, gastos o clientes como se lo preguntarías a una persona`,`Resaltar espacios de optimización y posibles puntos débiles de la operativa`,`Saber de dónde sale cada número: la consulta queda a la vista`,`Usarlo desde el ordenador, el móvil o el WhatsApp del equipo`],cifras:[],frase:`Preguntas con normalidad. Contesta con exactitud.`,ficha:[[`Modelo`,`Depende de las necesidades`],[`Datos`,`Excel, base de datos, ERP o CRM`],[`Acceso`,`Solo lectura: no toca nada`],[`Respuesta`,`Cifra, gráfica y la consulta que la saca`],[`Dónde`,`Web, móvil o WhatsApp`],[`Privacidad`,`Tus datos no entrenan ningún modelo`]],beneficios:[[`Rapidez`,`La respuesta en segundos, no en un informe a final de mes`],[`Para todos`,`No hace falta saber de Excel ni de bases de datos`],[`Confianza`,`Cada cifra con su origen`],[`Siempre`,`A cualquier hora, sin esperar a nadie`]]},mision:_.grabada?{modulo:`pregunta`,orden:`Pregúntale a la cafetería cómo le va`,gesto:`Elige una pregunta y mantén pulsado el botón`,curso:`El asistente está consultando…`,veredicto:`Respondido con sus datos`,explica:`El asistente no se sabe las cifras: entiende la pregunta, decide qué consultar, lo consulta en los datos de la cafetería y contesta con la cifra y la gráfica. Es una ejecución real de Claude, grabada; los datos son de ejemplo.`}:null},{slug:`conecta`,servicio:`Integraciones`,titulo:`Conecta`,texto:`Tus herramientas no se hablan: la tienda vende, el Excel no se entera y alguien copia los pedidos. Las conectamos para que los datos pasen solos.`,puntos:[{p:[0,.32,0],t:`Conexión`},{p:[-1.25,.95,.1],t:`Tienda`}],articulo:{intro:[`Casi todas las empresas trabajan con cinco o seis herramientas que no se conocen entre sí: la tienda, el TPV, el Excel, el correo, el banco. Entre medias, alguien copia y pega.`,`Las conectamos para que lo que pasa en una llegue a las demás en el momento. Sin cambiar de herramientas: las tuyas, hablando entre ellas.`],permite:[`Que cada pedido de la tienda llegue solo a tu Excel o tu ERP`,`Que el stock se actualice en todas partes a la vez`,`Que los cobros del banco se crucen con las facturas`,`Que nadie tenga que copiar y pegar entre programas`],cifras:[],frase:`Tus herramientas, hablando entre ellas`,ficha:[[`Conecta`,`Tiendas, TPV, Excel, ERP, CRM, correo y bancos`],[`Cómo`,`APIs y webhooks, en tiempo real`],[`Dónde corre`,`n8n en nuestro servidor, o en el tuyo`],[`Fallos`,`Si algo no pasa, se reintenta y te avisa`],[`Registro`,`Cada dato que pasa queda apuntado`],[`Cambios`,`Ninguno en tus herramientas`]],beneficios:[[`Un solo dato`,`La misma cifra en todas partes`],[`Al momento`,`Sin esperar a que alguien lo pase`],[`Sin errores`,`Nada de copiar y pegar`],[`Tranquilidad`,`Si algo falla, te enteras`]]},mision:{modulo:`conecta`,orden:`Conecta la tienda con el Excel de pedidos`,gesto:`Arrastra el cable de la tienda al Excel`,curso:`Pasando los pedidos…`,veredicto:`Conectadas · los pedidos pasan solos`,explica:`Al conectarlas, cada pedido de la tienda llega al Excel en el momento, sin que nadie lo copie; los que esperaban pasan primero. En la vida real, si algo falla se reintenta y te avisa. Los pedidos son de ejemplo.`}},{slug:`automatiza`,servicio:`Automatizaciones`,titulo:`Automatiza`,texto:`Lo que alguien hace a mano cada semana, una máquina lo hace sola: leer documentos, pasar datos de un programa a otro, avisar a quien toca. En segundos y sin errores de dedo.`,puntos:[{p:[.42,.58,.12],t:`Total · leído`},{p:[-.62,-.62,.55],t:`Lector`}],articulo:{intro:[`Cada empresa tiene tareas que alguien repite a mano todas las semanas: pasar facturas a un Excel, copiar pedidos de un programa a otro, rellenar el mismo informe o avisar a quien toca cuando algo cambia.`,`Las automatizamos de principio a fin. La máquina lee el documento o el correo, saca los datos, comprueba que cuadran y los deja donde se usan. Lo que tiene dudas se marca para que lo mire una persona.`,`Ya lo hacemos con las facturas de proveedores en hostelería, y el mismo método vale para pedidos, partes de trabajo, contratos o cualquier papel que hoy se teclea.`],permite:[`Leer facturas, albaranes, pedidos o contratos en PDF, foto o correo`,`Comprobar que los datos cuadran antes de apuntar nada`,`Dejar cada dato en tu Excel, tu ERP o tu app, sin copiar a mano`,`Avisar por correo o WhatsApp a quien le toca, cuando le toca`],cifras:v.grabada?[{n:`${(e=>(e/1e3).toLocaleString(`es-ES`,{maximumFractionDigits:1}))(v.ms)} s`,t:`tardó la IA en leer la factura de la misión`},{n:String(Object.keys(v.campos).length),t:`datos sacados y comprobados, sin plantilla`}]:[],frase:`Lo que hoy se teclea, mañana se apunta solo`,ficha:[[`Entrada`,`PDF, foto, correo o formulario`],[`Lectura`,`Un modelo de IA con visión, sin plantillas por documento`],[`Comprobación`,`Las cuentas se rehacen: si no cuadran, no se apunta`],[`Salida`,`Excel, ERP, base de datos o tu app`],[`Avisos`,`Correo o WhatsApp`],[`Hecho en`,`n8n o código propio, según el caso`]],beneficios:[[`Tiempo`,`Las horas de copiar a mano vuelven a lo que importa`],[`Errores`,`Nada de cifras mal tecleadas`],[`Control`,`Sabes lo que entra el mismo día, no a final de mes`],[`Escala`,`Diez documentos o mil, el mismo trabajo`]]},mision:{modulo:`factura`,orden:`Pasa el lector por la factura para sacar sus datos`,gesto:`Arrastra el lector para leer la factura`,curso:`Leyendo la factura…`,veredicto:`Factura leída · cuadra`,explica:`Cada dato se reconoce donde esté, sin plantillas: proveedor, fecha, base, IVA y total. Se rehacen las cuentas y, si cuadran, la línea se apunta sola en tu Excel.`}},{slug:`a-medida`,servicio:`Software a medida`,titulo:`A medida`,texto:`Cuando la herramienta no existe, la hacemos. Para el equipo de Neumomadrid de la FJD, un programa que separa el tejido pulmonar píxel a píxel y mide cada región.`,puntos:[{p:[0,-.08,.05],t:`Muestra`},{p:[.28,1.22,-.32],t:`Óptica`}],articulo:{intro:[`Hay trabajos que ninguna aplicación del mercado resuelve, porque son solo tuyos. Ahí hace falta software a medida: pensado para tu proceso, no al revés.`,`Tysiu fue el primero, para el equipo de investigación de Neumomadrid de la Fundación Jiménez Díaz. El programa carga la imagen del tejido pulmonar, separa píxel a píxel lo que es tejido de lo que no y mide cada región.`],permite:[`Cargar y editar la imagen de cada muestra`,`Separar el tejido del aire, píxel a píxel`,`Medir cada región, una a una`,`Exportar los resultados para el estudio`],cifras:[{n:`2024`,t:`nuestro primer software a medida`}],frase:`Software que analiza tejido pulmonar, píxel a píxel`,ficha:[[`Para`,`Neumomadrid · Fundación Jiménez Díaz`],[`Año`,`2024`],[`Entrada`,`La imagen de la muestra`],[`Proceso`,`Separa el tejido y mide cada región`],[`Salida`,`Las medidas, exportadas`],[`Equipo`,`Álvaro`]],beneficios:[[`Hecho a su medida`,`Su proceso, tal cual lo trabajaban`],[`Precisión`,`Cada píxel cuenta, no una estimación a ojo`],[`Repetible`,`El mismo criterio en cada imagen`],[`Suyo`,`Lo usaron mucho tiempo después`]]},mision:{modulo:`tejido`,orden:`Analiza la muestra para separar el tejido del aire`,gesto:`Clic para analizar`,gestoDedo:`Toca para analizar`,curso:`Análisis en curso…`,veredicto:`Tejido segmentado`,explica:`El tejido se separa del aire píxel a píxel y cada región se mide: los colores cálidos son las más grandes. Lo que ves lo está calculando ahora tu navegador.`}}],b={proveedor:`Huerta de Ejemplo, S.L.`,nif:`B00000000`,numero:`F-2026/0417`,fecha:`27/10/2026`,lineas:[[`Tomate pera`,`12 kg`,`1,85`,`22,20`],[`Burrata 125 g`,`20 ud`,`1,40`,`28,00`],[`Aceite de oliva virgen extra`,`2 × 5 l`,`31,50`,`63,00`]],base:`113,20`,ivaTipo:`10 %`,iva:`11,32`,total:`124,52`},x=class{constructor(){this.p=[],this.a=[]}linea(e,t,n,r,i,a,o=0){return this.p.push(e,t,n,r,i,a),this.a.push(o,o),this}poli(e,t=0,n=!1){for(let n=0;n<e.length-1;n++)this.linea(...e[n],...e[n+1],t);return n&&this.linea(...e[e.length-1],...e[0],t),this}caja(e,t,n,r,i,a,o=0){let s=[e-r/2,e+r/2],c=[t-i/2,t+i/2],l=[n-a/2,n+a/2];for(let e of c)for(let t of l)this.linea(s[0],e,t,s[1],e,t,o);for(let e of s)for(let t of l)this.linea(e,c[0],t,e,c[1],t,o);for(let e of s)for(let t of c)this.linea(e,t,l[0],e,t,l[1],o);return this}circulo(e,t,n,r,i=28,a=`xz`,o=0){let s=[];for(let o=0;o<i;o++){let c=o/i*Math.PI*2,l=Math.cos(c)*r,u=Math.sin(c)*r;s.push(a===`xz`?[e+l,t,n+u]:a===`xy`?[e+l,t+u,n]:[e,t+l,n+u])}return this.poli(s,o,!0)}cilindro(e,t,n,r,i,a=24,o=0,s=8){this.circulo(e,t-i/2,n,r,a,`xz`,o).circulo(e,t+i/2,n,r,a,`xz`,o);for(let a=0;a<s;a++){let c=a/s*Math.PI*2;this.linea(e+Math.cos(c)*r,t-i/2,n+Math.sin(c)*r,e+Math.cos(c)*r,t+i/2,n+Math.sin(c)*r,o)}return this}rejilla(e,t,n,r,i,a,o,s=0){for(let o=0;o<=a;o++){let c=e-r/2+r*o/a;this.linea(c,t,n-i/2,c,t,n+i/2,s)}for(let a=0;a<=o;a++){let c=n-i/2+i*a/o;this.linea(e-r/2,t,c,e+r/2,t,c,s)}return this}junta(e,{rx:t=0,ry:n=0,x:r=0,y:i=0,z:a=0}={}){let o=Math.cos(t),s=Math.sin(t),c=Math.cos(n),l=Math.sin(n);for(let t=0;t<e.p.length;t+=3){let n=e.p[t],u=e.p[t+1],d=e.p[t+2],f=u*o-d*s,p=u*s+d*o,m=n*c+p*l,h=-n*l+p*c;this.p.push(m+r,f+i,h+a)}return this.a.push(...e.a),this}listo(){return{posicion:new Float32Array(this.p),acento:new Float32Array(this.a)}}};function S(){let e=new x;e.caja(0,-.72,.2,2.5,.36,1.7),e.caja(0,-.52,.2,2.3,.04,1.5),e.rejilla(0,-.5,.2,2.1,1.3,10,6),e.caja(0,-.78,1.1,1.9,.08,.12);for(let[t,n]of[[-1.1,-.5],[1.1,-.5],[-1.1,.9],[1.1,.9]])e.cilindro(t,-.95,n,.07,.1,10,0,4);let t=new x;t.caja(0,0,0,1.9,.04,1.3),t.linea(-.95,.02,-.65,-.95,.18,-.65).linea(.95,.02,-.65,.95,.18,-.65),e.junta(t,{rx:1.05,y:.05,z:-.85});let n=new x,r=1.5,i=1.95;n.poli([[-1.5/2,-1.95/2,0],[r/2,-1.95/2,0],[r/2,i/2,0],[-1.5/2,i/2,0]],1,!0),n.caja(-.42,.74,0,.5,.22,.001,1);for(let e=0;e<3;e++)n.linea(.12,.82-e*.09,0,.62,.82-e*.09,0,1);n.linea(-.66,.42,0,.66,.42,0,1);for(let e=0;e<6;e++){let t=.3-e*.14;n.linea(-.62,t,0,-.05,t,0,1).linea(.12,t,0,.3,t,0,1).linea(.42,t,0,.62,t,0,1)}return n.linea(-.66,-.58,0,.66,-.58,0,1),n.caja(.36,-.75,0,.56,.2,.001,1),e.junta(n,{rx:-.52,y:.36,z:-.97}),e.listo()}function C(){let e=new x;e.caja(0,-.84,.35,2.7,.1,1.75),e.rejilla(0,-.785,.15,2.2,.8,13,4),e.caja(0,-.785,.9,.9,.001,.45);let t=new x;t.caja(0,.85,0,2.7,1.7,.06),t.poli([[-1.22,.1,.04],[1.22,.1,.04],[1.22,1.6,.04],[-1.22,1.6,.04]],0,!0),t.poli([[-1.05,1.42,.05],[-.1,1.42,.05],[-.1,1.24,.05],[-.95,1.24,.05],[-1.05,1.16,.05]],0,!0),t.linea(-.98,1.33,.05,-.3,1.33,.05),t.linea(-.95,.25,.05,1.05,.25,.05,1).linea(-.95,.25,.05,-.95,1.05,.05,1);let n=[.28,.42,.36,.55,.48,.7];return n.forEach((e,n)=>{let r=-.78+n*.3;t.poli([[r,.25,.05],[r,.25+e,.05],[r+.18,.25+e,.05],[r+.18,.25,.05]],1)}),t.poli(n.map((e,t)=>[-.69+t*.3,.25+e+.12,.05]),1),e.junta(t,{rx:-.22,y:-.79,z:-.52}),e.listo()}function w(){let e=new x;e.caja(0,-.85,.15,1.7,.16,1.25),e.caja(0,-.75,-.35,.5,.06,.4),e.poli([[-.18,-.77,-.45],[-.18,.4,-.45],[-.18,1.05,-.15],[-.18,1.15,.2]]),e.poli([[.18,-.77,-.45],[.18,.4,-.45],[.18,1.05,-.15],[.18,1.15,.2]]),e.poli([[-.18,-.77,-.25],[-.18,.3,-.25],[-.18,.88,-.02]]),e.poli([[.18,-.77,-.25],[.18,.3,-.25],[.18,.88,-.02]]);for(let t of[-.77,.3])e.linea(-.18,t,-.45,.18,t,-.45).linea(-.18,t,-.25,.18,t,-.25);e.circulo(.24,-.35,-.35,.16,20,`yz`).circulo(.3,-.35,-.35,.16,20,`yz`),e.circulo(-.24,-.35,-.35,.16,20,`yz`),e.caja(0,-.12,.22,1.25,.06,.95),e.caja(0,-.075,.22,1,.02,.34,1),e.circulo(0,-.06,.22,.13,24,`xz`,1).circulo(0,-.06,.22,.07,18,`xz`,1),e.linea(-.45,-.07,.05,-.2,-.07,.12).linea(.45,-.07,.05,.2,-.07,.12),e.cilindro(0,.48,.22,.26,.12,24,0,8),e.cilindro(0,.25,.22,.07,.3,14,0,5).cilindro(.17,.3,.12,.05,.22,12,0,4).cilindro(-.17,.3,.12,.05,.22,12,0,4);let t=new x;return t.cilindro(0,.4,0,.13,.8,20,0,6).cilindro(0,.92,0,.09,.25,16,0,4),e.junta(t,{rx:.35,y:.6,z:.22}),e.listo()}function T(){let e=new x,t=new x;t.caja(0,0,0,1,1.4,.06),t.poli([[-.42,-.6,.04],[.42,-.6,.04],[.42,.6,.04],[-.42,.6,.04]],0,!0);for(let e=0;e<2;e++)for(let n=0;n<2;n++)t.caja(-.2+e*.42,.22-n*.5,.045,.34,.34,.001);t.caja(0,-.48,.045,.6,.1,.001),e.junta(t,{ry:.38,x:-1.25,y:.2,z:.1}),e.caja(-1.25,-.6,.15,.7,.06,.5),e.linea(-1.25,-.57,.15,-1.25,-.48,.05);let n=new x;n.caja(0,0,0,1.6,1.05,.06);for(let e=0;e<=5;e++)n.linea(-.7,.42-e*.16,.04,.7,.42-e*.16,.04);for(let e=0;e<=4;e++)n.linea(-.7+e*.35,.42,.04,-.7+e*.35,-.38,.04);e.junta(n,{ry:-.42,x:1.15,y:.35,z:0}),e.caja(1.15,-.5,0,.12,.6,.12).caja(1.15,-.82,.05,.8,.05,.5),e.caja(-.8,-.28,.25,.12,.12,.2,1).caja(.55,-.15,.2,.12,.12,.2,1);let r=[];for(let e=0;e<=40;e++){let t=e/40,n=-.74+t*1.23,i=-.28+t*.13-Math.sin(t*Math.PI)*.6,a=.25+Math.sin(t*Math.PI)*.55-t*.05;r.push([n,i,a])}return e.poli(r,1),[.3,.55,.8].forEach(t=>{let n=Math.round(t*40),[i,a,o]=r[n];e.circulo(i,a,o,.05,10,`xy`,1)}),e.listo()}var E={observa:C,conecta:T,automatiza:S,"a-medida":w},D={observa:.94,conecta:1.04,automatiza:1,"a-medida":1.32};function ee(){let e=new x;e.circulo(0,0,0,1.62,72).circulo(0,0,0,1.44,72);for(let t=0;t<60;t++){let n=t/60*Math.PI*2,r=Math.cos(n),i=Math.sin(n),a=t%15==0?1.2:t%5==0?1.32:1.38;e.linea(r*1.44,0,i*1.44,r*a,0,i*a)}return e.listo()}function te(){let e=new x,t=[0,1,2].map(e=>e/3*Math.PI*2),n=e=>.11-e*.08,r=(e,t)=>[Math.cos(e)*n(t),t,Math.sin(e)*n(t)];for(let n of t)e.linea(...r(n,0),...r(n,.86));for(let n=0;n<7;n++){let i=n*.12,a=i+.12;for(let n=0;n<3;n++)e.linea(...r(t[n],i),...r(t[(n+1)%3],a))}return e.linea(0,.86,0,0,1,0),e.circulo(0,1,0,.035,8,`xy`,1).linea(-.07,.95,0,.07,.95,0,1),e.listo()}function O(){let e=new x,t=3.6,n=-1.45,r=1.75,i=-3.2,a=2.6;e.poli([[-3.6,n,i],[t,n,i],[t,r,i],[-3.6,r,i]],0,!0);for(let[o,s]of[[-3.6,n],[t,n],[-3.6,r],[t,r]])e.linea(o,s,i,o*2.2,s*1.9,a);for(let r=0;r<=18;r++){let o=-7.2+t*4*r/18;e.linea(o,n,i,o,n,a)}for(let r=0;r<=12;r++){let a=i+5.800000000000001*r/12;e.linea(-3.6*2.2,n,a,t*2.2,n,a)}return e.poli([[-1.9,-1.2,-3.1900000000000004],[1.9,-1.2,-3.1900000000000004],[1.9,1.45,-3.1900000000000004],[-1.9,1.45,-3.1900000000000004]],1,!0),e.listo()}var k=1.6,A=.55,j=7.4,M=-1.05,N=e=>k*Math.cos(Math.PI*e),P=e=>Math.abs(e)%2==0?-1:1,F=`
+uniform float uSep;
+uniform float uVaiven;
+float valle(float z) { return uVaiven * cos(3.14159265 * (${j.toFixed(2)} - z) / uSep); }
+float azar(vec2 p) { vec3 q = fract(vec3(p.xyx) * 0.1031); q += dot(q, q.yzx + 33.33); return fract((q.x + q.y) * q.z); }
+float ruido(vec2 p) {
+  vec2 i = floor(p), f = fract(p), s = f * f * (3.0 - 2.0 * f);
+  return mix(mix(azar(i), azar(i + vec2(1.0, 0.0)), s.x), mix(azar(i + vec2(0.0, 1.0)), azar(i + vec2(1.0, 1.0)), s.x), s.y);
+}
+// La altura del terreno: casi llano en el valle y montañas a los lados
+float alto(vec2 w) {
+  float d = abs(w.x - valle(w.y));
+  float ladera = smoothstep(3.4, 11.0, d);
+  float n = ruido(w * 0.15) * 0.6 + ruido(w * 0.34 + 7.0) * 0.28 + ruido(w * 0.8 + 3.0) * 0.12;
+  return ladera * (0.25 + pow(n, 1.5) * 5.4) + (1.0 - ladera) * ruido(w * 0.45) * 0.1;
+}`,I=`
+uniform float uCerca;
+float lejos(float prof, float l) { return (1.0 - smoothstep(l * 0.35, l, prof)) * smoothstep(uCerca * 0.25, uCerca, prof); }`,L=`
+attribute vec3 position;
+attribute float acento;
+attribute float orden;
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+uniform float uDesvio;
+varying float vAcento;
+varying float vProf;
+varying float vOrden;
+void main() {
+  vec4 mv = modelViewMatrix * vec4(position, 1.0);
+  vProf = -mv.z;
+  vAcento = acento;
+  vOrden = orden;
+  vec4 c = projectionMatrix * mv;
+  c.x += uDesvio * c.w;
+  gl_Position = c;
+}`,R=`
+precision highp float;
+uniform vec3 uCrema;
+uniform vec3 uRosa;
+uniform vec3 uTinte;
+uniform float uAlfa;
+uniform float uLejos;
+uniform float uDibujo;
+varying float vAcento;
+varying float vProf;
+varying float vOrden;
+${I}
+void main() {
+  if (vOrden > uDibujo) discard;
+  float frente = smoothstep(0.07, 0.0, uDibujo - vOrden) * step(uDibujo, 0.999);
+  float a = max(vAcento, frente);
+  vec3 c = mix(uCrema, uRosa, a) * uTinte;
+  gl_FragColor = vec4(c, uAlfa * mix(0.4, 1.0, a) * lejos(vProf, uLejos));
+}`,z=`
+attribute vec3 position;
+attribute float acento;
+uniform mat4 modelMatrix;
+uniform mat4 viewMatrix;
+uniform mat4 projectionMatrix;
+${F}
+varying float vProf;
+varying float vAlto;
+varying float vTipo;
+void main() {
+  vec4 w = modelMatrix * vec4(position, 1.0);
+  float h = alto(w.xz);
+  w.y = ${M.toFixed(2)} + h;
+  vAlto = h;
+  vTipo = acento;
+  vec4 mv = viewMatrix * w;
+  vProf = -mv.z;
+  gl_Position = projectionMatrix * mv;
+}`,ne=`
+precision highp float;
+uniform vec3 uCrema;
+uniform vec3 uRosa;
+uniform float uAlfa;
+uniform float uLejos;
+varying float vProf;
+varying float vAlto;
+varying float vTipo;
+${I}
+void main() {
+  float luz = 0.4 + 0.6 * smoothstep(0.15, 3.8, vAlto);
+  float cumbre = smoothstep(3.6, 4.8, vAlto);
+  vec3 c = mix(uCrema, uRosa, cumbre);
+  gl_FragColor = vec4(c, uAlfa * luz * lejos(vProf, uLejos) * mix(1.0, 0.4, vTipo) * (1.0 + cumbre));
+}`,re=`
+attribute vec3 position;
+attribute float carril;
+uniform mat4 modelMatrix;
+uniform mat4 viewMatrix;
+uniform mat4 projectionMatrix;
+${F}
+varying float vProf;
+varying float vZ;
+varying float vCarril;
+void main() {
+  vec4 w = modelMatrix * vec4(position, 1.0);
+  w.x = valle(w.z) + carril * 2.5;
+  w.y = ${(-1.04).toFixed(2)};
+  vZ = w.z;
+  vCarril = carril;
+  vec4 mv = viewMatrix * w;
+  vProf = -mv.z;
+  gl_Position = projectionMatrix * mv;
+}`,B=`
+precision highp float;
+uniform vec3 uCrema;
+uniform vec3 uRosa;
+uniform float uAlfa;
+uniform float uLejos;
+uniform float uTiempo;
+varying float vProf;
+varying float vZ;
+varying float vCarril;
+${I}
+void main() {
+  float pulso = pow(smoothstep(0.75, 1.0, fract(-vZ / 14.0 - uTiempo * 0.22)), 3.0);
+  gl_FragColor = vec4(uRosa, uAlfa * (0.22 + 0.78 * pulso) * lejos(vProf, uLejos));
+}`,ie=`
+attribute vec3 position;
+attribute float acento;
+attribute float base;
+uniform mat4 modelMatrix;
+uniform mat4 viewMatrix;
+uniform mat4 projectionMatrix;
+${F}
+varying float vProf;
+varying float vAcento;
+varying float vFase;
+void main() {
+  float z = (modelMatrix * vec4(0.0, 0.0, base, 1.0)).z;
+  float n = floor(z / 13.0 + 0.5);
+  float lado = mod(n, 2.0) * 2.0 - 1.0;
+  float r = azar(vec2(n, 3.7));
+  float x = valle(z) + lado * (6.2 + r * 2.6);
+  vec3 w = vec3(x, ${M.toFixed(2)} + alto(vec2(x, z)) - 0.05, z) + position * (2.1 + r * 1.3);
+  vAcento = acento;
+  vFase = r * 6.28;
+  vec4 mv = viewMatrix * vec4(w, 1.0);
+  vProf = -mv.z;
+  gl_Position = projectionMatrix * mv;
+}`,ae=`
+precision highp float;
+uniform vec3 uCrema;
+uniform vec3 uRosa;
+uniform float uAlfa;
+uniform float uLejos;
+uniform float uTiempo;
+varying float vProf;
+varying float vAcento;
+varying float vFase;
+${I}
+void main() {
+  float late = 0.35 + 0.65 * pow(0.5 + 0.5 * sin(uTiempo * 2.6 + vFase), 4.0);
+  vec3 c = mix(uCrema, uRosa, vAcento);
+  gl_FragColor = vec4(c, uAlfa * mix(0.42, late * 1.4, vAcento) * lejos(vProf, uLejos));
+}`,oe=`
+attribute vec3 position;
+attribute float cola;
+attribute float brillo;
+uniform mat4 viewMatrix;
+uniform mat4 projectionMatrix;
+uniform vec3 uCam;
+uniform vec3 uVel;
+uniform float uEstela;
+uniform float uTiempo;
+varying float vProf;
+varying float vBrillo;
+void main() {
+  vec3 lo = vec3(-15.0, -1.4, -44.0), caja = vec3(30.0, 9.0, 50.0);
+  vec3 p = position + vec3(0.0, uTiempo * 0.05 * brillo, 0.0);
+  vec3 w = uCam + mod(p - uCam - lo, caja) + lo;
+  w -= uVel * uEstela * cola;
+  // Quieta, cada mota es una raya de unos pocos píxeles, esté cerca o lejos
+  w.y += cola * 0.0035 * max(0.5, -(viewMatrix * vec4(w, 1.0)).z);
+  vBrillo = brillo;
+  vec4 mv = viewMatrix * vec4(w, 1.0);
+  vProf = -mv.z;
+  gl_Position = projectionMatrix * mv;
+}`,se=`
+precision highp float;
+uniform vec3 uCrema;
+uniform vec3 uRosa;
+uniform float uAlfa;
+uniform float uLejos;
+varying float vProf;
+varying float vBrillo;
+${I}
+void main() {
+  vec3 c = mix(uCrema, uRosa, step(0.92, vBrillo));
+  gl_FragColor = vec4(c, uAlfa * (0.25 + 0.6 * vBrillo) * lejos(vProf, uLejos));
+}`,ce=[231/255,226/255,218/255],le=[245/255,203/255,215/255],ue=e=>{let t=Math.sin(e*12.9898)*43758.5453;return t-Math.floor(t)};function de(e,{conRaton:t=!1,reducido:n=!1,slugs:r=Object.keys(E)}={}){let i;try{i=new u({canvas:e,dpr:Math.min(devicePixelRatio||1,2),alpha:!0,antialias:!0,premultipliedAlpha:!1})}catch{return null}let o=i.gl;o.clearColor(0,0,0,0);let s=r.length,c=new h(o,{fov:30,near:.1,far:80}),g=new d,_=(e,t,n={},r=!1)=>{let i=new l(o,{vertex:e,fragment:t,transparent:!0,depthTest:!1,depthWrite:!1,uniforms:{uCrema:{value:ce},uRosa:{value:le},uAlfa:{value:1},uLejos:{value:30},uSep:{value:10},uVaiven:{value:k},uCerca:{value:2.2},...n}});return r&&i.setBlendFunc(o.SRC_ALPHA,o.ONE),i},v=({posicion:e,acento:t},n=!1)=>{let r=e.length/3,i=new Float32Array(r),a=1/0,s=-1/0;for(let t=1;t<e.length;t+=3)a=Math.min(a,e[t]),s=Math.max(s,e[t]);for(let t=0;t<r;t+=2){let r=(e[t*3]+e[t*3+3])/2,o=(e[t*3+1]+e[t*3+4])/2,c=(e[t*3+2]+e[t*3+5])/2,l=n?Math.atan2(c,r)/(Math.PI*2)+.5:(o-a)/(s-a||1)*.82+ue(t)*.18;i[t]=i[t+1]=Math.min(.995,l)}return new f(o,{position:{size:3,data:e},acento:{size:1,data:t},orden:{size:1,data:i}})},y=(e,t,n=g)=>{let r=new m(o,{geometry:e,program:t,mode:o.LINES,frustumCulled:!1});return r.setParent(n),r},b=(()=>{let e=[],t=[];for(let n=0;n<=86;n++){let r=6-n*.6;for(let n=0;n<120;n++)e.push(-24+n*.4,0,r,-24+(n+1)*.4,0,r),t.push(0,0)}for(let n=0;n<=20;n++){let r=-24+n*2.4;for(let n=0;n<129;n++)e.push(r,0,6-n*.4,r,0,6-(n+1)*.4),t.push(1,1)}return new f(o,{position:{size:3,data:new Float32Array(e)},acento:{size:1,data:new Float32Array(t)}})})(),x=_(z,ne,{uLejos:{value:50}}),S=y(b,x),C=(()=>{let e=[],t=[];for(let n of[0])for(let r=0;r<173;r++)e.push(0,0,6-r*.3,0,0,6-(r+1)*.3),t.push(n,n);return new f(o,{position:{size:3,data:new Float32Array(e)},carril:{size:1,data:new Float32Array(t)}})})(),w=_(re,B,{uLejos:{value:34},uTiempo:{value:0}}),T=y(C,w),M=(()=>{let e=te(),t=[],n=[],r=[];for(let i=0;i<6;i++){t.push(...e.posicion),n.push(...e.acento);for(let t=0;t<e.acento.length;t++)r.push(13-i*13)}return new f(o,{position:{size:3,data:new Float32Array(t)},acento:{size:1,data:new Float32Array(n)},base:{size:1,data:new Float32Array(r)}})})(),F=_(ie,ae,{uLejos:{value:40},uCerca:{value:8},uTiempo:{value:0}}),I=y(M,F),de=(()=>{let e=[],t=[],n=[];for(let r=0;r<700;r++){let r=Math.random()*30,i=Math.random()*9,a=Math.random()*50,o=Math.random();e.push(r,i,a,r,i,a),t.push(0,1),n.push(o,o)}return new f(o,{position:{size:3,data:new Float32Array(e)},cola:{size:1,data:new Float32Array(t)},brillo:{size:1,data:new Float32Array(n)}})})(),V=_(oe,se,{uLejos:{value:26},uCam:{value:[0,0,0]},uVel:{value:[0,0,0]},uEstela:{value:.12},uTiempo:{value:0}}),H=y(de,V),U=_(L,R,{uLejos:{value:34},uTinte:{value:[1,1,1]},uDibujo:{value:1},uDesvio:{value:0}}),W=y(v(O(),!0),U),G=_(L,R,{uLejos:{value:28},uTinte:{value:[1,1,1]},uDibujo:{value:1},uDesvio:{value:0}}),fe=_(L,R,{uLejos:{value:28},uTinte:{value:[1,.22,.42]},uDibujo:{value:1},uDesvio:{value:0}},!0),pe=_(L,R,{uLejos:{value:28},uTinte:{value:[.25,.72,1]},uDibujo:{value:1},uDesvio:{value:0}},!0),K=_(L,R,{uLejos:{value:28},uTinte:{value:[1,1,1]},uDibujo:{value:1},uDesvio:{value:0}}),me=v(ee(),!0),he=()=>innerWidth/innerHeight<.8,q={slider:e=>he()?{x:0,y:.95,z:-.6,ry:-.5*e,s:.62}:{x:1.72*e,y:-.32,z:-.4,ry:-.55*e,s:.72},dentro:e=>he()?{x:0,y:.85,z:.2,ry:.45*e,s:.7}:{x:-1.36*e,y:-.42,z:.6,ry:.5*e,s:.84}};q.mision=q.dentro;let ge=r.map((e,t)=>{let n=new d;n.setParent(g);let r=v(E[e]()),i={idx:t,slug:e,grupo:n,k:t,lado:P(t),factor:D[e]||1,alfa:0,dibujo:0,desvio:0};i.pose=q.slider(i.lado);let[a,o,s]=[G,fe,pe].map(e=>y(r,e,n));a.onBeforeRender(()=>{G.uniforms.uAlfa.value=i.alfa,G.uniforms.uDibujo.value=i.dibujo});for(let[e,t,n]of[[o,fe,-1],[s,pe,1]])e.onBeforeRender(()=>{t.uniforms.uAlfa.value=i.alfa*Math.min(1,i.desvio*1.6)*.85,t.uniforms.uDibujo.value=i.dibujo,t.uniforms.uDesvio.value=n*.016*i.desvio});return i.copias=[o,s],i.peana=y(me,K),i.peana.onBeforeRender(()=>{K.uniforms.uAlfa.value=i.alfa*J.terreno*.7,K.uniforms.uDibujo.value=i.dibujo}),i}),J={u:0,terreno:0,sala:0,modelo:1,glitch:0,dir:1,solo:null},Y=`slider`,X=()=>ge[(Math.round(J.u)%s+s)%s],Z={x:0,y:0},_e=0,ve=0;t&&!n&&addEventListener(`pointermove`,e=>{Z.x=e.clientX/innerWidth-.5,Z.y=e.clientY/innerHeight-.5},{passive:!0});let ye=30,be=0,xe=()=>{i.setSize(innerWidth,innerHeight),ye=he()?42:30,be=0;let e=X();for(let t of ge)t.pose=t===e?q[Y](t.lado):q.slider(t.lado)};addEventListener(`resize`,xe),xe();let Se=(e,t=0,r=0)=>{let i=e-Math.floor(e),a=n?0:Math.sin(Math.PI*i),o=N(e),s=-e*10+j,l=-1.6*Math.PI*Math.sin(Math.PI*e),u=Math.hypot(l,-10);c.position.set(o+t,A+a*1.15+r,s);let d=-.1*a*Math.cos(Math.PI*e)*J.dir;c.up.set(Math.sin(d),Math.cos(d),0),c.lookAt([o+l/u*j+t*.3,.050000000000000044-a*.75,s+-10/u*j]);let f=ye+a*9;return Math.abs(f-be)>.01&&(c.perspective({aspect:innerWidth/innerHeight,fov:f}),be=f),a},Ce=performance.now(),we=Ce,Te=!0,Ee=0,De=new p,Q=[0,0,0],Oe=e=>{if(Ee=requestAnimationFrame(Oe),!Te)return;let t=(e-Ce)/1e3,r=Math.max(.001,Math.min(.1,(e-we)/1e3));we=e;let a=J.u,o=Y===`mision`?0:1,l=Y===`mision`?.18:.04;_e+=(Z.x*.6*o-_e)*l,ve+=(-Z.y*.35*o-ve)*l,De.copy(c.position);let u=Se(a,_e,ve);for(let e=0;e<3;e++)Q[e]+=((c.position[e]-De[e])/r-Q[e])*.3;S.position.set(Math.round(c.position.x/2.4)*2.4,0,Math.round(c.position.z/1.2)*1.2),T.position.set(0,0,Math.round(c.position.z/1.2)*1.2),I.position.set(0,0,Math.round(c.position.z/13)*13),x.uniforms.uAlfa.value=J.terreno*.95,w.uniforms.uAlfa.value=J.terreno,F.uniforms.uAlfa.value=J.terreno,F.uniforms.uTiempo.value=t,w.uniforms.uTiempo.value=n?0:t,V.uniforms.uAlfa.value=J.terreno*.8,V.uniforms.uTiempo.value=n?0:t,V.uniforms.uCam.value=[c.position.x,c.position.y,c.position.z],V.uniforms.uVel.value=Q;for(let e of[S,T,I,H])e.visible=J.terreno>.01;let d=X();for(let e of ge){e.k=e.idx+s*Math.round((a-e.idx)/s);let r=e.k-a,i=N(e.k),o=-e.k*10,c=e.pose;e.grupo.position.set(i+c.x,c.y,o+c.z),e.grupo.rotation.y=c.ry+(n?0:Math.sin(t*.22+e.idx)*.1);let l=c.s*e.factor;e.grupo.scale.set(l,l,l),e.dibujo=r>0?Math.max(0,Math.min(1,1-(r-.12)/.62)):1,e.alfa=r>-.9&&r<.76&&(J.solo===null||J.solo===e.k)?e===d?J.modelo:1:0,e.desvio=Math.max(u,J.glitch),e.grupo.visible=e.alfa>.01&&e.dibujo>0;for(let t of e.copias)t.visible=e.desvio>.02;e.peana.visible=e.grupo.visible&&J.terreno>.01,e.peana.position.set(i+c.x,-1.03,o+c.z),e.peana.rotation.y=t*.06*e.lado}W.position.set(N(Math.round(a)),0,-Math.round(a)*10),U.uniforms.uAlfa.value=J.sala,U.uniforms.uDibujo.value=Math.min(1,J.sala*1.15),W.visible=J.sala>.01,i.render({scene:g,camera:c})};Ee=requestAnimationFrame(Oe),document.addEventListener(`visibilitychange`,()=>{Te=!document.hidden,we=performance.now()});let $=+!n;return{ladoDe:P,entrar(e){return J.u=e-.9*$,J.dir=1,J.solo=e,a.timeline({onComplete:()=>{J.solo=null}}).to(J,{terreno:1,duration:1.6*$,ease:`power2.out`},0).to(J,{u:e,duration:2.6*$,ease:`power3.out`},0)},viajar(e,t=2.3){return J.dir=e>=J.u?1:-1,a.to(J,{u:e,duration:t*$,ease:`power2.inOut`,overwrite:`auto`})},vista(e){Y=e;let t=X(),n=e===`mision`?{modelo:0,terreno:0,sala:1}:{modelo:1,terreno:1,sala:0};return a.to(t.pose,{...q[e](t.lado),duration:1.2*$,ease:`power3.inOut`,overwrite:`auto`}),e!==`mision`&&a.fromTo(J,{glitch:.6},{glitch:0,duration:1.1*$,ease:`power2.out`}),a.to(J,{...n,duration:1.2*$,ease:`power3.inOut`,overwrite:`auto`})},proyectar([e,t,n]){let r=X();g.updateMatrixWorld(),c.updateMatrixWorld();let i=new p(e,t,n).applyMatrix4(r.grupo.worldMatrix);return c.project(i),{x:(i.x*.5+.5)*innerWidth,y:(-i.y*.5+.5)*innerHeight,delante:i.z<1}},proyectarMundo([e,t,n]){let r=Math.round(J.u);Se(r),c.updateMatrixWorld();let i=new p(N(r)+e,t,-r*10+n);return c.project(i),{x:(i.x*.5+.5)*innerWidth,y:(-i.y*.5+.5)*innerHeight}},destruir(){cancelAnimationFrame(Ee),removeEventListener(`resize`,xe)}}}var V={pregunta:()=>o(()=>import(`./pregunta.EgEF7R-Y.js`),__vite__mapDeps([0,1,2])),conecta:()=>o(()=>import(`./conecta.FcFwXPsX.js`),__vite__mapDeps([3,1,2])),factura:()=>o(()=>import(`./factura.7fUOs9zn.js`),__vite__mapDeps([4,1,2])),tejido:()=>o(()=>import(`./tejido.BQP44k8L.js`),__vite__mapDeps([5,1,2]))},H=e=>String(e).padStart(2,`0`);function U(e,t,{salir:n=!1,reducido:r=!1}={}){return r?(e.textContent=t,Promise.resolve()):new Promise(r=>{let i=0,a=setInterval(()=>{i++;let o=n?i/11:1-i/11;e.replaceChildren(...[...t].map(e=>{if(e===` `||Math.random()>o*.5)return document.createTextNode(e);let t=document.createElement(`span`);t.className=`d`,t.textContent=e;let n=document.createDocumentFragment();return n.append(e,t),n})),e.style.opacity=n?String(1-i/11*.9):`1`,i>=11&&(clearInterval(a),n||(e.textContent=t),r())},42)})}function W({reducido:o,conRaton:s,lenis:l}){let u=document.querySelector(`[data-tech]`);if(!u)return;l?.stop(),document.documentElement.classList.add(`tech-fija`);let d=e=>u.querySelector(e),f=e=>[...u.querySelectorAll(e)],p=de(d(`[data-tec-lienzo]`),{conRaton:s,reducido:o,slugs:y.map(e=>e.slug)}),m=+!o,h=2.3,g={servicio:d(`[data-tec-servicio]`),titulo:d(`[data-tec-titulo]`),texto:d(`[data-tec-texto]`),entrar:d(`[data-tec-entrar]`),a:d(`[data-tec-a]`),b:d(`[data-tec-b]`),atras:d(`[data-tec-atras]`),sig:d(`[data-tec-sig]`),dentro:d(`[data-tec-dentro]`),puntos:d(`[data-tec-puntos]`),botones:d(`[data-tec-botones]`),abrirMision:d(`[data-tec-abrir-mision]`),mision:d(`[data-tec-mision]`),orden:d(`[data-tec-orden]`),zona:d(`[data-tec-zona]`),leyenda:d(`[data-tec-leyenda]`),explica:d(`[data-tec-explica-t]`),gesto:d(`[data-tec-gesto]`)},_=y.length,v=Math.max(0,y.findIndex(e=>`#${e.slug}`===location.hash)),b=v,x=`slider`,S=!1,C=null,w=d(`[data-tec-hora]`),T=new Intl.DateTimeFormat(`es-ES`,{timeZone:`Europe/Madrid`,hour:`2-digit`,minute:`2-digit`}),E=()=>{w&&(w.textContent=T.format(new Date))};E(),setInterval(E,15e3);let D=e=>{x=e,u.dataset.vista=e},ee=()=>{try{history.replaceState(null,``,`#${y[b].slug}`)}catch{}};function te(){let e=y[b];g.servicio.textContent=e.servicio,g.texto.textContent=e.texto,g.a.textContent=H(b+1),g.b.textContent=H((b+1)%_+1),u.dataset.lado=P(v)<0?`izq`:`der`,f(`[data-tec-art]`).forEach(t=>t.classList.toggle(`es-actual`,t.dataset.tecArt===e.slug)),g.abrirMision.hidden=!e.mision}function O(){let e=a.timeline();return e.fromTo([g.servicio,g.texto],{opacity:0,y:14},{opacity:1,y:0,duration:.8*m,stagger:.12,ease:`power3.out`},.15*m),e.fromTo(g.entrar,{scaleX:.04,opacity:1},{scaleX:1,duration:.7*m,ease:`power3.inOut`},.35*m),e.fromTo(g.entrar.firstElementChild,{opacity:0},{opacity:1,duration:.3*m},.9*m),e.fromTo([g.a,g.b],{yPercent:60,opacity:0},{yPercent:0,opacity:1,duration:.6*m,stagger:.06,ease:`power3.out`},0),U(g.titulo,y[b].titulo,{reducido:o}),e}async function k(e){if(S||x!==`slider`)return;S=!0,i(h*m||.5,e),a.to([g.servicio,g.texto,g.a,g.b],{opacity:0,duration:.35*m}),a.to(g.entrar.firstElementChild,{opacity:0,duration:.12*m}),a.to(g.entrar,{scaleX:.04,duration:.45*m,ease:`power3.in`}),U(g.titulo,y[b].titulo,{salir:!0,reducido:o}),v+=e,b=(v%_+_)%_,ee();let t=p?p.viajar(v,h):null;await new Promise(e=>setTimeout(e,h*.66*1e3*m)),te(),O(),t&&await t.then(),S=!1}g.sig.addEventListener(`click`,()=>k(1)),g.atras.addEventListener(`click`,()=>k(-1));let A=0;u.addEventListener(`wheel`,e=>{if(x!==`slider`)return;let t=performance.now(),n=t-A>260;A=t,!(!n||Math.abs(e.deltaY)+Math.abs(e.deltaX)<8)&&k((e.deltaY||e.deltaX)>0?1:-1)},{passive:!0});let j=null;u.addEventListener(`pointerdown`,e=>{x===`slider`&&e.pointerType!==`mouse`&&(j=e.clientX)}),u.addEventListener(`pointerup`,e=>{if(j===null)return;let t=e.clientX-j;j=null,Math.abs(t)>50&&k(t<0?1:-1)}),addEventListener(`keydown`,e=>{e.key===`ArrowRight`&&x===`slider`?k(1):e.key===`ArrowLeft`&&x===`slider`?k(-1):e.key===`Escape`&&(x===`mision`?B():x===`dentro`&&F())});let M=()=>d(`[data-tec-art="${y[b].slug}"]`);function N(){if(S||x!==`slider`)return;r(),D(`dentro`),g.dentro.scrollTop=0,p?.vista(`dentro`);let e=M();a.fromTo(g.dentro,{opacity:0},{opacity:1,duration:.6*m,delay:.35*m}),a.fromTo(g.botones,{opacity:0,x:20},{opacity:1,x:0,duration:.7*m,delay:.6*m,ease:`power3.out`}),a.fromTo(e.querySelector(`.tec__baja i`),{scaleY:0},{scaleY:1,duration:1*m,delay:.8*m,ease:`power2.inOut`}),U(e.querySelector(`.tec__titulo`),y[b].titulo,{reducido:o}),L()}function F(){x===`dentro`&&(n(),a.to([g.dentro,g.botones],{opacity:0,duration:.4*m,onComplete:()=>{D(`slider`),a.set([g.dentro,g.botones],{clearProps:`opacity,transform`})}}),p?.vista(`slider`),R(),setTimeout(()=>O(),300*m))}g.entrar.addEventListener(`click`,N),d(`[data-tec-cerrar]`).addEventListener(`click`,F),f(`[data-tec-siguiente]`).forEach(e=>e.addEventListener(`click`,e=>{e.preventDefault(),F(),setTimeout(()=>k(1),900*m)}));let I=0;function L(){if(R(),!p)return;let t=y[b].puntos.map(t=>{let n=document.createElement(`span`);return n.className=`tec__punto`,n.innerHTML=`<span class="insp"></span>`,n.querySelector(`.insp`).textContent=t.t,n.addEventListener(`pointerenter`,()=>e(.8)),g.puntos.append(n),{el:n,pt:t}});a.fromTo(t.map(e=>e.el),{scale:0,opacity:0},{scale:1,opacity:1,duration:.6*m,delay:1.1*m,stagger:.12,ease:`back.out(2)`});let n=()=>{I=requestAnimationFrame(n);let e=Math.min(1,g.dentro.scrollTop/(innerHeight*.4));g.puntos.style.opacity=String(1-e),g.puntos.style.visibility=e>=1?`hidden`:``;for(let{el:e,pt:n}of t){let t=p.proyectar(n.p);e.style.translate=`${t.x}px ${t.y-g.dentro.scrollTop*.3}px`}};n()}function R(){cancelAnimationFrame(I),g.puntos.replaceChildren(),g.puntos.style.opacity=``}let z={orden(e,t=!1){g.orden.classList.toggle(`es-estado`,t),a.fromTo(g.orden,{opacity:0},{opacity:1,duration:.4*m}),g.orden.textContent=e},gesto(e){g.gesto.textContent=e||``},leyenda(e){g.leyenda.replaceChildren(...e?[e]:[])},hecha(e){g.explica.textContent=e,g.mision.classList.add(`es-hecha`),a.fromTo(g.mision.querySelector(`.tec__explica i`),{scaleX:0},{scaleX:1,duration:.8*m,delay:.2*m,ease:`power3.out`})}};function ne(){if(!p)return;let e=p.proyectarMundo([-1.9,1.45,-3.19]),t=p.proyectarMundo([1.9,-1.2,-3.19]);Object.assign(g.zona.style,{left:`${e.x}px`,top:`${e.y}px`,width:`${t.x-e.x}px`,height:`${t.y-e.y}px`,transform:`none`}),g.mision.style.setProperty(`--zona-abajo`,`${t.y}px`),g.mision.style.setProperty(`--zona-izq`,`${e.x}px`)}addEventListener(`resize`,()=>{x===`mision`&&ne()});async function re(){let e=y[b].mision;if(!e||x!==`dentro`)return;r(),R(),a.to([g.dentro,g.botones],{opacity:0,duration:.4*m}),p?.vista(`mision`),await new Promise(e=>setTimeout(e,500*m)),D(`mision`),a.set([g.dentro,g.botones],{clearProps:`opacity,transform`}),g.mision.classList.remove(`es-hecha`),z.leyenda(null),z.gesto(``),z.orden(e.orden),g.zona.replaceChildren(),await new Promise(e=>setTimeout(e,700*m)),ne();let{montar:n}=await V[e.modulo]();C=await n(g.zona,{mision:e,panel:z,sonido:t,reducido:o,conRaton:s})}function B(){x===`mision`&&(n(),C?.destruir?.(),C=null,g.zona.replaceChildren(),D(`dentro`),p?.vista(`dentro`),a.fromTo([g.dentro,g.botones],{opacity:0},{opacity:1,duration:.6*m,delay:.5*m}),g.dentro.scrollTop=0,L())}g.abrirMision.addEventListener(`click`,re),d(`[data-tec-cerrar-m]`).addEventListener(`click`,B),s&&!o&&c(u,{vale:e=>{let t=e.closest(`[data-glitch-capa]`)?.dataset.glitchCapa;return t===x&&(t!==`dentro`||e.closest(`.tec__art`)?.classList.contains(`es-actual`))}}),te(),g.titulo.textContent=``,p?.entrar(v),setTimeout(()=>O(),1100*m)}s(W);export{v as n,_ as r,b as t};
