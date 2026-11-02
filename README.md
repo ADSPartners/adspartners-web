@@ -30,6 +30,14 @@ src/pages/tech/index.astro   Tech («Tech · adsPartners»): la maqueta del slid
                         cuarta, otra vez a la primera). «Entrar» abre su artículo y [+] su misión (scripts/tech.js; textos y datos en
                         src/data/tech.js; lo grabado con la API, en src/data/lectura.json y src/data/preguntas.json; la cafetería
                         de ejemplo, en src/data/negocio.js)
+src/pages/aviso-legal/, privacidad/, cookies/   las legales, «el libro» (components/legal/Libro.astro): un libro abierto en
+                        Garamond, a doble página o a una, con sus tres capítulos, sumario, guardas y colofón. Cada dirección lo abre
+                        por su capítulo. Las páginas las corta el navegador (columnas CSS) y las pasa scripts/libro.js girando una
+                        hoja; cada párrafo abre en el inspector su nota «en cristiano». Los textos, en src/data/legal.js. Las
+                        direcciones de la web anterior (/privacidad.html…) redirigen desde public/
+src/pages/404.astro     la 404, «Fe de erratas»: dice la dirección que escribiste y debe decir la buena, calculada de verdad
+                        (scripts/erratas.js: sinónimos, las fichas de proyecto que ya no existen y la distancia de edición). Para
+                        probarla en la copia de prueba: 404.html?donde=/ruta
 src/layouts/Base.astro  <head>, metas, fuentes precargadas y el script que decide umbral, movimiento y ratón
 src/components/
   Umbral.astro          carga con humor, barra de 1 px y entrar con o sin sonido (el final lo pinta portada.js)
@@ -42,6 +50,9 @@ src/components/
   Contacto.astro        la carta con huecos, la posdata de privacidad, «Enviar la carta» y el cierre
   Fresa.astro           el globo de FRESA (abre una ventana de chat en plano técnico) y el chat del final, tras el muro
   Fondo.astro           el fondo tech de todas las páginas (rejilla quieta; con ratón, el canvas de gl/fondo.js)
+  Consentimiento.astro  la «N. del E.»: el aviso de consentimiento de medición y campañas. Solo sale si hay IDs en
+                        src/data/rastreo.js (o al compilar con ADS_RASTREO_DEMO=1, que lo enseña sin cargar nada); lo mueve
+                        scripts/consentimiento.js y lo que carga, scripts/rastreo.js, solo después del sí
   Cursor.astro, Marca.astro
 src/data/               partners y proyectos (el archivo los enseña todos con su foto «cinta»; el lienzo de la home, los home: true con su «foto»); de dónde sale cada logo, en partners-LEEME.md
 src/scripts/
