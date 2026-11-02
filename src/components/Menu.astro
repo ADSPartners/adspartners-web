@@ -1,8 +1,7 @@
 ---
 // El menú, que abre el botón «Menú» de la cabecera (se queda encima y pasa a «Cerrar»): una ola vuelve la web el código
-// que la construye, la página queda como la hoja de arriba de una vista explotada (lo que ves, el código que lo pinta y
-// sus bytes, cada una con su nombre) y la cámara baja siguiendo un cable hasta la placa que lo ejecuta
-// (scripts/menu/placa.js). Cada página es una pieza de la placa, con su nombre al lado y, al apuntarla, la caja del
+// que la construye y la cámara baja recta por sus capas (lo que ves, el código que lo pinta y sus píxeles), entre bits,
+// hasta la placa que lo ejecuta (scripts/menu/placa.js). Cada página es una pieza de la placa, con su nombre al lado y, al apuntarla, la caja del
 // inspector con lo que mide. Abajo, siempre a mano, la lista de las páginas (para ir directo, con teclado o
 // con lector de pantalla), la capa por la que vas y cuánto lleva encendida (tu visita). Sin «Inicio»: a la home se
 // vuelve con el logo. Los datos salen de data/menu.js.
@@ -21,18 +20,9 @@ const enlace = (d) => (d.ruta === null ? undefined : `${base}${d.ruta}`);
       </span>
     ))}
   </div>
-  <div class="pl__hojas" aria-hidden="true">
-    {CAPAS.map((c, i) => (
-      <span class="pl__hoja" data-pl-hoja={i} data-nombre={c.nombre}>
-        <span class="pl__hoja-n mono">capa {i + 1} de {CAPAS.length}</span>
-        <span class="pl__hoja-nombre">{c.nombre}</span>
-        <span class="pl__hoja-frase mono">{c.frase}</span>
-      </span>
-    ))}
-  </div>
   <div class="pl__caja" data-pl-caja aria-hidden="true"><span class="insp" data-pl-caja-etq></span></div>
 
-  <p class="pl__capa mono" data-pl-capa aria-hidden="true"></p>
+  <p class="pl__capa mono" data-pl-capa data-capas={JSON.stringify(CAPAS)} aria-hidden="true"></p>
   <p class="pl__encendida mono" data-pl-encendida aria-hidden="true"></p>
 
   <nav class="pl__lista mono" aria-label="Páginas">
@@ -74,26 +64,6 @@ const enlace = (d) => (d.ruta === null ? undefined : `${base}${d.ruta}`);
   .pl__frase { color: var(--crema-2); text-shadow: 0 0 6px var(--noche), 0 0 14px var(--noche); transition: color .3s; }
   .pl__dest:global(.on) .pl__frase { color: var(--c); }
 
-  /* El nombre de cada capa, al lado de su hoja mientras bajas por el cable (placa.js lo lleva a su sitio y lo enciende;
-     con la clase «debajo» va centrado bajo la hoja, cuando a su derecha no cabe) */
-  .pl__hoja {
-    position: absolute; left: 0; top: 0; z-index: 2; pointer-events: none; display: grid; gap: 4px;
-    width: max-content; max-width: 30ch; translate: 0 -50%; opacity: 0; transition: opacity .5s var(--curva);
-  }
-  .pl__hoja:global(.on) { opacity: 1; }
-  .pl__hoja:global(.debajo) { translate: -50% 0; justify-items: center; text-align: center; }
-  /* En cada parada, el de la hoja en la que estás, en grande, con un velo oscuro detrás para que se lea sobre el código */
-  .pl__hoja:global(.grande) {
-    max-width: min(36ch, calc(100vw - 36px)); gap: 8px; padding: 22px 64px 22px 0;
-    background: linear-gradient(90deg, rgba(18, 13, 10, .86) 0%, rgba(18, 13, 10, .7) 70%, rgba(18, 13, 10, 0) 100%);
-  }
-  .pl__hoja:global(.grande) .pl__hoja-n { font-size: 11px; }
-  .pl__hoja:global(.grande) .pl__hoja-nombre { font-size: clamp(38px, 4.6vw, 76px); }
-  .pl__hoja:global(.grande) .pl__hoja-frase { font-size: 13px; color: var(--crema); }
-  .pl__hoja-n { color: var(--rosa); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
-  .pl__hoja-nombre { font-family: var(--serif); font-weight: 300; font-size: clamp(22px, 2vw, 34px); line-height: 1.05; text-shadow: 0 0 12px var(--noche), 0 0 24px var(--noche); }
-  .pl__hoja-frase { color: var(--crema-2); font-size: 11px; line-height: 1.4; text-shadow: 0 0 8px var(--noche); }
-
   /* La caja del inspector sobre la pieza apuntada: solo dos esquinas, y su ficha encima (como en la portada) */
   .pl__caja { position: absolute; left: 0; top: 0; z-index: 2; pointer-events: none; opacity: 0; transition: opacity .25s; }
   .pl__caja:global(.on) { opacity: 1; }
@@ -102,7 +72,8 @@ const enlace = (d) => (d.ruta === null ? undefined : `${base}${d.ruta}`);
   .pl__caja::after { right: 0; bottom: 0; border-left: 0; border-top: 0; }
   .pl__caja .insp { position: absolute; left: 0; bottom: calc(100% + 8px); background: var(--c, var(--rosa)); }
 
-  /* El inspector del viaje: la capa (abajo a la izquierda, encima de la lista) y lo que lleva encendida (abajo a la derecha) */
+  /* El inspector del viaje: la capa y su zoom (abajo a la izquierda, encima de la lista) y lo que lleva encendida (abajo a
+     la derecha) */
   .pl__capa, .pl__encendida { position: absolute; z-index: 3; margin: 0; color: var(--crema-2); pointer-events: none; min-height: 1.4em; }
   .pl__capa { left: var(--margen); bottom: calc(var(--margen) + 34px); }
   .pl__encendida { right: var(--margen); bottom: var(--margen); max-width: 52ch; text-align: right; }
@@ -115,7 +86,7 @@ const enlace = (d) => (d.ruta === null ? undefined : `${base}${d.ruta}`);
   .pl__lista a[aria-disabled='true'] { opacity: .55; }
 
   /* Al bajar hasta una pieza, los textos se apagan y todo se inunda de su color */
-  .menu:global(.zambullendo) :is(.pl__dest, .pl__hoja, .pl__caja, .pl__lista, .pl__capa, .pl__encendida) { opacity: 0 !important; transition: opacity .5s; }
+  .menu:global(.zambullendo) :is(.pl__dest, .pl__caja, .pl__lista, .pl__capa, .pl__encendida) { opacity: 0 !important; transition: opacity .5s; }
   .pl__inundar {
     position: absolute; inset: 0; z-index: 5; pointer-events: none; opacity: 0;
     background: radial-gradient(ellipse at 50% 50%, color-mix(in srgb, var(--c, #fff) 85%, white) 0%, var(--c, #fff) 45%, color-mix(in srgb, var(--c, #fff) 40%, var(--noche)) 100%);

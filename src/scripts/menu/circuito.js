@@ -34,7 +34,7 @@ const BOBINA = { w: 1.25, h: 1.05, d: 1.25, color: '#34302c', metal: 0.5 };
 const CONDENSADOR = { forma: 'pila', w: 0.72, h: 0.9, d: 0.72, color: '#8d8881', metal: 0.9 };
 
 // Cada pieza: su sitio, sus partes (cajas o cilindros, «pila»; y0, a qué altura empieza) y su LED. Los buses van del
-// borde del procesador al de la pieza; n pistas separadas «ancho». «aterriza», dónde se conecta el cable del menú
+// borde del procesador al de la pieza; n pistas separadas «ancho»
 export function disposicion(vertical) {
   if (!vertical) {
     return {
@@ -65,7 +65,6 @@ export function disposicion(vertical) {
         { slug: 'tech', n: 8, ancho: 0.28, ruta: [[4.8, -4.6], [6.6, -4.6], [6.6, -12], [10.2, -15.6], [36, -15.6]] },
       ],
       firma: [-30, 12.6],
-      aterriza: [-6.6, -9.4],   // donde se conecta el cable del menú: en el bus del procesador que sube a la izquierda
     };
   }
   // En vertical (el móvil), las piezas en columna y un poco a la izquierda: sus nombres van a la derecha
@@ -97,7 +96,6 @@ export function disposicion(vertical) {
       { slug: 'tech', n: 6, ancho: 0.28, ruta: [[1.6, -1], [36, -1]] },
     ],
     firma: [-9.4, 15.6],
-    aterriza: [-8.8, -1],
   };
 }
 

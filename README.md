@@ -50,11 +50,11 @@ src/scripts/
   comun.js              lo compartido: los imanes y la barra que se esconde (y se pone en tinta sobre lo claro)
   menu.js               el menú (components/Menu.astro, datos en data/menu.js): abrir y cerrar
   menu/placa.js         el menú baja de la web a la placa que la ejecuta: una ola que sale del botón vuelve la página su
-                        código; la página queda como la hoja de arriba de una vista explotada (lo que ves, el código que
-                        lo pinta, los píxeles) y la cámara baja siguiendo un cable, con una parada en cada hoja, hasta la
-                        placa base, donde cada página es una pieza (Tech, el procesador; Proyectos, el SSD; Brand, la
+                        código y la cámara baja recta por sus capas (lo que ves, el código que lo pinta, los píxeles),
+                        que se deshacen a bloques al atravesarlas, hasta la placa base, donde cada página es una pieza (Tech, el procesador; Proyectos, el SSD; Brand, la
                         gráfica; About, la BIOS). Apuntar enciende sus pistas; pinchar baja hasta ella. Escena 3D con OGL
-  menu/cable.js         el cable que se sigue: la curva por sus puntos de paso, a velocidad constante, y su tubo
+  menu/bits.js          los bits que pasan entre capa y capa (ceros y unos que cambian, código, píxeles y paquetes), con
+                        estela cuando la cámara va deprisa
   menu/codigo.js        las hojas: la página en pantalla pasada a su HTML (medido del DOM), el shader de la portada y este
                         menú (con ?raw), y la misma pantalla reducida a píxeles (el shader los pinta con sus tres luces)
   menu/circuito.js      la placa: dónde va cada pieza (en horizontal y en vertical), la textura de la placa, la de la
