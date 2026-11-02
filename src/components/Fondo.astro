@@ -1,7 +1,10 @@
 ---
-// El fondo tech de toda la página: en el móvil, una rejilla quieta; con ratón, el canvas vivo encima (gl/fondo.js)
+// El fondo tech de toda la página: en el móvil, una rejilla quieta; con ratón, el canvas vivo encima (gl/fondo.js).
+// papel: la mitad izquierda es el papel de la marca, movido por el mismo fluido (el About)
+interface Props { papel?: boolean }
+const { papel = false } = Astro.props;
 ---
-<div class="fondo" aria-hidden="true"><canvas class="fondo__gl" data-fondo></canvas></div>
+<div class="fondo" aria-hidden="true"><canvas class="fondo__gl" data-fondo data-papel={papel ? '' : undefined}></canvas></div>
 
 <style>
   .fondo {

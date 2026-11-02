@@ -38,6 +38,13 @@ src/pages/aviso-legal/, privacidad/, cookies/   las legales, «el libro» (compo
 src/pages/404.astro     la 404, «Fe de erratas»: dice la dirección que escribiste y debe decir la buena, calculada de verdad
                         (scripts/erratas.js: sinónimos, las fichas de proyecto que ya no existen y la distancia de edición). Para
                         probarla en la copia de prueba: 404.html?donde=/ruta
+src/pages/brand/index.astro   Brand («Brand · adsPartners»), «Desmontada»: la marca de ads despiezada en seis planchas (la marca,
+                        la forma, el color, la letra, la voz y la idea), en CSS 3D. Cada capa es un capítulo con su dato y su juego;
+                        debajo, lo que hace una marca bien hecha y el cierre (scripts/brand.js; textos y datos en src/data/brand.js)
+src/pages/about/index.astro   About («About · adsPartners»): los dos que hacemos ads. Arriba, los dos nombres y el marco de su foto
+                        (vacío hasta la sesión); al bajar, dos montones de fotos de vida, cinco capítulos con una de cada uno, que
+                        se acercan hasta juntarse en el marco; al final, lo que hace cada uno (scripts/about.js; textos y fotos en
+                        src/data/about.js; lo que falta de Sebas sale como hueco marcado con su pregunta)
 src/layouts/Base.astro  <head>, metas, fuentes precargadas y el script que decide umbral, movimiento y ratón
 src/components/
   Umbral.astro          carga con humor, barra de 1 px y entrar con o sin sonido (el final lo pinta portada.js)
@@ -72,6 +79,8 @@ src/scripts/
                         señal de los buses y las caras con dibujo de las piezas
   rastro.js             el rastro de la visita (tiempo y metros de ratón): lo que lleva encendida la placa del menú
   cinta.js              el archivo de proyectos
+  about.js              About: con ratón, la escena fija de los montones (las fotos de Sebas caen en papel; las de Álvaro se
+                        montan a píxeles con la matriz de Bayer de cinta.js y el inspector las mide); sin ratón, de arriba abajo
   tech.js               la página Tech: slider, artículo y misiones (las tres vistas y sus pasos)
   tech/escena.js        la escena en alambre con OGL: el viaje por el valle (montañas, camino, antenas y polvo, calculados en
                         los shaders), los modelos que se dibujan al llegar y la sala de las misiones
