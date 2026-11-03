@@ -4,15 +4,28 @@
 // flechas pasan los proyectos en diagonal, uno cada vez; llegan desde abajo a la izquierda, se paran en el centro y se
 // apilan arriba a la derecha, y el ratón mueve toda la fila. No hay una página por proyecto: lo de cada uno va en la
 // esquina de la izquierda (equipo, rol, lanzamiento y lo que hicimos, que cambia a píxeles) y en el índice de la
-// derecha (un resumen). Lo mueve scripts/cinta.js; aquí está lo que se ve sin él (el índice, con sus enlaces).
+// derecha (un resumen). Lo mueve scripts/cinta.js; aquí está todo lo que se lee sin él (auditoría SEO del 03-nov): las
+// diez fichas de la esquina, cada una con el id de su proyecto (el #slug del índice lleva a ella), y el índice.
+// Las fotos de la cinta van con sus variantes de 480, 800 y 1200 px (<foto>-<ancho>.webp, junto a la original): el
+// navegador pide la que le basta para el tamaño de la carta, y cinta.js solo las de las cartas que están en pantalla o
+// a un paso. Bajo el logotipo, los enlaces a las demás páginas (components/EnlacesWeb.astro).
 import Base from '../../layouts/Base.astro';
 import Cursor from '../../components/Cursor.astro';
 import Marca from '../../components/Marca.astro';
+import EnlacesWeb from '../../components/EnlacesWeb.astro';
 import { PROYECTOS } from '../../data/proyectos.js';
 import { ORG_ID, LISTA_ID, LISTA_PROYECTOS } from '../../data/schema.js';
 const base = import.meta.env.BASE_URL;
 const dos = (n: number) => String(n).padStart(2, '0');
 const correo = 'adsgroup@ads-partners.com';
+// Las fotos de la cinta: sus variantes y el ancho con que se pinta la carta (el de tam() en cinta.js: en el escritorio,
+// min(20vw, 36vh) × √(4/3), y en el móvil, min(62vw, 30vh) × √(4/3)), para que el navegador elija la que le basta
+const ANCHOS = [480, 800, 1200];
+const variante = (src: string, w: number) => `${base}assets/proyectos/${src.replace(/\.webp$/, `-${w}.webp`)}`;
+const TAMANO = '(max-width: 760px) 72vw, (min-aspect-ratio: 9/5) 42vh, 24vw';
+// Las que se ven nada más entrar, en el escritorio y en el móvil (la del centro, las dos que vienen y la que se acaba de
+// ir): esas se piden ya, y la del centro primero; las demás esperan a cinta.js
+const PRIMERAS = [0, 1, 2, PROYECTOS.length - 1];
 ---
 <Base
   titulo="Proyectos de branding, webs y software · adsPartners®"
@@ -34,32 +47,40 @@ const correo = 'adsgroup@ads-partners.com';
 
     <!-- La fila de cartas -->
     <div class="cin__escena" data-cin-escena aria-hidden="true">
-      {PROYECTOS.map((p, j) => (
-        <a class="cin__carta" href={p.enlace ? p.enlace.url : `mailto:${correo}`} tabindex="-1" data-cin-carta={j}>
-          <img src={`${base}assets/proyectos/${p.cinta.src}`} alt="" decoding="async" data-cin-img />
-        </a>
-      ))}
+      {PROYECTOS.map((p, j) => {
+        const ya = PRIMERAS.includes(j);
+        return (
+          <a class="cin__carta" href={p.enlace ? p.enlace.url : `mailto:${correo}`} tabindex="-1" data-cin-carta={j} data-cin-espera={ya ? undefined : ''}>
+            <img src={variante(p.cinta.src, 800)} srcset={ANCHOS.map((w) => `${variante(p.cinta.src, w)} ${w}w`).join(', ')} sizes={TAMANO}
+              width="1200" height={Math.round((1200 * p.cinta.alto) / p.cinta.ancho)} alt="" decoding="async"
+              loading={ya ? 'eager' : 'lazy'} fetchpriority={j === 0 ? 'high' : ya ? undefined : 'low'} data-cin-img />
+          </a>
+        );
+      })}
     </div>
 
     <div class="cin__marcas" data-cin-marcas aria-hidden="true">
       <span class="insp cin__marca" data-cin-marca="foto"></span>
     </div>
 
-    <!-- La esquina de la izquierda: lo del que está en el centro. Dos capas iguales, para pasar de uno a otro a píxeles
-         (cinta.js rellena la de debajo y cambia una por otra celda a celda) -->
+    <!-- La esquina de la izquierda: lo del que está en el centro. Las diez fichas, una encima de otra y con el id de su
+         proyecto (el #slug del índice); se ve la del centro y cinta.js pasa de una a otra a píxeles, celda a celda.
+         Las que no se ven están ocultas del todo (visibility), así que el lector de pantalla solo anuncia la que entra -->
     <div class="cin__info" data-cin-info aria-live="polite">
-      <div class="cin__capa" data-cin-capa>
-        <dl class="cin__par cin__par--equipo">
-          <dt>Equipo</dt><dd data-v="equipo"></dd>
-          <dt>Rol</dt><dd data-v="rol"></dd>
-        </dl>
-        <dl class="cin__par cin__par--lanza">
-          <dt>Lanzamiento</dt><dd data-v="anio"></dd>
-        </dl>
-        <dl class="cin__par cin__par--hicimos">
-          <dt>Hicimos</dt><dd data-v="datos"></dd>
-        </dl>
-      </div>
+      {PROYECTOS.map((p) => (
+        <article class="cin__capa" id={p.slug} aria-labelledby={`${p.slug}-nombre`} data-cin-capa>
+          <dl class="cin__par cin__par--equipo">
+            <dt>Equipo</dt><dd>{p.equipo}</dd>
+            <dt>Rol</dt><dd>{p.rol.map((r, i) => <Fragment>{i > 0 && ' '}<span>{r}</span></Fragment>)}</dd>
+          </dl>
+          <dl class="cin__par cin__par--lanza">
+            <dt>Lanzamiento</dt><dd>{p.anio || '—'}</dd>
+          </dl>
+          <dl class="cin__par cin__par--hicimos">
+            <dt>Hicimos</dt><dd>{p.datos.map((d, i) => <Fragment>{i > 0 && ' '}<span>{d}</span></Fragment>)}</dd>
+          </dl>
+        </article>
+      ))}
     </div>
 
     <!-- El índice: cada entrada lleva a su proyecto dentro de la fila -->
@@ -69,7 +90,7 @@ const correo = 'adsgroup@ads-partners.com';
           <li class="cin__item" data-cin-item={j}>
             <a href={`#${p.slug}`} data-cursor-enlace data-sonido-hover>
               <span class="cin__item-etq">{p.sector}</span>
-              <span class="cin__item-nombre">{p.nombre}</span>
+              <span class="cin__item-nombre" id={`${p.slug}-nombre`}>{p.nombre}</span>
               <span class="cin__item-raya" aria-hidden="true"></span>
               <span class="cin__item-linea">{p.resumen}</span>
             </a>
@@ -87,6 +108,7 @@ const correo = 'adsgroup@ads-partners.com';
     </div>
 
     <p class="cin__pista" aria-hidden="true"><span class="cin__pista-raton">Rueda</span><span class="cin__pista-dedo">Desliza</span></p>
+    <EnlacesWeb actual="proyectos" class="cin__enlaces" />
     <a class="cin__ver" href={`mailto:${correo}`} data-cin-ver data-sonido-hover><span class="cin__subraya" data-cin-ver-t>Te lo contamos</span> <span class="cin__flecha" aria-hidden="true">▶</span></a>
   </main>
   <Cursor />
@@ -100,8 +122,10 @@ const correo = 'adsgroup@ads-partners.com';
 <style>
   /* La página no baja: la rueda, el dedo y las flechas mueven la fila. En claro, como papel */
   :global(html.cinta-fija), :global(html.cinta-fija body) { height: 100%; overflow: hidden; overscroll-behavior: none; background: var(--crema); }
+  /* overflow: clip y no hidden: así no es un contenedor con scroll y el #slug del índice (que lleva a la ficha) no puede
+     desplazarlo (las cartas giradas se salen de la pantalla y le darían recorrido) */
   .cin {
-    position: fixed; inset: 0; overflow: hidden; touch-action: none;
+    position: fixed; inset: 0; overflow: hidden; overflow: clip; touch-action: none;
     background: var(--crema); color: var(--tinta);
     font-size: 13px; line-height: 1.22;
     --gris: rgba(25, 9, 0, .46);
@@ -140,6 +164,9 @@ const correo = 'adsgroup@ads-partners.com';
   /* --- La fila de cartas (cinta.js pone a cada una su sitio y su tamaño) --------------------------------------- */
   .cin__escena { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
   :global(html:not(.js)) .cin__escena { display: none; }
+  /* Las cartas cuya foto espera (cinta.js la pide cuando la carta se acerca): fuera hasta que cinta.js monta la fila, para
+     que el navegador no las pida por su cuenta mientras están apiladas en el centro */
+  .cin__carta[data-cin-espera] { display: none; }
   .cin__carta {
     position: absolute; left: 50%; top: 50%; width: var(--w, 20vw); height: var(--h, 15vw); overflow: hidden;
     transform: translate(-50%, -50%); background: #DCD5CA;
@@ -157,6 +184,11 @@ const correo = 'adsgroup@ads-partners.com';
   /* --- La esquina de la izquierda, como la de Huyml: equipo y rol; a su derecha, lanzamiento y lo que hicimos ---- */
   .cin__info { position: absolute; left: var(--margen); top: calc(43% - 8px); z-index: 2; width: calc(var(--col-b) - var(--margen) + 380px); height: 180px; pointer-events: none; }
   .cin__capa { position: absolute; inset: 0; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
+  /* Las diez fichas, una encima de otra: se ve una (cinta.js lo decide). Sin JS, la del primero o la que pidas en el
+     índice (su #slug) */
+  .cin__capa:not(:first-child) { visibility: hidden; }
+  :global(html:not(.js)) .cin__info:has(.cin__capa:target) .cin__capa { visibility: hidden; }
+  :global(html:not(.js)) .cin__info:has(.cin__capa:target) .cin__capa:target { visibility: visible; }
   /* 8 px de aire arriba: las tildes de la primera línea tienen que caber dentro de la máscara de los píxeles */
   .cin__par { position: absolute; top: 8px; margin: 0; display: grid; grid-template-columns: 64px 1fr; align-items: baseline; }
   .cin__par--equipo { left: 0; width: calc(var(--col-b) - var(--margen) - 20px); }
@@ -173,6 +205,8 @@ const correo = 'adsgroup@ads-partners.com';
     mask-image: linear-gradient(transparent 3%, #000 24%, #000 76%, transparent 97%);
   }
   .cin__lista { position: absolute; left: 0; right: 0; top: calc(50% - var(--alto-item) / 2); margin: 0; padding: 0; list-style: none; will-change: transform; }
+  /* Sin JS no sube con la fila: se puede bajar a mano, para llegar a todos */
+  :global(html:not(.js)) .cin__indice { overflow-y: auto; scrollbar-width: none; }
   .cin__item { height: var(--alto-item); }
   .cin__item a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; height: 100%; text-align: center; }
   .cin__item-etq { color: var(--gris); font-weight: 500; }
@@ -205,6 +239,9 @@ const correo = 'adsgroup@ads-partners.com';
     .cin__pista-raton { display: none; }
     .cin__pista-dedo { display: inline; }
   }
+  /* Los enlaces a las demás páginas (components/EnlacesWeb.astro): en la columna del logotipo, debajo de él, por donde
+     no pasa la fila; en tres líneas, como el sello */
+  :global(.cin__enlaces) { position: absolute; left: var(--margen); top: calc(var(--arriba) + 136px + 3vh); z-index: 4; width: calc(var(--col-b) - var(--margen) - 24px); }
   .cin__ver { position: absolute; right: var(--margen); bottom: var(--margen); z-index: 4; font-weight: 500; }
   .cin__ver .cin__flecha { margin-left: 4px; }
   .cin__ver:hover .cin__flecha, .cin__ver:focus-visible .cin__flecha { transform: translateX(4px); }
@@ -215,6 +252,8 @@ const correo = 'adsgroup@ads-partners.com';
     .cin__logo { width: 120px; height: 24px; }
     .cin__logo :global(svg) { top: 0; width: 120px; transform: none; }
     .cin__sello, .cin__donde, .cin__sonido, .cin__info, .cin__paleta, .cin__pista { display: none; }
+    /* los enlaces, centrados en el hueco que queda entre la carta que se acaba de ir (arriba) y la del centro */
+    :global(.cin__enlaces) { left: var(--margen); right: var(--margen); top: 17%; width: auto; transform: translateY(-50%); justify-content: center; }
     .cin__marca { transform: translate(-50%, calc(var(--h, 0px) / -2 - 100% - 10px)); }
     .cin__indice { left: var(--margen); right: var(--margen); width: auto; top: 57%; bottom: auto; height: var(--alto-item); -webkit-mask-image: none; mask-image: none; }
     .cin__lista { top: 0; }

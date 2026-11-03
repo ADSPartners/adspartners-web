@@ -37,8 +37,9 @@
   <link rel="stylesheet" href="/_ads/preload-helper.ClVmhQ35.css">
 <link rel="stylesheet" href="/_ads/Marca.E1-mdiDQ.css">
 <style>.cursor[data-astro-cid-qmueewfo]{z-index:60;pointer-events:none;opacity:0;transition:opacity .35s var(--curva);will-change:transform;position:fixed;top:0;left:0}html.cursor-visible .cursor[data-astro-cid-qmueewfo]{opacity:1}.cursor__cuerpo[data-astro-cid-qmueewfo]{place-items:center;width:48px;height:48px;display:grid;position:absolute;top:-24px;left:-24px}.cursor__aro[data-astro-cid-qmueewfo]{width:100%;height:100%;position:absolute;inset:0;overflow:visible;transform:rotate(-90deg)}.cursor__pista[data-astro-cid-qmueewfo]{fill:none;stroke:#e7e2da52;stroke-width:1px;vector-effect:non-scaling-stroke;transition:stroke .3s}.cursor__progreso[data-astro-cid-qmueewfo]{fill:none;stroke:var(--rosa);stroke-width:1.5px;vector-effect:non-scaling-stroke;stroke-dasharray:1;stroke-dashoffset:1px}.cursor__iso[data-astro-cid-qmueewfo]{width:20px;color:var(--crema);transition:transform .5s var(--curva)}.cursor__iso[data-astro-cid-qmueewfo] svg{width:100%;height:auto}.cursor__texto[data-astro-cid-qmueewfo]{white-space:nowrap;color:var(--crema);height:14px;line-height:14px;display:block;position:absolute;top:-7px;left:34px;overflow:hidden}.cursor__texto[data-astro-cid-qmueewfo] span[data-astro-cid-qmueewfo]{display:block}html.cursor-pulsando .cursor__iso[data-astro-cid-qmueewfo]{transform:scale(.82)}
+.enl[data-astro-cid-ybghp7hs]{font-family:var(--mono);letter-spacing:.14em;text-transform:uppercase;color:inherit;flex-wrap:wrap;align-items:baseline;gap:6px 18px;font-size:11px;display:flex}.enl__t[data-astro-cid-ybghp7hs]{opacity:.55}.enl__lista[data-astro-cid-ybghp7hs]{flex-wrap:wrap;gap:6px 18px;margin:0;padding:0;list-style:none;display:flex}.enl[data-astro-cid-ybghp7hs] a[data-astro-cid-ybghp7hs]{color:inherit;border-bottom:1px solid #0000;text-decoration:none;transition:border-color .3s,opacity .3s}.enl[data-astro-cid-ybghp7hs] a[data-astro-cid-ybghp7hs]:hover,.enl[data-astro-cid-ybghp7hs] a[data-astro-cid-ybghp7hs]:focus-visible{border-bottom-color:currentColor}.enl__carta[data-astro-cid-ybghp7hs]{font-weight:500}
 </style>
-<link rel="stylesheet" href="/_ads/index.Ckj-rYvZ.css"></head>
+<link rel="stylesheet" href="/_ads/index.-yNXlu1J.css"></head>
   <body>
     
   
@@ -120,18 +121,72 @@
           <span class="bd-cota"><b>01</b><span>La marca · Lo que la gente ve y recuerda</span></span><span class="bd-cota"><b>02</b><span>Forma · 2500 × 1036 · se escala, no se estira</span></span><span class="bd-cota"><b>03</b><span>Color · 5 colores · cada uno con su papel</span></span><span class="bd-cota"><b>04</b><span>Letra · Garamond · Open Sauce · Quetine</span></span><span class="bd-cota"><b>05</b><span>Voz · Menos adjetivos · más hechos</span></span><span class="bd-cota"><b>06</b><span>Idea · Qué eres · para quién · por qué tú</span></span>
         </div>
 
-        <!-- El capítulo de la capa que toca: qué es, qué efecto tiene, el dato con su fuente y su juego -->
-        <article class="bd-cap" data-cap aria-live="polite">
-          <p class="bd-cap__n" data-cap-n></p>
-          <h3 class="bd-cap__t" data-cap-t></h3>
-          <p class="bd-cap__que" data-cap-que></p>
-          <p class="bd-cap__importa" data-cap-importa></p>
-          <div class="bd-cap__dato">
-            <p class="bd-cap__cifra" data-cap-cifra></p>
-            <div><p class="bd-cap__dice" data-cap-dice></p><p class="bd-cap__fuente" data-cap-fuente></p></div>
-          </div>
-          <p class="bd-cap__juego" data-cap-juego></p>
-        </article>
+        <!-- Los seis capítulos, uno por capa: qué es, qué efecto tiene, el dato con su fuente y su juego. Están todos en el
+             HTML (los lee quien no ejecuta el JS: buscadores y asistentes) y brand.js enseña el de la capa que toca. Los
+             demás quedan ocultos del todo (visibility), así que el lector de pantalla solo anuncia el que entra -->
+        <div class="bd-caps" aria-live="polite">
+          <article class="bd-cap" data-cap="0">
+              <p class="bd-cap__n">01 — La marca</p>
+              <h3 class="bd-cap__t">Lo que la gente <em>recuerda</em> de ti.</h3>
+              <p class="bd-cap__que">Una marca no es un logo: es la idea que se hace la gente de tu empresa. Marty Neumeier la define como «la sensación visceral de una persona sobre un producto, un servicio o una empresa». No la decides tú, la decide quien te mira. Pero se puede trabajar, capa a capa.</p>
+              <p class="bd-cap__importa">Esa sensación es la que inclina la balanza cuando alguien duda entre tú y otro. Y se basa, sobre todo, en si se fía de ti.</p>
+              <div class="bd-cap__dato">
+                <p class="bd-cap__cifra" data-cap-cifra>81 %</p>
+                <div><p class="bd-cap__dice">de la gente dice que, para comprar, tiene que poder confiar en que la marca hará lo correcto.</p><p class="bd-cap__fuente">Edelman Trust Barometer, informe especial «In Brands We Trust?», 2019 · 16.000 personas en 8 países</p></div>
+              </div>
+              <p class="bd-cap__juego" data-cap-juego>Cógela y gírala</p>
+            </article><article class="bd-cap" data-cap="1">
+              <p class="bd-cap__n">02 — Forma</p>
+              <h3 class="bd-cap__t">La firma, <em>siempre igual.</em></h3>
+              <p class="bd-cap__que">El logotipo y el isotipo son la firma de la empresa: lo primero que se reconoce. Se dibujan una vez y se usan siempre igual: se escalan, nunca se estiran, y siempre llevan aire alrededor para que respiren.</p>
+              <p class="bd-cap__importa">Lo que se repite igual se convierte en un atajo de memoria. Los estudios del Ehrenberg-Bass Institute lo resumen en dos condiciones: que mucha gente lo reconozca y que solo sea tuyo. Y el juicio llega antes de leer nada.</p>
+              <div class="bd-cap__dato">
+                <p class="bd-cap__cifra" data-cap-cifra>50 ms</p>
+                <div><p class="bd-cap__dice">tarda alguien en formarse una opinión del aspecto de una web, y se parece mucho a la que tendrá después de mirarla con calma.</p><p class="bd-cap__fuente">Lindgaard, Fernandes, Dudek y Brown, Behaviour &amp; Information Technology, 2006</p></div>
+              </div>
+              <p class="bd-cap__juego" data-cap-juego>Intenta estirarlo</p>
+            </article><article class="bd-cap" data-cap="2">
+              <p class="bd-cap__n">03 — Color</p>
+              <h3 class="bd-cap__t">Se ve <em>antes</em> de leer.</h3>
+              <p class="bd-cap__que">El color es lo primero que llega, antes que el nombre. Cinco colores, y cada uno con su papel: el marrón da peso, el beige calma, el rosa marca lo que tiene que verse, el blanco deja aire y el negro es el texto.</p>
+              <p class="bd-cap__importa">Usado siempre igual, el color hace reconocible la marca de lejos y sin leer nada. Usado cada vez distinto, no hace nada.</p>
+              <div class="bd-cap__dato">
+                <p class="bd-cap__cifra" data-cap-cifra>62–90 %</p>
+                <div><p class="bd-cap__dice">de la primera impresión que nos llevamos de un producto se basa solo en el color.</p><p class="bd-cap__fuente">Satyendra Singh, «Impact of color on marketing», Management Decision, 2006 (revisión de estudios)</p></div>
+              </div>
+              <p class="bd-cap__juego" data-cap-juego>Pasa por un color y mira la marca</p>
+            </article><article class="bd-cap" data-cap="3">
+              <p class="bd-cap__n">04 — Letra</p>
+              <h3 class="bd-cap__t">La voz, <em>escrita.</em></h3>
+              <p class="bd-cap__que">La letra es cómo suena la marca por escrito. Garamond para la marca, Open Sauce para la interfaz y Quetine para el detalle: cada una tiene su papel y no se cambian de sitio.</p>
+              <p class="bd-cap__importa">La misma frase no se recibe igual en cualquier letra. La letra pone el tono antes de que se lea la primera palabra.</p>
+              <div class="bd-cap__dato">
+                <p class="bd-cap__cifra" data-cap-cifra>40.000</p>
+                <div><p class="bd-cap__dice">lectores del New York Times leyeron la misma frase en seis letras distintas: en Baskerville resultó algo más creíble. Poco, pero se notó.</p><p class="bd-cap__fuente">Errol Morris, The New York Times, 2012 (experimento abierto, sin laboratorio)</p></div>
+              </div>
+              <p class="bd-cap__juego" data-cap-juego>Cambia la letra del titular</p>
+            </article><article class="bd-cap" data-cap="4">
+              <p class="bd-cap__n">05 — Voz</p>
+              <h3 class="bd-cap__t">Cómo hablas <em>también</em> es marca.</h3>
+              <p class="bd-cap__que">La voz es cómo suena la marca cuando habla: en la web, en un correo o en una propuesta. La nuestra es cercana y clara, sin lenguaje de agencia. Menos adjetivos, más hechos.</p>
+              <p class="bd-cap__importa">El mismo mensaje, con otro tono, cambia cuánto se fían de ti. En un estudio de Nielsen Norman Group, el tono cambió cómo de cercana, de fiable y de recomendable parecía la misma empresa. Y lo que más pesaba era la confianza.</p>
+              <div class="bd-cap__dato">
+                <p class="bd-cap__cifra" data-cap-cifra>52 %</p>
+                <div><p class="bd-cap__dice">de las diferencias en las ganas de recomendar una empresa se explica por lo fiable que suena.</p><p class="bd-cap__fuente">Nielsen Norman Group, «The Impact of Tone of Voice on Users’ Brand Perception», Kate Moran, 2016</p></div>
+              </div>
+              <p class="bd-cap__juego" data-cap-juego>Pasa por la frase</p>
+            </article><article class="bd-cap" data-cap="5">
+              <p class="bd-cap__n">06 — Idea</p>
+              <h3 class="bd-cap__t">Debajo de todo, <em>la idea.</em></h3>
+              <p class="bd-cap__que">La capa que no se ve y lo sostiene todo: qué eres, para quién y por qué tú. Si está clara, el logo, el color, la letra y la voz cuentan lo mismo. Si no, cada capa va a su aire.</p>
+              <p class="bd-cap__importa">Una marca se construye a largo plazo, y es lo que más hace crecer a largo plazo. Lo que solo busca vender ya da subidas cortas.</p>
+              <div class="bd-cap__dato">
+                <p class="bd-cap__cifra" data-cap-cifra>60/40</p>
+                <div><p class="bd-cap__dice">es el reparto que mejor funcionó, de media, entre construir marca y vender a corto plazo.</p><p class="bd-cap__fuente">Les Binet y Peter Field, «The Long and the Short of It», IPA, 2013 · 996 campañas</p></div>
+              </div>
+              <p class="bd-cap__juego" data-cap-juego>Pasa por ella y quítala</p>
+            </article>
+        </div>
         <p class="bd-pista" data-pista><span>Baja</span><i aria-hidden="true"></i></p>
       </div>
     </section>
@@ -171,6 +226,13 @@
         <ul class="bd-cierre__servicios"><li>Identidad y logotipo</li><li>Webs con una idea propia</li><li>Dirección de arte</li><li>Contenido</li></ul>
         <a class="bd-cierre__carta" href="/#contacto" data-sonido-hover><span class="bd-subraya">Cuéntanos la tuya</span> <span aria-hidden="true">▶</span></a>
       </div>
+      <nav class="enl bd-cierre__enlaces" aria-label="Más de adsPartners" data-astro-cid-ybghp7hs>
+  <span class="enl__t" data-astro-cid-ybghp7hs>Sigue por</span>
+  <ul class="enl__lista" data-astro-cid-ybghp7hs>
+    <li data-astro-cid-ybghp7hs><a href="/tech/" data-sonido-hover data-astro-cid-ybghp7hs>Tech</a></li><li data-astro-cid-ybghp7hs><a href="/proyectos/" data-sonido-hover data-astro-cid-ybghp7hs>Proyectos</a></li><li data-astro-cid-ybghp7hs><a href="/about/" data-sonido-hover data-astro-cid-ybghp7hs>About</a></li>
+    <li data-astro-cid-ybghp7hs><a class="enl__carta" href="/#contacto" data-sonido-hover data-astro-cid-ybghp7hs>Escríbenos <span aria-hidden="true" data-astro-cid-ybghp7hs>▶</span></a></li>
+  </ul>
+</nav>
     </section>
   </main>
   <div class="cursor" data-cursor-el aria-hidden="true" data-astro-cid-qmueewfo>
@@ -183,7 +245,7 @@
   </div>
   <span class="cursor__texto mono" data-astro-cid-qmueewfo><span data-cursor-texto data-astro-cid-qmueewfo></span></span>
 </div>
-  <script type="module" src="/_ads/index.astro_astro_type_script_index_0_lang.CHYRCBYK.js"></script>
+  <script type="module" src="/_ads/index.astro_astro_type_script_index_0_lang.B8Tf926p.js"></script>
 
     
 

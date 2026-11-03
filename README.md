@@ -31,8 +31,10 @@ src/pages/tech/index.astro   Tech («Tech · adsPartners»): la maqueta del slid
                         src/data/tech.js; lo grabado con la API, en src/data/lectura.json y src/data/preguntas.json; la cafetería
                         de ejemplo, en src/data/negocio.js)
 src/pages/aviso-legal/, privacidad/, cookies/   las legales, «el libro» (components/legal/Libro.astro): un libro abierto en
-                        Garamond, a doble página o a una, con sus tres capítulos, sumario, guardas y colofón. Cada dirección lo abre
-                        por su capítulo. Las páginas las corta el navegador (columnas CSS) y las pasa scripts/libro.js girando una
+                        Garamond, a doble página o a una, con sus tres capítulos, sumario, guardas y colofón. Cada dirección trae
+                        en su HTML solo el texto de su capítulo (para que Google no vea tres páginas iguales); al pasar de la
+                        portadilla del siguiente, se va a su dirección. Las páginas las corta el navegador (columnas CSS) y las
+                        pasa scripts/libro.js girando una
                         hoja; cada párrafo abre en el inspector su nota «en cristiano». Los textos, en src/data/legal.js. Las
                         direcciones de la web anterior (/privacidad.html…) redirigen desde public/
 src/pages/404.astro     la 404, «Fe de erratas»: dice la dirección que escribiste y debe decir la buena, calculada de verdad

@@ -1,7 +1,10 @@
 ---
 // Las legales, «el libro»: un libro abierto en Garamond sobre la mesa (a doble página en el ordenador y a una en el
 // móvil), con sus tres capítulos (aviso legal, privacidad y cookies), su sumario, sus guardas y su colofón. Cada
-// capítulo tiene su dirección y el libro se abre por esa página. Lo pagina el navegador (columnas CSS) y lo mueve
+// capítulo tiene su dirección y en ella va solo su texto (si no, para Google serían tres veces la misma página): el
+// libro se abre por su portadilla y de los otros dos capítulos quedan su entrada en el sumario, los capítulos de
+// abajo y, al acabar el texto, la portadilla del siguiente, que es la puerta a su dirección (pasar de ella es ir
+// allí). El colofón y la guarda del final van solo en el último. Lo pagina el navegador (columnas CSS) y lo mueve
 // scripts/libro.js: pasar página, los folios, el inspector de cada párrafo y lo que tu navegador tiene guardado.
 // Sin JS (o antes de que llegue), es un artículo que se lee bajando: todo lo del libro va bajo .lib[data-modo].
 // Los textos, en data/legal.js.
@@ -14,6 +17,8 @@ import { ORG_ID } from '../../data/schema.js';
 interface Props { capitulo: string }
 const { capitulo } = Astro.props;
 const cap = CAPITULOS.find((c) => c.slug === capitulo) ?? CAPITULOS[0];
+// El capítulo siguiente: su portadilla cierra este y lleva a su dirección. Sin siguiente, el libro acaba aquí
+const sig = CAPITULOS[CAPITULOS.indexOf(cap) + 1];
 const base = import.meta.env.BASE_URL;
 const claves = [...ALMACEN, ...COOKIES].map((a) => a.clave);
 ---
@@ -51,11 +56,13 @@ const claves = [...ALMACEN, ...COOKIES].map((a) => a.clave);
 }`}</pre>
             </section>
 
+            <!-- El sumario: este capítulo con sus apartados y sus folios; los otros dos, solo su entrada, que lleva a su
+                 dirección -->
             <nav class="lib__pag lib__sumario" data-pag="sumario" aria-label="Sumario">
               <div class="lib__sum" data-lib-sumario>
                 <p class="lib__sum-tit">Sumario</p>
                 <ol class="lib__sum-caps">
-                  {CAPITULOS.map((c) => (
+                  {CAPITULOS.map((c) => (c.slug === cap.slug ? (
                     <li>
                       <a class="lib__sum-cap" href={`${base}${c.slug}/`} data-ir={c.slug}><span class="lib__sum-num">{c.num}</span>{c.titulo}<i aria-hidden="true"></i><b data-folio-de={c.slug}></b></a>
                       <ol class="lib__sum-aps">
@@ -64,86 +71,105 @@ const claves = [...ALMACEN, ...COOKIES].map((a) => a.clave);
                         ))}
                       </ol>
                     </li>
-                  ))}
+                  ) : (
+                    <li class="lib__sum-otro">
+                      <a class="lib__sum-cap" href={`${base}${c.slug}/`}><span class="lib__sum-num">{c.num}</span>{c.titulo}<i aria-hidden="true"></i><b class="lib__sum-ir" aria-hidden="true">▶</b></a>
+                    </li>
+                  )))}
                 </ol>
               </div>
             </nav>
 
-            {CAPITULOS.map((c) => (
-              <Fragment>
-                <header class="lib__pag lib__portadilla" data-pag="portadilla" data-cap={c.slug} id={c.slug}>
-                  <p class="lib__port-num" aria-hidden="true"><span data-vivo>{c.num}</span></p>
-                  <h2 class="lib__port-tit">{c.titulo}</h2>
-                  <p class="lib__port-entr">{c.entradilla}</p>
-                  <p class="lib__port-medida mono" aria-hidden="true" data-lib-port-medida></p>
-                </header>
-                <article class="lib__cap" data-pag="texto" data-cap={c.slug} data-num={c.num} data-titulo={c.titulo} aria-label={c.titulo}>
-                  <div class="lib__cols">
-                    {c.apartados.map((a, j) => (
-                      <section class="lib__ap" id={`${c.slug}-${j + 1}`}>
-                        <h3><span class="lib__ap-num">{c.num}.{j + 1}</span> {a.titulo}</h3>
-                        {a.bloques.map((b) => (
-                          b.p ? <p class="lib__p" data-nota={b.nota} set:html={b.p} />
-                          : b.lista ? <ul class="lib__lista" data-nota={b.nota}>{b.lista.map((li) => <li set:html={li} />)}</ul>
-                          : b.datos ? <dl class="lib__datos" data-nota={b.nota}>{b.datos.map(([k, v]) => <div><dt>{k}</dt><dd set:html={v} /></div>)}</dl>
-                          : b.tabla ? (
-                            <table class="lib__tabla" data-nota={b.nota}>
-                              <thead><tr>{b.tabla.cab.map((h) => <th scope="col">{h}</th>)}</tr></thead>
-                              <tbody>{b.tabla.filas.map((f) => <tr>{f.map((celda) => <td set:html={celda} />)}</tr>)}</tbody>
+            <!-- El capítulo de esta dirección: su portadilla y su texto -->
+            <header class="lib__pag lib__portadilla" data-pag="portadilla" data-cap={cap.slug} id={cap.slug}>
+              <p class="lib__port-num" aria-hidden="true"><span data-vivo>{cap.num}</span></p>
+              <h2 class="lib__port-tit">{cap.titulo}</h2>
+              <p class="lib__port-entr">{cap.entradilla}</p>
+              <p class="lib__port-medida mono" aria-hidden="true" data-lib-port-medida></p>
+            </header>
+            <article class="lib__cap" data-pag="texto" data-cap={cap.slug} data-num={cap.num} data-titulo={cap.titulo} aria-label={cap.titulo}>
+              <div class="lib__cols">
+                {cap.apartados.map((a, j) => (
+                  <section class="lib__ap" id={`${cap.slug}-${j + 1}`}>
+                    <h3><span class="lib__ap-num">{cap.num}.{j + 1}</span> {a.titulo}</h3>
+                    {a.bloques.map((b) => (
+                      b.p ? <p class="lib__p" data-nota={b.nota} set:html={b.p} />
+                      : b.lista ? <ul class="lib__lista" data-nota={b.nota}>{b.lista.map((li) => <li set:html={li} />)}</ul>
+                      : b.datos ? <dl class="lib__datos" data-nota={b.nota}>{b.datos.map(([k, v]) => <div><dt>{k}</dt><dd set:html={v} /></div>)}</dl>
+                      : b.tabla ? (
+                        <table class="lib__tabla" data-nota={b.nota}>
+                          <thead><tr>{b.tabla.cab.map((h) => <th scope="col">{h}</th>)}</tr></thead>
+                          <tbody>{b.tabla.filas.map((f) => <tr>{f.map((celda) => <td set:html={celda} />)}</tr>)}</tbody>
+                        </table>
+                      )
+                      : b.camino ? (
+                        <figure class="lib__camino" data-nota={b.nota} aria-label={CAMINOS[b.camino].titulo}>
+                          <div class="lib__camino-pasos">
+                            <p class="lib__fig-tit mono" aria-hidden="true">{CAMINOS[b.camino].titulo}</p>
+                            <ol class="lib__pasos">
+                              {CAMINOS[b.camino].pasos.map(([quien, que]) => <li><b>{quien}</b><span>{que}</span></li>)}
+                            </ol>
+                          </div>
+                          <div class="lib__codigo-caja">
+                            <pre class="lib__codigo"><code>{CAMINOS[b.camino].codigo.join('\n')}</code></pre>
+                            <p class="lib__fuente mono">{CAMINOS[b.camino].fuente}</p>
+                          </div>
+                        </figure>
+                      )
+                      : b.almacen ? (
+                        <figure class="lib__almacen" data-nota={b.nota} data-lib-almacen data-claves={JSON.stringify(claves)}>
+                          <figcaption class="lib__fig-tit mono">localStorage · sessionStorage · document.cookie</figcaption>
+                          <div class="lib__almacen-caja">
+                            <table class="lib__tabla lib__tabla--vivo">
+                              <thead><tr><th scope="col">Nombre</th><th scope="col">Valor</th><th scope="col">Bytes</th></tr></thead>
+                              <tbody data-lib-almacen-filas><tr><td colspan="3">Para leerlo hace falta JavaScript, y lo tienes apagado: así que ahora mismo no podemos guardar nada.</td></tr></tbody>
                             </table>
-                          )
-                          : b.camino ? (
-                            <figure class="lib__camino" data-nota={b.nota} aria-label={CAMINOS[b.camino].titulo}>
-                              <div class="lib__camino-pasos">
-                                <p class="lib__fig-tit mono" aria-hidden="true">{CAMINOS[b.camino].titulo}</p>
-                                <ol class="lib__pasos">
-                                  {CAMINOS[b.camino].pasos.map(([quien, que]) => <li><b>{quien}</b><span>{que}</span></li>)}
-                                </ol>
-                              </div>
-                              <div class="lib__codigo-caja">
-                                <pre class="lib__codigo"><code>{CAMINOS[b.camino].codigo.join('\n')}</code></pre>
-                                <p class="lib__fuente mono">{CAMINOS[b.camino].fuente}</p>
-                              </div>
-                            </figure>
-                          )
-                          : b.almacen ? (
-                            <figure class="lib__almacen" data-nota={b.nota} data-lib-almacen data-claves={JSON.stringify(claves)}>
-                              <figcaption class="lib__fig-tit mono">localStorage · sessionStorage · document.cookie</figcaption>
-                              <div class="lib__almacen-caja">
-                                <table class="lib__tabla lib__tabla--vivo">
-                                  <thead><tr><th scope="col">Nombre</th><th scope="col">Valor</th><th scope="col">Bytes</th></tr></thead>
-                                  <tbody data-lib-almacen-filas><tr><td colspan="3">Para leerlo hace falta JavaScript, y lo tienes apagado: así que ahora mismo no podemos guardar nada.</td></tr></tbody>
-                                </table>
-                              </div>
-                              <p class="lib__almacen-pie"><span class="mono" data-lib-almacen-total></span><button type="button" class="lib__boton" data-lib-borrar data-sonido-hover>Borrar lo vuestro</button></p>
-                            </figure>
-                          )
-                          : b.eleccion ? (
-                            <div class="lib__eleccion" data-nota={b.nota}>
-                              <p class="lib__eleccion-estado" data-lib-eleccion>Aún no has elegido.</p>
-                              <button type="button" class="lib__boton" data-lib-elegir data-sonido-hover>Cambiar mi elección</button>
-                            </div>
-                          )
-                          : null
-                        ))}
-                      </section>
+                          </div>
+                          <p class="lib__almacen-pie"><span class="mono" data-lib-almacen-total></span><button type="button" class="lib__boton" data-lib-borrar data-sonido-hover>Borrar lo vuestro</button></p>
+                        </figure>
+                      )
+                      : b.eleccion ? (
+                        <div class="lib__eleccion" data-nota={b.nota}>
+                          <p class="lib__eleccion-estado" data-lib-eleccion>Aún no has elegido.</p>
+                          <button type="button" class="lib__boton" data-lib-elegir data-sonido-hover>Cambiar mi elección</button>
+                        </div>
+                      )
+                      : null
                     ))}
-                    <span class="lib__fin" aria-hidden="true"></span>
-                  </div>
-                </article>
-              </Fragment>
-            ))}
-
-            <!-- Colofón: cómo se hizo este libro (los datos de la paginación los pone libro.js) -->
-            <section class="lib__pag lib__colofon" data-pag="colofon">
-              <div class="lib__colofon-dentro">
-                <span class="lib__colofon-iso"><Marca tipo="iso" /></span>
-                <p data-lib-colofon>Este libro se compuso en Apple Garamond y Geist Mono y se pagina en tu navegador. Ninguna de sus páginas se ha impreso.</p>
-                <p class="lib__colofon-rev">Última revisión del texto: {REVISION}.</p>
-                <p class="lib__colofon-pie mono">{TITULAR.razon} · Madrid</p>
+                  </section>
+                ))}
+                <span class="lib__fin" aria-hidden="true"></span>
               </div>
-            </section>
-            <section class="lib__pag lib__guarda lib__guarda--fin" data-pag="guarda" aria-hidden="true"></section>
+            </article>
+
+            <!-- Al final, la puerta: la portadilla del capítulo siguiente, que se lee en su dirección (pasar de ella es ir
+                 allí). En el último capítulo, el colofón y la guarda -->
+            {sig ? (
+              <Fragment>
+                <aside class="lib__pag lib__portadilla lib__puerta" data-pag="puerta" data-a={sig.slug} data-num={sig.num} data-titulo={sig.titulo} data-aps={sig.apartados.length} aria-label={`Capítulo siguiente: ${sig.titulo}`}>
+                  <p class="lib__port-num" aria-hidden="true"><span data-vivo>{sig.num}</span></p>
+                  <p class="lib__port-tit"><a href={`${base}${sig.slug}/`} data-sonido-hover>{sig.titulo}</a></p>
+                  <p class="lib__port-entr">{sig.entradilla}</p>
+                  <p class="lib__port-medida mono" aria-hidden="true" data-lib-port-medida></p>
+                </aside>
+                {/* Si a doble página la puerta cae a la izquierda, la de al lado dice adónde lleva pasar la hoja (en vez de
+                    quedar en blanco). La escribe libro.js: solo existe en el libro */}
+                <section class="lib__pag lib__tras" data-pag="tras" data-cursor="pasar" aria-hidden="true" hidden><div class="lib__tras-dentro" data-lib-tras></div></section>
+              </Fragment>
+            ) : (
+              <Fragment>
+                {/* Colofón: cómo se hizo este libro (los datos de la paginación los pone libro.js) */}
+                <section class="lib__pag lib__colofon" data-pag="colofon">
+                  <div class="lib__colofon-dentro">
+                    <span class="lib__colofon-iso"><Marca tipo="iso" /></span>
+                    <p data-lib-colofon>Este libro se compuso en Apple Garamond y Geist Mono y se pagina en tu navegador. Ninguna de sus páginas se ha impreso.</p>
+                    <p class="lib__colofon-rev">Última revisión del texto: {REVISION}.</p>
+                    <p class="lib__colofon-pie mono">{TITULAR.razon} · Madrid</p>
+                  </div>
+                </section>
+                <section class="lib__pag lib__guarda lib__guarda--fin" data-pag="guarda" aria-hidden="true"></section>
+              </Fragment>
+            )}
           </div>
         </div>
 
@@ -166,9 +192,10 @@ const claves = [...ALMACEN, ...COOKIES].map((a) => a.clave);
       </div>
     </div>
 
+    <!-- Los capítulos: el de aquí hojea el libro hasta su portadilla; los otros dos llevan a su dirección -->
     <nav class="lib__caps" aria-label="Capítulos">
       {CAPITULOS.map((c) => (
-        <a href={`${base}${c.slug}/`} data-ir={c.slug} data-lib-cap-nav={c.slug} aria-current={c.slug === cap.slug ? 'page' : undefined} data-sonido-hover>
+        <a href={`${base}${c.slug}/`} data-ir={c.slug === cap.slug ? c.slug : undefined} data-lib-cap-nav={c.slug} aria-current={c.slug === cap.slug ? 'page' : undefined} data-sonido-hover>
           <span class="lib__caps-num">{c.num}</span><span class="lib__caps-tit">{c.titulo}</span>
         </a>
       ))}
@@ -334,9 +361,16 @@ const claves = [...ALMACEN, ...COOKIES].map((a) => a.clave);
   .lib__sum-num { font-family: var(--mono); font-style: normal; font-size: .46em; letter-spacing: .1em; color: var(--tinta-2); min-width: 2.6em; }
   .lib__sum-aps { padding-left: calc(1.3em * .46 * 2.6 + .65em) !important; font-size: .82em; color: var(--tinta-2); }
   .lib__sum-aps a:hover, .lib__sum-cap:hover { color: var(--tinta); }
+  /* Los otros dos capítulos: solo su entrada, más tenue, y en vez del folio la flecha a su dirección */
+  .lib__sum-otro .lib__sum-cap { color: var(--tinta-2); }
+  .lib__sum .lib__sum-ir { font-family: var(--mono); font-size: .42em; color: var(--tinta-3); transform: translateY(-.15em); }
+  .lib__sum-otro .lib__sum-cap:hover .lib__sum-ir { color: var(--tinta); }
   .lib__port-num { margin: 0; font-family: var(--serif); font-weight: 300; font-size: clamp(90px, calc(var(--H, 600px) * .3), 260px); line-height: .9; letter-spacing: -.02em; }
   .lib__port-tit { margin: .3em 0 0; font-family: var(--serif); font-weight: 400; font-style: italic; font-size: calc(var(--fs, 16px) * 2.4); line-height: 1.05; }
   .lib__port-entr { margin: 1em 0 0; max-width: 22em; font-family: var(--sans); font-size: calc(var(--fs, 16px) * .8); line-height: 1.55; color: var(--tinta-2); }
+  /* La puerta: como una portadilla, con el título que lleva a la dirección del capítulo */
+  .lib__puerta .lib__port-tit a { border-bottom: 1px solid var(--tinta-3); transition: border-color .3s; }
+  .lib__puerta .lib__port-tit a:hover { border-bottom-color: var(--tinta); }
   .lib__colofon-dentro { text-align: center; font-family: var(--serif); font-size: calc(var(--fs, 16px) * .92); line-height: 1.55; color: var(--tinta); }
   .lib__colofon-iso { display: block; width: 34px; margin: 0 auto 1.6em; color: var(--tinta); }
   .lib__colofon-iso :global(svg) { width: 100%; height: auto; }
@@ -363,8 +397,14 @@ const claves = [...ALMACEN, ...COOKIES].map((a) => a.clave);
   .lib[data-modo] .lib__tira { position: absolute; left: 0; top: 0; height: 100%; will-change: transform; }
   .lib[data-modo] .lib__pag, .lib[data-modo] .lib__cap { display: block; position: absolute; top: 0; height: var(--H); width: var(--P); margin: 0; }
   .lib[data-modo] .lib__pag:not(.lib__guarda) { padding: var(--mt) var(--m) var(--mb); }
+  /* Las páginas que el libro no usa a este tamaño (la guarda del final a una página, la de al lado de la puerta):
+     sin esto, el display de arriba les gana al atributo hidden y la guarda tapaba la primera */
+  .lib[data-modo] .lib__pag[hidden] { display: none; }
   .lib[data-modo] .lib__cols { position: absolute; left: var(--m); top: var(--mt); width: var(--W); height: var(--Hc); column-count: 1; column-gap: calc(var(--m) * 2); column-fill: auto; }
   .lib[data-modo] .lib__fin { display: inline-block; width: 1px; height: 1px; }
+  /* Al pasar de artículo a libro todo cambia de sitio (y al volver a paginar, el libro). Se hace con eso escondido y
+     libro.js lo enseña dos fotogramas después, ya quieto: lo que no se ve no cuenta como salto de la página (CLS) */
+  .lib[data-montando='todo'], .lib[data-montando] .lib__mesa { visibility: hidden; }
 
   /* La guarda: papel rosa con el CSS que pagina el libro */
   .lib[data-modo] .lib__guarda { display: block; background: var(--rosa); overflow: hidden; }
@@ -381,6 +421,11 @@ const claves = [...ALMACEN, ...COOKIES].map((a) => a.clave);
   .lib[data-modo] .lib__portadilla { display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: calc(var(--mb) * 2); }
   .lib[data-modo] .lib__port-medida { display: block; position: absolute; right: var(--m); top: var(--mt); margin: 0; font-size: 9px; color: var(--tinta-2); text-align: right; line-height: 1.6; }
   .lib[data-modo] .lib__colofon { display: flex; align-items: center; justify-content: center; }
+  .lib[data-modo] .lib__tras { display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  :global(html.cursor-propio) .lib__tras { cursor: none; }
+  .lib__tras-dentro { text-align: center; font-family: var(--serif); font-size: calc(var(--fs, 16px) * .92); line-height: 1.55; color: var(--tinta-2); }
+  .lib__tras-dentro :global(p) { margin: 0 auto .9em; max-width: 17em; font-style: italic; }
+  .lib__tras-dentro :global(.mono) { margin-top: 1.6em; font-style: normal; font-size: 9px; letter-spacing: .14em; text-transform: uppercase; }
   .lib[data-modo] .lib__almacen-pie, .lib[data-modo] .lib__eleccion { display: flex; }
   .lib[data-modo] .lib__marco, .lib[data-modo] .lib__guia, .lib[data-modo] .lib__insp { display: block; }
 

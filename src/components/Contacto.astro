@@ -1,7 +1,9 @@
 ---
 // CTA + contacto, el capítulo claro: una carta en Garamond con los huecos para rellenar en línea, la privacidad como
 // posdata (una casilla en plano tech con un visto de píxeles) y «Enviar la carta».
-// Va al webhook de n8n (ads-contacto). Debajo, el cierre que parece el final de la página.
+// Va al webhook de n8n (ads-contacto). Debajo, el cierre que parece el final de la página, con los perfiles de ads
+// (los mismos que el sameAs de los datos estructurados: data/schema.js) y las legales.
+import { PERFILES } from '../data/schema.js';
 
 // El visto, en píxeles (rejilla de 4 unidades del dibujo de 40): primero el brazo corto que baja, después el largo
 // que sube, lo cruza por un píxel y se sale de la casilla por arriba a la derecha
@@ -71,11 +73,14 @@ const base = import.meta.env.BASE_URL;
     <p class="ct__sello" data-ct-sello aria-hidden="true">Recibida</p>
   </form>
 
-  <p class="ct__otros">¿Prefieres otra vía? <a href="mailto:adsgroup@ads-partners.com">adsgroup@ads-partners.com</a> · <a href="https://wa.me/34633565840" target="_blank" rel="noopener">WhatsApp</a></p>
+  <p class="ct__otros">¿Prefieres otra vía? <a href="mailto:adsgroup@ads-partners.com">adsgroup@ads-partners.com</a> · <a href="https://wa.me/34633565840" target="_blank" rel="noopener">WhatsApp +34 633 56 58 40</a></p>
 
   <footer class="ct__cierre">
     <span class="ct__marca" data-vivo>adsPartners<sup>®</sup></span>
     <span class="mono">Madrid · 2026</span>
+    <nav class="ct__legales mono" aria-label="adsPartners en redes">
+      {PERFILES.map((p) => <a href={p.url} target="_blank" rel="noopener me">{p.nombre}</a>)}
+    </nav>
     <nav class="ct__legales mono" aria-label="Legales">
       <a href={`${base}aviso-legal/`}>Aviso legal</a>
       <a href={`${base}privacidad/`}>Privacidad</a>
@@ -244,5 +249,7 @@ const base = import.meta.env.BASE_URL;
     .ct__enviar { align-self: flex-end; font-size: 34px; gap: 14px; }
     .ct__enviar-flecha { width: 48px; }
     .ct__sello { right: 4%; top: 30%; }
+    /* que la última fila (perfiles y legales) no quede debajo del globo de FRESA */
+    .ct__cierre { padding-bottom: 76px; }
   }
 </style>

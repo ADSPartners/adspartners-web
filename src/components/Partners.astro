@@ -18,7 +18,7 @@ const dos = (n: number) => String(n).padStart(2, '0');
     <ul class="pt__mundo" data-pt-mundo>
       {PARTNERS.map((p, i) => (
         <li class="pt__logo" data-pt-logo
-          style={`--tinta:${p.tinta || 'transparent'};--ancho:${p.ancho};--src:url('${base}assets/partners/${p.logo}')`}>
+          style={`--tinta:${p.tinta || 'transparent'};--ancho:${p.ancho};--srcd:url('${base}assets/partners/${p.logo}')`}>
           <div class="pt__caja">
             <span class="pt__cara pt__cara--maquina" aria-hidden="true"><span class="pt__silueta"></span></span>
             <span class="pt__cara pt__cara--marca">
@@ -54,6 +54,8 @@ const dos = (n: number) => String(n).padStart(2, '0');
   .pt__pista { margin: 22px 0 0; color: var(--crema-3); }
 
   .pt__mundo { position: absolute; left: 50%; top: 50%; width: 0; height: 0; margin: 0; padding: 0; list-style: none; transform-style: preserve-3d; }
+  /* Cada logo trae su imagen en --srcd; partners.js la pasa a --src al montar la sección. Sin JS, desde el principio */
+  :global(html:not(.js)) .pt__logo { --src: var(--srcd); }
   .pt__logo {
     --marca: 0;
     position: absolute; left: 0; top: 0;

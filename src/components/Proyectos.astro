@@ -26,6 +26,9 @@ const textos = (p: any) => ({
 });
 // No hay una página por proyecto: «Ver proyecto» lleva al archivo, parado en ese
 const datos = PROYECTOS.map((p) => ({ ...p, enlace: `${base}proyectos/#${p.slug}` }));
+// La ficha del proyecto abierto sale ya escrita en el HTML con el primero del lienzo (sin encabezados vacíos: auditoría
+// SEO del 03-nov); al abrir uno, secciones/proyectos.js la reescribe entera con el suyo
+const primero = datos[0];
 ---
 <section class="pro" id="proyectos" data-seccion="proyectos" data-cursor="proyectos" aria-labelledby="pro-titulo">
   <div class="pro__pegado" data-pro-pegado>
@@ -63,12 +66,12 @@ const datos = PROYECTOS.map((p) => ({ ...p, enlace: `${base}proyectos/#${p.slug}
       <div class="pro__fondo-abierto" data-pro-cerrar-fondo></div>
       <div class="pro__foco" data-pro-foco></div>
       <div class="pro__ficha" data-pro-ficha role="dialog" aria-modal="true" aria-labelledby="pro-ficha-nombre">
-        <p class="pro__ficha-etq mono" data-f="etq"></p>
-        <h3 class="pro__ficha-nombre" id="pro-ficha-nombre" data-f="nombre"></h3>
-        <p class="pro__ficha-con mono" data-f="con"></p>
-        <p class="pro__ficha-texto" data-f="texto"></p>
-        <ul class="pro__ficha-datos" data-f="datos"></ul>
-        <a class="pro__ficha-enlace" data-f="enlace" href="#" data-sonido-hover>Ver proyecto <span aria-hidden="true">→</span></a>
+        <p class="pro__ficha-etq mono" data-f="etq">{[primero.rama, primero.anio, primero.sector].filter(Boolean).join(' · ')}</p>
+        <h3 class="pro__ficha-nombre" id="pro-ficha-nombre" data-f="nombre">{primero.nombre}</h3>
+        <p class="pro__ficha-con mono" data-f="con" hidden={!primero.con}>{primero.con}</p>
+        <p class="pro__ficha-texto" data-f="texto">{primero.texto}</p>
+        <ul class="pro__ficha-datos" data-f="datos">{primero.datos.map((d: string) => <li>{d}</li>)}</ul>
+        <a class="pro__ficha-enlace" data-f="enlace" href={primero.enlace} data-sonido-hover>Ver proyecto <span aria-hidden="true">→</span></a>
       </div>
       <button class="pro__cerrar mono" type="button" data-pro-cerrar>Cerrar <span aria-hidden="true">✕</span></button>
     </div>

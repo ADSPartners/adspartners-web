@@ -4,10 +4,14 @@
 // recorre capa a capa (la marca, la forma, el color, la letra, la voz y, debajo de todo, la idea). Cada capa es un
 // capítulo: su plancha crece y, al lado, qué es, qué efecto tiene en una empresa y un dato con su fuente; y tiene su
 // juego. Al final se vuelve a montar. El ratón la ladea con un muelle, levanta la plancha que tienes debajo y deja coger
-// la pila y girarla (scripts/brand.js). CSS 3D, sin WebGL. Debajo, lo que hace una marca bien hecha y el cierre.
+// la pila y girarla (scripts/brand.js). CSS 3D, sin WebGL. Debajo, lo que hace una marca bien hecha y el cierre, que
+// remata con los enlaces a las demás páginas (components/EnlacesWeb.astro).
+// Los seis capítulos van enteros en el HTML (auditoría SEO del 03-nov: antes los escribía el JS y no los veía quien no lo
+// ejecuta); brand.js solo decide cuál se ve.
 import Base from '../../layouts/Base.astro';
 import Cursor from '../../components/Cursor.astro';
 import Marca from '../../components/Marca.astro';
+import EnlacesWeb from '../../components/EnlacesWeb.astro';
 import { PORTADA, CAPAS, IDEA, PALETA, LETRAS, TITULAR_LETRA, EFECTOS, CIERRE } from '../../data/brand.js';
 import { SERVICIO_BRAND } from '../../data/schema.js';
 
@@ -104,18 +108,24 @@ const cursiva = (s: string) => s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
           {CAPAS.map((c) => <span class="bd-cota"><b>{c.n}</b><span>{c.nombre} · {c.cota}</span></span>)}
         </div>
 
-        <!-- El capítulo de la capa que toca: qué es, qué efecto tiene, el dato con su fuente y su juego -->
-        <article class="bd-cap" data-cap aria-live="polite">
-          <p class="bd-cap__n" data-cap-n></p>
-          <h3 class="bd-cap__t" data-cap-t></h3>
-          <p class="bd-cap__que" data-cap-que></p>
-          <p class="bd-cap__importa" data-cap-importa></p>
-          <div class="bd-cap__dato">
-            <p class="bd-cap__cifra" data-cap-cifra></p>
-            <div><p class="bd-cap__dice" data-cap-dice></p><p class="bd-cap__fuente" data-cap-fuente></p></div>
-          </div>
-          <p class="bd-cap__juego" data-cap-juego></p>
-        </article>
+        <!-- Los seis capítulos, uno por capa: qué es, qué efecto tiene, el dato con su fuente y su juego. Están todos en el
+             HTML (los lee quien no ejecuta el JS: buscadores y asistentes) y brand.js enseña el de la capa que toca. Los
+             demás quedan ocultos del todo (visibility), así que el lector de pantalla solo anuncia el que entra -->
+        <div class="bd-caps" aria-live="polite">
+          {CAPAS.map((c, i) => (
+            <article class="bd-cap" data-cap={i}>
+              <p class="bd-cap__n">{c.n} — {c.nombre}</p>
+              <h3 class="bd-cap__t" set:html={cursiva(c.titular)} />
+              <p class="bd-cap__que">{c.que}</p>
+              <p class="bd-cap__importa">{c.importa}</p>
+              <div class="bd-cap__dato">
+                <p class="bd-cap__cifra" data-cap-cifra>{c.dato.cifra}</p>
+                <div><p class="bd-cap__dice">{c.dato.texto}</p><p class="bd-cap__fuente">{c.dato.fuente}</p></div>
+              </div>
+              <p class="bd-cap__juego" data-cap-juego>{c.juego}</p>
+            </article>
+          ))}
+        </div>
         <p class="bd-pista" data-pista><span>{PORTADA.pista}</span><i aria-hidden="true"></i></p>
       </div>
     </section>
@@ -147,6 +157,7 @@ const cursiva = (s: string) => s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
         <ul class="bd-cierre__servicios">{CIERRE.servicios.map((s) => <li>{s}</li>)}</ul>
         <a class="bd-cierre__carta" href={`${base}#contacto`} data-sonido-hover><span class="bd-subraya">{CIERRE.carta}</span> <span aria-hidden="true">▶</span></a>
       </div>
+      <EnlacesWeb actual="brand" class="bd-cierre__enlaces" />
     </section>
   </main>
   <Cursor />
@@ -283,10 +294,12 @@ const cursiva = (s: string) => s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
   .bd-cota b { font-weight: 400; color: var(--rosa); margin-right: 8px; }
   .bd-cota.activa { color: var(--crema); }
 
-  /* El capítulo de la capa que toca: entra al cambiar de capa (brand.js le quita y le pone .on) */
+  /* Los capítulos, uno encima de otro: se ve el de la capa que toca, que entra al cambiar de capa (brand.js le pone .on y
+     se la quita al que sale). El que sale se apaga y, al acabar, se oculta del todo (visibility: fuera del árbol de
+     accesibilidad, para que el lector de pantalla no lea los seis) */
   .bd-cap { position: absolute; left: var(--lado); top: 12vh; bottom: 9vh; z-index: 3; width: min(34vw, 530px); display: flex; flex-direction: column; justify-content: center; pointer-events: none;
-    opacity: 0; transform: translateY(16px); transition: opacity .45s var(--curva), transform .45s var(--curva); }
-  .bd-cap.on { opacity: 1; transform: none; transition-duration: .8s; }
+    opacity: 0; transform: translateY(16px); visibility: hidden; transition: opacity .45s var(--curva), transform .45s var(--curva), visibility 0s linear .45s; }
+  .bd-cap.on { opacity: 1; transform: none; visibility: visible; transition: opacity .8s var(--curva), transform .8s var(--curva), visibility 0s; }
   .bd-cap p, .bd-cap h3 { margin: 0; }
   .bd-cap__n { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--rosa); }
   .bd-cap__t { margin-top: 2.2vh !important; font-family: var(--serif); font-weight: 300; font-size: clamp(34px, 3.3vw, 60px); line-height: .98; letter-spacing: -.02em; }
@@ -332,12 +345,15 @@ const cursiva = (s: string) => s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
   .bd-cierre__servicios li { padding-top: 8px; border-top: 1px solid var(--linea); }
   .bd-cierre__carta { display: inline-block; margin-top: 6vh; font-weight: 500; }
   .bd-subraya { text-decoration: underline; text-underline-offset: 2px; }
-  .bd-cierre__ante, .bd-cierre__t, .bd-cierre__dcha > * { opacity: 0; transform: translateY(18px); transition: opacity .9s var(--curva), transform .9s var(--curva); }
-  .bd-cierre.on .bd-cierre__ante, .bd-cierre.on .bd-cierre__t, .bd-cierre.on .bd-cierre__dcha > * { opacity: 1; transform: none; }
+  /* De remate, los enlaces a las demás páginas (components/EnlacesWeb.astro), a todo lo ancho y con su raya */
+  .bd-cierre__enlaces { grid-column: 1 / -1; margin-top: 12vh; padding-top: 3vh; border-top: 1px solid var(--linea); }
+  .bd-cierre__ante, .bd-cierre__t, .bd-cierre__dcha > *, .bd-cierre__enlaces { opacity: 0; transform: translateY(18px); transition: opacity .9s var(--curva), transform .9s var(--curva); }
+  .bd-cierre.on .bd-cierre__ante, .bd-cierre.on .bd-cierre__t, .bd-cierre.on .bd-cierre__dcha > *, .bd-cierre.on .bd-cierre__enlaces { opacity: 1; transform: none; }
   .bd-cierre.on .bd-cierre__t { transition-delay: .1s; }
   .bd-cierre.on .bd-cierre__dcha > :nth-child(1) { transition-delay: .3s; }
   .bd-cierre.on .bd-cierre__dcha > :nth-child(2) { transition-delay: .42s; }
   .bd-cierre.on .bd-cierre__dcha > :nth-child(3) { transition-delay: .54s; }
+  .bd-cierre.on .bd-cierre__enlaces { transition-delay: .7s; }
 
   /* --- Móvil ------------------------------------------------------------------------------------------------------ */
   @media (max-width: 760px) {

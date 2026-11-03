@@ -10,11 +10,16 @@
 import Base from '../../layouts/Base.astro';
 import Fondo from '../../components/Fondo.astro';
 import Marca from '../../components/Marca.astro';
+import EnlacesWeb from '../../components/EnlacesWeb.astro';
 import { PERSONAS, CAPITULOS, CIERRE } from '../../data/about.js';
 import { ORG_ID, PERSONAS as PERSONAS_SCHEMA } from '../../data/schema.js';
 const base = import.meta.env.BASE_URL;
 const dos = (n: number) => String(n).padStart(2, '0');
 const foto = (src: string) => `${base}assets/about/${src}`;
+// Cada foto lleva variantes más pequeñas al lado (<nombre>-<ancho>.webp): el navegador baja la que le basta
+const variantes = (src: string, anchos: number[], maximo: number) =>
+  [...anchos.map((w) => `${foto(src.replace('.webp', `-${w}.webp`))} ${w}w`), `${foto(src)} ${maximo}w`].join(', ');
+const TAM_CAPITULO = '(max-width: 760px) 48vw, 26vw';
 ---
 <Base
   titulo="Quiénes somos: Sebas y Álvaro · adsPartners®"
@@ -60,7 +65,7 @@ const foto = (src: string) => `${base}assets/about/${src}`;
     <section class="ab__portada" aria-label="Quiénes somos">
       <p class="ab__nombre ab__nombre--sebas" data-tinta>{PERSONAS.sebas.nombre}</p>
       <figure class="ab__marco ab__marco--portada" data-ab-marco>
-        <img class="ab__marco-img" src={foto('los-dos-portada.webp')} width="1440" height="960" alt="Sebas y Álvaro en traje, en una oficina: un collage con las cabezas más grandes que el cuerpo, hecho con ChatGPT." decoding="async" fetchpriority="high" />
+        <img class="ab__marco-img" src={foto('los-dos-portada.webp')} srcset={variantes('los-dos-portada.webp', [480, 800], 1440)} sizes="(max-width: 760px) 92vw, min(38vw, 620px)" width="1440" height="960" alt="Sebas y Álvaro en traje, en una oficina: un collage con las cabezas más grandes que el cuerpo, hecho con ChatGPT." decoding="async" fetchpriority="high" />
         <span class="ab__guia ab__guia--a" aria-hidden="true"></span>
         <span class="ab__guia ab__guia--b" aria-hidden="true"></span>
         <span class="insp ab__marco-insp" aria-hidden="true">img · los dos</span>
@@ -89,7 +94,7 @@ const foto = (src: string) => `${base}assets/about/${src}`;
 
             <figure class="ab__foto ab__foto--sebas" data-ab-foto="sebas" data-ab-i={j}>
               <div class="ab__papel">
-                <img src={foto(c.sebas.foto.src)} width="900" height={c.sebas.foto.alto} alt={`Sebas. ${c.sebas.foto.pie}`} loading="lazy" decoding="async" data-ab-img />
+                <img src={foto(c.sebas.foto.src)} srcset={variantes(c.sebas.foto.src, [400, 800], 900)} sizes={TAM_CAPITULO} width="900" height={c.sebas.foto.alto} alt={`Sebas. ${c.sebas.foto.pie}`} loading="lazy" decoding="async" data-ab-img />
               </div>
               <figcaption class="ab__pie ab__pie--sebas">
                 {c.sebas.foto.pie}
@@ -102,7 +107,7 @@ const foto = (src: string) => `${base}assets/about/${src}`;
 
             <figure class="ab__foto ab__foto--alvaro" data-ab-foto="alvaro" data-ab-i={j}>
               <div class="ab__papel">
-                <img src={foto(c.alvaro.foto.src)} width="900" height={c.alvaro.foto.alto} alt={`Álvaro. ${c.alvaro.foto.pie}, ${c.alvaro.foto.donde}, ${c.alvaro.foto.cuando}.`} loading="lazy" decoding="async" data-ab-img />
+                <img src={foto(c.alvaro.foto.src)} srcset={variantes(c.alvaro.foto.src, [400, 800], 900)} sizes={TAM_CAPITULO} width="900" height={c.alvaro.foto.alto} alt={`Álvaro. ${c.alvaro.foto.pie}, ${c.alvaro.foto.donde}, ${c.alvaro.foto.cuando}.`} loading="lazy" decoding="async" data-ab-img />
                 <canvas class="ab__pix" data-ab-pix aria-hidden="true"></canvas>
                 <span class="ab__caja" aria-hidden="true"><i></i><i></i></span>
                 <span class="insp ab__insp" data-ab-insp aria-hidden="true">{c.alvaro.foto.src}</span>
@@ -134,7 +139,7 @@ const foto = (src: string) => `${base}assets/about/${src}`;
 
         <!-- El final de los montones: los dos se juntan en una sola foto -->
         <figure class="ab__marco ab__marco--final" data-ab-marco data-ab-final>
-          <img class="ab__marco-img" src={foto('los-dos-final.webp')} width="1440" height="960" alt="Sebas y Álvaro, juntos en un selfie." loading="lazy" decoding="async" />
+          <img class="ab__marco-img" src={foto('los-dos-final.webp')} srcset={variantes('los-dos-final.webp', [480, 800], 1440)} sizes="(max-width: 760px) 92vw, min(46vw, 720px)" width="1440" height="960" alt="Sebas y Álvaro, juntos en un selfie." loading="lazy" decoding="async" />
           <span class="ab__guia ab__guia--a" aria-hidden="true"></span>
           <span class="ab__guia ab__guia--b" aria-hidden="true"></span>
           <span class="insp ab__marco-insp" aria-hidden="true">img · los dos</span>
@@ -161,6 +166,7 @@ const foto = (src: string) => `${base}assets/about/${src}`;
       <p class="ab__frase ab__frase--a" data-tinta>Por separado, cada uno hace bien lo suyo.</p>
       <p class="ab__frase ab__frase--b ab__dos"><em>Juntos, lo que ninguno haría solo.</em></p>
       <a class="ab__hablemos" href={`${base}#contacto`} data-sonido-hover data-iman><span>Hablemos</span> <span aria-hidden="true">→</span></a>
+      <div class="ab__enlaces ab__dos"><EnlacesWeb actual="about" /></div>
     </section>
   </main>
   <script>
@@ -417,6 +423,8 @@ const foto = (src: string) => `${base}assets/about/${src}`;
     background: var(--crema); border-left: 9px solid var(--rosa); transition: background .3s var(--curva);
   }
   .ab__hablemos:hover { background: #fff; }
+  /* las demás páginas, centradas debajo (con ratón, a dos tintas como «Juntos») */
+  .ab__enlaces { display: table; margin: 12vh auto 0; color: var(--crema-2); }
 
   /* --- Móvil -------------------------------------------------------------------------------------------------------- */
   @media (max-width: 760px) {
@@ -544,5 +552,6 @@ const foto = (src: string) => `${base}assets/about/${src}`;
     .ab__frase--b { display: table; margin: 7vh auto 0; text-align: center; --izq: var(--tinta); --dcha: var(--rosa); }
     .ab__hablemos { color: var(--crema); background: var(--tinta); }
     .ab__hablemos:hover { background: #2E1A0C; }
+    .ab__enlaces { --izq: var(--tinta); --dcha: var(--crema); }
   }
 </style>

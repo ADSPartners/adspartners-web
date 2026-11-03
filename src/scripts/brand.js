@@ -2,6 +2,7 @@
 // - El scroll: arriba, el ads terminado y de frente; al bajar, la pila se pone en vista técnica, se abre y se recorre
 //   capa a capa. Cada capa es un capítulo (Álvaro: «dale más importancia a cada capa»): su plancha crece y sale hacia
 //   un lado, y a la izquierda entra qué es, qué efecto tiene y su dato, que sube contando. Al final se vuelve a montar.
+//   Los seis capítulos ya vienen en el HTML (para quien no ejecuta este JS): aquí solo se enseña el que toca.
 // - El ratón: la pila se ladea hacia él con un muelle que rebota un poco, cada plancha se desplaza según su
 //   profundidad, la que tienes debajo se levanta, un brillo recorre la marca y, quieto, todo flota un poco. Se puede
 //   coger la pila y girarla; al soltarla sigue por inercia y vuelve.
@@ -29,8 +30,8 @@ export function montarBrand({ reducido, conRaton, cursor }) {
   const escena = $('[data-escena]'), giro = $('[data-giro]'), texto = $('[data-texto]');
   const capas = [...viaje.querySelectorAll('[data-capa]')], marca = capas[0], N = capas.length, MEDIO = (N - 1) / 2;
   const cotas = [...viaje.querySelectorAll('.bd-cota')], lineas = [...viaje.querySelectorAll('.bd-cotas line')];
-  const cap = $('[data-cap]'), capN = $('[data-cap-n]'), capT = $('[data-cap-t]'), capQue = $('[data-cap-que]'), capImporta = $('[data-cap-importa]');
-  const capCifra = $('[data-cap-cifra]'), capDice = $('[data-cap-dice]'), capFuente = $('[data-cap-fuente]'), juego = $('[data-cap-juego]');
+  // Los seis capítulos ya están en el HTML (pages/brand), uno por capa y en el mismo orden: aquí solo se elige cuál se ve
+  const caps = [...viaje.querySelectorAll('[data-cap]')];
   const titulo = $('[data-titulo]'), pista = $('[data-pista]');
 
   const hora = document.querySelector('[data-bd-hora]');
@@ -47,8 +48,11 @@ export function montarBrand({ reducido, conRaton, cursor }) {
   };
 
   let activa = -1;
-  // Lo que dice la línea del juego: el de la capa que toca o, mientras juegas, lo que acabas de tocar
-  const decirJuego = (frase) => { juego.textContent = frase ?? (activa >= 0 ? CAPAS[activa].juego : ''); };
+  // Lo que dice la línea del juego del capítulo que se ve: el de su capa o, mientras juegas, lo que acabas de tocar
+  const decirJuego = (frase) => {
+    const juego = caps[activa]?.querySelector('[data-cap-juego]');
+    if (juego) juego.textContent = frase ?? CAPAS[activa].juego;
+  };
 
   // --- El ratón ----------------------------------------------------------------------------------------------------
   const raton = { x: 0, y: 0 };
@@ -214,18 +218,12 @@ export function montarBrand({ reducido, conRaton, cursor }) {
   let turno = 0;
   const ponerCapitulo = (i) => {
     const mio = ++turno;
-    cap.classList.remove('on');
+    caps.forEach((cap) => cap.classList.remove('on'));
     if (i < 0) return;
     setTimeout(() => {
       if (mio !== turno) return;
-      const c = CAPAS[i];
-      capN.textContent = `${c.n} — ${c.nombre}`;
-      capT.innerHTML = cursiva(c.titular);
-      capQue.textContent = c.que;
-      capImporta.textContent = c.importa;
-      capDice.textContent = c.dato.texto;
-      capFuente.textContent = c.dato.fuente;
-      if (c.dato.cuenta) contar(capCifra, c.dato.cuenta, '', c.dato.sufijo); else capCifra.textContent = c.dato.cifra;
+      const c = CAPAS[i], cap = caps[i], cifra = cap.querySelector('[data-cap-cifra]');
+      if (c.dato.cuenta) contar(cifra, c.dato.cuenta, '', c.dato.sufijo); else cifra.textContent = c.dato.cifra;
       decirJuego();
       cap.classList.add('on');
     }, reducido ? 0 : 260);

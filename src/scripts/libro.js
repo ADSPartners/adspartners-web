@@ -1,7 +1,9 @@
-// Las legales, «el libro» (components/legal/Libro.astro). El navegador pagina el texto: cada capítulo es una columna
+// Las legales, «el libro» (components/legal/Libro.astro). El navegador pagina el texto: el capítulo es una columna
 // CSS de alto fijo y lo que no cabe pasa a la columna siguiente, que es la página siguiente. Aquí se mide todo eso
-// (cuántas páginas sale cada capítulo y en cuál cae cada apartado), se colocan las páginas en una tira y se pasa de
+// (cuántas páginas sale el capítulo y en cuál cae cada apartado), se colocan las páginas en una tira y se pasa de
 // una a otra girando una hoja de verdad: una copia de la tira por cara, cada una enseñando su página.
+// Cada dirección lleva solo el texto de su capítulo: el libro acaba en la portadilla del siguiente (la puerta), y
+// pasar de ella es ir a su dirección, que se abre por su primera página. Los otros capítulos, por su dirección.
 // También el inspector de cada párrafo (su nota en cristiano y lo medido), la guarda con el CSS de la paginación, el
 // colofón y la tabla de lo que tu navegador tiene guardado de esta web, leída en vivo.
 import { gsap } from 'gsap';
@@ -29,9 +31,18 @@ export function montarLibro({ reducido, conRaton, cursor }) {
   const frente = $('.lib__cara--frente', hoja);
   const dorso = $('.lib__cara--dorso', hoja);
   const base = raiz.dataset.base || '/';
-  const caps = $$('.lib__cap', tira);
-  const capPorSlug = Object.fromEntries(caps.map((c) => [c.dataset.cap, c]));
-  const portadillas = $$('.lib__portadilla', tira);
+  const cap = $('.lib__cap', tira);                                    // el capítulo de esta dirección, con su texto
+  const portadilla = $('.lib__portadilla:not(.lib__puerta)', tira);
+  const puerta = $('.lib__puerta', tira);                               // la portadilla del siguiente (no hay en el último)
+  const tras = $('.lib__tras', tira);                                   // la página de al lado de la puerta, si hace falta
+  const slugs = $$('[data-lib-cap-nav]').map((a) => a.dataset.libCapNav);
+  const leerAncla = () => { try { return decodeURIComponent(location.hash.slice(1)); } catch (e) { return ''; } };
+  const estadoHistorial = () => (history.state && typeof history.state === 'object' ? history.state : {});
+
+  // Un ancla de otro capítulo (/privacidad/#cookies-3): ese texto está en su dirección, así que se va allí
+  const ancla = leerAncla();
+  const deOtro = slugs.find((s) => s !== raiz.dataset.abrir && (ancla === s || ancla.startsWith(`${s}-`)));
+  if (deOtro) { location.replace(`${base}${deOtro}/#${ancla}`); return; }
 
   // --- La hora de aquí, como en Tech ----------------------------------------------------------------------------
   const hora = $('[data-lib-hora]');
@@ -40,7 +51,7 @@ export function montarLibro({ reducido, conRaton, cursor }) {
   setInterval(darHora, 20000);
 
   // --- Maquetar: medidas del libro, páginas de cada capítulo y dónde cae cada cosa ---------------------------------
-  let doble = false, P = 0, H = 0, m = 0, total = 0, actual = 0;
+  let doble = false, P = 0, H = 0, m = 0, total = 0, actual = 0, kPuerta = null;
   let paginas = [];             // { tipo, cap, num, titulo } por página
   const mapa = {};              // id (capítulo o apartado) → página
   let msPaginar = 0;
@@ -71,35 +82,41 @@ export function montarLibro({ reducido, conRaton, cursor }) {
     Object.entries(v).forEach(([k, val]) => raiz.style.setProperty(k, val));
     raiz.style.setProperty('--mesa-arriba', `${arriba - abajo}px`);
 
-    // Las páginas, en orden. A doble página, cada portadilla va a la izquierda y el texto empieza a la derecha
+    // Las páginas, en orden: la guarda, el sumario, la portadilla y el texto del capítulo y, al final, la puerta al
+    // siguiente o, en el último, el colofón y la guarda. A doble página, la portadilla va a la izquierda y el texto
+    // empieza a la derecha
     paginas = [];
     let k = 0;
     const poner = (el, n = 1) => { el.style.left = `${k * P}px`; el.style.width = `${n * P}px`; };
-    const guardas = $$('.lib__guarda', tira);
-    poner(guardas[0]); paginas[k++] = { tipo: 'guarda' };
-    const sumario = $('.lib__sumario', tira);
-    poner(sumario); paginas[k++] = { tipo: 'sumario' };
-    portadillas.forEach((port) => {
-      const slug = port.dataset.cap, cap = capPorSlug[slug];
-      const datos = { cap: slug, num: cap.dataset.num, titulo: cap.dataset.titulo };
-      if (doble && k % 2) paginas[k++] = { tipo: 'blanca' };
-      poner(port); mapa[slug] = k; paginas[k++] = { tipo: 'portadilla', ...datos };
-      // El capítulo: una columna por página. Se mide dónde acaba (el marcador del final) y dónde cae cada apartado
-      poner(cap);
-      const cols = $('.lib__cols', cap);
-      const x0 = cols.getBoundingClientRect().left;
-      const col = (el) => Math.max(0, Math.floor((el.getBoundingClientRect().left - x0 + 1) / P));
-      const n = col($('.lib__fin', cap)) + 1;
-      cap.style.width = `${n * P}px`;
-      $$('.lib__ap', cap).forEach((ap) => { mapa[ap.id] = k + col($('h3', ap)); });
-      for (let i = 0; i < n; i++) paginas[k++] = { tipo: 'texto', ...datos };
-    });
-    poner($('.lib__colofon', tira)); paginas[k++] = { tipo: 'colofon' };
-    if (doble) {
-      if (k % 2) paginas[k++] = { tipo: 'blanca' };
-      poner(guardas[1]); guardas[1].hidden = false; paginas[k++] = { tipo: 'guarda' };
-      paginas[k++] = { tipo: 'blanca' };
-    } else guardas[1].hidden = true;
+    const [guarda, guardaFin] = $$('.lib__guarda', tira);
+    poner(guarda); paginas[k++] = { tipo: 'guarda' };
+    poner($('.lib__sumario', tira)); paginas[k++] = { tipo: 'sumario' };
+    const datos = { cap: cap.dataset.cap, num: cap.dataset.num, titulo: cap.dataset.titulo };
+    if (doble && k % 2) paginas[k++] = { tipo: 'blanca' };
+    poner(portadilla); mapa[datos.cap] = k; paginas[k++] = { tipo: 'portadilla', ...datos };
+    // El capítulo: una columna por página. Se mide dónde acaba (el marcador del final) y dónde cae cada apartado
+    poner(cap);
+    const cols = $('.lib__cols', cap);
+    const x0 = cols.getBoundingClientRect().left;
+    const col = (el) => Math.max(0, Math.floor((el.getBoundingClientRect().left - x0 + 1) / P));
+    const n = col($('.lib__fin', cap)) + 1;
+    cap.style.width = `${n * P}px`;
+    $$('.lib__ap', cap).forEach((ap) => { mapa[ap.id] = k + col($('h3', ap)); });
+    for (let i = 0; i < n; i++) paginas[k++] = { tipo: 'texto', ...datos };
+    if (puerta) {
+      // La puerta va en la página que sigue (a doble página puede ir a la derecha: así no queda una en blanco
+      // delante) y es lo último del libro: si cae a la izquierda, cierra su pliego la página que dice adónde lleva
+      poner(puerta); kPuerta = k; paginas[k++] = { tipo: 'puerta' };
+      tras.hidden = !(doble && k % 2);
+      if (!tras.hidden) { poner(tras); paginas[k++] = { tipo: 'tras' }; }
+    } else {
+      poner($('.lib__colofon', tira)); paginas[k++] = { tipo: 'colofon' };
+      if (doble) {
+        if (k % 2) paginas[k++] = { tipo: 'blanca' };
+        poner(guardaFin); guardaFin.hidden = false; paginas[k++] = { tipo: 'guarda' };
+        paginas[k++] = { tipo: 'blanca' };
+      } else guardaFin.hidden = true;
+    }
     total = k;
     tira.style.width = `${total * P}px`;
     msPaginar = performance.now() - t0;
@@ -121,13 +138,16 @@ export function montarLibro({ reducido, conRaton, cursor }) {
     while (sum.scrollHeight > disponible && t > 9) { t -= 0.5; sum.style.setProperty('--fs-sum', `${t}px`); }
   }
 
+  // Lo medido de la portadilla y de la puerta (de la puerta, sus apartados y dónde se leen)
   function medirPortadillas(fs) {
-    portadillas.forEach((port) => {
-      const num = $('.lib__port-num', port), cap = capPorSlug[port.dataset.cap];
-      const tam = Math.round(parseFloat(getComputedStyle(num).fontSize));
-      const aps = $$('.lib__ap', cap).length;
-      $('[data-lib-port-medida]', port).textContent = `Garamond 300 · ${tam} px\n${aps} apartados · cuerpo ${String(+fs.toFixed(1)).replace('.', ',')} px`;
-      $('[data-lib-port-medida]', port).style.whiteSpace = 'pre-line';
+    [portadilla, puerta].filter(Boolean).forEach((port) => {
+      const tam = Math.round(parseFloat(getComputedStyle($('.lib__port-num', port)).fontSize));
+      const pie = port === puerta
+        ? `${port.dataset.aps} apartados · en ${base}${port.dataset.a}/`
+        : `${$$('.lib__ap', cap).length} apartados · cuerpo ${String(+fs.toFixed(1)).replace('.', ',')} px`;
+      const medida = $('[data-lib-port-medida]', port);
+      medida.textContent = `Garamond 300 · ${tam} px\n${pie}`;
+      medida.style.whiteSpace = 'pre-line';
     });
   }
 
@@ -150,8 +170,10 @@ export function montarLibro({ reducido, conRaton, cursor }) {
   }
 
   function escribirColofon() {
+    const colofon = $('[data-lib-colofon]', tira);
+    if (!colofon) return;   // solo lo lleva el último capítulo
     const ahora = new Date();
-    $('[data-lib-colofon]', tira).textContent = `Este libro se compuso en Apple Garamond y Geist Mono y se paginó en tu navegador el ${FECHA.format(ahora)}, a las ${MADRID.format(ahora)} de Madrid. Tiene ${total} páginas y ninguna se ha impreso.`;
+    colofon.textContent = `Este libro se compuso en Apple Garamond y Geist Mono y se paginó en tu navegador el ${FECHA.format(ahora)}, a las ${MADRID.format(ahora)} de Madrid. Tiene ${total} páginas y ninguna se ha impreso.`;
   }
 
   // Las copias de la tira que van en las caras de la hoja y en la página de debajo: sin ids ni nada que se pueda pulsar
@@ -171,12 +193,13 @@ export function montarLibro({ reducido, conRaton, cursor }) {
     if (!p || p.tipo !== 'texto') return '';
     return izquierda ? 'adsPartners® · Legales' : `${p.num} · ${p.titulo}`;
   };
-  const folioDe = (k) => (paginas[k] && ['texto', 'sumario', 'colofon'].includes(paginas[k].tipo) ? String(k + 1) : '');
+  const folioDe = (k) => (paginas[k] && ['texto', 'sumario', 'colofon', 'tras'].includes(paginas[k].tipo) ? String(k + 1) : '');
   const inicio = (k) => (doble ? k - (k % 2) : k);
   const paso = () => (doble ? 2 : 1);
-
-  let capActual = raiz.dataset.abrir;
-  const titulos = Object.fromEntries(caps.map((c) => [c.dataset.cap, c.dataset.titulo]));
+  // En el último pliego, con puerta, todavía se puede pasar: lleva al capítulo siguiente
+  const enLaPuerta = () => !!puerta && actual >= total - paso();
+  const bordeSig = $('.lib__borde--sig'), botonSig = $('[data-lib-paso="1"]');
+  const fraseBorde = (b) => (b.dataset.libBorde === '-1' ? 'Vuelve atrás' : enLaPuerta() ? `Pasa a ${puerta.dataset.titulo}` : 'Pasa la página');
 
   function mostrar(k) {
     actual = inicio(limitar(k, 0, total - 1));
@@ -186,28 +209,21 @@ export function montarLibro({ reducido, conRaton, cursor }) {
       $(`[data-lib-cab="${i}"]`).textContent = cabDe(p, doble && i === 0);
       $(`[data-lib-folio="${i}"]`).textContent = folioDe(p);
     });
-    const ultimo = total - paso();
+    const alFinal = actual >= total - paso() && !puerta;
     $('.lib__borde--atras').hidden = actual <= 0;
-    $('.lib__borde--sig').hidden = actual >= ultimo;
-    $$('[data-lib-paso]').forEach((b) => { b.disabled = b.dataset.libPaso === '-1' ? actual <= 0 : actual >= ultimo; });
+    bordeSig.hidden = alFinal;
+    $$('[data-lib-paso]').forEach((b) => { b.disabled = b.dataset.libPaso === '-1' ? actual <= 0 : alFinal; });
+    botonSig.setAttribute('aria-label', enLaPuerta() ? puerta.getAttribute('aria-label') : 'Página siguiente');
+    if (bordeSig.matches(':hover')) cursor.decir(fraseBorde(bordeSig));
     $('[data-lib-cuenta]').textContent = doble ? `${dos(actual + 1)}–${dos(actual + 2)} / ${dos(total)}` : `${dos(actual + 1)} / ${dos(total)}`;
     // El canto: más grueso del lado donde quedan más páginas
     const leido = total > 1 ? actual / (total - 1) : 0;
     raiz.style.setProperty('--canto-izq', `${(2 + leido * 9).toFixed(1)}px`);
     raiz.style.setProperty('--canto-der', `${(2 + (1 - leido) * 9).toFixed(1)}px`);
-    // El capítulo a la vista: se marca abajo, y la dirección y el título lo dicen (sin llenar el historial)
-    const p = paginas[slots[slots.length - 1]]?.cap ? paginas[slots[slots.length - 1]] : paginas[actual];
-    if (p?.cap && p.cap !== capActual && !hojeando) {
-      capActual = p.cap;
-      history.replaceState(null, '', `${base}${p.cap}/`);
-      document.title = `${titulos[p.cap]} · adsPartners®`;
-    }
-    $$('[data-lib-cap-nav]').forEach((a) => { if (a.dataset.libCapNav === capActual) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
   }
 
   // --- Pasar página ------------------------------------------------------------------------------------------------
   let girando = false, pendiente = 0;
-  let hojeando = false;   // mientras se hojea hasta una página lejana, la dirección no cambia con cada capítulo que pasa
 
   function preparar(cara, k, lado) {
     const vacia = k < 0 || k >= total || paginas[k]?.tipo === 'blanca';
@@ -262,8 +278,10 @@ export function montarLibro({ reducido, conRaton, cursor }) {
 
   async function pasar(dir, { duracion = 0.95, conSonido = true } = {}) {
     const destino = actual + dir * paso();
-    if (destino < 0 || destino > total - 1) { empujon(dir); return; }
+    const sale = dir > 0 && enLaPuerta();
+    if (!sale && (destino < 0 || destino > total - 1)) { empujon(dir); return; }
     if (girando) { pendiente = dir; return; }
+    if (sale) { seguir(); return; }
     cerrarNota();
     if (reducido) { mostrar(destino); return; }
     girando = true;
@@ -284,13 +302,11 @@ export function montarLibro({ reducido, conRaton, cursor }) {
     if (hojas > 6) { mostrar(destino - dir * 6 * paso()); hojas = 6; }
     if (hojas === 1) { pasar(dir); return; }
     girando = true;
-    hojeando = true;
     for (let i = 0; i < hojas; i++) {
       sonido.tic(0.6);
       await girar(dir, i === 0 ? 0.5 : 0.3);
     }
     girando = false;
-    hojeando = false;
     mostrar(actual);
   }
 
@@ -298,6 +314,38 @@ export function montarLibro({ reducido, conRaton, cursor }) {
   function empujon(dir) {
     if (reducido) return;
     gsap.fromTo(libro, { x: 0 }, { x: -dir * 10, duration: 0.12, ease: 'power2.out', yoyo: true, repeat: 1 });
+  }
+
+  // Pasar de la puerta: el capítulo siguiente está en su dirección y se va allí, abierto por su primera página (a doble
+  // página, el mismo pliego de su portadilla). Sin hoja que gire: detrás no hay nada que enseñar
+  let saliendo = false;
+  function seguir() {
+    if (saliendo) return;
+    saliendo = true;
+    cerrarNota();
+    sonido.pasa(0.72);
+    // Para que «atrás» vuelva a la puerta aunque el navegador tenga que cargar otra vez esta página
+    try { history.replaceState({ ...estadoHistorial(), libro: 'puerta' }, ''); } catch (e) { /* nada */ }
+    location.assign(`${base}${puerta.dataset.a}/#${puerta.dataset.a}-1`);
+  }
+  // Si se vuelve con «atrás» y el navegador tenía la página guardada tal cual, ya está en la puerta: se puede volver
+  // a pasar, y la marca del historial sobra
+  addEventListener('pageshow', (e) => {
+    saliendo = false;
+    if (e.persisted) { try { history.replaceState({ ...estadoHistorial(), libro: null }, ''); } catch (err) { /* nada */ } }
+  });
+
+  // La página de al lado de la puerta: qué pasa al pasar la hoja (y pincharla también la pasa)
+  if (tras) {
+    const dentro = $('[data-lib-tras]', tras);
+    const texto = document.createElement('p');
+    texto.textContent = `El capítulo ${puerta.dataset.num}, ${puerta.dataset.titulo}, está en su propia página. Pasa la hoja y sigues allí.`;
+    const dir = document.createElement('p');
+    dir.className = 'mono';
+    dir.textContent = `${base}${puerta.dataset.a}/ ▶`;
+    dentro.replaceChildren(texto, dir);
+    tras.addEventListener('click', () => pasar(1));
+    tras.addEventListener('pointerenter', () => cursor.decir(`Pasa a ${puerta.dataset.titulo}`));
   }
 
   // --- Lo que mueve el libro ---------------------------------------------------------------------------------------
@@ -343,11 +391,12 @@ export function montarLibro({ reducido, conRaton, cursor }) {
 
   $$('[data-lib-borde]').forEach((b) => {
     b.addEventListener('click', () => pasar(Number(b.dataset.libBorde)));
-    b.addEventListener('pointerenter', () => cursor.decir(b.dataset.libBorde === '1' ? 'Pasa la página' : 'Vuelve atrás'));
+    b.addEventListener('pointerenter', () => cursor.decir(fraseBorde(b)));
   });
   $$('[data-lib-paso]').forEach((b) => b.addEventListener('click', () => pasar(Number(b.dataset.libPaso))));
 
-  // El sumario, los capítulos de abajo y las referencias: se hojea hasta la página (y la dirección lo dice)
+  // El sumario, los capítulos de abajo y las referencias: se hojea hasta la página. Lo de los otros capítulos no lleva
+  // data-ir: es un enlace normal a su dirección
   raiz.addEventListener('click', (e) => {
     const a = e.target.closest('[data-ir]');
     if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
@@ -520,10 +569,36 @@ export function montarLibro({ reducido, conRaton, cursor }) {
   document.addEventListener('ads:consentimiento', () => { pintarEleccion(); pintarAlmacen(); });
 
   // --- Arranque: maquetar y abrir el libro por su capítulo (o por el apartado de la dirección) ---------------------
+  // ¿Se vuelve con «atrás» desde el capítulo siguiente? Se abre por la puerta (una vez: al recargar, como siempre)
+  const volviendo = estadoHistorial().libro === 'puerta';
+  if (volviendo) { try { history.replaceState({ ...estadoHistorial(), libro: null }, ''); } catch (e) { /* nada */ } }
+
   function destinoInicial() {
-    const ancla = decodeURIComponent(location.hash.slice(1));
+    if (volviendo && kPuerta != null) return kPuerta;
+    const ancla = leerAncla();
     if (ancla && mapa[ancla] != null) return mapa[ancla];
     return mapa[raiz.dataset.abrir] ?? 0;
+  }
+
+  // ¿Se llega desde otro capítulo (por la puerta, el sumario o los capítulos de abajo)? Entonces el libro ya estaba
+  // abierto y no se vuelve a hojear desde el principio: se enseña su página directamente
+  function vieneDelLibro() {
+    try {
+      const r = new URL(document.referrer);
+      return r.origin === location.origin && r.pathname !== location.pathname && slugs.some((s) => r.pathname === `${base}${s}/`);
+    } catch (e) { return false; }
+  }
+
+  // Lo que mueve cosas de sitio (pasar de artículo a libro, volver a paginar) se hace escondido y se enseña dos
+  // fotogramas después, ya en su sitio: así no cuenta como salto de la página (el CLS). Con todo = true se esconde
+  // la página entera (al pasar de artículo a libro se mueve todo); si no, solo el libro
+  let escondido = 0;
+  function sinSaltos(hacer, todo = false) {
+    raiz.dataset.montando = todo ? 'todo' : 'libro';
+    try { hacer(); } finally {
+      cancelAnimationFrame(escondido);
+      escondido = requestAnimationFrame(() => { escondido = requestAnimationFrame(() => { delete raiz.dataset.montando; }); });
+    }
   }
 
   // Al cambiar el tamaño, el libro se vuelve a paginar y se queda en el mismo sitio: la página donde cae ahora lo
@@ -539,18 +614,21 @@ export function montarLibro({ reducido, conRaton, cursor }) {
     gsap.killTweensOf(hoja);
     gsap.set([hoja, debajo], { visibility: 'hidden' });
     girando = false;
-    maquetar();
-    mostrar(ancla && !ancla.hidden ? paginaDe(ancla) : actual);
+    // (Después de imprimir, otra vez de artículo a libro: se esconde todo)
+    sinSaltos(() => {
+      maquetar();
+      mostrar(ancla && !ancla.hidden ? paginaDe(ancla) : actual);
+    }, !raiz.dataset.modo);
   };
 
-  const listo = () => {
+  const listo = () => sinSaltos(() => {
     maquetar();
     const destino = destinoInicial();
-    if (reducido || destino < paso()) { mostrar(destino); return; }
+    if (reducido || destino < paso() || volviendo || vieneDelLibro()) { mostrar(destino); return; }
     // El libro se abre por el sumario y se hojea hasta su capítulo
     mostrar(0);
     setTimeout(() => irA(destino), 650);
-  };
+  }, true);
   // Las letras tienen que estar para medir: con las de recambio (más anchas) un capítulo sale con una página de más.
   // Se piden las del libro y se espera a que lleguen; si tardan, se maqueta igual y se vuelve a paginar cuando llegue
   // cualquier letra (la Geist Mono viene con el JS de pagina.js, después que las demás)

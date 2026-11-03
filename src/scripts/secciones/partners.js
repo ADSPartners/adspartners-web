@@ -15,6 +15,8 @@ const FIN_TITULO = 0.17;   // parte del scroll que dura el vuelo del título
 const PERSPECTIVA = 900;   // la del CSS (.pt__pegado)
 
 export function montar(sec, { reducido, conRaton }) {
+  // Los logos (la máscara --src) se piden ahora, cuando la sección está cerca, y no al entrar en la home
+  sec.querySelectorAll('[data-pt-logo]').forEach((li) => li.style.setProperty('--src', 'var(--srcd)'));
   if (reducido) return;
   const pegado = sec.querySelector('[data-pt-pegado]');
   const menores = [...sec.querySelectorAll('[data-pt-menor]')];

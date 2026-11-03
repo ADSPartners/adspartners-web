@@ -5,6 +5,7 @@
 // dedo. Lo mueve scripts/tech.js; aquí está lo que se ve sin él (los cuatro artículos, enteros).
 import Base from '../../layouts/Base.astro';
 import Marca from '../../components/Marca.astro';
+import EnlacesWeb from '../../components/EnlacesWeb.astro';
 import { TECH } from '../../data/tech.js';
 import { SERVICIOS_TECH } from '../../data/schema.js';
 const base = import.meta.env.BASE_URL;
@@ -110,6 +111,7 @@ const primero = TECH[0];
               <span class="tec__servicio">Siguiente</span>
               <span class="tec__siguiente-t" data-glitch>{TECH[(j + 1) % TECH.length].titulo} <span aria-hidden="true">→</span></span>
             </a>
+            <div class="tec__enlaces"><EnlacesWeb actual="tech" /></div>
           </footer>
         </article>
       ))}
@@ -290,6 +292,8 @@ const primero = TECH[0];
   .tec__ficha-tec dt { margin-bottom: 8px; font-family: var(--mono); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--rosa); }
   .tec__ficha-tec dd { margin: 0; font-size: 13px; line-height: 1.65; color: var(--crema-2); }
   .tec__art-pie { padding-bottom: 22vh; }
+  /* las demás páginas y la carta, debajo de «Siguiente» */
+  .tec__enlaces { margin-top: 9vh; color: var(--crema-2); }
   .tec__siguiente { display: inline-flex; flex-direction: column; gap: 14px; }
   .tec__siguiente-t { font-family: var(--mono); font-size: clamp(30px, 3.4vw, 52px); letter-spacing: .2em; text-transform: uppercase; transition: color .3s, letter-spacing .6s var(--curva); }
   .tec__siguiente:hover .tec__siguiente-t { color: var(--rosa); letter-spacing: .26em; }

@@ -3,6 +3,9 @@
 // paran en el centro y se apilan arriba a la derecha hasta salirse de la pantalla; el ratón mueve toda la fila. El
 // índice y el contador se mueven con ella; la esquina de la izquierda cambia a píxeles. La etiqueta del inspector y la
 // paleta dicen lo que se mide de verdad en la foto del centro.
+// Lo que se lee ya viene en el HTML (pages/proyectos): las diez fichas de la esquina y el índice; aquí solo se elige qué
+// se ve. Las fotos de las cartas se piden cuando la carta está en pantalla o a un paso de entrar (las primeras que se
+// ven las pide ya el HTML), y de cada una el navegador elige la variante que le basta (srcset).
 import { gsap } from 'gsap';
 import * as sonido from './sonido.js';
 import { PROYECTOS } from '../data/proyectos.js';
@@ -66,18 +69,21 @@ export function montarCinta({ reducido, conRaton, lenis, cursor }) {
   darHora();
   setInterval(darHora, 15000);
 
-  // La esquina de la izquierda: lo del que está en el centro, que pasa de uno a otro a píxeles
-  const info = crearPixelado(raiz.querySelector('[data-cin-info]'), (capa, pr) => {
-    const v = { equipo: pr.equipo, rol: pr.rol, anio: pr.anio || '—', datos: pr.datos };
-    capa.querySelectorAll('[data-v]').forEach((dd) => {
-      const x = v[dd.dataset.v];
-      if (Array.isArray(x)) dd.replaceChildren(...x.map((t) => Object.assign(document.createElement('span'), { textContent: t })));
-      else dd.textContent = x || '';
-    });
-  }, reducido);
+  // La esquina de la izquierda: la ficha del que está en el centro, que pasa de uno a otro a píxeles
+  const info = crearPixelado(raiz.querySelector('[data-cin-info]'), reducido);
 
-  // Lo que pinta el servidor sirve de plantilla: una carta y una entrada del índice por proyecto
-  const plantillaCarta = [...escena.querySelectorAll('[data-cin-carta]')].map((el) => el.cloneNode(true));
+  // Lo que pinta el servidor sirve de plantilla: una carta y una entrada del índice por proyecto. La foto de las cartas
+  // se guarda aparte: cada copia la pide cuando se acerca a la pantalla (pedirFoto). La img se hace nueva, sin src: una
+  // copia con src la pediría ya (el navegador no espera con las que no están en la página)
+  const plantillaCarta = [...escena.querySelectorAll('[data-cin-carta]')].map((el) => {
+    const copia = el.cloneNode(false), img = el.querySelector('img'), sin = document.createElement('img');
+    copia.removeAttribute('data-cin-espera');
+    for (const { name, value } of img.attributes) if (!['src', 'srcset', 'loading'].includes(name)) sin.setAttribute(name, value);
+    sin.dataset.src = img.getAttribute('src');
+    sin.dataset.srcset = img.getAttribute('srcset') || '';
+    copia.appendChild(sin);
+    return copia;
+  });
   const plantillaItem = [...lista.querySelectorAll('[data-cin-item]')].map((el) => el.cloneNode(true));
 
   let activos = [], n = 0, M = 0;   // los proyectos de la fila, cuántos y cuántas cartas hay (con copias)
@@ -100,22 +106,25 @@ export function montarCinta({ reducido, conRaton, lenis, cursor }) {
 
   // --- Medir cada foto (una vez por proyecto y tamaño): su paleta y lo que pesa ----------------------------------
   const lecturas = new Map();
-  async function leer(j) {
+  async function leer(c) {
+    const { j } = c;
     const { w, h } = tam(j);
     const clave = `${w}x${h}`;
     const previa = lecturas.get(j);
     if (previa && previa.clave === clave) return previa;
-    const img = plantillaCarta[j].querySelector('img');
-    // La plantilla no está en la página: se carga la misma foto que ya pidió la carta (sale de la caché)
+    // La foto de esta carta: se espera a que llegue (se pide cuando la carta se acerca a la pantalla)
+    const img = c.img;
     if (!img.complete || !img.naturalWidth) await new Promise((ok) => { img.addEventListener('load', ok, { once: true }); img.addEventListener('error', ok, { once: true }); });
     if (!img.naturalWidth) return null;
+    // La variante que eligió el navegador, y su tamaño de verdad (con srcset, naturalWidth ya viene dividido por la
+    // densidad: daría el de la carta, no el del fichero)
     const url = img.currentSrc || img.src;
     const ext = url.split('?')[0].split('.').pop();
-    const kb = await pesoKB(url);
+    const [[ancho, alto], kb] = await Promise.all([medidas(url), pesoKB(url)]);
     const lectura = {
       clave,
       // En el móvil, sin el tamaño en pantalla, para que quepa
-      foto: [`img · ${img.naturalWidth}×${img.naturalHeight}${movil() ? '' : ` → ${w}×${h} px`}`, ext, kb && `${kb} KB`].filter(Boolean).join(' · '),
+      foto: [`img · ${ancho}×${alto}${movil() ? '' : ` → ${w}×${h} px`}`, ext, kb && `${kb} KB`].filter(Boolean).join(' · '),
       paleta: medirPaleta(img),
     };
     lecturas.set(j, lectura);
@@ -124,9 +133,10 @@ export function montarCinta({ reducido, conRaton, lenis, cursor }) {
 
   async function vestir(c) {
     const { w, h } = tam(c.j);
+    c.w = w; c.h = h;
     c.el.style.setProperty('--w', `${w}px`);
     c.el.style.setProperty('--h', `${h}px`);
-    const l = await leer(c.j);
+    const l = await leer(c);
     if (!l || !c.el.isConnected) return;
     if (activos[actual] === c.j) { colocarMarca(); pintarPaleta(c.j); }
   }
@@ -144,7 +154,7 @@ export function montarCinta({ reducido, conRaton, lenis, cursor }) {
       const e = enlaceDe(j);
       el.href = e.url;
       if (fuera(e.url)) { el.target = '_blank'; el.rel = 'noopener'; }
-      const c = { el, j, k };
+      const c = { el, j, k, img: el.querySelector('img'), espera: true };
       el.addEventListener('click', (ev) => {
         if (Math.abs(envolver(k - p, M)) < 0.5) { sonido.abrir(); return; }   // la del centro: abre lo suyo
         ev.preventDefault();
@@ -164,7 +174,8 @@ export function montarCinta({ reducido, conRaton, lenis, cursor }) {
       activos.forEach((j, a) => {
         const li = plantillaItem[j].cloneNode(true);
         const enlace = li.querySelector('a');
-        if (copia !== 1) { li.setAttribute('aria-hidden', 'true'); enlace.tabIndex = -1; }
+        // (y sin los id: el del nombre, que da nombre a su ficha, solo va en la copia de verdad)
+        if (copia !== 1) { li.setAttribute('aria-hidden', 'true'); enlace.tabIndex = -1; li.querySelectorAll('[id]').forEach((e) => e.removeAttribute('id')); }
         else enlace.addEventListener('focus', () => { if (enlace.matches(':focus-visible')) irA(a); });
         enlace.addEventListener('pointerenter', () => cursor?.decir?.('Traer'));
         enlace.addEventListener('pointerleave', () => cursor?.decir?.(''));
@@ -199,7 +210,7 @@ export function montarCinta({ reducido, conRaton, lenis, cursor }) {
   // --- Cambia el del centro: la esquina, el enlace, la etiqueta, la paleta y el sonido ---------------------------
   function cambiar(j, primera) {
     if (!primera) sonido.pasa(dir > 0 ? 0.35 : 0.65);
-    info(PROYECTOS[j], primera);
+    info(j, primera);
     const e = enlaceDe(j);
     verT.textContent = e.t;
     ver.href = e.url;
@@ -255,6 +266,19 @@ export function montarCinta({ reducido, conRaton, lenis, cursor }) {
     return P.centro.map((c, i) => c + (lado[i] - c) * t + paso[i] * mas);
   }
 
+  // ¿Se ve la carta c si está a d del centro? (su caja sin girar y con su escala, de sobra para lo poco que gira)
+  function enPantalla(c, d, P, W, H) {
+    const [x, y, , , , s] = pose(d, P);
+    const r = (Math.max(c.w, c.h) * s) / 2;
+    return Math.abs(x * W) - r < W / 2 && Math.abs(y * H) - r < H / 2;
+  }
+  // Su foto se pide cuando se ve o está a un paso (una carta más en cualquier sentido), para que al llegar ya esté
+  function pedirFoto(c) {
+    c.espera = false;
+    if (c.img.dataset.srcset) c.img.srcset = c.img.dataset.srcset;
+    c.img.src = c.img.dataset.src;
+  }
+
   function pintar() {
     const W = innerWidth, H = innerHeight;
     const P = movil() ? POSES.movil : POSES.escritorio;
@@ -263,6 +287,7 @@ export function montarCinta({ reducido, conRaton, lenis, cursor }) {
       const a = Math.abs(d);
       // Las de los extremos ya están fuera de la pantalla: ni se pintan
       if (a > 6) { c.el.style.visibility = 'hidden'; continue; }
+      if (c.espera && (enPantalla(c, d, P, W, H) || enPantalla(c, d - 1, P, W, H) || enPantalla(c, d + 1, P, W, H))) pedirFoto(c);
       let [x, y, rx, ry, rz, s] = pose(d, P);
       // El ratón mueve toda la fila: la gira hacia él y la desplaza un poco, más a la del centro
       const peso = a < 1 ? 1 - a * 0.45 : 0.55;
@@ -421,19 +446,17 @@ export function montarCinta({ reducido, conRaton, lenis, cursor }) {
   });
 }
 
-// El cambio a píxeles: dos capas iguales, una encima de otra. La nueva se rellena y entra celda a celda mientras la
-// de antes se va con las celdas contrarias, en el orden de la matriz de Bayer y con un barrido de izquierda a derecha.
+// El cambio a píxeles: las diez fichas (una por proyecto, ya en el HTML) están una encima de otra y se ve una. La nueva
+// entra celda a celda mientras la de antes se va con las celdas contrarias, en el orden de la matriz de Bayer y con un
+// barrido de izquierda a derecha; las demás, ocultas del todo (visibility: tampoco las lee el lector de pantalla).
 // Las máscaras de cada paso se dibujan al cargar (y otra vez si cambia el tamaño), una por fotograma y codificadas
 // fuera del hilo principal (toBlob), para que no se pare nada: dibujarlas de golpe al primer cambio frenaba la fila
 // y partía en dos el deslizamiento del touchpad. Mientras no están, el cambio es directo
-function crearPixelado(caja, rellenar, reducido) {
+function crearPixelado(caja, reducido) {
   const PASOS = 10, CELDA = 4;
-  const capas = [caja.querySelector('[data-cin-capa]')];
-  capas.push(capas[0].cloneNode(true));
-  capas[1].setAttribute('aria-hidden', 'true');
-  capas[1].style.visibility = 'hidden';
-  caja.appendChild(capas[1]);
-  let frente = 0, medida = '', mascaras = null, anim = null, tanda = 0;
+  const capas = [...caja.querySelectorAll('[data-cin-capa]')];
+  capas.forEach((c) => { c.style.visibility = 'hidden'; });
+  let frente = -1, medida = '', mascaras = null, anim = null, tanda = 0;
 
   const poner = (capa, m) => { capa.style.webkitMaskImage = m; capa.style.maskImage = m; };
   const fotograma = () => new Promise((ok) => requestAnimationFrame(ok));
@@ -473,16 +496,16 @@ function crearPixelado(caja, rellenar, reducido) {
     if (!anim) return;
     anim.kill();
     anim = null;
-    poner(capas[frente], 'none');
-    poner(capas[1 - frente], 'none');
-    capas[1 - frente].style.visibility = 'hidden';
+    capas.forEach((c, i) => { poner(c, 'none'); if (i !== frente) c.style.visibility = 'hidden'; });
   }
-  const cambiar = (datos, primera) => {
+  // j: el proyecto (las fichas van en el orden de PROYECTOS)
+  const cambiar = (j, primera) => {
     terminar();
-    const sale = capas[frente], entra = capas[1 - frente];
-    rellenar(entra, datos);
-    entra.style.visibility = '';
-    frente = 1 - frente;
+    if (j === frente || !capas[j]) return;
+    const sale = capas[frente], entra = capas[j];
+    entra.style.visibility = 'visible';
+    frente = j;
+    if (!sale) return;
     if (primera || reducido || !mascaras) { sale.style.visibility = 'hidden'; return; }
     poner(entra, mascaras.entra[0]);
     poner(sale, mascaras.sale[0]);
@@ -520,6 +543,14 @@ export function medirPaleta(img) {
     if (paleta.length === 3) break;
   }
   return paleta.map(hex);
+}
+
+// El tamaño de verdad de un fichero de imagen (sale de la caché: es el que ya pintó la carta)
+async function medidas(url) {
+  const i = new Image();
+  i.src = url;
+  try { await i.decode(); } catch (e) { /* si no se puede, lo que haya */ }
+  return [i.naturalWidth, i.naturalHeight];
 }
 
 // Lo que pesa la foto: lo dice el navegador si la bajó ahora; si salió de la memoria, se lee de la caché (sin red).
