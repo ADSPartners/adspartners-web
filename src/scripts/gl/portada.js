@@ -500,7 +500,8 @@ function crearInspector({ sec, h1, u, renderer, capas, nivel, tam }) {
     letra() {
       const nodos = [];
       const w = document.createTreeWalker(h1, NodeFilter.SHOW_TEXT);
-      while (w.nextNode()) if (w.currentNode.textContent.trim()) nodos.push(w.currentNode);
+      // solo las letras que se ven (el h1 lleva además un texto para lectores de pantalla y buscadores)
+      while (w.nextNode()) if (w.currentNode.textContent.trim() && w.currentNode.parentElement.closest('[data-trozo]')) nodos.push(w.currentNode);
       if (!nodos.length) return null;
       const nodo = nodos[Math.floor(Math.random() * nodos.length)];
       const i = Math.floor(Math.random() * nodo.textContent.length);

@@ -6,16 +6,20 @@
 import Base from '../../layouts/Base.astro';
 import Marca from '../../components/Marca.astro';
 import { TECH } from '../../data/tech.js';
+import { SERVICIOS_TECH } from '../../data/schema.js';
 const base = import.meta.env.BASE_URL;
 const dos = (n: number) => String(n).padStart(2, '0');
 const primero = TECH[0];
 ---
 <Base
-  titulo="Tech · adsPartners®"
-  descripcion="Lo que construimos en adsPartners, para tocarlo: automatizaciones, asistentes de IA, software a medida e integraciones. Cada uno con una demo que haces tú."
+  titulo="Automatizaciones, IA y software a medida · adsPartners®"
+  descripcion="Automatizamos lo que hoy se teclea, conectamos tus herramientas y hacemos asistentes de IA y software a medida. Cada servicio, con una demo que haces tú."
+  miga="Tech"
+  pagina={{ about: SERVICIOS_TECH.map((s) => ({ '@id': s['@id'] })) }}
+  schema={SERVICIOS_TECH}
 >
   <main class="tec" data-tech data-vista="slider" data-lado="izq">
-    <h1 class="oculto-accesible">Tech · adsPartners</h1>
+    <h1 class="oculto-accesible">Tech: automatizaciones, integraciones, asistentes de IA y software a medida</h1>
     <canvas class="tec__lienzo" data-tec-lienzo aria-hidden="true"></canvas>
     <div class="tec__rejilla" aria-hidden="true"></div>
 

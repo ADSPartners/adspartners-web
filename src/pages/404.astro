@@ -21,7 +21,7 @@ const rutas = Object.keys(import.meta.glob('./**/index.astro'))
   .map((slug) => ({ slug, nombre: NOMBRES[slug], href: `${base}${slug ? `${slug}/` : ''}` }));
 const proyectos = PROYECTOS.map((p) => ({ slug: p.slug, nombre: p.nombre }));
 ---
-<Base titulo="404 · adsPartners®" descripcion="Esta dirección no existe en ads-partners.com. Te decimos cuál es la buena.">
+<Base titulo="404 · adsPartners®" descripcion="Esta dirección no existe en ads-partners.com. Te decimos cuál es la buena." indexar={false}>
   <main class="err" data-erratas data-base={base} data-rutas={JSON.stringify(rutas)} data-proyectos={JSON.stringify(proyectos)}>
     <div class="err__zona" data-err-zona>
       <canvas class="err__lienzo" data-err-lienzo aria-hidden="true"></canvas>

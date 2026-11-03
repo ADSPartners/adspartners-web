@@ -9,13 +9,17 @@ import Base from '../../layouts/Base.astro';
 import Cursor from '../../components/Cursor.astro';
 import Marca from '../../components/Marca.astro';
 import { PORTADA, CAPAS, IDEA, PALETA, LETRAS, TITULAR_LETRA, EFECTOS, CIERRE } from '../../data/brand.js';
+import { SERVICIO_BRAND } from '../../data/schema.js';
 
 const base = import.meta.env.BASE_URL;
 const cursiva = (s: string) => s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
 ---
 <Base
-  titulo="Brand · adsPartners®"
-  descripcion="Brand en adsPartners: la identidad de tu marca, el logotipo, el color, la letra y la forma de hablar, escrita en reglas y aplicada en la web y en el contenido. Brand por fuera, tech por dentro."
+  titulo="Branding e identidad de marca en Madrid · adsPartners®"
+  descripcion="Identidad de marca de arriba abajo: logotipo, color, letra y voz, escritos en reglas y aplicados en tu web y tu contenido. Una marca no es un logo."
+  miga="Brand"
+  pagina={{ about: { '@id': SERVICIO_BRAND['@id'] } }}
+  schema={[SERVICIO_BRAND]}
 >
   <!-- Fijo, como en Tech: dónde estás y, a la derecha, la hora de aquí, el sonido y la vuelta -->
   <p class="bd-donde"><span class="bd-barra" aria-hidden="true"></span><span>Brand · <span class="bd-marca">adsPartners</span></span></p>
@@ -29,7 +33,7 @@ const cursiva = (s: string) => s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
   </div>
 
   <main class="bd" data-brand data-cursor="manual">
-    <h1 class="oculto-accesible">Brand · adsPartners</h1>
+    <h1 class="oculto-accesible">Brand: branding, identidad de marca, logotipo y webs con una idea propia</h1>
 
     <!-- El viaje: la escena se queda fija mientras bajas y lo bajado la despieza -->
     <section class="bd-viaje" data-viaje aria-label="La marca de adsPartners, desmontada">

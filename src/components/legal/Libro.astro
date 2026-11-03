@@ -9,6 +9,7 @@ import Base from '../../layouts/Base.astro';
 import Marca from '../Marca.astro';
 import Cursor from '../Cursor.astro';
 import { CAPITULOS, CAMINOS, ALMACEN, COOKIES, REVISION, TITULAR } from '../../data/legal.js';
+import { ORG_ID } from '../../data/schema.js';
 
 interface Props { capitulo: string }
 const { capitulo } = Astro.props;
@@ -16,7 +17,7 @@ const cap = CAPITULOS.find((c) => c.slug === capitulo) ?? CAPITULOS[0];
 const base = import.meta.env.BASE_URL;
 const claves = [...ALMACEN, ...COOKIES].map((a) => a.clave);
 ---
-<Base titulo={`${cap.titulo} · adsPartners®`} descripcion={cap.descripcion}>
+<Base titulo={`${cap.titulo} · adsPartners®`} descripcion={cap.descripcion} miga={cap.titulo} pagina={{ about: { '@id': ORG_ID } }}>
   <main class="lib" data-libro data-abrir={cap.slug} data-base={base}>
     <h1 class="oculto-accesible">{cap.titulo} · adsPartners</h1>
     <div class="lib__rejilla" aria-hidden="true"></div>

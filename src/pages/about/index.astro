@@ -11,13 +11,18 @@ import Base from '../../layouts/Base.astro';
 import Fondo from '../../components/Fondo.astro';
 import Marca from '../../components/Marca.astro';
 import { PERSONAS, CAPITULOS, CIERRE } from '../../data/about.js';
+import { ORG_ID, PERSONAS as PERSONAS_SCHEMA } from '../../data/schema.js';
 const base = import.meta.env.BASE_URL;
 const dos = (n: number) => String(n).padStart(2, '0');
 const foto = (src: string) => `${base}assets/about/${src}`;
 ---
 <Base
-  titulo="About · adsPartners®"
-  descripcion="Quiénes hacemos adsPartners: Sebas, en la marca, y Álvaro, en la tecnología. De dónde venimos, en cinco capítulos y diez fotos."
+  titulo="Quiénes somos: Sebas y Álvaro · adsPartners®"
+  descripcion="Somos dos: Sebas, en la marca, y Álvaro, en la tecnología. De dónde venimos y cómo acabamos montando un estudio en Madrid, en cinco capítulos y diez fotos."
+  tipoPagina="AboutPage"
+  miga="About"
+  pagina={{ about: [{ '@id': ORG_ID }, ...PERSONAS_SCHEMA.map((p) => ({ '@id': p['@id'] }))], mainEntity: { '@id': ORG_ID } }}
+  schema={PERSONAS_SCHEMA}
 >
   <script is:inline>
     // Antes de pintar: con ratón y sin «movimiento reducido», los montones van en escena fija
@@ -25,7 +30,7 @@ const foto = (src: string) => `${base}assets/about/${src}`;
   </script>
   <Fondo papel />
   <main class="ab" data-about>
-    <h1 class="oculto-accesible">About · adsPartners: Sebas y Álvaro</h1>
+    <h1 class="oculto-accesible">Quiénes somos: Sebas, en la marca, y Álvaro, en la tecnología</h1>
     <!-- El fondo, partido en dos: la mitad de Sebas es papel (brand); la de Álvaro, la rejilla y los glifos (tech). Con
          ratón lo pinta el fondo vivo (gl/fondo.js, data-papel); esto es el papel quieto, para cuando no lo hay -->
     <div class="ab__mitad" aria-hidden="true"></div>
