@@ -1,0 +1,78 @@
+# adsPartners
+
+> Estudio de marca y tecnología en Madrid. Marca y tecnología en el mismo equipo, de la
+> primera idea al último detalle, para empresas que quieren verse como lo que valen y dejar
+> de perder horas en lo que una máquina hace mejor. «Brand por fuera. Tech por dentro.»
+
+adsPartners somos dos. Sebas lleva la marca: el logo, los colores, cómo habla y cómo se ve
+en cada sitio, y la dirección de arte de cada web. Álvaro lleva la tecnología: la IA, la
+informática, los servidores y todo lo que hay montado por dentro. Además, con gente de
+confianza, llegamos a finanzas y contabilidad y a paid media (publicidad de pago).
+
+La idea: por separado, una marca bonita se queda en un PDF y una buena herramienta no la
+usa nadie. Juntas, la empresa se ve como lo que vale y funciona como debería.
+
+No hay paquetes ni tarifas: cada proyecto se presupuesta a medida, según lo que haya que
+hacer. Para empezar, se nos escribe con el caso y respondemos nosotros.
+
+## Páginas
+
+- [Inicio](https://ads-partners.com/): qué somos, los proyectos y el contacto.
+- [Tech](https://ads-partners.com/tech/): los cuatro servicios de tecnología, cada uno con su demostración.
+- [Brand](https://ads-partners.com/brand/): qué es una marca, capa a capa, y cómo la trabajamos.
+- [Proyectos](https://ads-partners.com/proyectos/): lo que hemos hecho, de 2024 a 2026.
+- [About](https://ads-partners.com/about/): quiénes somos.
+
+## Brand (con Sebas)
+
+- Identidad y logotipo.
+- Webs con una idea propia.
+- Dirección de arte.
+- Contenido.
+
+Una marca no es un logo: es la idea que se hace la gente de una empresa. Primero miramos
+cómo se ve la marca y cómo debería verse, empezando por la idea (qué eres, para quién y por
+qué tú). Después hacemos cada capa (la firma, el color, la letra y la voz) y la dejamos
+escrita en reglas. En la web, esas reglas son código, y se cumplen solas.
+
+## Tech (con Álvaro)
+
+- Asistentes de IA: un asistente conectado a los datos del negocio (Excel, base de datos,
+  ERP o CRM) al que se le pregunta en lenguaje normal y contesta con la cifra y la gráfica.
+  Cada respuesta sale de una consulta a los datos, que se puede ver. Solo lee, no toca nada.
+- Integraciones: conectamos las herramientas que ya usa la empresa (la tienda, el TPV, el
+  Excel, el correo, el banco) para que los datos pasen solos, sin copiar y pegar.
+- Automatizaciones: lo que alguien hace a mano cada semana lo hace una máquina sola: leer
+  facturas, albaranes, pedidos o contratos, comprobar que los datos cuadran, dejarlos donde
+  se usan y avisar a quien le toca.
+- Software a medida: cuando la herramienta no existe, la hacemos, pensada para el proceso.
+
+## Proyectos
+
+- Tysiu: software para el equipo de Neumomadrid de la Fundación Jiménez Díaz; separa el
+  tejido pulmonar píxel a píxel y mide cada región.
+- Tercero B: una fiesta en una casa que solo abre los jueves; su marca a mano, sus webs, la
+  venta de llaves y los pagos.
+- RaciónJusta: una app para bares que lee las facturas de los proveedores y saca lo que
+  cuesta y lo que deja cada plato.
+- Inversalia: su marca, creada desde cero, su web y sus automatizaciones.
+- Klink: la marca de una app de mensajería privada, desde cero.
+- Butter Studio: la web de unas cookies hechas a mano en Madrid.
+- Métele Voltaje: la web de una asesoría energética de Teruel.
+- Ava Pastelería: la web de una pastelería de tartas por encargo.
+- Impulso Visual: herramientas con IA para una empresa de PLV; las artes finales y las
+  presentaciones, de días a un clic.
+- Dr. Jorge Cato: la web de un cirujano vascular en Madrid y la captación de pacientes para
+  su consulta.
+
+## Contacto
+
+- Correo: adsgroup@ads-partners.com
+- WhatsApp: +34 633 565 840
+- La carta del final de https://ads-partners.com/ (sección de contacto).
+
+## Legal
+
+- [Aviso legal](https://ads-partners.com/aviso-legal/)
+- [Privacidad](https://ads-partners.com/privacidad/)
+- [Cookies](https://ads-partners.com/cookies/)
