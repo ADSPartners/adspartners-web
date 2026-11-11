@@ -4,3 +4,4 @@ dist/
 
 # La auditoría SEO y su seguimiento (capturas, informes, registro): solo en local, el repo es público
 seo/
+.playwright-cli/
