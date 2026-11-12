@@ -39,12 +39,13 @@ export function montarAbout({ reducido, conRaton }) {
   setInterval(darHora, 15000);
 
   // Las fotos de Álvaro llevan lo que el inspector mide en cada una: fichero, tamaño real, peso y sus tres colores
+  // (el tamaño, el del fichero que ha bajado: con srcset, naturalWidth viene corregido por la densidad de la pantalla)
   raiz.querySelectorAll('[data-ab-foto="alvaro"]').forEach((fig) => {
     const img = fig.querySelector('[data-ab-img]');
     const vestir = async () => {
-      const kb = await pesoKB(img.currentSrc || img.src);
+      const [kb, real] = await Promise.all([pesoKB(img.currentSrc || img.src), fuenteReal(img).catch(() => img)]);
       fig.querySelector('[data-ab-insp]').textContent = [
-        img.getAttribute('src').split('/').pop(), `${img.naturalWidth} × ${img.naturalHeight}`, kb && `${kb} KB`,
+        img.getAttribute('src').split('/').pop(), `${real.naturalWidth} × ${real.naturalHeight}`, kb && `${kb} KB`,
       ].filter(Boolean).join(' · ');
       try {
         fig.querySelector('[data-ab-paleta]').replaceChildren(...medirPaleta(img).map((c) => {
@@ -205,24 +206,48 @@ function montarFlujo(raiz, reducido) {
   // Las de Álvaro se montan a píxeles cuando llegan a la pantalla
   figs.forEach((fig) => {
     const px = crearPixelador(fig);
-    const img = fig.querySelector('[data-ab-img]');
     fig.classList.add('pix-espera');
     const io = new IntersectionObserver(([e]) => {
       if (!e.isIntersecting) return;
       io.disconnect();
-      const ir = () => {
+      // Se monta cuando la foto ya está; si no llega (o falla), se enseña tal cual: nunca se queda oculta
+      px.lista(4000).then((si) => {
+        if (!si) { px.pintar(1); return; }
         const o = { e: 0 };
         gsap.to(o, { e: 1, duration: 1.4, ease: 'power1.inOut', onUpdate: () => px.pintar(o.e), onComplete: () => px.pintar(1) });
-      };
-      if (img.complete && img.naturalWidth) ir();
-      else img.addEventListener('load', ir, { once: true });
+      });
     }, { threshold: 0.35 });
     io.observe(fig.querySelector('.ab__papel'));   // en el móvil la figura no tiene caja (display: contents)
   });
 }
 
+// La foto tal como ha bajado, a su tamaño de verdad. Con srcset, la <img> da naturalWidth corregido por la densidad de
+// la pantalla (en un móvil a 3×, 188 px de una foto de 800), pero drawImage recorta sobre los píxeles del fichero: con
+// sus medidas, el pixelado cogía solo un trozo de la foto (un zoom) y al acabar saltaba a la foto entera. Una Image
+// sin srcset, con el mismo fichero (ya en caché), da las medidas buenas
+const reales = new WeakMap();
+function fuenteReal(img) {
+  if (!reales.has(img)) {
+    reales.set(img, new Promise((ok, mal) => {
+      const desde = () => {
+        const f = new Image();
+        f.src = img.currentSrc || img.src;
+        f.decode().then(() => ok(f), mal);
+      };
+      if (img.complete && img.naturalWidth) desde();
+      else {
+        img.addEventListener('load', desde, { once: true });
+        img.addEventListener('error', mal, { once: true });
+      }
+    }));
+  }
+  return reales.get(img);
+}
+
 // La foto de Álvaro, a píxeles. e va de 0 a 1: hasta la mitad entran las celdas gruesas en el orden de la matriz de
-// Bayer, de abajo arriba; después los píxeles se encogen (de 22 px de pantalla a 1) hasta que queda la foto
+// Bayer, de abajo arriba; después los píxeles se encogen (de 22 px de pantalla a 1) hasta que queda la foto.
+// Los dos extremos se aplican siempre: con 1, la foto (la <img>); antes, el canvas. Si la foto no llega a tiempo o
+// falla, se enseña tal cual: nunca se queda oculta ni a medias
 function crearPixelador(fig) {
   const img = fig.querySelector('[data-ab-img]');
   const cv = fig.querySelector('[data-ab-pix]');
@@ -230,7 +255,7 @@ function crearPixelador(fig) {
   const chico = document.createElement('canvas');
   const cc = chico.getContext('2d', { willReadFrequently: true });
   const GRUESO = 22;
-  let w = 0, h = 0, grueso = null, ultimo = -1;
+  let w = 0, h = 0, grueso = null, ultimo = -1, fuente = null, fallo = false, pedida = null;
 
   const medir = () => {
     w = cv.offsetWidth; h = cv.offsetHeight;
@@ -240,22 +265,34 @@ function crearPixelador(fig) {
     grueso = null; ultimo = -1;
   };
   addEventListener('resize', medir);
+  // Pide la foto real (una vez); a los 5 s sin ella, se da por perdida y se enseña la <img> tal cual
+  const cargar = () => (pedida ||= Promise.race([
+    fuenteReal(img).then((f) => { fuente = f; grueso = null; ultimo = -1; return true; }),
+    new Promise((ok) => setTimeout(() => ok(false), 5000)),
+  ]).catch(() => false).then((si) => { if (!si) fallo = true; return si; }));
+  // Resuelve true cuando se puede pixelar; false si no llega antes de tope ms
+  const lista = (tope) => Promise.race([cargar(), new Promise((ok) => setTimeout(() => ok(false), tope))]);
   // El trozo de la foto que se ve: como object-fit: cover, con el centro al 40 % de alto (como el CSS)
   const recorte = () => {
-    const iw = img.naturalWidth, ih = img.naturalHeight, ar = w / h;
+    const iw = fuente.naturalWidth, ih = fuente.naturalHeight, ar = w / h;
     let sw = iw, sh = iw / ar;
     if (sh > ih) { sh = ih; sw = ih * ar; }
     return [(iw - sw) / 2, (ih - sh) * 0.4, sw, sh];
   };
 
   function pintar(e) {
-    if (!img.naturalWidth) return;
+    if (e >= 1 || fallo) {
+      ultimo = 1;
+      fig.classList.add('pix-hecho');
+      fig.classList.remove('pix-espera');
+      return;
+    }
+    fig.classList.remove('pix-hecho');
+    fig.classList.add('pix-espera');
+    if (!fuente) { if (e > 0) cargar(); return; }
     if (!w) medir();
     if (!w || Math.abs(e - ultimo) < 0.003) return;
     ultimo = e;
-    fig.classList.toggle('pix-hecho', e >= 1);
-    fig.classList.toggle('pix-espera', e < 1);
-    if (e >= 1) return;
     ctx.clearRect(0, 0, cv.width, cv.height);
     if (e <= 0) return;
     ctx.imageSmoothingEnabled = false;
@@ -263,7 +300,7 @@ function crearPixelador(fig) {
     if (e < 0.5) {
       const cols = Math.ceil(w / GRUESO), filas = Math.ceil(h / GRUESO);
       chico.width = cols; chico.height = filas;
-      if (!grueso) { cc.drawImage(img, ...rec, 0, 0, cols, filas); grueso = cc.getImageData(0, 0, cols, filas); }
+      if (!grueso) { cc.drawImage(fuente, ...rec, 0, 0, cols, filas); grueso = cc.getImageData(0, 0, cols, filas); }
       const t = e / 0.5;
       const d = new ImageData(new Uint8ClampedArray(grueso.data), cols, filas);
       for (let f = 0; f < filas; f++) {
@@ -278,11 +315,11 @@ function crearPixelador(fig) {
       const celda = Math.max(1, GRUESO * Math.pow(1 / GRUESO, suave((e - 0.5) / 0.5)));
       const cols = Math.ceil(w / celda), filas = Math.ceil(h / celda);
       chico.width = cols; chico.height = filas;
-      cc.drawImage(img, ...rec, 0, 0, cols, filas);
+      cc.drawImage(fuente, ...rec, 0, 0, cols, filas);
       ctx.drawImage(chico, 0, 0, cols, filas, 0, 0, cv.width, cv.height);
     }
   }
-  return { pintar };
+  return { pintar, lista };
 }
 
 // El texto de Álvaro se escribe a máquina descifrándose: lo ya escrito, una franja de signos y el resto, invisible
