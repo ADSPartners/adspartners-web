@@ -5,7 +5,7 @@ import '@fontsource/geist-mono/400.css';
 import Lenis from 'lenis';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ajustes, alCambiar, montarBotonSonido } from './ajustes.js';
+import { ajustes, alCambiar, montarBotonSonido, seguirSonido } from './ajustes.js';
 import * as sonido from './sonido.js';
 import { crearCursor } from './cursor.js';
 import { montarVivo } from './vivo.js';
@@ -30,14 +30,8 @@ export async function arrancarPagina(montar) {
   alCambiar((clave, valor) => {
     if (clave === 'sonido') (valor === 'si' ? sonido.encender() : sonido.apagar());
   });
-  // Si en la home entró con sonido, vuelve a sonar al primer gesto (el navegador no deja antes)
-  let modo = null;
-  try { modo = sessionStorage.getItem('ads-umbral'); } catch (e) { /* nada */ }
-  if (modo === 'con' && ajustes.sonido !== 'no') {
-    const primerGesto = () => { sonido.encender(); removeEventListener('pointerdown', primerGesto); removeEventListener('keydown', primerGesto); };
-    addEventListener('pointerdown', primerGesto);
-    addEventListener('keydown', primerGesto);
-  }
+  // Si el sonido estaba encendido, sigue encendido (si el navegador pide un gesto, suena con el primero)
+  seguirSonido(sonido.encender);
 
   const cursor = crearCursor({ reducido });
   cursor.activar();

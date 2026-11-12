@@ -12,6 +12,19 @@ export const ajustes = {
 const oyentes = new Set();
 export const alCambiar = (fn) => oyentes.add(fn);
 
+// Lo elegido en el umbral, recordado igual que lo de las barras (sin avisar: quien entra ya lo enciende o no)
+export function recordarSonido(valor) {
+  ajustes.sonido = valor;
+  guardar(valor);
+}
+
+// Al cargar una página: si el sonido estaba encendido, sigue (se enciende cuando el navegador está libre; si no deja
+// sin un gesto, sonido.js lo arranca con el primero y hasta entonces el botón dice «off»)
+export function seguirSonido(encender) {
+  if (ajustes.sonido !== 'si') return;
+  (window.requestIdleCallback || ((f) => setTimeout(f, 300)))(() => encender(), { timeout: 1500 });
+}
+
 export function fijarSonido(valor) {
   ajustes.sonido = valor;
   guardar(valor);

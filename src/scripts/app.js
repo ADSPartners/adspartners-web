@@ -5,7 +5,7 @@ import '@fontsource/geist-mono/400.css';
 import Lenis from 'lenis';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ajustes, alCambiar, montarBotonSonido } from './ajustes.js';
+import { ajustes, alCambiar, montarBotonSonido, recordarSonido, seguirSonido } from './ajustes.js';
 import * as sonido from './sonido.js';
 import { crearCursor } from './cursor.js';
 import { montarUmbral } from './umbral.js';
@@ -66,8 +66,8 @@ export async function arrancar() {
     reducido,
     alEntrar(modo, info = {}) {
       entrado = true;
-      if (modo === 'con') { ajustes.sonido = 'si'; sonido.encender().then(() => sonido.entrar()); }
-      else if (modo === 'sin') { ajustes.sonido = 'no'; }
+      if (modo === 'con') { recordarSonido('si'); sonido.encender().then(() => sonido.entrar()); }
+      else if (modo === 'sin') { recordarSonido('no'); }
       lenis?.start();
       cursor.activar();
       if (info.rectIso) cursor.volarDesde(info.rectIso);
@@ -77,16 +77,9 @@ export async function arrancar() {
     },
   });
 
-  // Sin umbral (ya entró en esta sesión): si había elegido sonido, se enciende al primer gesto
-  if (!enUmbral) {
-    let modo = null;
-    try { modo = sessionStorage.getItem('ads-umbral'); } catch (e) { /* nada */ }
-    if (modo === 'con' && ajustes.sonido !== 'no') {
-      const primerGesto = () => { sonido.encender(); window.removeEventListener('pointerdown', primerGesto); window.removeEventListener('keydown', primerGesto); };
-      window.addEventListener('pointerdown', primerGesto);
-      window.addEventListener('keydown', primerGesto);
-    }
-  }
+  // Sin umbral (ya entró en esta sesión): si el sonido estaba encendido, sigue encendido (si el navegador pide un
+  // gesto, suena con el primero)
+  if (!enUmbral) seguirSonido(sonido.encender);
 
   // Gota de agua al pasar por botones y enlaces
   document.querySelectorAll('[data-sonido-hover]').forEach((a) => a.addEventListener('pointerenter', () => sonido.tic(0.7)));

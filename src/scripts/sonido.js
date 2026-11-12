@@ -30,18 +30,46 @@ const COMPAS = 9;
 
 export const sonidoActivo = () => activo;
 
+// El botón dice «on» solo si suena de verdad: encendido y con el AudioContext en marcha. Al cargar una página con el
+// sonido encendido, el navegador puede no dejar arrancar el audio sin un gesto (Safari y Firefox; Chrome sí deja tras
+// navegar dentro de la web): hasta entonces el botón dice «off» y el audio arranca con el primer toque, clic o tecla.
+// (pointerdown de un dedo no cuenta como gesto para el navegador; pointerup, touchend, click, keydown y mousedown, sí.
+// Bajar con la rueda o arrastrando el dedo, tampoco.) Las barras van por su cuenta: su clic enciende o apaga
+const GESTOS = ['pointerup', 'touchend', 'click', 'keydown', 'mousedown'];
+let gestoArmado = false;
+const pintarEstado = () => document.documentElement.classList.toggle('sonido-on', activo && !!ctx && ctx.state === 'running');
+function alGesto(e) {
+  if (e.target?.closest?.('[data-sonido-btn]')) return;
+  if (!activo || !ctx) { desarmarGesto(); return; }
+  if (ctx.state !== 'running') ctx.resume().then(pintarEstado, () => {});
+}
+function armarGesto() {
+  if (gestoArmado) return;
+  gestoArmado = true;
+  GESTOS.forEach((t) => addEventListener(t, alGesto, { capture: true, passive: true }));
+}
+function desarmarGesto() {
+  if (!gestoArmado) return;
+  gestoArmado = false;
+  GESTOS.forEach((t) => removeEventListener(t, alGesto, { capture: true }));
+}
+
 export async function encender() {
   if (!ctx) crear();
-  if (ctx.state === 'suspended') { try { await ctx.resume(); } catch (e) { /* sin gesto todavía */ } }
   activo = true;
   const t = ctx.currentTime;
   master.gain.cancelScheduledValues(t);
   master.gain.setTargetAtTime(0.9, t, 0.3);
-  document.documentElement.classList.add('sonido-on');
+  if (ctx.state !== 'running') {
+    armarGesto();
+    try { await ctx.resume(); } catch (e) { /* sin gesto todavía: arranca con el primero */ }
+  }
+  pintarEstado();
 }
 
 export function apagar() {
   activo = false;
+  desarmarGesto();
   document.documentElement.classList.remove('sonido-on');
   if (!ctx) return;
   master.gain.cancelScheduledValues(ctx.currentTime);
@@ -82,6 +110,12 @@ function crear() {
 
   montarAgua();
   arrancarMusica();
+  // Cuando arranca (o se para: pestaña escondida, una llamada en el iPhone), el botón lo cuenta
+  ctx.onstatechange = () => {
+    pintarEstado();
+    if (ctx.state === 'running') desarmarGesto();
+    else if (activo) armarGesto();
+  };
   document.addEventListener('visibilitychange', () => {
     if (!ctx) return;
     if (document.hidden) ctx.suspend();
