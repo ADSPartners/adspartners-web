@@ -18,6 +18,7 @@ const primero = TECH[0];
   miga="Tech"
   pagina={{ about: SERVICIOS_TECH.map((s) => ({ '@id': s['@id'] })) }}
   schema={SERVICIOS_TECH}
+  construye
 >
   <main class="tec" data-tech data-vista="slider" data-lado="izq">
     <h1 class="oculto-accesible">Tech: automatizaciones, integraciones, asistentes de IA y software a medida</h1>
@@ -420,4 +421,28 @@ const primero = TECH[0];
     .tec__explica p { font-size: 12px; line-height: 1.6; }
     .tec__gesto { bottom: 74px; padding: 16px 20px; font-size: 10px; }
   }
+
+  /* --- La llegada: la página se construye (html.construye; Base.astro). Primero lo ligero: la rejilla se despliega
+     desde su eje y aparece lo que es la innovación (su servicio y el título, que ya trae el HTML). Detrás, lo que pesa:
+     la escena WebGL se crea después de este pintado y la cámara llega volando por el valle (tech.js); mientras, entran
+     el contador, el texto y «Entrar» (tech.js, a su hora con la llegada), las flechas y lo fijo. Solo opacity y
+     transform: corre en el compositor aunque el hilo principal esté compilando los sombreadores ------------------- */
+  :global(html.construye) { animation-name: construida; animation-duration: 1.6s; animation-timing-function: linear; animation-fill-mode: both; }
+  :global(html.construye) .tec__rejilla { animation-name: tec-c-despliega; animation-duration: 1s; animation-timing-function: var(--curva); animation-fill-mode: both; }
+  :global(html.construye) .tec__ficha .tec__servicio,
+  :global(html.construye) .tec__ficha .tec__titulo { animation-name: tec-c-entra, tec-c-sube; animation-duration: .6s, .9s; animation-delay: .1s; animation-timing-function: ease-out, var(--curva); animation-fill-mode: both; }
+  :global(html.construye) .tec__ficha .tec__titulo { animation-delay: .22s; }
+  /* (el texto, «Entrar» y las cifras los trae tech.js, que les pone su opacidad; hasta entonces, nada) */
+  :global(html.construye) .tec__ficha .tec__texto,
+  :global(html.construye) .tec__entrar,
+  :global(html.construye) .tec__cifra { opacity: 0; }
+  :global(html.construye) .tec__contador,
+  :global(html.construye) .tec__flecha { animation-name: tec-c-entra; animation-duration: .5s; animation-delay: .95s; animation-timing-function: ease-out; animation-fill-mode: both; }
+  :global(html.construye) .tec__donde,
+  :global(html.construye) .tec__arriba,
+  :global(html.construye) .tec__logo,
+  :global(html.construye) .tec__pie { animation-name: tec-c-entra; animation-duration: .5s; animation-delay: 1.05s; animation-timing-function: ease-out; animation-fill-mode: both; }
+  @keyframes tec-c-entra { from { opacity: 0; } }
+  @keyframes tec-c-sube { from { translate: 0 16px; } }
+  @keyframes tec-c-despliega { from { scale: 1 0; opacity: 0; } 30% { opacity: 1; } }
 </style>

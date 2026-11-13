@@ -7,6 +7,9 @@
 //   capa. Los círculos sobre el modelo enseñan su etiqueta del inspector.
 // - mision: la sala en alambre; el módulo de la misión (scripts/tech/<modulo>.js) pone lo suyo en la zona del centro.
 // La dirección lleva el #slug de la innovación, para poder enlazarla.
+// Al llegar, la página se construye (html.construye, Base.astro): lo primero es ligero y lo pone el CSS con el primer
+// pintado (la rejilla, el título y su servicio); la escena WebGL, que es lo que pesa (compilar sus sombreadores lleva
+// medio segundo), se crea después de ese pintado, y la cámara llega volando mientras el resto de la ficha entra.
 import { gsap } from 'gsap';
 import * as sonido from './sonido.js';
 import { TECH } from '../data/tech.js';
@@ -45,7 +48,7 @@ function desdoblar(el, texto, { salir = false, reducido = false } = {}) {
   });
 }
 
-export function montarTech({ reducido, conRaton, lenis }) {
+export function montarTech({ reducido, conRaton, lenis, compas }) {
   const raiz = document.querySelector('[data-tech]');
   if (!raiz) return;
   lenis?.stop();
@@ -53,7 +56,9 @@ export function montarTech({ reducido, conRaton, lenis }) {
   const $ = (s) => raiz.querySelector(s);
   const $$ = (s) => [...raiz.querySelectorAll(s)];
 
-  const escena = crearEscena($('[data-tec-lienzo]'), { conRaton, reducido, slugs: TECH.map((t) => t.slug) });
+  const construyendo = document.documentElement.classList.contains('construye');
+  // (se crea después del primer pintado: ver el arranque, abajo)
+  let escena = null;
   const D = reducido ? 0 : 1;
   const VIAJE = 2.3;   // s de una estación a la siguiente
 
@@ -96,14 +101,15 @@ export function montarTech({ reducido, conRaton, lenis }) {
     ui.abrirMision.hidden = !it.mision;
   }
 
-  function entrarFicha() {
+  // primera: al llegar, el título y su servicio ya los ha puesto el CSS de la llegada
+  function entrarFicha(primera = false) {
     const tl = gsap.timeline();
-    tl.fromTo([ui.servicio, ui.texto], { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.8 * D, stagger: 0.12, ease: 'power3.out' }, 0.15 * D);
+    tl.fromTo(primera ? [ui.texto] : [ui.servicio, ui.texto], { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.8 * D, stagger: 0.12, ease: 'power3.out' }, 0.15 * D);
     // «Entrar» nace de su barrita rosa
     tl.fromTo(ui.entrar, { scaleX: 0.04, opacity: 1 }, { scaleX: 1, duration: 0.7 * D, ease: 'power3.inOut' }, 0.35 * D);
     tl.fromTo(ui.entrar.firstElementChild, { opacity: 0 }, { opacity: 1, duration: 0.3 * D }, 0.9 * D);
     tl.fromTo([ui.a, ui.b], { yPercent: 60, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.6 * D, stagger: 0.06, ease: 'power3.out' }, 0);
-    desdoblar(ui.titulo, TECH[i].titulo, { reducido });
+    if (!primera) desdoblar(ui.titulo, TECH[i].titulo, { reducido });
     return tl;
   }
 
@@ -292,8 +298,23 @@ export function montarTech({ reducido, conRaton, lenis }) {
   }
 
   // --- Arranque: la cámara llega volando a su estación ---------------------------------------------------------------
+  // La escena, después del primer pintado (dos fotogramas: el primero corre justo antes de pintar); mientras se
+  // compila, lo de la llegada sigue en el compositor
   pintarFicha();
-  ui.titulo.textContent = '';
-  escena?.entrar(estacion);
-  setTimeout(() => entrarFicha(), 1100 * D);
+  requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(async () => {
+    const e = await crearEscena($('[data-tec-lienzo]'), { conRaton, reducido, slugs: TECH.map((t) => t.slug) });
+    if (!e) return;
+    escena = e;
+    // (si mientras tanto ya se ha pasado a otra, la cámara llega a esa)
+    escena.entrar(estacion);
+    if (vista !== 'slider') escena.vista(vista);
+  })));
+  if (construyendo) {
+    // El título ya está (lo trae el HTML y lo enseña el CSS); el texto, «Entrar» y el contador, con la llegada
+    ui.titulo.textContent = TECH[i].titulo;
+    compas(950).then(() => entrarFicha(true));
+  } else {
+    ui.titulo.textContent = '';
+    setTimeout(() => entrarFicha(), 1100 * D);
+  }
 }

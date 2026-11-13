@@ -6,6 +6,8 @@
 // antenas y polvo) se calcula en los shaders a partir de la posición en el mundo: es infinito y no pesa.
 // Al entrar en una innovación su modelo se va al otro lado; en la misión, la sala, que también se dibuja sola.
 // Todo son líneas (gl.LINES) con OGL; no hay texturas ni ficheros.
+// Sus sombreadores se compilan antes en paralelo (precompilar): compilados de golpe, OGL esperaba a cada uno y
+// paraba el hilo principal (y el pintado) medio segundo al llegar a la página.
 import { Renderer, Camera, Transform, Program, Mesh, Geometry, Vec3 } from 'ogl';
 import { gsap } from 'gsap';
 import { MODELOS, ESCALA, peana, antena, sala } from './modelos.js';
@@ -242,12 +244,40 @@ const CREMA = [231 / 255, 226 / 255, 218 / 255];
 const ROSA = [245 / 255, 203 / 255, 215 / 255];
 const azar = (n) => { const x = Math.sin(n * 12.9898) * 43758.5453; return x - Math.floor(x); };
 
-export function crearEscena(canvas, { conRaton = false, reducido = false, slugs = Object.keys(MODELOS) } = {}) {
+// Compila los sombreadores con KHR_parallel_shader_compile (el navegador los compila aparte) y espera, fotograma a
+// fotograma, a que estén; después OGL los vuelve a pedir y salen de la caché de programas del navegador, sin esperar.
+// Sin la extensión, no hace nada (y OGL los compila como siempre)
+async function precompilar(gl, pares) {
+  const ext = gl.getExtension('KHR_parallel_shader_compile');
+  if (!ext) return;
+  const progs = pares.map(([v, f]) => {
+    const prog = gl.createProgram();
+    for (const [tipo, fuente] of [[gl.VERTEX_SHADER, v], [gl.FRAGMENT_SHADER, f]]) {
+      const sh = gl.createShader(tipo);
+      gl.shaderSource(sh, fuente);
+      gl.compileShader(sh);
+      gl.attachShader(prog, sh);
+    }
+    gl.linkProgram(prog);
+    return prog;
+  });
+  const t0 = performance.now();
+  while (progs.some((q) => !gl.getProgramParameter(q, ext.COMPLETION_STATUS_KHR)) && performance.now() - t0 < 4000) {
+    await new Promise((ok) => requestAnimationFrame(ok));
+  }
+  for (const q of progs) {
+    for (const sh of gl.getAttachedShaders(q) || []) { gl.detachShader(q, sh); gl.deleteShader(sh); }
+    gl.deleteProgram(q);
+  }
+}
+
+export async function crearEscena(canvas, { conRaton = false, reducido = false, slugs = Object.keys(MODELOS) } = {}) {
   let renderer;
   try {
     renderer = new Renderer({ canvas, dpr: Math.min(devicePixelRatio || 1, 2), alpha: true, antialias: true, premultipliedAlpha: false });
   } catch (e) { return null; }
   const gl = renderer.gl;
+  try { await precompilar(gl, [[VERT_T, FRAG_T], [VERT_C, FRAG_C], [VERT_A, FRAG_A], [VERT_P, FRAG_P], [VERT_M, FRAG_M]]); } catch (e) { /* OGL los compila igual */ }
   gl.clearColor(0, 0, 0, 0);
   const N = slugs.length;
 
