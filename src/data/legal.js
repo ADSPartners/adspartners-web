@@ -119,6 +119,7 @@ export const CAPITULOS = [
         titulo: 'Lo que ves es nuestro',
         bloques: [
           { p: `Los textos, las fotografías, el diseño, las animaciones, el sonido y el código de la web son de ${T.razon} o se usan con permiso de sus autores. Que puedas verlos no te da ningún derecho para copiarlos, distribuirlos o modificarlos más allá de lo necesario para usar la web.`, nota: 'Lo hemos hecho nosotros. Si quieres usar algo, pregúntanos.' },
+          { p: 'Parte del código es de terceros, de código abierto, y se usa con su licencia. El fluido que mueve el fondo y la portada está adaptado de WebGL-Fluid-Simulation, de Pavel Dobryakov (licencia MIT, copyright © 2017 Pavel Dobryakov).', nota: 'Lo que no hemos escrito nosotros lleva el nombre de quien lo hizo.' },
           { p: `La marca ${T.marca} y su logotipo son de ${T.razon}. Los logotipos y los nombres de clientes y colaboradores que aparecen en la web pertenecen a sus titulares y se muestran solo para contar el trabajo que hemos hecho con ellos.`, nota: 'Los logos de los clientes son suyos; los enseñamos porque hemos trabajado juntos.' },
         ],
       },
