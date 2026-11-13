@@ -34,6 +34,7 @@ const PRIMERAS = [0, 1, 2, PROYECTOS.length - 1];
   miga="Proyectos"
   pagina={{ mainEntity: { '@id': LISTA_ID }, about: { '@id': ORG_ID } }}
   schema={[LISTA_PROYECTOS]}
+  construye
 >
   <main class="cin" data-cursor="archivo" data-cinta>
     <h1 class="oculto-accesible">Proyectos de branding, webs y software, de 2024 a 2026</h1>
@@ -260,4 +261,28 @@ const PRIMERAS = [0, 1, 2, PROYECTOS.length - 1];
     .cin__contador { left: var(--margen); font-size: 92px; gap: 8px; }
     .cin__contador-etq { display: none; }
   }
+
+  /* --- La llegada: la página se construye (html.construye; Base.astro). Primero lo ligero y que dice dónde estás: el
+     índice, con el nombre del proyecto que va a salir encendido, y la cifra del contador, que sube. Después lo que pesa,
+     las fotos: la carta del centro sube por la diagonal y las demás se reparten desde detrás (eso lo hace cinta.js; la
+     fila no se enseña hasta que la monta). Al final, la esquina con la ficha, la paleta y lo fijo. Solo opacity y
+     transform: corre en el compositor mientras el JS arranca ------------------------------------------------------- */
+  :global(html.construye) { animation-name: construida; animation-duration: 1.9s; animation-timing-function: linear; animation-fill-mode: both; }
+  :global(html.construye) .cin__escena:not(.es-viva) { visibility: hidden; }
+  :global(html.construye) .cin__indice { animation-name: cin-c-entra, cin-c-sube; animation-duration: .5s, .8s; animation-timing-function: ease-out, var(--curva); animation-fill-mode: both; }
+  :global(html.construye) .cin__contador { animation-name: cin-c-entra, cin-c-sube-mas; animation-duration: .5s, .9s; animation-delay: .15s; animation-timing-function: ease-out, var(--curva); animation-fill-mode: both; }
+  :global(html.construye) .cin__info,
+  :global(html.construye) .cin__paleta,
+  :global(html.construye) .cin__marcas { animation-name: cin-c-entra; animation-duration: .5s; animation-delay: 1.15s; animation-timing-function: ease-out; animation-fill-mode: both; }
+  :global(html.construye) .cin__logo,
+  :global(html.construye) .cin__sello,
+  :global(html.construye) .cin__sonido,
+  :global(html.construye) .cin__donde,
+  :global(html.construye) .cin__volver,
+  :global(html.construye) .cin__pista,
+  :global(html.construye .cin__enlaces),
+  :global(html.construye) .cin__ver { animation-name: cin-c-entra; animation-duration: .5s; animation-delay: 1.25s; animation-timing-function: ease-out; animation-fill-mode: both; }
+  @keyframes cin-c-entra { from { opacity: 0; } }
+  @keyframes cin-c-sube { from { translate: 0 18px; } }
+  @keyframes cin-c-sube-mas { from { translate: 0 .35em; } }
 </style>

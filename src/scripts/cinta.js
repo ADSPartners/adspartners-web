@@ -6,6 +6,10 @@
 // Lo que se lee ya viene en el HTML (pages/proyectos): las diez fichas de la esquina y el índice; aquí solo se elige qué
 // se ve. Las fotos de las cartas se piden cuando la carta está en pantalla o a un paso de entrar (las primeras que se
 // ven las pide ya el HTML), y de cada una el navegador elige la variante que le basta (srcset).
+// Al llegar, la fila se construye (html.construye, Base.astro): el índice ya está en su sitio con el nombre del que va
+// a salir; la carta del centro sube por la diagonal hasta él y las demás se reparten desde detrás, por su camino (con
+// la API de animaciones: corren en el compositor y van con el reloj de la llegada). Lo que mide las fotos de las demás
+// y las máscaras de los píxeles de la esquina esperan a que acabe y el navegador esté libre.
 import { gsap } from 'gsap';
 import * as sonido from './sonido.js';
 import { PROYECTOS } from '../data/proyectos.js';
@@ -45,9 +49,12 @@ const enlaceDe = (j) => PROYECTOS[j].enlace
 const fuera = (url) => /^https?:/.test(url);
 const indiceDe = (slug) => PROYECTOS.findIndex((x) => x.slug === slug);
 
-export function montarCinta({ reducido, conRaton, lenis, cursor }) {
+export function montarCinta({ reducido, conRaton, lenis, cursor, construida, enReposo, relojConstruccion }) {
   const raiz = document.querySelector('[data-cinta]');
   if (!raiz) return;
+  const construyendo = document.documentElement.classList.contains('construye') && !reducido;
+  // Lo que puede esperar a que la página esté construida y el navegador libre
+  const luego = construyendo && construida ? construida().then(() => enReposo?.()) : Promise.resolve();
   lenis?.stop();
   document.documentElement.classList.add('cinta-fija');
 
@@ -70,7 +77,7 @@ export function montarCinta({ reducido, conRaton, lenis, cursor }) {
   setInterval(darHora, 15000);
 
   // La esquina de la izquierda: la ficha del que está en el centro, que pasa de uno a otro a píxeles
-  const info = crearPixelado(raiz.querySelector('[data-cin-info]'), reducido);
+  const info = crearPixelado(raiz.querySelector('[data-cin-info]'), reducido, luego);
 
   // Lo que pinta el servidor sirve de plantilla: una carta y una entrada del índice por proyecto. La foto de las cartas
   // se guarda aparte: cada copia la pide cuando se acerca a la pantalla (pedirFoto). La img se hace nueva, sin src: una
@@ -136,6 +143,11 @@ export function montarCinta({ reducido, conRaton, lenis, cursor }) {
     c.w = w; c.h = h;
     c.el.style.setProperty('--w', `${w}px`);
     c.el.style.setProperty('--h', `${h}px`);
+    // Mientras se construye, solo se mide la del centro; las demás, después
+    if (construyendo) {
+      await null;
+      if (activos[modulo(Math.round(objetivo), n)] !== c.j) await luego;
+    }
     const l = await leer(c);
     if (!l || !c.el.isConnected) return;
     if (activos[actual] === c.j) { colocarMarca(); pintarPaleta(c.j); }
@@ -259,6 +271,7 @@ export function montarCinta({ reducido, conRaton, lenis, cursor }) {
   }
 
   // --- Pintar la fila en su sitio -------------------------------------------------------------------------------
+  const transformDe = ([x, y, rx, ry, rz, s], W, H) => `translate(-50%, -50%) translate3d(${(x * W).toFixed(1)}px, ${(y * H).toFixed(1)}px, 0) perspective(1100px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) rotateZ(${rz.toFixed(2)}deg) scale(${s.toFixed(3)})`;
   function pose(d, P) {
     const a = Math.abs(d);
     const lado = d > 0 ? P.entra : P.sale, paso = d > 0 ? P.entraPaso : P.salePaso;
@@ -299,7 +312,7 @@ export function montarCinta({ reducido, conRaton, lenis, cursor }) {
       // Encima, la del centro. En la pila de abajo, como en Huyml, las que vienen después van por delante de la siguiente
       // (que asoma más arriba, más cerca del centro); en la de arriba, la que acaba de salir tapa a las de antes
       c.el.style.zIndex = String(a <= 0.5 ? 1000 : d > 0 ? 100 + Math.round(d * 10) : 900 - Math.round(a * 10));
-      c.el.style.transform = `translate(-50%, -50%) translate3d(${(x * W).toFixed(1)}px, ${(y * H).toFixed(1)}px, 0) perspective(1100px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) rotateZ(${rz.toFixed(2)}deg) scale(${s.toFixed(3)})`;
+      c.el.style.transform = transformDe([x, y, rx, ry, rz, s], W, H);
     }
 
     // El índice sube con la fila; el del centro, encendido
@@ -433,6 +446,36 @@ export function montarCinta({ reducido, conRaton, lenis, cursor }) {
   construir([...PROYECTOS.keys()]);
   const desde = indiceDe(location.hash.slice(1));
   if (desde >= 0) p = objetivo = activos.indexOf(desde);
+  if (construyendo) repartir();
+  else escena.classList.add('es-viva');
+
+  // La llegada: la carta del centro sube por la diagonal (desde donde esperan las que vienen) y las demás salen de
+  // detrás de ella hacia su sitio, primero las de al lado. Cada una acaba justo donde la deja pintar(); la API de
+  // animaciones la lleva en el compositor y se pone en hora con la llegada (la animación «construida» del <html>)
+  function repartir() {
+    pintar();
+    pintadoEn = p;
+    escena.classList.add('es-viva');
+    const W = innerWidth, H = innerHeight, P = movil() ? POSES.movil : POSES.escritorio;
+    const anims = [];
+    for (const c of cartas) {
+      // (las que acaban fuera de la pantalla no cruzan por ella: van directas a su sitio)
+      const d = envolver(c.k - p, M);
+      if (c.el.style.visibility === 'hidden' || !enPantalla(c, d, P, W, H)) continue;
+      const a = Math.abs(d);
+      const fin = c.el.style.transform;
+      const centro = a < 0.5;
+      const desde = transformDe(centro ? pose(1.5, P) : pose(0, P).map((v, i) => (i === 5 ? v * 0.96 : v)), W, H);
+      anims.push(c.el.animate(
+        [{ transform: desde, opacity: 0 }, { opacity: 1, offset: centro ? 0.3 : 0.2 }, { transform: fin, opacity: 1 }],
+        { duration: centro ? 850 : 800, delay: centro ? 120 : 640 + Math.min(a, 6) * 85, easing: 'cubic-bezier(.22, 1, .36, 1)', fill: 'backwards' },
+      ));
+    }
+    // En hora con la llegada: si este JS ha corrido después del primer pintado, empiezan por donde van
+    const reloj = relojConstruccion?.();
+    if (reloj) reloj.ready.then(() => { anims.forEach((x) => { try { x.startTime = reloj.startTime; } catch (e) { /* a su aire */ } }); });
+  }
+
   // Las entradas del índice son #slug: al pulsarlas, la fila va a ese proyecto
   addEventListener('hashchange', () => {
     const a = activos.indexOf(indiceDe(location.hash.slice(1)));
@@ -452,14 +495,15 @@ export function montarCinta({ reducido, conRaton, lenis, cursor }) {
 // Las máscaras de cada paso se dibujan al cargar (y otra vez si cambia el tamaño), una por fotograma y codificadas
 // fuera del hilo principal (toBlob), para que no se pare nada: dibujarlas de golpe al primer cambio frenaba la fila
 // y partía en dos el deslizamiento del touchpad. Mientras no están, el cambio es directo
-function crearPixelado(caja, reducido) {
+function crearPixelado(caja, reducido, luego = Promise.resolve()) {
   const PASOS = 10, CELDA = 4;
   const capas = [...caja.querySelectorAll('[data-cin-capa]')];
   capas.forEach((c) => { c.style.visibility = 'hidden'; });
   let frente = -1, medida = '', mascaras = null, anim = null, tanda = 0;
 
   const poner = (capa, m) => { capa.style.webkitMaskImage = m; capa.style.maskImage = m; };
-  const fotograma = () => new Promise((ok) => requestAnimationFrame(ok));
+  // (una por hueco del navegador, sin quitarle fotogramas a nada)
+  const fotograma = () => new Promise((ok) => (window.requestIdleCallback ? requestIdleCallback(() => ok(), { timeout: 500 }) : requestAnimationFrame(ok)));
   async function preparar() {
     const W = Math.ceil(caja.offsetWidth), H = Math.ceil(caja.offsetHeight);
     if (!W || !H || `${W}x${H}` === medida) return;
@@ -469,18 +513,25 @@ function crearPixelado(caja, reducido) {
     const cv = document.createElement('canvas');
     cv.width = W; cv.height = H;
     const ctx = cv.getContext('2d');
+    // Cada celda es un píxel de un lienzo pequeño, que se amplía sin suavizar (celda a celda costaba ~30 ms por máscara)
+    const chico = document.createElement('canvas');
+    chico.width = cols; chico.height = filas;
+    const cc = chico.getContext('2d');
+    const datos = cc.createImageData(cols, filas);
     const nuevas = { entra: [], sale: [] };
     for (let k = 0; k <= PASOS; k++) {
       const t = k / PASOS;
       for (const lado of ['entra', 'sale']) {
-        ctx.clearRect(0, 0, W, H);
-        ctx.fillStyle = '#000';
         for (let f = 0; f < filas; f++) {
           for (let c = 0; c < cols; c++) {
             const orden = ((BAYER[(f % 8) * 8 + (c % 8)] + 0.5) / 64) * 0.5 + (c / cols) * 0.5;
-            if ((orden < t) === (lado === 'entra')) ctx.fillRect(c * CELDA, f * CELDA, CELDA, CELDA);
+            datos.data[(f * cols + c) * 4 + 3] = (orden < t) === (lado === 'entra') ? 255 : 0;
           }
         }
+        cc.putImageData(datos, 0, 0);
+        ctx.clearRect(0, 0, W, H);
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(chico, 0, 0, cols * CELDA, filas * CELDA);
         const blob = await new Promise((ok) => cv.toBlob(ok));
         nuevas[lado].push(`url(${URL.createObjectURL(blob)})`);
         await fotograma();
@@ -517,7 +568,7 @@ function crearPixelado(caja, reducido) {
     });
   };
   cambiar.preparar = preparar;
-  if (!reducido) setTimeout(preparar, 400);
+  if (!reducido) luego.then(preparar);
   return cambiar;
 }
 
