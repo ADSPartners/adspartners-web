@@ -14,7 +14,8 @@
     position: absolute; display: block; background: var(--noche);
     --guia: color-mix(in srgb, var(--entra-c, #F5CBD7) 60%, transparent);
     --luz: color-mix(in srgb, var(--entra-c, #F5CBD7) 22%, var(--noche));
-    animation: .9s cubic-bezier(.55, 0, .2, 1) .06s both;
+    /* (en propiedades sueltas: el atajo sin nombre, el minificador de la build lo deja en «animation: none») */
+    animation-duration: .9s; animation-timing-function: cubic-bezier(.55, 0, .2, 1); animation-delay: .06s; animation-fill-mode: both;
   }
   /* Arriba y abajo: medio alto cada una, corridas hasta el borde de la ventana (el 30 % de su alto = el 15 % de la
      pantalla); a los lados, medio ancho */
