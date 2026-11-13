@@ -47,7 +47,10 @@ src/pages/about/index.astro   About («About · adsPartners»): los dos que hace
                         (vacío hasta la sesión); al bajar, dos montones de fotos de vida, cinco capítulos con una de cada uno, que
                         se acercan hasta juntarse en el marco; al final, lo que hace cada uno (scripts/about.js; textos y fotos en
                         src/data/about.js; lo que falta de Sebas sale como hueco marcado con su pregunta)
-src/layouts/Base.astro  <head>, metas, fuentes precargadas y el script que decide umbral, movimiento y ratón
+src/layouts/Base.astro  <head>, metas, fuentes precargadas y el script que decide umbral, movimiento y ratón. construye: la
+                        página se construye al llegar (About, Proyectos, Tech): la coreografía es CSS de cada página bajo
+                        html.construye, empieza con el primer pintado y acaba con la animación «construida» del <html>; lo
+                        que pesa (WebGL, letras que notan el ratón, fotos de más) espera a ads:construida (pagina.js)
 src/components/
   Umbral.astro          carga con humor, barra de 1 px y entrar con o sin sonido (el final lo pinta portada.js)
   Cabecera.astro        logotipo, las barras del sonido (se pulsan para callarlo) y Hablemos
@@ -69,6 +72,7 @@ src/data/               partners y proyectos (el archivo los enseña todos con s
 src/scripts/
   app.js                arranque: Lenis + ScrollTrigger, sonido, cursor, umbral, portada, fondo, textos vivos y secciones bajo demanda
   pagina.js             arranque de las subpáginas: lo mismo menos el umbral y la portada, más el montaje propio de cada una
+                        (que recibe construida, enReposo y compas para esperar a la llegada o ponerse en hora con ella)
   comun.js              lo compartido: los imanes y la barra que se esconde (y se pone en tinta sobre lo claro)
   menu.js               el menú (components/Menu.astro, datos en data/menu.js): abrir y cerrar
   menu/placa.js         el menú baja de la web a la placa que la ejecuta: una ola que sale del botón vuelve la página su

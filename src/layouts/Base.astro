@@ -7,14 +7,16 @@ import { ORGANIZACION, WEBSITE, WEB_ID, migas } from '../data/schema.js';
 // titulo: el <title>, con las palabras que se buscan; ogTitulo: lo que sale al compartir en redes (si no, el titulo).
 // Los datos estructurados (data/schema.js): la organización y el sitio en todas, la página (tipoPagina, con lo de
 // pagina dentro), sus migas si hay miga y los nodos propios de schema. indexar={false}: sin canónica, con noindex y
-// sin datos estructurados (la 404).
+// sin datos estructurados (la 404). construye: la página se construye al llegar (la coreografía es de cada página, en
+// CSS bajo html.construye, y acaba con la animación «construida» en el <html>; ver más abajo)
 interface Props {
   titulo: string; descripcion: string; ogTitulo?: string; lang?: string; umbral?: boolean;
   tipoPagina?: string; miga?: string; pagina?: Record<string, unknown>; schema?: object[]; indexar?: boolean;
+  construye?: boolean;
 }
 const {
   titulo, descripcion, ogTitulo = titulo, lang = 'es-ES', umbral = false,
-  tipoPagina = 'WebPage', miga, pagina = {}, schema = [], indexar = true,
+  tipoPagina = 'WebPage', miga, pagina = {}, schema = [], indexar = true, construye = false,
 } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const canonica = new URL(Astro.url.pathname, Astro.site).href;
@@ -34,7 +36,7 @@ const grafo = indexar ? {
 } : null;
 ---
 <!doctype html>
-<html lang={lang} data-umbral={umbral ? '' : undefined}>
+<html lang={lang} data-umbral={umbral ? '' : undefined} data-construye={construye ? '' : undefined}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -79,6 +81,24 @@ const grafo = indexar ? {
           var quitar = function () { h.classList.remove('entra-menu', 'entra-partido'); h.style.removeProperty('--entra-c'); h.style.removeProperty('--entra-f'); };
           document.addEventListener('animationend', function fin(e) { if (e.animationName === 'entrada-fundido') { document.removeEventListener('animationend', fin); quitar(); } });
           setTimeout(quitar, 6000);
+        }
+        // La página que se construye al llegar: la coreografía es CSS (html.construye), empieza con el primer pintado
+        // y corre en el compositor aunque el JS aún esté arrancando. Acaba con la animación «construida» del <html>:
+        // entonces se quita la clase (todo queda en su sitio de siempre) y se avisa (ads:construida) para que lo que
+        // pesa (el fondo vivo, las letras que notan el ratón) arranque detrás. Con «movimiento reducido», un fundido corto
+        if (h.hasAttribute('data-construye')) {
+          if (reducido) h.classList.add('construye-suave');
+          else {
+            h.classList.add('construye');
+            var hecho = function () {
+              if (!h.classList.contains('construye')) return;
+              h.classList.remove('construye');
+              h.classList.add('construida');
+              try { window.dispatchEvent(new Event('ads:construida')); } catch (e) {}
+            };
+            document.addEventListener('animationend', function fin(e) { if (e.animationName === 'construida') { document.removeEventListener('animationend', fin); hecho(); } });
+            setTimeout(hecho, 6000);
+          }
         }
         if (window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth > 760) h.classList.add('con-raton');
         h.classList.add('js');
