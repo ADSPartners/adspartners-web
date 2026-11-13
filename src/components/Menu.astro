@@ -33,7 +33,6 @@ const enlace = (d) => (d.ruta === null ? undefined : `${base}${d.ruta}`);
     ))}
   </nav>
 
-  <div class="pl__inundar" data-pl-inundar aria-hidden="true"></div>
   <script type="application/json" data-menu-datos set:html={JSON.stringify(DESTINOS)} />
 </div>
 
@@ -85,12 +84,8 @@ const enlace = (d) => (d.ruta === null ? undefined : `${base}${d.ruta}`);
   .pl__lista i { width: 7px; height: 7px; background: var(--c); box-shadow: 0 0 10px var(--c); }
   .pl__lista a[aria-disabled='true'] { opacity: .55; }
 
-  /* Al bajar hasta una pieza, los textos se apagan y todo se inunda de su color */
+  /* Al bajar hasta una pieza, los textos se apagan (y se entra en ella: menu/placa.js) */
   .menu:global(.zambullendo) :is(.pl__dest, .pl__caja, .pl__lista, .pl__capa, .pl__encendida) { opacity: 0 !important; transition: opacity .5s; }
-  .pl__inundar {
-    position: absolute; inset: 0; z-index: 5; pointer-events: none; opacity: 0;
-    background: radial-gradient(ellipse at 50% 50%, color-mix(in srgb, var(--c, #fff) 85%, white) 0%, var(--c, #fff) 45%, color-mix(in srgb, var(--c, #fff) 40%, var(--noche)) 100%);
-  }
 
   /* Sin WebGL: la lista, grande y en el centro */
   .menu:global(.sin-gl) .pl__lista { inset: 0; flex-direction: column; justify-content: center; align-items: center; gap: 18px; font-family: var(--serif); font-size: 44px; text-transform: none; letter-spacing: 0; }

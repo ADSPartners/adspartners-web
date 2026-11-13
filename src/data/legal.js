@@ -23,12 +23,13 @@ export const TITULAR = {
 const T = TITULAR;
 const correo = `<a href="mailto:${T.correo}">${T.correo}</a>`;
 
-// Lo que la web guarda en el navegador. Las claves son las del código: ajustes.js, umbral.js, menu.js, secciones/fresa.js
-// y consentimiento.js. Si se añade una, va aquí (y sale sola en el capítulo III y en la tabla en vivo)
+// Lo que la web guarda en el navegador. Las claves son las del código: ajustes.js, umbral.js, menu.js (y Base.astro, que
+// lee ads-entrada), secciones/fresa.js y consentimiento.js. Si se añade una, va aquí (y sale sola en el capítulo III y en la tabla en vivo)
 export const ALMACEN = [
   { clave: 'ads-sonido', donde: 'localStorage', para: 'Recordar si quieres la web con sonido o sin él.', dura: 'Hasta que lo borres' },
   { clave: 'ads-umbral', donde: 'sessionStorage', para: 'Saber que ya pasaste la pantalla de carga y si entraste con sonido.', dura: 'Hasta cerrar la pestaña' },
   { clave: 'ads-placa', donde: 'sessionStorage', para: 'Que el viaje largo del menú hasta la placa solo salga la primera vez.', dura: 'Hasta cerrar la pestaña' },
+  { clave: 'ads-entrada', donde: 'sessionStorage', para: 'Que la página que eliges en el menú se abra donde acaba el viaje hasta su pieza.', dura: 'Unos segundos: se borra al llegar' },
   { clave: 'ads_chat_history', donde: 'sessionStorage', para: 'No perder tu conversación con FRESA al cambiar de página (los 20 últimos mensajes).', dura: 'Hasta cerrar la pestaña' },
   ...(R.activo ? [{ clave: CONSENTIMIENTO.clave, donde: 'localStorage', para: 'Guardar lo que elegiste sobre medición y campañas.', dura: `${CONSENTIMIENTO.meses} meses` }] : []),
 ];

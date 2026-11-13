@@ -1,0 +1,33 @@
+---
+// La llegada desde el menú. El viaje del menú (scripts/menu/placa.js) entra en la pieza de la página y acaba en una
+// ventana en el centro, del 30 % de la pantalla, con el fondo de esta página y sus guías del color de la pieza. Esta
+// página empieza en esa misma ventana y la abre: cuatro barras de noche que se van hacia fuera, cada una con su guía.
+// Solo sale si se llega así (el script de Base.astro lee ads-entrada antes de pintar y pone html.entra-menu); sin
+// «movimiento reducido». Es CSS: corre en el compositor aunque la página aún esté arrancando su JS.
+---
+<div class="entrada" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+
+<style is:global>
+  .entrada { display: none; }
+  html.entra-menu .entrada { display: block; position: fixed; inset: 0; z-index: 2147483000; pointer-events: none; overflow: hidden; }
+  .entrada i {
+    position: absolute; display: block; background: var(--noche);
+    --guia: color-mix(in srgb, var(--entra-c, #F5CBD7) 60%, transparent);
+    --luz: color-mix(in srgb, var(--entra-c, #F5CBD7) 22%, var(--noche));
+    animation: .9s cubic-bezier(.55, 0, .2, 1) .06s both;
+  }
+  /* Arriba y abajo: medio alto cada una, corridas hasta el borde de la ventana (el 30 % de su alto = el 15 % de la
+     pantalla); a los lados, medio ancho */
+  .entrada i:nth-child(1) { left: 0; right: 0; top: 0; height: 50%; animation-name: entrada-arriba;
+    background: linear-gradient(to top, var(--guia) 0 1px, var(--luz) 1px, var(--noche) 60px); }
+  .entrada i:nth-child(2) { left: 0; right: 0; bottom: 0; height: 50%; animation-name: entrada-abajo;
+    background: linear-gradient(to bottom, var(--guia) 0 1px, var(--luz) 1px, var(--noche) 60px); }
+  .entrada i:nth-child(3) { top: 0; bottom: 0; left: 0; width: 50%; animation-name: entrada-izq;
+    background: linear-gradient(to left, var(--guia) 0 1px, var(--luz) 1px, var(--noche) 60px); }
+  .entrada i:nth-child(4) { top: 0; bottom: 0; right: 0; width: 50%; animation-name: entrada-dcha;
+    background: linear-gradient(to right, var(--guia) 0 1px, var(--luz) 1px, var(--noche) 60px); }
+  @keyframes entrada-arriba { from { transform: translateY(-30%); } to { transform: translateY(-102%); } }
+  @keyframes entrada-abajo { from { transform: translateY(30%); } to { transform: translateY(102%); } }
+  @keyframes entrada-izq { from { transform: translateX(-30%); } to { transform: translateX(-102%); } }
+  @keyframes entrada-dcha { from { transform: translateX(30%); } to { transform: translateX(102%); } }
+</style>

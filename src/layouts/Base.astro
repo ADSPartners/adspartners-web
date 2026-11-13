@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import Consentimiento from '../components/Consentimiento.astro';
+import Entrada from '../components/Entrada.astro';
 import { ORGANIZACION, WEBSITE, WEB_ID, migas } from '../data/schema.js';
 
 // titulo: el <title>, con las palabras que se buscan; ogTitulo: lo que sale al compartir en redes (si no, el titulo).
@@ -58,18 +59,28 @@ const grafo = indexar ? {
     <link rel="preload" href={`${base}assets/fonts/AppleGaramond-Light.woff2`} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={`${base}assets/fonts/OpenSauceSans-Regular.woff2`} as="font" type="font/woff2" crossorigin />
     <script is:inline>
-      // Antes de pintar: ¿ya pasó por el umbral en esta sesión? ¿el sistema pide menos movimiento? ¿hay ratón?
+      // Antes de pintar: ¿ya pasó por el umbral en esta sesión? ¿el sistema pide menos movimiento? ¿hay ratón? ¿llega
+      // entrando en su pieza desde el menú? (entonces empieza en la ventana en la que acabó el viaje: Entrada.astro)
       (function () {
-        var h = document.documentElement, umbral = null;
+        var h = document.documentElement, umbral = null, entrada = null;
         try { umbral = sessionStorage.getItem('ads-umbral'); } catch (e) {}
+        try { entrada = JSON.parse(sessionStorage.getItem('ads-entrada') || 'null'); sessionStorage.removeItem('ads-entrada'); } catch (e) {}
         if (!umbral && h.hasAttribute('data-umbral')) h.classList.add('en-umbral');
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) h.classList.add('mov-reducido');
+        var reducido = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reducido) h.classList.add('mov-reducido');
+        var color = /^#[0-9a-fA-F]{6}$/;
+        if (entrada && !reducido && Date.now() - entrada.t < 6000 && color.test(entrada.c)) {
+          h.classList.add('entra-menu');
+          h.style.setProperty('--entra-c', entrada.c);
+          setTimeout(function () { h.classList.remove('entra-menu'); h.style.removeProperty('--entra-c'); }, 1400);
+        }
         if (window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth > 760) h.classList.add('con-raton');
         h.classList.add('js');
       })();
     </script>
   </head>
   <body>
+    <Entrada />
     <slot />
     <Consentimiento />
   </body>

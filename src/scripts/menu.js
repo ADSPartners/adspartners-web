@@ -33,14 +33,17 @@ export function montarMenu({ lenis, reducido }) {
     setTimeout(() => (window.requestIdleCallback || setTimeout)(precargar), 4000);
   }
 
-  // Ir a una página desde el menú: lo que empieza por # baja a esa sección de la home y lo demás navega
-  const ir = (d) => {
+  // Ir a una página desde el menú: lo que empieza por # baja a esa sección de la home y lo demás navega. entrada: si se
+  // llega entrando en la pieza, la página nueva lo sabe (ads-entrada, unos segundos) y empieza en la misma ventana en la
+  // que acaba el viaje (components/Entrada.astro)
+  const ir = (d, entrada) => {
     if (!d.ruta) return;
     if (d.ruta.startsWith('#')) {
       const destino = document.querySelector(d.ruta);
       // Se baja cuando el menú ya se ha cerrado (hasta entonces el scroll está parado)
       if (destino) { cerrar().then(() => (lenis ? lenis.scrollTo(destino, { duration: 1.6 }) : destino.scrollIntoView({ behavior: 'smooth' }))); return; }
     }
+    if (entrada) { try { sessionStorage.setItem('ads-entrada', JSON.stringify({ ...entrada, t: Date.now() })); } catch (e) { /* sin almacenamiento: entra sin más */ } }
     location.href = `${window.ADS_BASE || '/'}${d.ruta}`;
   };
 
@@ -90,6 +93,20 @@ export function montarMenu({ lenis, reducido }) {
       gsap.to(raiz, { opacity: 0, duration: 0.35, ease: 'power2.in', onComplete: () => { fin(); listo(); } });
     });
   }
+
+  // Al volver con «atrás» después de entrar en una pieza, el navegador puede devolver la página tal cual se fue (con el
+  // menú dentro de la pieza): se deja cerrado y la página, como estaba
+  addEventListener('pageshow', (e) => {
+    if (!e.persisted || !abierto) return;
+    placa?.reiniciar?.();
+    abierto = false; cerrando = false;
+    html.classList.remove('menu-abierto');
+    boton.setAttribute('aria-expanded', 'false');
+    if (textoBoton) textoBoton.textContent = 'Menú';
+    raiz.hidden = true;
+    pagina.style.visibility = '';
+    lenis?.start();
+  });
 
   boton.addEventListener('click', () => (abierto ? cerrar() : abrir()));
   addEventListener('keydown', (e) => { if (e.key === 'Escape' && abierto) cerrar(); });

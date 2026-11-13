@@ -205,6 +205,104 @@ void main() {
   salida = vec4(0.0, 0.0, 0.0, (1.0 - smoothstep(0.0, uMargen, d)) * 0.82 * uSube);
 }`;
 
+// --- Entrar en la pieza ---------------------------------------------------------------------------------------------
+// Al pinchar una pieza, la cámara baja hasta ella y su tapa se abre desde el centro (con el borde ondulado y el hilo de
+// la ola del menú) y deja ver la pieza por dentro: el silicio, con bloques, pistas y vías en el color de su LED, y
+// pulsos que corren hacia el centro. Se pinta en pantalla (un triángulo que la cubre), pegado a la cara de arriba de la
+// pieza mientras la cámara baja (uCentro, uEsc: su centro y su medio ancho, en píxeles) y, cuando la cámara ya está
+// encima, el zoom sigue dentro sin fin: tres niveles del dibujo, cada uno cuatro veces más fino, que se relevan
+// (uL: cuántas veces ×4 se ha acercado). Al final (uFin), el dibujo se apaga y en el centro se abre una ventana con el
+// fondo de la página que viene; la página nueva empieza en esa misma ventana (components/Entrada.astro) y la abre.
+// Todo en píxeles de la pantalla del lienzo (con su dpr), con el origen arriba a la izquierda
+const VERT_PANTALLA = /* glsl */ `#version 300 es
+in vec3 position;
+void main() { gl_Position = vec4(position.xy * 2.0, 0.0, 1.0); }`;
+const FRAG_DENTRO = /* glsl */ `#version 300 es
+precision highp float;
+out vec4 salida;
+uniform vec2 uPant, uCentro, uVentana;
+uniform vec4 uCaja;
+uniform float uEsc, uL, uAbre, uFin, uT, uTipo, uPartido, uDpr;
+uniform vec3 uColor, uNoche, uRosa, uFondo;
+float azar(vec2 p) { vec3 q = fract(vec3(p.xyx) * 0.1031); q += dot(q, q.yzx + 33.33); return fract((q.x + q.y) * q.z); }
+// Un nivel del dibujo: cada celda es una pista (horizontal o vertical), un bloque con su borde o un hueco con una vía.
+// x: lo que brilla (líneas); y: lo que se rellena (bloques). Las proporciones cambian con la pieza (más bloques en el
+// procesador y la gráfica; celdas regulares en el SSD; pocas cosas en la BIOS)
+vec2 nivel(vec2 q, float n) {
+  vec2 c = floor(q), f = fract(q);
+  float h = azar(c + n * 17.13), h2 = azar(c.yx + n * 5.71 + 3.1);
+  // (los grosores, con tope en píxeles: en el nivel grueso una celda mide cientos de píxeles y una pista proporcional
+  // saldría como una banda)
+  float px = fwidth(q.x), aa = px * 1.2, ancho = min(0.035, px * 1.2);
+  float pistas = mix(0.4, 0.26, step(0.5, uTipo) * step(uTipo, 2.5)), bloques = mix(0.66, 0.76, step(0.5, uTipo) * step(uTipo, 2.5));
+  if (uTipo > 2.5) { pistas = 0.3; bloques = 0.5; }
+  float linea = 0.0, relleno = 0.0;
+  if (h < pistas * 0.55) linea = 1.0 - smoothstep(ancho, ancho + aa, abs(f.y - 0.5));
+  else if (h < pistas) linea = 1.0 - smoothstep(ancho, ancho + aa, abs(f.x - 0.5));
+  else if (h < bloques) {
+    vec2 b = abs(f - 0.5);
+    float r = max(b.x, b.y), lado = uTipo > 0.5 && uTipo < 1.5 ? 0.42 : 0.36;
+    linea = 1.0 - smoothstep(0.0, px, abs(r - lado) - min(0.012, px * 0.8));
+    relleno = step(r, lado) * (0.35 + 0.65 * h2);
+    // dentro de los bloques grandes, una rejilla fina (los núcleos, las celdas)
+    vec2 g = abs(fract(f * 4.0) - 0.5);
+    linea = max(linea, relleno * 0.35 * (1.0 - smoothstep(0.0, px * 4.0, min(g.x, g.y) - min(0.04, px * 3.2))));
+  }
+  float via = min(0.08, px * 5.0);
+  if (h2 > 0.86) linea = max(linea, 1.0 - smoothstep(via, via + aa, length(f - 0.5)));
+  return vec2(linea, relleno);
+}
+void main() {
+  vec2 P = vec2(gl_FragCoord.x, uPant.y - gl_FragCoord.y);
+  vec2 d = (P - uCentro) / uEsc;
+  // La tapa se abre desde el centro, con el borde ondulado; fuera de la cara de arriba no hay nada (mientras la cámara
+  // aún no la tiene encima)
+  float ang = atan(d.y, d.x);
+  float onda = sin(ang * 7.0 + uT * 5.0) * 0.06 + sin(ang * 13.0 - uT * 7.0) * 0.03;
+  float dentro = uAbre * 2.6 - length(d) + onda * uAbre;
+  float enCara = step(uCaja.x, P.x) * step(P.x, uCaja.z) * step(uCaja.y, P.y) * step(P.y, uCaja.w);
+  float abierto = smoothstep(-0.02, 0.02, dentro) * max(enCara, step(0.999, uAbre));
+  float hilo = exp(-abs(dentro) / 0.03) * enCara * (1.0 - step(0.999, uAbre));
+  // Los tres niveles (cada uno ×4), con el relevo: el grueso se va mientras el fino llega
+  float f = fract(uL), n0 = floor(uL);
+  vec2 q = (P - uCentro) / (uEsc / pow(4.0, uL) * pow(4.0, f)) * 6.0;
+  vec3 col = mix(uNoche, uColor, 0.05);
+  float r = length(P - uCentro) / uPant.y;
+  float pulso = exp(-abs(fract(r * 2.6 + uT * 1.25) - 0.5) * 16.0);
+  float escala = 1.0;
+  for (int k = 0; k < 3; k++) {
+    float fk = float(k);
+    // el grueso se va y el fino llega (y el fino, más tenue: es el detalle)
+    float peso = k == 0 ? 1.0 - f : (k == 2 ? f * 0.75 : 1.0);
+    if (peso > 0.01) {
+      vec2 v = nivel(q * escala, n0 + fk);
+      float luz = 0.46 + 1.0 * pulso;
+      col = mix(col, mix(uNoche, uColor, 0.12 + 0.06 * fk), v.y * peso * 0.45);
+      col = mix(col, uColor * luz + uRosa * 0.08 * pulso, v.x * peso * 0.9);
+    }
+    escala *= 4.0;
+  }
+  // El final: el dibujo se apaga y se abre la ventana con el fondo de la página que viene, con sus guías (las
+  // verticales, de arriba abajo; las horizontales, solo sobre la ventana: como las barras de components/Entrada.astro)
+  float apaga = smoothstep(0.0, 0.8, uFin);
+  col = mix(col, uNoche, apaga);
+  vec2 m = abs(P - uPant * 0.5) - uVentana;
+  float enVentana = step(max(m.x, m.y), 0.0) * step(0.001, uFin);
+  vec3 fondo = uFondo;
+  if (uPartido > 0.5) fondo = mix(uFondo, uNoche, smoothstep(uPant.x * 0.43, uPant.x * 0.57, P.x));
+  float uno = uDpr;
+  float guiaX = 1.0 - smoothstep(0.0, uno, abs(abs(P.x - uPant.x * 0.5) - uVentana.x));
+  float guiaY = (1.0 - smoothstep(0.0, uno, abs(abs(P.y - uPant.y * 0.5) - uVentana.y))) * step(abs(P.x - uPant.x * 0.5), uVentana.x + uno);
+  float brillo = exp(-max(max(m.x, m.y), 0.0) / (60.0 * uDpr)) * (1.0 - enVentana);
+  col = mix(col, mix(uNoche, uColor, 0.22), brillo * apaga * 0.8);
+  col = mix(col, fondo, enVentana);
+  col = mix(col, uColor, max(guiaX, guiaY) * 0.6 * apaga);
+  vec3 sal = col * abierto + uColor * hilo * 0.9;
+  salida = vec4(sal, max(abierto, hilo));
+}`;
+// El tipo de dibujo de cada pieza (los núcleos del procesador, las celdas del SSD, la matriz de la gráfica, la BIOS)
+const TIPO = { tech: 1, proyectos: 2, brand: 0, about: 3 };
+
 // pagina: el <main>, que se esconde cuando la ola lo ha cubierto y vuelve antes de que la ola se retire
 export function crear(raiz, { datos, reducido, sonido, ir, pagina }) {
   const lienzo = raiz.querySelector('[data-pl-lienzo]');
@@ -272,6 +370,26 @@ export function crear(raiz, { datos, reducido, sonido, ir, pagina }) {
   const progPieza = new Program(gl, { vertex: VERT_PIEZA, fragment: FRAG_PIEZA, uniforms: uniPieza, cullFace: null });
   const uniSombra = { uTam: { value: [1, 1] }, uMargen: { value: 0.7 }, uRedondo: { value: 0 }, uSube: { value: 0 } };
   const progSombra = new Program(gl, { vertex: VERT_PLANO, fragment: FRAG_SOMBRA, uniforms: uniSombra, transparent: true, depthWrite: false });
+
+  // La pieza por dentro, en pantalla (encima de todo)
+  const uniDentro = {
+    uPant: { value: [1, 1] }, uCentro: { value: [0, 0] }, uVentana: { value: [0, 0] }, uCaja: { value: [0, 0, 0, 0] },
+    uEsc: { value: 1 }, uL: { value: 0 }, uAbre: { value: 0 }, uFin: { value: 0 }, uT: { value: 0 }, uTipo: { value: 0 },
+    uPartido: { value: 0 }, uDpr: { value: 1 }, uColor: { value: [1, 1, 1] }, uNoche: { value: NOCHE }, uRosa: { value: ROSA },
+    uFondo: { value: NOCHE },
+  };
+  const escenaDentro = new Transform();
+  const mallaDentro = new Mesh(gl, {
+    geometry: new Plane(gl),
+    program: new Program(gl, { vertex: VERT_PANTALLA, fragment: FRAG_DENTRO, uniforms: uniDentro, transparent: true, depthTest: false, depthWrite: false }),
+    frustumCulled: false,
+  });
+  mallaDentro.setParent(escenaDentro);
+  // El viaje hacia dentro: s, la bajada de la cámara (0 a 1); abre, la tapa; t2, el zoom ya dentro; fin, la ventana.
+  // esc0 y L: el medio ancho de la cara al empezar a abrirse y cuántas veces ×4 se ha acercado desde entonces; ritmo:
+  // a qué velocidad se acercaba la cámara al llegar (el zoom de dentro sigue a esa misma velocidad, sin frenazo)
+  const zb = { s: 0, abre: 0, t2: 0, fin: 0, esc: 1, esc0: 0, ritmo: 0, p0: null, m0: null, dFin: 1, L0: 1 };
+  const BAJADA = 1.0, DENTRO = 0.85;
 
   // --- El estado del viaje y la cámara -----------------------------------------------------------------------------
   // y: la altura de la cámara; k: cuánto se ha inclinado hacia la vista de la placa; sube: cuánto han crecido las
@@ -396,11 +514,22 @@ export function crear(raiz, { datos, reducido, sonido, ir, pagina }) {
     const conRaton = llegado && raton.dentro && !movil && !destino;
     pos = [pos[0] + deriva[0] + (conRaton ? raton.nx * 1.1 : 0), pos[1] + deriva[1], pos[2] + deriva[2] + (conRaton ? raton.ny * 0.8 : 0)];
     mira = [mira[0] + deriva[0] * 0.6, mira[1], mira[2] + deriva[2] * 0.6];
-    if (destino && st.dive > 0) {
-      const e = st.dive * st.dive;
+    if (destino && !zb.p0) {
+      // (de dónde parte: la cámara tal cual estaba al pinchar)
       const c = [(destino.h.x0 + destino.h.x1) / 2, destino.h.h, (destino.h.z0 + destino.h.z1) / 2];
-      pos = mezcla(pos, [c[0], c[1] + 1.6, c[2] + 0.01], e);
-      mira = mezcla(mira, c, e);
+      zb.p0 = pos; zb.m0 = mira; zb.L0 = Math.hypot(...pos.map((v, i) => v - c[i]));
+    }
+    if (destino && zb.p0) {
+      // La bajada: la distancia a la cara de arriba de la pieza encoge a ritmo exponencial (el zoom se siente igual de
+      // rápido todo el rato, sin el acelerón del final) y la dirección pasa de la vista inclinada a mirar recto abajo
+      const c = [(destino.h.x0 + destino.h.x1) / 2, destino.h.h, (destino.h.z0 + destino.h.z1) / 2];
+      const g = Math.pow(zb.s, 1.6), k = suave(zb.s);
+      const dist = zb.L0 * Math.pow(zb.dFin / zb.L0, g);
+      const u0 = zb.p0.map((v, i) => (v - c[i]) / zb.L0);
+      const dir = mezcla(u0, [0, 1, 0.0005], k);
+      const n = Math.hypot(...dir);
+      pos = c.map((v, i) => v + (dir[i] / n) * dist);
+      mira = mezcla(zb.m0, c, k);
     }
     camara.position.set(...pos);
     camara.lookAt(mira);
@@ -448,7 +577,6 @@ export function crear(raiz, { datos, reducido, sonido, ir, pagina }) {
     if (pz) lanzar(pz.p.slug);
   });
 
-  const inundar = raiz.querySelector('[data-pl-inundar]');
   function lanzar(slug) {
     const pz = piezas.find((q) => q.p.slug === slug);
     if (!pz || destino) return;
@@ -465,12 +593,25 @@ export function crear(raiz, { datos, reducido, sonido, ir, pagina }) {
     destino = pz;
     apuntado = pz;
     raiz.classList.add('zambullendo');
-    sonido.viaje(1.3, 1);
     if (reducido) { ir(pz.d); return; }
-    inundar.style.setProperty('--c', pz.d.color);
-    gsap.timeline({ onComplete: () => ir(pz.d) })
-      .to(st, { dive: 1, duration: 1.3, ease: 'power2.in' }, 0)
-      .fromTo(inundar, { opacity: 0 }, { opacity: 1, duration: 0.45, ease: 'power1.in' }, 0.9);
+    sonido.viaje(BAJADA + DENTRO, 1);
+    // Hasta dónde baja la cámara: hasta que la cara de arriba de la pieza cubre la pantalla de sobra (por su lado más
+    // corto en pantalla); desde ahí sigue el zoom dentro
+    const asp = innerWidth / innerHeight, hw = (pz.h.x1 - pz.h.x0) / 2, hd = (pz.h.z1 - pz.h.z0) / 2;
+    Object.assign(zb, { s: 0, abre: 0, t2: 0, fin: 0, esc0: 0, ritmo: 0, p0: null, m0: null, dFin: Math.min(hw / (1.7 * TAN * asp), hd / (1.7 * TAN)) });
+    const u = uniDentro;
+    u.uColor.value = rgb(pz.d.color);
+    const partido = !!pz.d.partido && innerWidth > 760;
+    u.uFondo.value = pz.d.partido && !partido ? NOCHE : rgb(pz.d.fondo || '#120D0A');
+    u.uPartido.value = partido ? 1 : 0;
+    u.uTipo.value = TIPO[slug] ?? 0;
+    const entrada = { slug, c: pz.d.color, f: partido || !pz.d.partido ? (pz.d.fondo || '#120D0A') : '#120D0A', p: partido ? 1 : 0 };
+    gsap.timeline({ onComplete: () => ir(pz.d, entrada) })
+      .to(zb, { s: 1, duration: BAJADA, ease: 'none' }, 0)
+      .to(zb, { abre: 1, duration: BAJADA * 0.48, ease: 'power1.inOut' }, BAJADA * 0.52)
+      .to(zb, { t2: 1, duration: DENTRO, ease: 'none' }, BAJADA)
+      .to(zb, { fin: 1, duration: 0.55, ease: 'power2.inOut' }, BAJADA + DENTRO - 0.55)
+      .to({}, { duration: 0.05 });
   }
   raiz.querySelectorAll('[data-pl-ir]').forEach((a) => {
     a.addEventListener('click', (e) => {
@@ -695,16 +836,53 @@ export function crear(raiz, { datos, reducido, sonido, ir, pagina }) {
       pz.etq.style.transform = `translate(${x.toFixed(1)}px, ${yy.toFixed(1)}px)`;
     }
 
+    // Entrando en una pieza: dónde cae su cara de arriba en pantalla mientras baja la cámara y, ya encima, el zoom dentro
+    const dentro = !!destino && !!zb.p0 && zb.abre > 0;
+    if (destino && zb.p0) {
+      st.dive = zb.s;
+      const dpr = renderer.dpr, hh = destino.h, cz = (hh.z0 + hh.z1) / 2, cx = (hh.x0 + hh.x1) / 2;
+      const pr = (x, z) => { v3.set(x, hh.h, z); camara.project(v3); return [((v3.x + 1) / 2) * innerWidth * dpr, ((1 - v3.y) / 2) * innerHeight * dpr]; };
+      if (zb.s < 1) {
+        const c = pr(cx, cz), dcha = pr(hh.x1, cz);
+        zb.esc = Math.hypot(dcha[0] - c[0], dcha[1] - c[1]);
+        zb.centro = c;
+        const es = [[hh.x0, hh.z0], [hh.x1, hh.z0], [hh.x0, hh.z1], [hh.x1, hh.z1]].map(([x, z]) => pr(x, z));
+        zb.caja = [Math.min(...es.map((e) => e[0])), Math.min(...es.map((e) => e[1])), Math.max(...es.map((e) => e[0])), Math.max(...es.map((e) => e[1]))];
+      } else {
+        // Ya encima: el zoom sigue al ritmo con el que llegaba la cámara (la distancia encogía a ritmo exponencial:
+        // ln(L0/dFin) por la pendiente final de s^1.6, 1,6) y va frenando hasta la ventana
+        const ritmo = (Math.log(zb.L0 / zb.dFin) * 1.6) / BAJADA;
+        zb.esc *= Math.exp(ritmo * (1 - 0.8 * suave(zb.t2)) * dt);
+      }
+      if (!zb.esc0 && zb.abre > 0) zb.esc0 = zb.esc;
+      const u = uniDentro;
+      u.uPant.value = [gl.canvas.width, gl.canvas.height];
+      u.uCentro.value = zb.centro;
+      u.uCaja.value = zb.caja;
+      u.uEsc.value = zb.esc;
+      u.uL.value = zb.esc0 ? Math.log(zb.esc / zb.esc0) / Math.log(4) : 0;
+      u.uAbre.value = zb.abre;
+      u.uFin.value = zb.fin;
+      u.uT.value = st.T;
+      u.uDpr.value = dpr;
+      u.uVentana.value = [gl.canvas.width * 0.15 * zb.fin, gl.canvas.height * 0.15 * zb.fin];
+    }
+    mallaDentro.visible = dentro;
+    // Con la tapa del todo abierta y la cámara encima, la placa ya no se ve: solo se pinta lo de dentro
+    const soloDentro = dentro && zb.abre >= 1 && zb.s >= 1;
+
     // Con la ola a medias, el lienzo es transparente y solo lleva la hoja de arriba; después, la noche, la placa y, de
     // abajo arriba, los bits y las hojas
     if (cubierta) {
       gl.clearColor(...NOCHE, 1);
-      renderer.render({ scene: mundo, camera: camara });
+      if (soloDentro) gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+      else renderer.render({ scene: mundo, camera: camara });
     } else {
       gl.clearColor(0, 0, 0, 0);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     }
-    renderer.render({ scene: capas, camera: camara, clear: false });
+    if (!soloDentro) renderer.render({ scene: capas, camera: camara, clear: false });
+    if (dentro) renderer.render({ scene: escenaDentro, camera: camara, clear: false });
   }
 
   // La hoja de arriba, con la página tal cual está ahora mismo (con mipmaps: al deshacerse se ve en grande y en
@@ -753,7 +931,8 @@ export function crear(raiz, { datos, reducido, sonido, ir, pagina }) {
       destino = null; apuntado = null; peso = 0; deriva = [0, 0, 0]; llegado = false;
       antesCam = null; velCam = [0, 0, 0];
       raiz.classList.remove('zambullendo', 'llegado');
-      inundar.style.opacity = 0;
+      Object.assign(zb, { s: 0, abre: 0, t2: 0, fin: 0, esc0: 0, p0: null });
+      mallaDentro.visible = false;
       piezas.forEach((pz) => { pz.etq.classList.remove('visto', 'on'); pz.etq.querySelector('.pl__frase').textContent = pz.d.frase; });
       Object.values(leds).forEach((l) => { l.on = 0; });
       hudEncendida.textContent = '';
@@ -801,6 +980,17 @@ export function crear(raiz, { datos, reducido, sonido, ir, pagina }) {
       gsap.killTweensOf(st);
       cancelAnimationFrame(raf);
       vivo = false;
+    },
+    // Volver con «atrás» a una página que se fue entrando en una pieza (el navegador la guarda tal cual): sin nada
+    // a medias, como recién cargada
+    reiniciar() {
+      this.parar();
+      gsap.killTweensOf(zb);
+      destino = null; apuntado = null; llegado = false;
+      Object.assign(zb, { s: 0, abre: 0, t2: 0, fin: 0, esc0: 0, p0: null });
+      mallaDentro.visible = false;
+      raiz.classList.remove('zambullendo', 'llegado', 'ola');
+      sonido.pararZumbido();
     },
   };
 }

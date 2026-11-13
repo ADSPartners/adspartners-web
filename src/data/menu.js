@@ -2,7 +2,9 @@
 // página (sin «Inicio»: a la home se vuelve con el logo; Hablemos va siempre arriba). Cada página es la pieza que hace
 // en una placa lo mismo que ella en ads: Tech, el procesador; Proyectos, el almacenamiento; Brand, la gráfica (lo que se
 // ve), y About, la BIOS (lo primero que arranca, y la placa sabe quién es). El color es el de su LED. Los datos de cada
-// página salen de sus propios ficheros.
+// página salen de sus propios ficheros. fondo: el color con el que abre la página (el viaje del menú acaba en una
+// ventana de ese color, y la página empieza en esa misma ventana); partido: en pantallas anchas, la mitad izquierda es
+// de ese color y la derecha de noche (el About).
 import { PROYECTOS } from './proyectos.js';
 import { TECH } from './tech.js';
 import { CAPITULOS } from './about.js';
@@ -14,22 +16,22 @@ export const DESTINOS = [
   {
     slug: 'proyectos', nombre: 'Proyectos', ruta: 'proyectos/',
     frase: `${PROYECTOS.length} proyectos, de ${Math.min(...anios)} a ${Math.max(...anios)}`,
-    color: '#ff5c5c', pieza: 'ssd', ficha: 'almacenamiento · M.2 2280',
+    color: '#ff5c5c', pieza: 'ssd', ficha: 'almacenamiento · M.2 2280', fondo: '#E7E2DA',
   },
   {
     slug: 'tech', nombre: 'Tech', ruta: 'tech/',
     frase: `${TECH.length} servicios, una misión en cada uno`,
-    color: '#5cff9d', pieza: 'cpu', ficha: 'procesador · zócalo U1',
+    color: '#5cff9d', pieza: 'cpu', ficha: 'procesador · zócalo U1', fondo: '#120D0A',
   },
   {
     slug: 'brand', nombre: 'Brand', ruta: 'brand/',
     frase: `la marca, desmontada en ${PLANCHAS.length} capas`,
-    color: '#ff8fc8', pieza: 'vga', ficha: 'gráfica · PCIe ×16',
+    color: '#ff8fc8', pieza: 'vga', ficha: 'gráfica · PCIe ×16', fondo: '#120D0A',
   },
   {
     slug: 'about', nombre: 'About', ruta: 'about/',
     frase: `los dos, en ${CAPITULOS.length * 2} fotos`,
-    color: '#8f7dff', pieza: 'bios', ficha: 'BIOS · pila CR2032',
+    color: '#8f7dff', pieza: 'bios', ficha: 'BIOS · pila CR2032', fondo: '#E7E2DA', partido: true,
   },
 ];
 
