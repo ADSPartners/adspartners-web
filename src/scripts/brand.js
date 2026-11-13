@@ -8,7 +8,9 @@
 //   coger la pila y girarla; al soltarla sigue por inercia y vuelve.
 // - El juego de cada plancha: la forma no se deja estirar, la marca toma el color por el que pasas, el titular se pone
 //   la letra que eliges, la frase de agencia se corrige sola y, si quitas la idea, las demás capas se descolocan.
-// Debajo, lo que hace una marca bien hecha (sus cifras suben contando al verse) y el cierre.
+// Debajo, la marca aplicada (sus soportes pasan de lado al bajar), lo que hace una marca bien hecha (cada efecto en su
+// color, y sus cifras suben contando al verse) y el cierre, sobre un bloque rosa que sube.
+// La luz de detrás de la pila cambia con cada capítulo (el color de su capa, de la paleta de la marca).
 import { gsap } from 'gsap';
 import * as sonido from './sonido.js';
 import { CAPAS, PALETA, LETRAS, VOZ, PORTADA } from '../data/brand.js';
@@ -132,11 +134,13 @@ export function montarBrand({ reducido, conRaton, cursor }) {
     viaje.querySelectorAll('[data-color]').forEach((b) => b.classList.toggle('tocado', Number(b.dataset.color) === i));
     colores.classList.toggle('con-uno', i >= 0);
     if (i < 0) {
+      escena.style.removeProperty('--luz-color');
       marca.style.removeProperty('--iso'); marca.style.removeProperty('--logo'); marca.style.backgroundColor = '';
       decirJuego();
       return;
     }
     const c = PALETA[i];
+    escena.style.setProperty('--luz-color', c.hex);
     marca.style.setProperty('--iso', c.hex);
     marca.style.backgroundColor = c.oscuro ? '#E7E2DA' : '';
     if (c.oscuro) marca.style.setProperty('--logo', '#190900'); else marca.style.removeProperty('--logo');
@@ -317,6 +321,75 @@ export function montarBrand({ reducido, conRaton, cursor }) {
     // Al final, montada otra vez: brand por fuera, tech por dentro
     const cierre = p > FIN + 0.05;
     if (cierre !== cierreAntes) { cierreAntes = cierre; titulo.innerHTML = cursiva(cierre ? PORTADA.final : PORTADA.titulo); }
+    // La luz de detrás: la del capítulo que toca (en la portada y al volver a montarse, la suya)
+    const luz = activa >= 0 ? CAPAS[activa].id : cierre ? 'final' : 'portada';
+    if (escena.dataset.luz !== luz) escena.dataset.luz = luz;
+  });
+
+  // --- La marca aplicada: la escena se queda fija y la fila de soportes pasa de lado al bajar; cada uno se endereza
+  // al pasar por el centro. Sin JS o con movimiento reducido, la fila se desliza con el dedo (lo pone el CSS)
+  const aplicada = raiz.querySelector('[data-aplicada]');
+  const fila = aplicada?.querySelector('[data-aplicada-pista]');
+  const piezas = fila ? [...fila.children] : [];
+  let recorrido = 0, centros = [], giros = [];
+  const medirAplicada = () => {
+    if (!aplicada || reducido) return;
+    recorrido = Math.max(0, fila.scrollWidth - innerWidth);
+    aplicada.style.height = `calc(100vh + ${recorrido}px)`;
+    // (dónde cae el centro de cada soporte dentro de la fila, para no medirlos en cada fotograma)
+    centros = piezas.map((el) => el.offsetLeft + el.offsetWidth / 2);
+    giros = piezas.map((el) => parseFloat(el.style.getPropertyValue('--g')) || 0);
+  };
+  if (aplicada && !reducido) {
+    aplicada.classList.add('en-viaje');
+    medirAplicada();
+    addEventListener('resize', medirAplicada);
+    // (las fuentes cambian el ancho de lo escrito)
+    document.fonts?.ready.then(medirAplicada);
+  }
+
+  // --- Los efectos: cada tarjeta, a su ritmo al bajar (un poco de profundidad entre ellas)
+  const efectosEl = raiz.querySelector('[data-efectos]');
+  const tarjetas = [...(efectosEl?.querySelectorAll('.bd-efecto') || [])];
+  const RITMO = [-38, 12, 54];
+
+  // --- El cierre: el bloque rosa sube desde abajo al llegar, y el texto entra cuando ya está casi entero
+  const cierreEl = raiz.querySelector('[data-cierre]');
+  const fondoCierre = cierreEl?.querySelector('[data-cierre-fondo]');
+  const html = document.documentElement;
+
+  gsap.ticker.add(() => {
+    const vh = innerHeight;
+    if (aplicada && !reducido && recorrido) {
+      const r = aplicada.getBoundingClientRect();
+      if (r.bottom > -50 && r.top < vh + 50) {
+        const k = clamp(-r.top / recorrido, 0, 1);
+        fila.style.transform = `translate3d(${(-k * recorrido).toFixed(1)}px, 0, 0)`;
+        // cada soporte se endereza y sube un poco al pasar por el centro de la pantalla
+        piezas.forEach((el, i) => {
+          const centro = (centros[i] - k * recorrido) / innerWidth - 0.5;
+          el.style.transform = `translate3d(0, ${(Math.abs(centro) * 40).toFixed(1)}px, 0) rotate(${(giros[i] * Math.min(1, Math.abs(centro) * 2.4)).toFixed(2)}deg)`;
+        });
+      }
+    }
+    if (efectosEl && !reducido) {
+      const r = efectosEl.getBoundingClientRect();
+      if (r.bottom > 0 && r.top < vh) {
+        const k = clamp((vh - r.top) / (vh + r.height), 0, 1) - 0.5;
+        tarjetas.forEach((t, i) => { const v = `0 ${(k * RITMO[i]).toFixed(1)}px`; if (t.style.translate !== v) t.style.translate = v; });
+      }
+    }
+    if (cierreEl) {
+      const r = cierreEl.getBoundingClientRect();
+      const k = reducido ? 1 : clamp((vh - r.top) / (vh * 0.75), 0, 1);
+      const escala = `scaleY(${(1 - Math.pow(1 - k, 3)).toFixed(3)})`;
+      if (fondoCierre && fondoCierre.style.transform !== escala) fondoCierre.style.transform = escala;
+      if (k > 0.7 && !cierreEl.classList.contains('on')) cierreEl.classList.add('on');
+      // lo fijo de arriba, en tinta sobre lo claro (la marca aplicada y el cierre, ya subido)
+      const a = aplicada?.getBoundingClientRect();
+      const claro = (a && a.top < 40 && a.bottom > 40) || (k > 0.95 && r.top < 40 && r.bottom > 40);
+      html.classList.toggle('bd-claro', !!claro);
+    }
   });
 
   // Lo que hace una marca bien hecha: entra al verse y sus cifras suben contando
@@ -328,7 +401,5 @@ export function montarBrand({ reducido, conRaton, cursor }) {
     efectos.querySelectorAll('[data-cuenta]').forEach((n, i) => setTimeout(() => contar(n, Number(n.dataset.cuenta), n.dataset.antes ?? '', n.dataset.sufijo ?? ''), i * 140));
   }, { threshold: 0.25 }).observe(efectos);
 
-  // El cierre entra la primera vez que se ve bien
-  const cierre = raiz.querySelector('[data-cierre]');
-  new IntersectionObserver(([e], io) => { if (e.isIntersecting) { cierre.classList.add('on'); io.disconnect(); } }, { threshold: 0.25 }).observe(cierre);
+  // (el cierre entra con su bloque rosa: lo pone el ticker de arriba)
 }

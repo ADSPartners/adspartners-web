@@ -17,6 +17,16 @@ import { SERVICIO_BRAND } from '../../data/schema.js';
 
 const base = import.meta.env.BASE_URL;
 const cursiva = (s: string) => s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+// El canto de cada plancha, de la paleta del manual y el rosa de Brand (el de su pieza en el menú): en la vista técnica,
+// la pila se lee como hojas de color apiladas
+const CANTO: Record<string, string> = {
+  marca: '#ff8fc8', forma: '#E7E2DA', color: 'linear-gradient(#34190A 0 20%, #E7E2DA 20% 40%, #F5CBD7 40% 60%, #F5F3F1 60% 80%, #190900 80%)',
+  letra: '#F5CBD7', voz: '#ff8fc8', idea: '#34190A',
+};
+const LUZ_CANTO: Record<string, string> = { marca: '#ff8fc8', forma: '#E7E2DA', color: '#F5CBD7', letra: '#F5CBD7', voz: '#ff8fc8', idea: '#F5CBD7' };
+const canto = (i: number) => `--canto: ${CANTO[CAPAS[i].id]}; --canto-luz: ${LUZ_CANTO[CAPAS[i].id]}`;
+// La marca aplicada: lo que hacemos (los servicios del cierre) puesto en sus soportes
+const [S_IDENTIDAD, S_WEBS, S_ARTE, S_CONTENIDO] = CIERRE.servicios;
 ---
 <Base
   titulo="Branding e identidad de marca en Madrid · adsPartners®"
@@ -50,14 +60,14 @@ const cursiva = (s: string) => s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
 
         <div class="bd-pila" data-pila aria-hidden="true">
           <div class="bd-giro" data-giro>
-            <div class="bd-capa bd-capa--marca" data-capa="0">
+            <div class="bd-capa bd-capa--marca" data-capa="0" style={canto(0)}>
               <div class="bd-capa__brillo"></div>
               <div class="bd-capa__dentro">
                 <div class="bd-marca__iso"><Marca tipo="iso" /></div>
                 <div class="bd-marca__logo"><Marca tipo="logo" /></div>
               </div>
             </div>
-            <div class="bd-capa" data-capa="1">
+            <div class="bd-capa" data-capa="1" style={canto(1)}>
               <div class="bd-capa__dentro">
                 <div class="bd-forma" data-forma>
                   <span class="bd-forma__aire" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
@@ -69,14 +79,14 @@ const cursiva = (s: string) => s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
                 <span class="bd-forma__cota" data-forma-cota></span>
               </div>
             </div>
-            <div class="bd-capa" data-capa="2">
+            <div class="bd-capa" data-capa="2" style={canto(2)}>
               <div class="bd-colores">
                 {PALETA.map((c, i) => (
                   <button class="bd-color" type="button" data-color={i} tabindex="-1" style={`background:${c.hex};color:${c.oscuro ? '#E7E2DA' : '#190900'}`}><span>{c.nombre}</span></button>
                 ))}
               </div>
             </div>
-            <div class="bd-capa" data-capa="3">
+            <div class="bd-capa" data-capa="3" style={canto(3)}>
               <div class="bd-capa__dentro bd-letra">
                 <p class="bd-letra__t" data-letra-t>{TITULAR_LETRA}</p>
                 <p class="bd-letra__escala"><span>Titular · 300</span><span>Texto · 400</span><span>Detalle</span></p>
@@ -87,14 +97,14 @@ const cursiva = (s: string) => s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
                 </div>
               </div>
             </div>
-            <div class="bd-capa" data-capa="4">
+            <div class="bd-capa" data-capa="4" style={canto(4)}>
               <div class="bd-capa__dentro bd-vozcapa" data-voz-capa>
                 <p class="bd-voz__etq">Así no · así sí</p>
                 <p class="bd-voz" data-voz></p>
                 <p class="bd-voz__no" data-voz-no></p>
               </div>
             </div>
-            <div class="bd-capa bd-capa--idea" data-capa="5">
+            <div class="bd-capa bd-capa--idea" data-capa="5" style={canto(5)}>
               <div class="bd-capa__dentro bd-idea" data-idea>
                 {IDEA.map(([que, dice]) => <p class="bd-idea__linea"><span>{que}</span>{dice}</p>)}
               </div>
@@ -130,6 +140,47 @@ const cursiva = (s: string) => s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
       </div>
     </section>
 
+    <!-- La marca aplicada: la misma marca en sus soportes (la tarjeta, la web, el post, el sobre, el cartel y la bolsa),
+         sobre el rosa de Brand. Al bajar, la fila pasa de lado (brand.js); sin JS o con «movimiento reducido», se
+         desliza con el dedo. Es dibujo: las palabras son las que ya salen en la página -->
+    <section class="bd-aplicada" data-aplicada aria-hidden="true">
+      <div class="bd-aplicada__fijo" data-aplicada-fijo>
+        <div class="bd-aplicada__pista" data-aplicada-pista>
+          <figure class="bd-ap bd-ap--tarjetas" style="--g: -4deg">
+            <div class="bd-tarjeta bd-tarjeta--detras"><span class="bd-tarjeta__iso"><Marca tipo="iso" /></span></div>
+            <div class="bd-tarjeta"><span class="bd-tarjeta__iso"><Marca tipo="iso" /></span><span class="bd-tarjeta__logo"><Marca tipo="logo" /></span><span class="bd-tarjeta__raya"></span></div>
+            <figcaption>{S_IDENTIDAD}</figcaption>
+          </figure>
+          <figure class="bd-ap bd-ap--web" style="--g: 3deg">
+            <div class="bd-web">
+              <div class="bd-web__barra"><i></i><i></i><i></i><span></span></div>
+              <div class="bd-web__dentro">
+                <span class="bd-web__logo"><Marca tipo="logo" /></span>
+                <p class="bd-web__t" set:html={cursiva(PORTADA.titulo)} />
+                <span class="bd-web__boton"></span>
+                <span class="bd-web__iso"><Marca tipo="iso" /></span>
+              </div>
+            </div>
+            <figcaption>{S_WEBS}</figcaption>
+          </figure>
+          <figure class="bd-ap bd-ap--post" style="--g: -2deg">
+            <div class="bd-post"><span class="bd-post__iso"><Marca tipo="iso" /></span><span class="bd-post__logo"><Marca tipo="logo" /></span></div>
+            <figcaption>{S_CONTENIDO}</figcaption>
+          </figure>
+          <figure class="bd-ap bd-ap--sobre" style="--g: 5deg">
+            <div class="bd-sobre"><span class="bd-sobre__solapa"></span><span class="bd-sobre__sello"><Marca tipo="iso" /></span><span class="bd-sobre__logo"><Marca tipo="logo" /></span></div>
+          </figure>
+          <figure class="bd-ap bd-ap--cartel" style="--g: -3deg">
+            <div class="bd-cartel"><p class="bd-cartel__t" set:html={cursiva(PORTADA.final)} /><span class="bd-cartel__logo"><Marca tipo="logo" /></span><span class="bd-cartel__iso"><Marca tipo="iso" /></span></div>
+            <figcaption>{S_ARTE}</figcaption>
+          </figure>
+          <figure class="bd-ap bd-ap--bolsa" style="--g: 4deg">
+            <div class="bd-bolsa"><span class="bd-bolsa__asa"></span><span class="bd-bolsa__logo"><Marca tipo="logo" /></span><span class="bd-bolsa__iso"><Marca tipo="iso" /></span></div>
+          </figure>
+        </div>
+      </div>
+    </section>
+
     <!-- Lo que hace una marca bien hecha: tres efectos medidos, cada uno con su fuente y su pega -->
     <section class="bd-efectos" data-efectos aria-labelledby="bd-efectos-t">
       <p class="bd-efectos__ante">{EFECTOS.antetitulo}</p>
@@ -148,6 +199,7 @@ const cursiva = (s: string) => s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
 
     <!-- Lo que hacemos con la tuya -->
     <section class="bd-cierre" id="la-tuya" data-cierre aria-labelledby="bd-cierre-t">
+      <div class="bd-cierre__fondo" data-cierre-fondo aria-hidden="true"></div>
       <div>
         <p class="bd-cierre__ante">{CIERRE.antetitulo}</p>
         <h2 class="bd-cierre__t" id="bd-cierre-t" data-vivo set:html={cursiva(CIERRE.titulo)} />
@@ -355,9 +407,154 @@ const cursiva = (s: string) => s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
   .bd-cierre.on .bd-cierre__dcha > :nth-child(3) { transition-delay: .54s; }
   .bd-cierre.on .bd-cierre__enlaces { transition-delay: .7s; }
 
+  /* --- Color (13-nov: «la idea me encanta, pero la página me parece sosa») ------------------------------------------
+     La paleta del manual (marrón, beige, rosa, blanco y negro) y el rosa de Brand, el de su pieza en el menú (#ff8fc8),
+     con su papel: el rosa marca lo que tiene que verse, el marrón da peso, el beige calma */
+  .bd { --brand: #ff8fc8; --marron: #34190A; }
+
+  /* La luz de cada capítulo, detrás de la pila: dos manchas de luz cuyos colores cambian con la capa que tiene su turno
+     (brand.js pone data-luz en la escena) y se funden al cambiar (propiedades registradas, que se pueden animar). Va en
+     su propia capa (::before, will-change): así no se repinta cuando cambian las cotas, que se mueven en cada
+     fotograma, y solo se pinta mientras cambia de color. Sin JS, la de la portada; sin @property, cambia sin fundido */
+  @property --luz-a { syntax: '<color>'; inherits: false; initial-value: rgba(255, 143, 200, .26); }
+  @property --luz-b { syntax: '<color>'; inherits: false; initial-value: rgba(52, 25, 10, .95); }
+  .bd-escena::before {
+    content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none; will-change: transform;
+    --luz-a: rgba(255, 143, 200, .26); --luz-b: rgba(52, 25, 10, .95);
+    background:
+      radial-gradient(ellipse 44% 52% at 62% 55%, var(--luz-a), transparent 70%),
+      radial-gradient(ellipse 75% 65% at 92% 100%, var(--luz-b), transparent 75%);
+    transition: --luz-a 1.2s var(--curva), --luz-b 1.2s var(--curva);
+  }
+  /* 01 la marca: su rosa · 02 la forma: beige, la calma de un tablero de dibujo · 03 el color: el que tocas (si no, el
+     rosa del manual), sobre el marrón que da peso · 04 la letra: rosa claro · 05 la voz: el rosa de Brand, de abajo
+     arriba · 06 la idea: el marrón de debajo de todo · y montada otra vez, el rosa entero */
+  .bd-escena[data-luz='marca']::before { --luz-a: rgba(255, 143, 200, .34); --luz-b: rgba(52, 25, 10, .9); }
+  .bd-escena[data-luz='forma']::before { --luz-a: rgba(231, 226, 218, .2); --luz-b: rgba(52, 25, 10, .5); }
+  .bd-escena[data-luz='color']::before { --luz-a: color-mix(in srgb, var(--luz-color, #F5CBD7) 42%, transparent); --luz-b: rgba(52, 25, 10, 1); }
+  .bd-escena[data-luz='letra']::before { --luz-a: rgba(245, 203, 215, .24); --luz-b: rgba(52, 25, 10, .6); }
+  .bd-escena[data-luz='voz']::before { --luz-a: rgba(255, 143, 200, .26); --luz-b: rgba(255, 143, 200, .36); }
+  .bd-escena[data-luz='idea']::before { --luz-a: rgba(245, 203, 215, .2); --luz-b: rgba(52, 25, 10, 1); }
+  .bd-escena[data-luz='final']::before { --luz-a: rgba(255, 143, 200, .42); --luz-b: rgba(52, 25, 10, .9); }
+  @media (prefers-reduced-motion: reduce) {
+    .bd-escena::before { transition: none; }
+  }
+
+  /* El canto de cada plancha: una tira de su color en el borde izquierdo (en la de color, las cinco) y, mientras tiene su
+     capítulo, el borde en su color */
+  .bd-capa::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--canto); pointer-events: none; }
+  /* (sin sombra difuminada: en una plancha en 3D que se mueve en cada fotograma, cuesta; el resplandor lo da la luz) */
+  .bd-capa.activa { border-color: var(--canto-luz); }
+
+  /* --- La marca aplicada ------------------------------------------------------------------------------------------ */
+  .bd-aplicada {
+    --u: min(1.15vh, 1.7vw);
+    position: relative; z-index: 2; overflow: clip; color: var(--tinta);
+    background:
+      radial-gradient(ellipse 60% 70% at 20% 30%, rgba(245, 203, 215, .7), transparent 70%),
+      radial-gradient(ellipse 50% 60% at 90% 90%, rgba(52, 25, 10, .22), transparent 70%),
+      var(--brand);
+  }
+  /* sin JS o con movimiento reducido, una fila que se desliza */
+  .bd-aplicada__fijo { height: 100vh; height: 100svh; display: flex; align-items: center; overflow-x: auto; scrollbar-width: none; }
+  .bd-aplicada__fijo::-webkit-scrollbar { display: none; }
+  .bd-aplicada__pista { display: flex; align-items: center; gap: calc(var(--u) * 9); padding: 0 calc(var(--u) * 12); flex: none; }
+  /* con JS: la escena se queda fija y la fila pasa de lado al bajar (brand.js da el alto y mueve la pista) */
+  .bd-aplicada.en-viaje .bd-aplicada__fijo { position: sticky; top: 0; overflow: visible; }
+  .bd-aplicada.en-viaje .bd-aplicada__pista { will-change: transform; }
+  .bd-ap { position: relative; flex: none; margin: 0; transform: rotate(var(--g, 0deg)); }
+  .bd-aplicada.en-viaje .bd-ap { will-change: transform; }
+  .bd-ap figcaption {
+    position: absolute; left: 0; top: calc(100% + var(--u) * 3.4); white-space: nowrap;
+    font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: rgba(25, 9, 0, .78);
+  }
+  .bd-ap figcaption::before { content: ''; display: inline-block; width: 6px; height: 6px; margin-right: 10px; background: var(--tinta); vertical-align: 1px; }
+  .bd-ap svg { display: block; width: 100%; height: auto; }
+  .bd-ap > div { box-shadow: 0 calc(var(--u) * 3) calc(var(--u) * 6) calc(var(--u) * -2) rgba(25, 9, 0, .45), 0 2px 4px rgba(25, 9, 0, .18); }
+
+  /* La tarjeta, por delante y por detrás */
+  .bd-ap--tarjetas { width: calc(var(--u) * 36); height: calc(var(--u) * 21); }
+  .bd-tarjeta { position: absolute; inset: 0; background: #F5F3F1; }
+  .bd-tarjeta--detras { background: var(--marron); transform: translate(calc(var(--u) * 6), calc(var(--u) * -5)) rotate(7deg); }
+  .bd-tarjeta__iso { position: absolute; right: 8%; top: 12%; width: 18%; color: var(--brand); }
+  .bd-tarjeta--detras .bd-tarjeta__iso { left: 50%; top: 50%; width: 36%; transform: translate(-50%, -50%); color: #F5CBD7; }
+  .bd-tarjeta__logo { position: absolute; left: 8%; bottom: 14%; width: 42%; color: var(--tinta); }
+  .bd-tarjeta__raya { position: absolute; left: 8%; bottom: 8%; width: 10%; height: 2px; background: var(--brand); }
+
+  /* La web */
+  .bd-ap--web { width: calc(var(--u) * 52); }
+  .bd-web { background: var(--noche); overflow: hidden; border-radius: calc(var(--u) * .6); }
+  .bd-web__barra { display: flex; align-items: center; gap: calc(var(--u) * .7); height: calc(var(--u) * 3); padding: 0 calc(var(--u) * 1.4); background: #1B1410; }
+  .bd-web__barra i { width: calc(var(--u) * .9); height: calc(var(--u) * .9); border-radius: 50%; background: rgba(231, 226, 218, .25); }
+  .bd-web__barra span { flex: 1; height: calc(var(--u) * 1.1); margin-left: calc(var(--u) * 2); border-radius: 99px; background: rgba(231, 226, 218, .08); }
+  .bd-web__dentro { position: relative; height: calc(var(--u) * 30); padding: calc(var(--u) * 3) calc(var(--u) * 3.4); color: var(--crema);
+    background: radial-gradient(ellipse 50% 60% at 78% 60%, rgba(255, 143, 200, .3), transparent 70%), var(--noche); }
+  .bd-web__logo { display: block; width: calc(var(--u) * 9); color: var(--crema); }
+  .bd-web__t { margin: calc(var(--u) * 5) 0 0; max-width: 9ch; font-family: var(--serif); font-weight: 300; font-size: calc(var(--u) * 4.4); line-height: .95; letter-spacing: -.02em; }
+  .bd-web__t em { color: var(--brand); }
+  .bd-web__boton { display: block; width: calc(var(--u) * 11); height: calc(var(--u) * 2.6); margin-top: calc(var(--u) * 3); background: var(--crema); border-left: calc(var(--u) * .8) solid var(--brand); }
+  .bd-web__iso { position: absolute; right: 9%; top: 34%; width: 30%; color: var(--brand); }
+
+  /* El post */
+  .bd-ap--post { width: calc(var(--u) * 28); }
+  .bd-post { position: relative; aspect-ratio: 1; background: #F5CBD7; }
+  .bd-post__iso { position: absolute; left: 50%; top: 46%; width: 64%; transform: translate(-50%, -50%); color: var(--marron); }
+  .bd-post__logo { position: absolute; left: 50%; bottom: 9%; width: 30%; transform: translateX(-50%); color: var(--marron); }
+
+  /* El sobre, con su sello */
+  .bd-ap--sobre { width: calc(var(--u) * 36); }
+  .bd-sobre { position: relative; aspect-ratio: 16 / 10; background: #EFEAE2; overflow: hidden; }
+  .bd-sobre__solapa { position: absolute; inset: 0 0 38% 0; background: #E7E2DA; clip-path: polygon(0 0, 100% 0, 50% 100%); box-shadow: inset 0 -1px 0 rgba(25, 9, 0, .1); }
+  .bd-sobre__sello { position: absolute; left: 50%; top: 62%; width: 17%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%;
+    background: var(--brand); color: var(--tinta); display: grid; place-items: center; padding: 3.5%; box-shadow: 0 2px 6px rgba(25, 9, 0, .3); }
+  .bd-sobre__logo { position: absolute; left: 6%; bottom: 8%; width: 22%; color: var(--tinta); opacity: .8; }
+
+  /* El cartel */
+  .bd-ap--cartel { width: calc(var(--u) * 27); }
+  .bd-cartel { position: relative; aspect-ratio: 5 / 7; background: var(--marron); color: var(--crema); padding: 10% 9%; }
+  .bd-cartel__t { margin: 0; font-family: var(--serif); font-weight: 300; font-size: calc(var(--u) * 3.6); line-height: .98; letter-spacing: -.02em; }
+  .bd-cartel__t em { color: var(--brand); }
+  .bd-cartel__logo { position: absolute; left: 9%; bottom: 7%; width: 34%; color: var(--crema); }
+  .bd-cartel__iso { position: absolute; right: -14%; bottom: 14%; width: 66%; color: #F5CBD7; opacity: .9; }
+
+  /* La bolsa */
+  .bd-ap--bolsa { width: calc(var(--u) * 27); margin-top: calc(var(--u) * 8); }
+  .bd-bolsa { position: relative; aspect-ratio: 9 / 10; background: #E7E2DA; }
+  .bd-bolsa__asa { position: absolute; left: 30%; right: 30%; bottom: 100%; height: calc(var(--u) * 9); border: calc(var(--u) * .9) solid #E7E2DA; border-bottom: 0; border-radius: 50% 50% 0 0 / 100% 100% 0 0; }
+  .bd-bolsa__logo { position: absolute; left: 50%; top: 58%; width: 50%; transform: translateX(-50%); color: var(--tinta); }
+  .bd-bolsa__iso { position: absolute; left: 50%; top: 22%; width: 36%; transform: translateX(-50%); color: var(--brand); }
+
+  /* Sobre lo claro (la marca aplicada y el cierre), lo fijo de arriba pasa a tinta */
+  html.bd-claro .bd-donde, html.bd-claro .bd-volver, html.bd-claro .bd-madrid { color: rgba(25, 9, 0, .75); }
+  html.bd-claro .bd-barra { background: var(--tinta); }
+  html.bd-claro .bd-ondas i { background: var(--tinta); }
+  .bd-donde, .bd-volver, .bd-madrid { transition: color .4s; }
+
+  /* --- Los efectos, cada uno en su color: el rosa (lo que tiene que verse), el beige (la calma) y el marrón (el peso) -- */
+  .bd-efectos { background: radial-gradient(ellipse 50% 40% at 10% 0%, rgba(255, 143, 200, .12), transparent 70%); }
+  .bd-efecto { padding: 3.4vh 2.2vw 4vh; border-top: 0; will-change: transform; }
+  .bd-efecto:nth-child(1) { background: var(--brand); color: var(--tinta); }
+  .bd-efecto:nth-child(2) { background: var(--crema); color: var(--tinta); }
+  .bd-efecto:nth-child(3) { background: var(--marron); color: var(--crema); }
+  .bd-efecto:nth-child(1) .bd-efecto__cifra, .bd-efecto:nth-child(2) .bd-efecto__cifra { color: var(--tinta); }
+  .bd-efecto:nth-child(3) .bd-efecto__cifra { color: var(--brand); }
+  .bd-efecto:nth-child(-n+2) :is(.bd-efecto__texto, .bd-efecto__cifra span) { color: rgba(25, 9, 0, .74); }
+  .bd-efecto:nth-child(-n+2) .bd-efecto__fuente { color: rgba(25, 9, 0, .56); }
+
+  /* --- El cierre, sobre un bloque rosa que sube al llegar (brand.js; sin JS, ya arriba) ------------------------------- */
+  .bd-cierre { color: var(--tinta); border-top: 0; }
+  .bd-cierre__fondo { position: absolute; inset: 0; z-index: -1; background: radial-gradient(ellipse 50% 60% at 85% 20%, rgba(255, 143, 200, .45), transparent 70%), #F5CBD7; transform-origin: 50% 100%; will-change: transform; }
+  .bd-cierre__ante { color: var(--marron); }
+  .bd-cierre__t em { color: var(--marron); }
+  .bd-cierre__p { color: rgba(25, 9, 0, .74); }
+  .bd-cierre__servicios li, .bd-cierre__enlaces { border-top-color: rgba(25, 9, 0, .2); }
+  .bd-cierre__carta .bd-subraya { text-decoration-color: var(--brand); text-decoration-thickness: 2px; }
+
+
   /* --- Móvil ------------------------------------------------------------------------------------------------------ */
   @media (max-width: 760px) {
     .bd-madrid { display: none; }
+    .bd-efecto { padding: 3vh 5vw 3.6vh; }
     .bd-texto { max-width: none; right: var(--lado); top: 11vh; }
     .bd-t { font-size: 42px; }
     .bd-pila { left: 50%; top: 60%; }
