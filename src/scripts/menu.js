@@ -19,7 +19,7 @@ export function montarMenu({ lenis, reducido }) {
 
   const cargar = () => (modulo ||= import('./menu/placa.js'));
   const crearPlaca = (m) => {
-    if (placa === null) placa = m.crear(raiz, { datos, reducido, sonido, ir, pagina }) || false;
+    if (placa === null) placa = m.crear(raiz, { datos, reducido, sonido, ir, adelantar, pagina }) || false;
     if (!placa) raiz.classList.add('sin-gl');
     return placa;
   };
@@ -36,6 +36,32 @@ export function montarMenu({ lenis, reducido }) {
   // Ir a una página desde el menú: lo que empieza por # baja a esa sección de la home y lo demás navega. entrada: si se
   // llega entrando en la pieza, la página nueva lo sabe (ads-entrada, unos segundos) y empieza en la misma ventana en la
   // que acaba el viaje (components/Entrada.astro)
+  const url = (d) => `${window.ADS_BASE || '/'}${d.ruta}`;
+  const recordarEntrada = (entrada) => {
+    try { sessionStorage.setItem('ads-entrada', JSON.stringify({ ...entrada, t: Date.now() })); } catch (e) { /* sin almacenamiento: entra sin más */ }
+  };
+  // Al elegir una pieza, la página de destino se descarga mientras dura el viaje (casi 2 s), para que al llegar no haya
+  // que esperar a la red: con Speculation Rules en Chrome y Edge, y con <link rel="prefetch"> en Firefox (Safari no lo
+  // hace y navega como siempre). Prerenderizarla no adelanta nada: Chrome no la pinta hasta enseñarla, y lo que tarda
+  // una página grande es pintar su primer fotograma. La marca de llegada se guarda ya
+  const adelantar = (d, entrada) => {
+    if (!d.ruta || d.ruta.startsWith('#')) return;
+    if (entrada) recordarEntrada(entrada);
+    const u = url(d);
+    if (document.querySelector(`[data-adelanto="${u}"]`)) return;
+    let el;
+    if (window.HTMLScriptElement?.supports?.('speculationrules')) {
+      el = document.createElement('script');
+      el.type = 'speculationrules';
+      el.textContent = JSON.stringify({ prefetch: [{ source: 'list', urls: [u], eagerness: 'immediate' }] });
+    } else {
+      el = document.createElement('link');
+      el.rel = 'prefetch';
+      el.href = u;
+    }
+    el.dataset.adelanto = u;
+    document.head.appendChild(el);
+  };
   const ir = (d, entrada) => {
     if (!d.ruta) return;
     if (d.ruta.startsWith('#')) {
@@ -43,8 +69,8 @@ export function montarMenu({ lenis, reducido }) {
       // Se baja cuando el menú ya se ha cerrado (hasta entonces el scroll está parado)
       if (destino) { cerrar().then(() => (lenis ? lenis.scrollTo(destino, { duration: 1.6 }) : destino.scrollIntoView({ behavior: 'smooth' }))); return; }
     }
-    if (entrada) { try { sessionStorage.setItem('ads-entrada', JSON.stringify({ ...entrada, t: Date.now() })); } catch (e) { /* sin almacenamiento: entra sin más */ } }
-    location.href = `${window.ADS_BASE || '/'}${d.ruta}`;
+    if (entrada) recordarEntrada(entrada);
+    location.href = url(d);
   };
 
   async function abrir() {

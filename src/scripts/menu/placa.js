@@ -212,7 +212,8 @@ void main() {
 // pieza mientras la cámara baja (uCentro, uEsc: su centro y su medio ancho, en píxeles) y, cuando la cámara ya está
 // encima, el zoom sigue dentro sin fin: tres niveles del dibujo, cada uno cuatro veces más fino, que se relevan
 // (uL: cuántas veces ×4 se ha acercado). Al final (uFin), el dibujo se apaga y en el centro se abre una ventana con el
-// fondo de la página que viene; la página nueva empieza en esa misma ventana (components/Entrada.astro) y la abre.
+// fondo de la página que viene, hasta llenar la pantalla; la página nueva empieza con ese fondo y lo desvanece
+// (components/Entrada.astro).
 // Todo en píxeles de la pantalla del lienzo (con su dpr), con el origen arriba a la izquierda
 const VERT_PANTALLA = /* glsl */ `#version 300 es
 in vec3 position;
@@ -283,7 +284,7 @@ void main() {
     escala *= 4.0;
   }
   // El final: el dibujo se apaga y se abre la ventana con el fondo de la página que viene, con sus guías (las
-  // verticales, de arriba abajo; las horizontales, solo sobre la ventana: como las barras de components/Entrada.astro)
+  // verticales, de arriba abajo; las horizontales, solo sobre la ventana), hasta llenar la pantalla
   float apaga = smoothstep(0.0, 0.8, uFin);
   col = mix(col, uNoche, apaga);
   vec2 m = abs(P - uPant * 0.5) - uVentana;
@@ -304,7 +305,7 @@ void main() {
 const TIPO = { tech: 1, proyectos: 2, brand: 0, about: 3 };
 
 // pagina: el <main>, que se esconde cuando la ola lo ha cubierto y vuelve antes de que la ola se retire
-export function crear(raiz, { datos, reducido, sonido, ir, pagina }) {
+export function crear(raiz, { datos, reducido, sonido, ir, adelantar, pagina }) {
   const lienzo = raiz.querySelector('[data-pl-lienzo]');
   const boton = document.querySelector('[data-menu-btn]');
   const movil = !matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -606,12 +607,19 @@ export function crear(raiz, { datos, reducido, sonido, ir, pagina }) {
     u.uPartido.value = partido ? 1 : 0;
     u.uTipo.value = TIPO[slug] ?? 0;
     const entrada = { slug, c: pz.d.color, f: partido || !pz.d.partido ? (pz.d.fondo || '#120D0A') : '#120D0A', p: partido ? 1 : 0 };
+    // La página de destino se prepara ya, mientras dura el viaje (en Chrome se prerenderiza: al llegar se enseña al
+    // instante, sin el fotograma congelado mientras pinta su primer fotograma)
+    adelantar?.(pz.d, entrada);
+    // La ventana del final no frena hasta pararse: se abre cada vez más deprisa hasta llenar la pantalla con el fondo
+    // de la página que viene, y entonces se navega. Mientras la página nueva pinta su primer fotograma (en una página
+    // grande, de 0,3 a 1 s según el equipo), el navegador deja quieto el último fotograma del viaje: así, lo que se
+    // queda quieto es el fondo de la página, como en cualquier carga, y no un recuadro a medio abrir. La página nueva
+    // empieza con ese mismo fondo encima y lo desvanece (components/Entrada.astro)
     gsap.timeline({ onComplete: () => ir(pz.d, entrada) })
       .to(zb, { s: 1, duration: BAJADA, ease: 'none' }, 0)
       .to(zb, { abre: 1, duration: BAJADA * 0.48, ease: 'power1.inOut' }, BAJADA * 0.52)
       .to(zb, { t2: 1, duration: DENTRO, ease: 'none' }, BAJADA)
-      .to(zb, { fin: 1, duration: 0.55, ease: 'power2.inOut' }, BAJADA + DENTRO - 0.55)
-      .to({}, { duration: 0.05 });
+      .to(zb, { fin: 1, duration: 0.65, ease: 'power2.in' }, BAJADA + DENTRO - 0.65);
   }
   raiz.querySelectorAll('[data-pl-ir]').forEach((a) => {
     a.addEventListener('click', (e) => {
@@ -865,7 +873,8 @@ export function crear(raiz, { datos, reducido, sonido, ir, pagina }) {
       u.uFin.value = zb.fin;
       u.uT.value = st.T;
       u.uDpr.value = dpr;
-      u.uVentana.value = [gl.canvas.width * 0.15 * zb.fin, gl.canvas.height * 0.15 * zb.fin];
+      // (de nada a toda la pantalla, y un poco más: al final, todo es el fondo de la página que viene)
+      u.uVentana.value = [gl.canvas.width * 0.52 * zb.fin, gl.canvas.height * 0.52 * zb.fin];
     }
     mallaDentro.visible = dentro;
     // Con la tapa del todo abierta y la cámara encima, la placa ya no se ve: solo se pinta lo de dentro
