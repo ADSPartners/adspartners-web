@@ -8,8 +8,8 @@
 // - mision: la sala en alambre; el módulo de la misión (scripts/tech/<modulo>.js) pone lo suyo en la zona del centro.
 // La dirección lleva el #slug de la innovación, para poder enlazarla.
 // Al llegar, la página se construye (html.construye, Base.astro): lo primero es ligero y lo pone el CSS con el primer
-// pintado (la rejilla, el título y su servicio); la escena WebGL, que es lo que pesa (compilar sus sombreadores lleva
-// medio segundo), se crea después de ese pintado, y la cámara llega volando mientras el resto de la ficha entra.
+// pintado (la rejilla, el título y su servicio); la escena WebGL, que es lo que pesa (sus sombreadores se compilan en
+// paralelo, escena.js), se crea después de ese pintado, y la cámara llega volando mientras el resto de la ficha entra.
 import { gsap } from 'gsap';
 import * as sonido from './sonido.js';
 import { TECH } from '../data/tech.js';
