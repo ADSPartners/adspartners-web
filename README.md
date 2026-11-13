@@ -62,6 +62,8 @@ src/components/
   Consentimiento.astro  la «N. del E.»: el aviso de consentimiento de medición y campañas. Solo sale si hay IDs en
                         src/data/rastreo.js (o al compilar con ADS_RASTREO_DEMO=1, que lo enseña sin cargar nada); lo mueve
                         scripts/consentimiento.js y lo que carga, scripts/rastreo.js, solo después del sí
+  Entrada.astro         la llegada desde el menú: la página empieza en la ventana en la que acaba el viaje y la abre (solo
+                        si se llega así: lo cuenta ads-entrada, que lee el script de Base.astro)
   Cursor.astro, Marca.astro
 src/data/               partners y proyectos (el archivo los enseña todos con su foto «cinta»; el lienzo de la home, los home: true con su «foto»); de dónde sale cada logo, en partners-LEEME.md
 src/scripts/
@@ -72,7 +74,9 @@ src/scripts/
   menu/placa.js         el menú baja de la web a la placa que la ejecuta: una ola que sale del botón vuelve la página su
                         código y la cámara baja recta por sus capas (lo que ves, el código que lo pinta, los píxeles),
                         que se deshacen a bloques al atravesarlas, hasta la placa base, donde cada página es una pieza (Tech, el procesador; Proyectos, el SSD; Brand, la
-                        gráfica; About, la BIOS). Apuntar enciende sus pistas; pinchar baja hasta ella. Escena 3D con OGL
+                        gráfica; About, la BIOS). Apuntar enciende sus pistas; pinchar baja hasta ella, abre su tapa y entra:
+                        se ve por dentro y el zoom acaba en una ventana con el fondo de la página (components/Entrada.astro).
+                        Escena 3D con OGL
   menu/bits.js          los bits que pasan entre capa y capa (ceros y unos que cambian, código, píxeles y paquetes), con
                         estela cuando la cámara va deprisa
   menu/codigo.js        las hojas: la página en pantalla pasada a su HTML (medido del DOM), el shader de la portada y este
