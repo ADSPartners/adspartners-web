@@ -26,7 +26,7 @@ const salida = (t) => 1 - Math.pow(1 - t, 3);
 const mezclar = (a, b, t) => a + (b - a) * t;
 const dos = (n) => String(n).padStart(2, '0');
 
-export function montarAbout({ reducido, conRaton }) {
+export function montarAbout({ reducido, conRaton, construida, enReposo }) {
   const raiz = document.querySelector('[data-about]');
   if (!raiz) return;
   const html = document.documentElement;
@@ -60,8 +60,9 @@ export function montarAbout({ reducido, conRaton }) {
     else img.addEventListener('load', vestir, { once: true });
   });
 
-  // Las letras de Sebas notan el ratón a lo brand: se levantan y se tiñen de rosa (las de Álvaro, como en toda la web)
-  if (conRaton && !reducido) {
+  // Las letras de Sebas notan el ratón a lo brand: se levantan y se tiñen de rosa (las de Álvaro, como en toda la web).
+  // Parten el nombre en letras: cuando la llegada ya lo ha dejado en su sitio
+  if (conRaton && !reducido) construida().then(() => {
     letrasQueNotan([...raiz.querySelectorAll('[data-tinta]')], {
       velMax: 1100,
       radio: (fs) => Math.min(240, Math.max(70, fs * 2.2)),
@@ -77,10 +78,10 @@ export function montarAbout({ reducido, conRaton }) {
         l.style.removeProperty('--tk-a');
       },
     });
-  }
+  });
 
   if (html.classList.contains('ab-escena') && (reducido || !conRaton)) html.classList.remove('ab-escena');
-  if (html.classList.contains('ab-escena')) montarEscena(raiz);
+  if (html.classList.contains('ab-escena')) montarEscena(raiz, construida, enReposo);
   else montarFlujo(raiz, reducido);
 
   // Las cotas: lo que ocupa de verdad en pantalla cada marco y la foto de arriba de Álvaro
@@ -94,7 +95,7 @@ export function montarAbout({ reducido, conRaton }) {
 }
 
 // --- Con ratón: la escena fija ------------------------------------------------------------------------------------------
-function montarEscena(raiz) {
+function montarEscena(raiz, construida, enReposo) {
   const sec = raiz.querySelector('[data-ab-montones]');
   const esc = raiz.querySelector('[data-ab-escena]');
   const caps = [...raiz.querySelectorAll('[data-ab-cap]')];
@@ -112,8 +113,14 @@ function montarEscena(raiz) {
     pilas[q].appendChild(fig);
     fotos[q].push(fig);
   }));
-  // La escena necesita las diez fotos ya bajadas para montarlas
-  esc.querySelectorAll('[data-ab-img]').forEach((img) => { img.loading = 'eager'; });
+  // La escena necesita las diez fotos ya bajadas para montarlas: se piden cuando la llegada ha acabado y el
+  // navegador está libre (o en cuanto se baja), para no quitarle la red ni el pintado a la foto de los dos de arriba
+  const pedirFotos = () => {
+    removeEventListener('scroll', pedirFotos);
+    esc.querySelectorAll('[data-ab-img]').forEach((img) => { img.loading = 'eager'; });
+  };
+  addEventListener('scroll', pedirFotos, { passive: true });
+  construida().then(() => enReposo(2500)).then(pedirFotos);
   const pix = fotos.alvaro.map(crearPixelador);
   const papeles = { sebas: fotos.sebas.map((f) => f.querySelector('.ab__papel')), alvaro: fotos.alvaro.map((f) => f.querySelector('.ab__papel')) };
   // Las de Álvaro no se mueven: se montan en su sitio

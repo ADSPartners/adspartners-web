@@ -28,6 +28,7 @@ const TAM_CAPITULO = '(max-width: 760px) 48vw, 26vw';
   miga="About"
   pagina={{ about: [{ '@id': ORG_ID }, ...PERSONAS_SCHEMA.map((p) => ({ '@id': p['@id'] }))], mainEntity: { '@id': ORG_ID } }}
   schema={PERSONAS_SCHEMA}
+  construye
 >
   <script is:inline>
     // Antes de pintar: con ratón y sin «movimiento reducido», los montones van en escena fija
@@ -36,6 +37,10 @@ const TAM_CAPITULO = '(max-width: 760px) 48vw, 26vw';
   <Fondo papel />
   <main class="ab" data-about>
     <h1 class="oculto-accesible">Quiénes somos: Sebas, en la marca, y Álvaro, en la tecnología</h1>
+    <!-- Al llegar, la página se construye (html.construye): sobre la noche, los dos nombres solos y centrados; cada uno se
+         va a su lado y, al llegar, su lado se vuelve lo que es: el de Sebas, papel (brand); el de Álvaro, la rejilla
+         (tech). Este telón es esa noche: tapa la rejilla hasta que Álvaro llega (en el móvil, hasta que se separan) -->
+    <div class="ab__telon" aria-hidden="true"></div>
     <!-- El fondo, partido en dos: la mitad de Sebas es papel (brand); la de Álvaro, la rejilla y los glifos (tech). Con
          ratón lo pinta el fondo vivo (gl/fondo.js, data-papel); esto es el papel quieto, para cuando no lo hay -->
     <div class="ab__mitad" aria-hidden="true"></div>
@@ -78,6 +83,24 @@ const TAM_CAPITULO = '(max-width: 760px) 48vw, 26vw';
       </div>
       <p class="ab__baja ab__dos mono" aria-hidden="true"><i></i>Baja</p>
     </section>
+    <script is:inline>
+      // Si la página se construye: lo que tiene que moverse cada nombre para empezar los dos en el centro, Sebas encima.
+      // En x, desde el borde al que va pegado (el ancho, en el CSS, con el 50 % de su caja: así no depende de si ya ha
+      // llegado la letra); en y, con su alto, que es el de su interlineado. Se mide sin la animación (offset*, que no
+      // cuenta transformaciones) y en el fotograma que va a pintarse (requestAnimationFrame corre justo antes del
+      // primer pintado): así se aprovecha la maqueta de ese pintado en vez de forzar otra a mitad de la carga
+      if (document.documentElement.classList.contains('construye')) requestAnimationFrame(function () {
+        var s = document.querySelector('.ab__nombre--sebas'), a = document.querySelector('.ab__nombre--alvaro');
+        if (!s || !a || !s.offsetParent) return;
+        var o = s.offsetParent.getBoundingClientRect();
+        var W = innerWidth, H = innerHeight, hueco = Math.max(10, H * 0.022);
+        var hs = s.offsetHeight, ha = a.offsetHeight, y0 = (H - (hs + hueco + ha)) / 2;
+        s.style.setProperty('--c-x', (W / 2 - o.left - s.offsetLeft).toFixed(1) + 'px');
+        s.style.setProperty('--c-y', (y0 - o.top - s.offsetTop).toFixed(1) + 'px');
+        a.style.setProperty('--c-x', (W / 2 - o.left - a.offsetLeft - a.offsetWidth).toFixed(1) + 'px');
+        a.style.setProperty('--c-y', (y0 + hs + hueco - o.top - a.offsetTop).toFixed(1) + 'px');
+      });
+    </script>
 
     <!-- 2. Los dos montones: un capítulo por pantalla, con una foto de cada uno -->
     <section class="ab__montones" data-ab-montones aria-label="De dónde venimos">
@@ -277,6 +300,10 @@ const TAM_CAPITULO = '(max-width: 760px) 48vw, 26vw';
 
   /* --- 2. Los montones, de arriba abajo (móvil, sin JS, movimiento reducido) ---------------------------------------- */
   .ab__montones { position: relative; padding: 14vh var(--lado) 6vh; }
+  /* Lo que no está en la primera pantalla no se maqueta ni se pinta hasta que se acerca (el alto, el que tuvo la última
+     vez; la primera, uno aproximado) */
+  .ab__montones, .ab__cierre { content-visibility: auto; contain-intrinsic-block-size: auto 4600px; }
+  .ab__cierre { contain-intrinsic-block-size: auto 1500px; }
   .ab__contador, .ab__quien, .ab__pila { display: none; }
   /* La foto de los dos, después del último capítulo (en la escena con ratón va en medio, encima de los montones) */
   .ab__marco--final { position: relative; width: min(100%, 720px); margin: 0 auto; }
@@ -416,7 +443,7 @@ const TAM_CAPITULO = '(max-width: 760px) 48vw, 26vw';
   }
   .ab__frase em { font-style: italic; font-weight: 400; color: var(--rosa); }
   .ab__frase--b { margin-top: .12em; max-width: none; }
-  .ab__mitad, .ab__imprenta { display: none; }
+  .ab__mitad, .ab__imprenta, .ab__telon { display: none; }
   .ab__hablemos {
     display: inline-flex; align-items: center; gap: 22px; margin-top: 8vh; padding: 0 30px 0 34px; height: 54px;
     font-family: var(--mono); font-size: 13px; letter-spacing: .2em; text-transform: uppercase; color: var(--tinta);
@@ -440,7 +467,7 @@ const TAM_CAPITULO = '(max-width: 760px) 48vw, 26vw';
     /* Arriba, en columna: Sebas, el marco, Álvaro y el texto */
     .ab__portada { height: auto; min-height: 100svh; display: flex; flex-direction: column; padding: calc(var(--arriba) + 70px) var(--lado) 8vh; }
     .ab__portada > * { position: relative; left: auto; right: auto; top: auto; bottom: auto; }
-    .ab__nombre--sebas { font-size: 27vw; }
+    .ab__nombre--sebas { align-self: flex-start; font-size: 27vw; }
     .ab__marco--portada { width: 100%; margin-top: 46px; transform: none; }
     .ab__nombre--alvaro { align-self: flex-end; margin-top: 44px; font-size: 13vw; letter-spacing: .06em; }
     .ab__intro { width: auto; margin-top: auto; padding-top: 6vh; }
@@ -481,8 +508,10 @@ const TAM_CAPITULO = '(max-width: 760px) 48vw, 26vw';
     .ab { --t2: rgba(25, 9, 0, .66); --t3: rgba(25, 9, 0, .44); --neutro: rgba(120, 108, 96, .45); }
     /* El papel quieto (sin fondo vivo): la costura, un degradado del 43 al 57 %. Con el fondo vivo lo pinta el canvas
        (con la costura a píxeles) y este se va cuando el canvas ya ha aparecido */
-    .ab__mitad {
-      display: block; position: fixed; left: 0; top: 0; bottom: 0; width: 100%; z-index: -1; pointer-events: none;
+    .ab__mitad { display: block; position: fixed; left: 0; top: 0; bottom: 0; width: 100%; z-index: -1; pointer-events: none; overflow: hidden; }
+    /* (en su ::before, para que al construirse entre de la costura a la izquierda: la caja se corre y el papel se queda) */
+    .ab__mitad::before {
+      content: ''; position: absolute; inset: 0;
       -webkit-mask-image: linear-gradient(90deg, #000 43%, transparent 57%); mask-image: linear-gradient(90deg, #000 43%, transparent 57%);
       background:
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .1 0 0 0 0 .04 0 0 0 0 0 .16 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E"),
@@ -553,5 +582,76 @@ const TAM_CAPITULO = '(max-width: 760px) 48vw, 26vw';
     .ab__hablemos { color: var(--crema); background: var(--tinta); }
     .ab__hablemos:hover { background: #2E1A0C; }
     .ab__enlaces { --izq: var(--tinta); --dcha: var(--crema); }
+  }
+
+  /* --- La llegada: la página se construye (html.construye; Base.astro). La idea es de Álvaro (13-nov): sobre la noche,
+     solo los dos nombres, centrados y Sebas encima; cada uno se va a su lado y, al llegar, su lado se vuelve lo que
+     representa: el de Sebas, el papel (brand), que entra desde la costura detrás de él; el de Álvaro, la rejilla
+     (tech), que el telón destapa a su paso. Después, el marco con la foto de los dos y el resto. Todo es transform y
+     opacity (corre en el compositor mientras el JS arranca), menos el color de Sebas, que pasa de claro a tinta cuando
+     el papel le llega. En el móvil no hay mitades: se separan arriba y abajo, la rejilla aparece y entre los dos se
+     abre el marco. Sin JS no hay clase y la página sale entera; con «movimiento reducido», el fundido corto -------- */
+  :global(html.construye) {
+    animation-name: construida; animation-duration: 2.1s; animation-timing-function: linear; animation-fill-mode: both;
+  }
+  :global(html.construye) .ab__telon {
+    display: block; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  }
+  .ab__telon::before, .ab__telon::after {
+    content: ''; position: absolute; top: 0; bottom: 0; width: 50%; background: var(--noche);
+    animation-fill-mode: both; animation-name: ab-c-fuera; animation-duration: .7s; animation-delay: .6s; animation-timing-function: ease-out;
+  }
+  .ab__telon::before { left: 0; }
+  .ab__telon::after { left: 50%; }
+  /* Los nombres: entran en el centro y se van a su sitio */
+  :global(html.construye) .ab__nombre {
+    animation-name: ab-c-entra, ab-c-nombre; animation-duration: .4s, .85s; animation-delay: 0s, .5s;
+    animation-timing-function: ease-out, cubic-bezier(.7, 0, .2, 1); animation-fill-mode: both;
+  }
+  /* El marco de los dos: primero sus líneas; dentro, la foto, que se posa */
+  :global(html.construye) .ab__marco--portada { animation-name: ab-c-entra; animation-duration: .45s; animation-delay: 1.05s; animation-timing-function: ease-out; animation-fill-mode: both; }
+  :global(html.construye) .ab__marco--portada .ab__marco-img {
+    animation-name: ab-c-entra, ab-c-posa; animation-duration: .6s, .8s; animation-delay: 1.2s; animation-timing-function: ease-out, var(--curva); animation-fill-mode: both;
+  }
+  /* El resto: lo que se lee y lo fijo */
+  :global(html.construye) .ab__intro,
+  :global(html.construye) .ab__baja {
+    animation-name: ab-c-entra, ab-c-sube; animation-duration: .55s, .7s; animation-delay: 1.35s; animation-timing-function: ease-out, var(--curva); animation-fill-mode: both;
+  }
+  :global(html.construye) .ab__baja { animation-delay: 1.5s; }
+  :global(html.construye) .ab__donde,
+  :global(html.construye) .ab__arriba,
+  :global(html.construye) .ab__logo,
+  :global(html.construye) .ab__correo { animation-name: ab-c-entra; animation-duration: .5s; animation-delay: 1.45s; animation-timing-function: ease-out; animation-fill-mode: both; }
+
+  @keyframes ab-c-entra { from { opacity: 0; } }
+  @keyframes ab-c-fuera { to { opacity: 0; } }
+  @keyframes ab-c-sube { from { translate: 0 14px; } }
+  @keyframes ab-c-posa { from { scale: .94; } }
+  /* (Sebas va pegado a la izquierda y Álvaro a la derecha: el 50 % de su propia caja los centra) */
+  @keyframes ab-c-nombre { from { transform: translate(calc(var(--c-x, 0px) - 50%), var(--c-y, 0px)); } }
+  :global(html.construye) .ab__nombre--alvaro { animation-name: ab-c-entra, ab-c-nombre-d; }
+  @keyframes ab-c-nombre-d { from { transform: translate(calc(var(--c-x, 0px) + 50%), var(--c-y, 0px)); } }
+
+  @media (min-width: 761px) {
+    /* La noche de Álvaro se va hacia la derecha, detrás de él; la de Sebas, cuando ya tiene el papel encima */
+    .ab__telon::after { animation-name: ab-c-barre; animation-duration: .8s; animation-delay: .72s; animation-timing-function: cubic-bezier(.6, 0, .2, 1); }
+    .ab__telon::before { animation-delay: 1.4s; animation-duration: .3s; }
+    @keyframes ab-c-barre { to { transform: translateX(100%); } }
+    /* El papel de Sebas entra desde la costura hacia la izquierda: la caja se corre y el papel, por dentro, se queda */
+    :global(html.construye) .ab__mitad,
+    :global(html.construye) .ab__mitad::before { animation-duration: .8s; animation-delay: .7s; animation-timing-function: cubic-bezier(.6, 0, .2, 1); animation-fill-mode: both; }
+    :global(html.construye) .ab__mitad { animation-name: ab-c-papel; }
+    :global(html.construye) .ab__mitad::before { animation-name: ab-c-papel-dentro; }
+    @keyframes ab-c-papel { from { transform: translateX(57%); } }
+    @keyframes ab-c-papel-dentro { from { transform: translateX(-57%); } }
+    /* Sebas pasa a tinta cuando el papel le llega */
+    :global(html.construye) .ab__nombre--sebas {
+      animation-name: ab-c-entra, ab-c-nombre, ab-c-tinta; animation-duration: .4s, .85s, .3s; animation-delay: 0s, .5s, .78s;
+      animation-timing-function: ease-out, cubic-bezier(.7, 0, .2, 1), ease-in-out;
+    }
+    @keyframes ab-c-tinta { from { color: var(--crema); } }
+    /* El pliego (la marca de registro y la carta de colores), con el papel ya puesto */
+    :global(html.construye) .ab__imprenta { animation-name: ab-c-entra; animation-duration: .5s; animation-delay: 1.4s; animation-timing-function: ease-out; animation-fill-mode: both; }
   }
 </style>

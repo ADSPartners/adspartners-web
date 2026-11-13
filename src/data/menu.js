@@ -4,7 +4,7 @@
 // ve), y About, la BIOS (lo primero que arranca, y la placa sabe quién es). El color es el de su LED. Los datos de cada
 // página salen de sus propios ficheros. fondo: el color con el que abre la página (el viaje del menú acaba en una
 // ventana de ese color, y la página empieza en esa misma ventana); partido: en pantallas anchas, la mitad izquierda es
-// de ese color y la derecha de noche (el About).
+// de ese color y la derecha de noche (ninguna ahora: el About se construye desde la noche, con los dos nombres solos).
 import { PROYECTOS } from './proyectos.js';
 import { TECH } from './tech.js';
 import { CAPITULOS } from './about.js';
@@ -31,7 +31,7 @@ export const DESTINOS = [
   {
     slug: 'about', nombre: 'About', ruta: 'about/',
     frase: `los dos, en ${CAPITULOS.length * 2} fotos`,
-    color: '#8f7dff', pieza: 'bios', ficha: 'BIOS · pila CR2032', fondo: '#E7E2DA', partido: true,
+    color: '#8f7dff', pieza: 'bios', ficha: 'BIOS · pila CR2032', fondo: '#120D0A',
   },
 ];
 
