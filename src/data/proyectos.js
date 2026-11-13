@@ -5,9 +5,10 @@
 // de las notas y lo confirma Álvaro. enlace: lo suyo que se puede ver en público; sin él, el archivo ofrece
 // contarlo por correo.
 // Todo lo que se dice tiene que ser verdad de ese trabajo (sale de la web anterior y de las notas): nada inventado.
-// foto: la del lienzo de la home (las que eligió Álvaro el 29-oct; solo los home: true); foto.provisional: a falta de
-// una mejor. cinta: la del archivo, las de Higgsfield que eligió Álvaro el 29-oct, todas en 4:3 (los originales y
-// la elección, en webs-negocios/portfolio/lienzos-ia/).
+// foto: la que llevaba el lienzo de la home hasta el 13-nov (las que eligió Álvaro el 29-oct; solo los home: true);
+// foto.provisional: a falta de una mejor. Ya no se usa: desde el 13-nov el lienzo lleva la de la cinta, como el archivo
+// (Álvaro: «no me terminan de gustar»). cinta: la del archivo, las de Higgsfield que eligió Álvaro el 29-oct, todas en
+// 4:3 (los originales y la elección, en webs-negocios/portfolio/lienzos-ia/).
 export const PROYECTOS = [
   {
     slug: 'fundacion-jimenez-diaz',

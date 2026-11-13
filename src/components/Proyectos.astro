@@ -6,6 +6,12 @@ import { PROYECTOS as TODOS } from '../data/proyectos.js';
 // En la home, solo los del lienzo (el archivo los tiene todos)
 const PROYECTOS = TODOS.filter((p) => p.home);
 const base = import.meta.env.BASE_URL;
+// Las fotos del lienzo son las del archivo (/proyectos/): las de Higgsfield en 4:3 que eligió Álvaro, con sus variantes
+// (<nombre>-480/800/1200.webp, las mismas que pide la cinta). Se pide la que basta para lo que ocupa la pieza y, al
+// abrirla, el foco (hasta el 50 % del ancho; en el móvil, el 86 %)
+const ANCHOS = [480, 800, 1200];
+const variante = (src: string, w: number) => `${base}assets/proyectos/${src.replace(/\.webp$/, `-${w}.webp`)}`;
+const TAMANO = '(max-width: 760px) 86vw, 50vw';
 
 // Dónde va cada foto (ancho en vw y x en %): en zigzag, para que el título de detrás asome entre ellas
 const SITIO = [{ w: 40, x: 5 }, { w: 27, x: 64 }, { w: 44, x: 9 }, { w: 34, x: 58 }, { w: 40, x: 13 }];
@@ -46,10 +52,10 @@ const primero = datos[0];
         return (
           <div class="pro__pieza" role="button" tabindex="0" data-pro-pieza data-proyecto={pr.slug}
             aria-label={`${pr.nombre}: ${pr.linea}`}
-            style={`--w:${s.w};--x:${s.x};--xm:${k % 2 ? 10 : 4};--ar:${pr.foto.ancho / pr.foto.alto}`}>
+            style={`--w:${s.w};--x:${s.x};--xm:${k % 2 ? 10 : 4};--ar:${pr.cinta.ancho / pr.cinta.alto}`}>
             <div class="pro__marco" data-pro-marco>
-              <img src={`${base}assets/proyectos/${pr.foto.src}`} alt="" loading="lazy" decoding="async" />
-              {pr.foto.provisional && <span class="pro__provisional mono">foto provisional</span>}
+              <img src={variante(pr.cinta.src, 800)} srcset={ANCHOS.map((w) => `${variante(pr.cinta.src, w)} ${w}w`).join(', ')} sizes={TAMANO}
+                width="1200" height={Math.round((1200 * pr.cinta.alto) / pr.cinta.ancho)} alt={`${pr.nombre}: ${pr.linea}`} loading="lazy" decoding="async" />
               <span class="pro__velo" aria-hidden="true"></span>
               <div class="pro__escrito" aria-hidden="true">
                 {ORDEN.filter((c) => c === 'cta' || t[c]).map((c) => (
