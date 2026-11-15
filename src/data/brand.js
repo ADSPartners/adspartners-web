@@ -19,7 +19,8 @@ export const PORTADA = {
 // Las seis planchas, de arriba abajo. Cada una es un capítulo:
 // - cota: su etiqueta en la vista técnica; titular, que (qué es) e importa (qué efecto tiene en una empresa);
 // - dato: la cifra grande, lo que significa y de dónde sale (cuenta: si la cifra sube contando al entrar);
-// - juego: qué se puede hacer con ella; cursor: lo que dice el cursor al pasar por encima.
+// - juego: qué se puede hacer con ella; cursor: lo que dice el cursor al pasar por encima. Solo las de color y letra
+//   tienen juego (15-nov, Álvaro: las demás «no se entienden»); las otras cuatro solo se miran.
 export const CAPAS = [
   {
     id: 'marca', n: '01', nombre: 'La marca', cota: 'Lo que la gente ve y recuerda',
@@ -27,7 +28,6 @@ export const CAPAS = [
     que: 'Una marca no es un logo: es la idea que se hace la gente de tu empresa. Marty Neumeier la define como «la sensación visceral de una persona sobre un producto, un servicio o una empresa». No la decides tú, la decide quien te mira. Pero se puede trabajar, capa a capa.',
     importa: 'Esa sensación es la que inclina la balanza cuando alguien duda entre tú y otro. Y se basa, sobre todo, en si se fía de ti.',
     dato: { cifra: '81 %', cuenta: 81, sufijo: ' %', texto: 'de la gente dice que, para comprar, tiene que poder confiar en que la marca hará lo correcto.', fuente: 'Edelman Trust Barometer, informe especial «In Brands We Trust?», 2019 · 16.000 personas en 8 países' },
-    juego: 'Cógela y gírala', cursor: 'Cógela y gírala',
   },
   {
     id: 'forma', n: '02', nombre: 'Forma', cota: '2500 × 1036 · se escala, no se estira',
@@ -35,7 +35,6 @@ export const CAPAS = [
     que: 'El logotipo y el isotipo son la firma de la empresa: lo primero que se reconoce. Se dibujan una vez y se usan siempre igual: se escalan, nunca se estiran, y siempre llevan aire alrededor para que respiren.',
     importa: 'Lo que se repite igual se convierte en un atajo de memoria. Los estudios del Ehrenberg-Bass Institute lo resumen en dos condiciones: que mucha gente lo reconozca y que solo sea tuyo. Y el juicio llega antes de leer nada.',
     dato: { cifra: '50 ms', cuenta: 50, sufijo: ' ms', texto: 'tarda alguien en formarse una opinión del aspecto de una web, y se parece mucho a la que tendrá después de mirarla con calma.', fuente: 'Lindgaard, Fernandes, Dudek y Brown, Behaviour & Information Technology, 2006' },
-    juego: 'Intenta estirarlo', cursor: 'Estíralo',
   },
   {
     id: 'color', n: '03', nombre: 'Color', cota: '5 colores · cada uno con su papel',
@@ -59,7 +58,6 @@ export const CAPAS = [
     que: 'La voz es cómo suena la marca cuando habla: en la web, en un correo o en una propuesta. La nuestra es cercana y clara, sin lenguaje de agencia. Menos adjetivos, más hechos.',
     importa: 'El mismo mensaje, con otro tono, cambia cuánto se fían de ti. En un estudio de Nielsen Norman Group, el tono cambió cómo de cercana, de fiable y de recomendable parecía la misma empresa. Y lo que más pesaba era la confianza.',
     dato: { cifra: '52 %', cuenta: 52, sufijo: ' %', texto: 'de las diferencias en las ganas de recomendar una empresa se explica por lo fiable que suena.', fuente: 'Nielsen Norman Group, «The Impact of Tone of Voice on Users’ Brand Perception», Kate Moran, 2016' },
-    juego: 'Pasa por la frase', cursor: 'Pasa por la frase',
   },
   {
     id: 'idea', n: '06', nombre: 'Idea', cota: 'Qué eres · para quién · por qué tú',
@@ -67,7 +65,6 @@ export const CAPAS = [
     que: 'La capa que no se ve y lo sostiene todo: qué eres, para quién y por qué tú. Si está clara, el logo, el color, la letra y la voz cuentan lo mismo. Si no, cada capa va a su aire.',
     importa: 'Una marca se construye a largo plazo, y es lo que más hace crecer a largo plazo. Lo que solo busca vender ya da subidas cortas.',
     dato: { cifra: '60/40', texto: 'es el reparto que mejor funcionó, de media, entre construir marca y vender a corto plazo.', fuente: 'Les Binet y Peter Field, «The Long and the Short of It», IPA, 2013 · 996 campañas' },
-    juego: 'Pasa por ella y quítala', cursor: 'Quítala',
   },
 ];
 

@@ -3,11 +3,11 @@
 //   capa a capa. Cada capa es un capítulo (Álvaro: «dale más importancia a cada capa»): su plancha crece y sale hacia
 //   un lado, y a la izquierda entra qué es, qué efecto tiene y su dato, que sube contando. Al final se vuelve a montar.
 //   Los seis capítulos ya vienen en el HTML (para quien no ejecuta este JS): aquí solo se enseña el que toca.
-// - El ratón: la pila se ladea hacia él con un muelle que rebota un poco, cada plancha se desplaza según su
-//   profundidad, la que tienes debajo se levanta, un brillo recorre la marca y, quieto, todo flota un poco. Se puede
-//   coger la pila y girarla; al soltarla sigue por inercia y vuelve.
-// - El juego de cada plancha: la forma no se deja estirar, la marca toma el color por el que pasas, el titular se pone
-//   la letra que eliges, la frase de agencia se corrige sola y, si quitas la idea, las demás capas se descolocan.
+// - El ratón: la pila se ladea un poco hacia él, sin rebote (un poco de profundidad, no un asa: 15-nov) y, quieta, flota.
+//   Solo se tocan dos planchas (Álvaro, 15-nov: las demás «no se entienden»): la de color (la marca toma el color por
+//   el que pasas) y la de letra (el titular se pone la letra que eliges); esas dos se levantan al pasar por encima.
+// - Lo que pasa solo al bajar: un brillo recorre la marca, la frase de agencia de la voz se corrige sola mientras dura
+//   su capítulo, el número grande de cada capa entra y sale, y el índice de abajo se llena capa a capa.
 // Debajo, la marca aplicada (sus soportes pasan de lado al bajar), lo que hace una marca bien hecha (cada efecto en su
 // color, y sus cifras suben contando al verse) y el cierre, sobre un bloque rosa que sube.
 // La luz de detrás de la pila cambia con cada capítulo (el color de su capa, de la paleta de la marca).
@@ -35,6 +35,9 @@ export function montarBrand({ reducido, conRaton, cursor }) {
   // Los seis capítulos ya están en el HTML (pages/brand), uno por capa y en el mismo orden: aquí solo se elige cuál se ve
   const caps = [...viaje.querySelectorAll('[data-cap]')];
   const titulo = $('[data-titulo]'), pista = $('[data-pista]');
+  // El número grande de cada capa (entra y sale con su capítulo) y el índice de abajo, que se llena capa a capa al bajar
+  const folio = $('[data-folio]'), folios = folio ? [...folio.children] : [];
+  const llenos = [...viaje.querySelectorAll('[data-indice] li')].map((li) => ({ li, i: li.querySelector('i'), k: -1 }));
 
   const hora = document.querySelector('[data-bd-hora]');
   const reloj = new Intl.DateTimeFormat('es-ES', { timeZone: 'Europe/Madrid', hour: '2-digit', minute: '2-digit' });
@@ -59,47 +62,25 @@ export function montarBrand({ reducido, conRaton, cursor }) {
   // --- El ratón ----------------------------------------------------------------------------------------------------
   const raton = { x: 0, y: 0 };
   const inclina = { x: nuevo(), y: nuevo() };
-  const libre = { z: 0, x: 0, vz: 0, vx: 0, cogida: false, px: 0, py: 0, t: 0 };
   const levanta = capas.map(nuevo), saca = capas.map(nuevo), crece = capas.map(nuevo);
   // La pila se recoloca para que la capa que tiene su capítulo quede en medio (si no, la de arriba o la de abajo se salen)
   const centro = nuevo();
   let encima = -1, abre = 0;
-  // El cursor de la web dice qué se puede hacer: con la pila de frente, cogerla; abierta, el juego de cada plancha
+  // El cursor de la web dice qué se puede hacer, y solo sobre las dos planchas que se tocan (las que tienen juego)
   const decir = (frase) => cursor?.decir?.(frase);
+  const juega = (i) => !!CAPAS[i].juego;
 
-  const alMover = (e) => {
+  addEventListener('pointermove', (e) => {
     if (e.pointerType !== 'mouse') return;
     raton.x = e.clientX / innerWidth - 0.5;
     raton.y = e.clientY / innerHeight - 0.5;
-    if (libre.cogida) {
-      const ahora = performance.now(), dtm = Math.max(8, ahora - libre.t) / 1000;
-      const dz = (e.clientX - libre.px) * 0.3, dx = -(e.clientY - libre.py) * 0.2;
-      libre.z += dz; libre.x = clamp(libre.x + dx, -30, 30);
-      libre.vz = libre.vz * 0.5 + (dz / dtm) * 0.5; libre.vx = libre.vx * 0.5 + (dx / dtm) * 0.5;
-      libre.px = e.clientX; libre.py = e.clientY; libre.t = ahora;
-    }
-    // el brillo de la marca, donde está el ratón
-    const r = marca.getBoundingClientRect();
-    marca.style.setProperty('--bx', `${clamp(((e.clientX - r.left) / r.width) * 100, -20, 120)}%`);
-    marca.style.setProperty('--by', `${clamp(((e.clientY - r.top) / r.height) * 100, -20, 120)}%`);
-  };
-  addEventListener('pointermove', alMover, { passive: true });
-  // Coger la pila y girarla (con ratón; en el móvil, arrastrar es bajar)
-  escena.addEventListener('pointerdown', (e) => {
-    if (e.pointerType !== 'mouse' || e.button !== 0 || reducido || e.target.closest('button, a')) return;
-    libre.cogida = true; libre.px = e.clientX; libre.py = e.clientY; libre.t = performance.now(); libre.vz = 0; libre.vx = 0;
-    escena.setPointerCapture(e.pointerId);
-    decir('Gírala');
-  });
-  const soltar = () => { if (!libre.cogida) return; libre.cogida = false; decir(encima >= 0 ? CAPAS[encima].cursor : ''); };
-  escena.addEventListener('pointerup', soltar);
-  escena.addEventListener('pointercancel', soltar);
-  // La plancha que tienes debajo se levanta, y el cursor dice su juego (de frente, solo se ve la marca: cogerla)
+  }, { passive: true });
+  // La plancha que se toca se levanta al pasar por encima, y el cursor dice su juego (de frente, no: solo se ve la marca)
   capas.forEach((c, i) => {
+    if (!juega(i)) return;
     c.addEventListener('pointerenter', (e) => {
-      if (e.pointerType !== 'mouse' || libre.cogida) return;
-      decir(CAPAS[abre < 0.4 ? 0 : i].cursor);
-      if (abre < 0.4) return;
+      if (e.pointerType !== 'mouse' || abre < 0.4) return;
+      decir(CAPAS[i].cursor);
       encima = i;
       c.classList.add('encima');
       sonido.tic(0.35);
@@ -107,27 +88,11 @@ export function montarBrand({ reducido, conRaton, cursor }) {
     c.addEventListener('pointerleave', () => {
       if (encima === i) encima = -1;
       c.classList.remove('encima');
-      if (!libre.cogida) decir('');
+      decir('');
     });
   });
 
   // --- Los juegos ----------------------------------------------------------------------------------------------------
-  // 02 · Forma: cuanto más empujas hacia la derecha, más se estira... un poco, se resiste, y vuelve de golpe
-  const forma = capas[1], formaIso = $('[data-forma-iso]'), formaCota = $('[data-forma-cota]');
-  const estira = nuevo();
-  let estiraObjetivo = 0, estiraba = false;
-  forma.addEventListener('pointermove', (e) => {
-    if (e.pointerType !== 'mouse' || libre.cogida) return;
-    const r = forma.getBoundingClientRect(), d = clamp(((e.clientX - r.left) / r.width - 0.2) / 0.8, 0, 1);
-    estiraObjetivo = 0.24 * (1 - Math.exp(-2.6 * d));
-  });
-  forma.addEventListener('pointerleave', () => { estiraObjetivo = 0; });
-  forma.addEventListener('pointerdown', (e) => {
-    if (e.pointerType === 'mouse') return;
-    estiraObjetivo = 0.22;
-    setTimeout(() => { estiraObjetivo = 0; }, 450);
-  });
-
   // 03 · Color: la marca, arriba, toma el color por el que pasas (si es oscuro, la plancha se aclara para que se vea)
   const colores = $('.bd-colores');
   const ponerColor = (i) => {
@@ -173,13 +138,15 @@ export function montarBrand({ reducido, conRaton, cursor }) {
     b.addEventListener('click', () => ponerLetra(letraPuesta === i ? 0 : i));
   });
 
-  // 05 · Voz: la frase de agencia se tacha y se escribe la nuestra, letra a letra; la siguiente vez, otra frase
-  const vozCapa = $('[data-voz-capa]'), voz = $('[data-voz]'), vozNo = $('[data-voz-no]');
+  // 05 · Voz (no se toca): mientras dura su capítulo, la frase de agencia se tacha y se escribe la nuestra, letra a
+  // letra, y después pasa a la siguiente (con movimiento reducido, se queda corregida)
+  const voz = $('[data-voz]'), vozNo = $('[data-voz-no]');
+  const enVoz = () => activa >= 0 && CAPAS[activa].id === 'voz';
   let iv = 0, escribiendo = false;
   const frase = () => VOZ[iv % VOZ.length];
   const sinCorregir = () => { const [a, mal, , b] = frase(); voz.innerHTML = `${a} ${mal}${b ? ` ${b}` : '.'}`; vozNo.textContent = ''; };
   const corregir = () => {
-    if (escribiendo) return;
+    if (escribiendo || !enVoz()) return;
     escribiendo = true;
     const [a, mal, bien, b, no] = frase();
     voz.innerHTML = `${a} <s>${mal}</s> <b></b>${b ? ` ${b}` : '.'}`;
@@ -191,32 +158,13 @@ export function montarBrand({ reducido, conRaton, cursor }) {
       if (k < bien.length) setTimeout(letra, reducido ? 0 : 55);
       else {
         vozNo.textContent = no;
-        setTimeout(() => { iv++; escribiendo = false; sinCorregir(); }, 2600);
+        if (reducido) { escribiendo = false; return; }
+        setTimeout(() => { iv++; escribiendo = false; sinCorregir(); setTimeout(corregir, 900); }, 2600);
       }
     };
     setTimeout(letra, reducido ? 0 : 320);
   };
   sinCorregir();
-  vozCapa.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse' && abre > 0.4) corregir(); });
-  vozCapa.addEventListener('click', corregir);
-
-  // 06 · Idea: si la quitas (pasas por ella), las demás capas se descolocan, cada una a su aire; al irte, vuelven
-  const idea = capas[N - 1];
-  const descoloca = capas.map(() => ({ x: nuevo(), y: nuevo(), r: nuevo(), ox: 0, oy: 0, or: 0 }));
-  let sinIdea = false;
-  const quitarIdea = (si) => {
-    if (si === sinIdea) return;
-    sinIdea = si;
-    descoloca.forEach((d, i) => {
-      const fuera = si && i !== N - 1;
-      d.ox = fuera ? (Math.random() - 0.5) * 0.9 : 0; d.oy = fuera ? (Math.random() - 0.5) * 0.6 : 0; d.or = fuera ? (Math.random() - 0.5) * 26 : 0;
-    });
-    decirJuego(si ? 'Sin idea, cada capa va a su aire' : undefined);
-    if (si) sonido.pasa(0.2);
-  };
-  idea.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse' && abre > 0.4) quitarIdea(true); });
-  idea.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') quitarIdea(false); });
-  idea.addEventListener('click', () => quitarIdea(!sinIdea));
 
   // --- El capítulo: sale el que estaba y, un momento después, entra el nuevo con su dato contando ------------------
   let turno = 0;
@@ -254,15 +202,11 @@ export function montarBrand({ reducido, conRaton, cursor }) {
     abre = liso(0.05, 0.16, p) * monta;
     const ahoraActiva = p > INICIO && p < FIN ? Math.min(N - 1, Math.floor((p - INICIO) / PASO)) : -1;
 
-    // El ratón: la inclinación con muelle (sin ratón, un vaivén lento) y el giro libre, con inercia y de vuelta
-    const ix = reducido ? 0 : muelle(inclina.x, conRaton ? raton.x : Math.sin(t * 0.4) * 0.14, dt);
-    const iy = reducido ? 0 : muelle(inclina.y, conRaton ? raton.y : Math.cos(t * 0.33) * 0.08, dt);
-    if (!libre.cogida) {
-      libre.z += libre.vz * dt; libre.x = clamp(libre.x + libre.vx * dt, -30, 30);
-      libre.vz *= Math.exp(-dt * 3.2); libre.vx *= Math.exp(-dt * 3.2);
-      libre.z -= libre.z * (1 - Math.exp(-dt * 0.8)); libre.x -= libre.x * (1 - Math.exp(-dt * 1.1));
-    }
-    giro.style.transform = `rotateX(${vista * 56 - iy * 18 + libre.x}deg) rotateY(${ix * 22 * (1 - vista)}deg) rotateZ(${vista * -34 + ix * 18 * vista + libre.z}deg)`;
+    // El ratón: la inclinación, suave y sin rebote (amortiguada del todo: es profundidad, no algo que se coja); sin
+    // ratón, un vaivén lento
+    const ix = reducido ? 0 : muelle(inclina.x, conRaton ? raton.x : Math.sin(t * 0.4) * 0.14, dt, 40, 13);
+    const iy = reducido ? 0 : muelle(inclina.y, conRaton ? raton.y : Math.cos(t * 0.33) * 0.08, dt, 40, 13);
+    giro.style.transform = `rotateX(${vista * 56 - iy * 8}deg) rotateY(${ix * 10 * (1 - vista)}deg) rotateZ(${vista * -34 + ix * 8 * vista}deg)`;
 
     const movil = innerWidth < 760;
     const z0 = muelle(centro, ahoraActiva >= 0 ? (MEDIO - ahoraActiva) * h * 0.4 * abre : 0, dt, 40, 10);
@@ -272,25 +216,27 @@ export function montarBrand({ reducido, conRaton, cursor }) {
       // que no hay sitio) y crece
       const sal = muelle(saca[i], i === ahoraActiva ? h * (movil ? 0.12 : 0.5) : 0, dt, 60, 11);
       const esc = muelle(crece[i], i === ahoraActiva ? 0.18 : 0, dt, 60, 11);
-      const d = descoloca[i];
-      const dx = muelle(d.x, d.ox * h, dt, 50, 7), dy = muelle(d.y, d.oy * h, dt, 50, 7), dr = muelle(d.r, d.or, dt, 50, 7);
       const flota = reducido ? 0 : Math.sin(t * 0.9 + i * 1.3) * 5 * abre;
       const hondo = (MEDIO - i) * abre;
-      c.style.transform = `translate3d(${sal + dx + ix * hondo * 18}px, ${dy + iy * hondo * 14}px, ${(MEDIO - i) * h * 0.4 * abre - z0 + (N - i) * 0.6 + lev + flota}px) rotateZ(${dr}deg) scale(${1 + esc})`;
-      // las demás, casi apagadas (salvo la marca en el turno del color, que es la que toma el color, y todas cuando
-      // se quita la idea, que es cuando se ve cómo se descolocan)
-      c.classList.toggle('apagada', ahoraActiva >= 0 && i !== ahoraActiva && !sinIdea && !(i === 0 && CAPAS[ahoraActiva].id === 'color'));
+      c.style.transform = `translate3d(${sal + ix * hondo * 8}px, ${iy * hondo * 6}px, ${(MEDIO - i) * h * 0.4 * abre - z0 + (N - i) * 0.6 + lev + flota}px) scale(${1 + esc})`;
+      // las demás, casi apagadas (salvo la marca en el turno del color, que es la que toma el color)
+      c.classList.toggle('apagada', ahoraActiva >= 0 && i !== ahoraActiva && !(i === 0 && CAPAS[ahoraActiva].id === 'color'));
       c.classList.toggle('activa', i === ahoraActiva);
     });
 
-    // La forma: el muelle del estirón (con temblor mientras se resiste) y su cota
-    const s = muelle(estira, estiraObjetivo, dt, 140, 7);
-    const tiembla = estiraObjetivo > 0.15 && !reducido ? Math.sin(t * 46) * 0.008 : 0;
-    formaIso.style.transform = `scaleX(${1 + s + tiembla})`;
-    formaCota.classList.toggle('on', s > 0.03);
-    if (s > 0.03) formaCota.textContent = `+${Math.round(s * 100)} % · no se estira`;
-    if (estiraObjetivo === 0 && estiraba && s < 0.01) sonido.tic(0.5);
-    estiraba = estiraObjetivo > 0;
+    // Lo que se mueve solo al bajar: el brillo recorre la marca, el número grande sube despacio mientras dura su
+    // capítulo y cada tramo del índice se llena con el suyo
+    const bx = Math.round(30 + p * 90), by = Math.round(20 + p * 70);
+    if (marca.dataset.b !== `${bx},${by}`) { marca.dataset.b = `${bx},${by}`; marca.style.setProperty('--bx', `${bx}%`); marca.style.setProperty('--by', `${by}%`); }
+    if (folio && !reducido && ahoraActiva >= 0) {
+      const dentro = clamp((p - INICIO - ahoraActiva * PASO) / PASO, 0, 1);
+      folio.style.transform = `translate3d(0, ${((0.5 - dentro) * innerHeight * 0.08).toFixed(1)}px, 0)`;
+    }
+    llenos.forEach((l, i) => {
+      const k = Math.round(clamp((p - INICIO - i * PASO) / PASO, 0, 1) * 200) / 200;
+      if (k !== l.k) { l.k = k; l.i.style.transform = `scaleX(${k})`; }
+      l.li.classList.toggle('activa', i === ahoraActiva);
+    });
 
     // Las cotas, a la derecha de cada plancha; si no caben (la plancha se sale por arriba o por abajo, o llega al borde
     // derecho y la cota la pisaría), no se ponen
@@ -309,7 +255,8 @@ export function montarBrand({ reducido, conRaton, cursor }) {
     // El capítulo de la capa que toca
     if (ahoraActiva !== activa) {
       activa = ahoraActiva;
-      quitarIdea(false);
+      // el número grande: entra el suyo desde abajo y los de antes se van por arriba
+      folios.forEach((f, k) => { f.classList.toggle('on', k === activa); f.classList.toggle('antes', activa >= 0 ? k < activa : p > FIN); });
       escena.classList.toggle('en-capitulo', activa >= 0);
       texto.classList.toggle('fuera', activa >= 0);
       ponerCapitulo(activa);
@@ -348,9 +295,11 @@ export function montarBrand({ reducido, conRaton, cursor }) {
     document.fonts?.ready.then(medirAplicada);
   }
 
-  // --- Los efectos: cada tarjeta, a su ritmo al bajar (un poco de profundidad entre ellas)
+  // --- Los efectos: cada tarjeta, a su ritmo al bajar (un poco de profundidad entre ellas), y la segunda línea del
+  // titular, sangrada, se corre un poco hacia la izquierda
   const efectosEl = raiz.querySelector('[data-efectos]');
   const tarjetas = [...(efectosEl?.querySelectorAll('.bd-efecto') || [])];
+  const efectosEm = efectosEl?.querySelector('.bd-efectos__t em');
   const RITMO = [-38, 12, 54];
 
   // --- El cierre: el bloque rosa sube desde abajo al llegar, y el texto entra cuando ya está casi entero
@@ -377,6 +326,7 @@ export function montarBrand({ reducido, conRaton, cursor }) {
       if (r.bottom > 0 && r.top < vh) {
         const k = clamp((vh - r.top) / (vh + r.height), 0, 1) - 0.5;
         tarjetas.forEach((t, i) => { const v = `0 ${(k * RITMO[i]).toFixed(1)}px`; if (t.style.translate !== v) t.style.translate = v; });
+        if (efectosEm) { const v = `${(-k * 7).toFixed(2)}vw 0`; if (efectosEm.style.translate !== v) efectosEm.style.translate = v; }
       }
     }
     if (cierreEl) {

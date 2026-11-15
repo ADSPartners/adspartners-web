@@ -2,10 +2,10 @@
 // Brand, «Desmontada» (02-nov; la B del prototipo de tres direcciones, la que eligió Álvaro). La marca de adsPartners
 // despiezada en seis planchas: arriba, el ads terminado; al bajar, la pila se pone en vista técnica, se abre y se
 // recorre capa a capa (la marca, la forma, el color, la letra, la voz y, debajo de todo, la idea). Cada capa es un
-// capítulo: su plancha crece y, al lado, qué es, qué efecto tiene en una empresa y un dato con su fuente; y tiene su
-// juego. Al final se vuelve a montar. El ratón la ladea con un muelle, levanta la plancha que tienes debajo y deja coger
-// la pila y girarla (scripts/brand.js). CSS 3D, sin WebGL. Debajo, lo que hace una marca bien hecha y el cierre, que
-// remata con los enlaces a las demás páginas (components/EnlacesWeb.astro).
+// capítulo: su plancha crece y, al lado, qué es, qué efecto tiene en una empresa y un dato con su fuente, con su número
+// grande detrás y el índice abajo. Al final se vuelve a montar. Solo se tocan la de color y la de letra (15-nov); el
+// ratón ladea un poco la pila y levanta esas dos (scripts/brand.js). CSS 3D, sin WebGL. Debajo, lo que hace una marca
+// bien hecha y el cierre, que remata con los enlaces a las demás páginas (components/EnlacesWeb.astro).
 // Los seis capítulos van enteros en el HTML (auditoría SEO del 03-nov: antes los escribía el JS y no los veía quien no lo
 // ejecuta); brand.js solo decide cuál se ve.
 import Base from '../../layouts/Base.astro';
@@ -58,6 +58,11 @@ const [S_IDENTIDAD, S_WEBS, S_ARTE, S_CONTENIDO] = CIERRE.servicios;
           <p class="bd-p">{PORTADA.texto}</p>
         </div>
 
+        <!-- El número grande de la capa que tiene su capítulo, detrás de la pila, cada uno a su manera: la marca en rosa,
+             la forma solo en su contorno, el color con los cinco, la letra en cursiva, la voz en rosa claro y la idea,
+             que no se ve, en hueco -->
+        <p class="bd-folio" data-folio aria-hidden="true">{CAPAS.map((c) => <span class={`bd-folio--${c.id}`}>{c.n}</span>)}</p>
+
         <div class="bd-pila" data-pila aria-hidden="true">
           <div class="bd-giro" data-giro>
             <div class="bd-capa bd-capa--marca" data-capa="0" style={canto(0)}>
@@ -76,7 +81,6 @@ const [S_IDENTIDAD, S_WEBS, S_ARTE, S_CONTENIDO] = CIERRE.servicios;
                 </div>
                 <span class="bd-forma__nota bd-forma__nota--aire">Área de respeto · x</span>
                 <span class="bd-forma__nota bd-forma__nota--min">Mínimo · 24 px</span>
-                <span class="bd-forma__cota" data-forma-cota></span>
               </div>
             </div>
             <div class="bd-capa" data-capa="2" style={canto(2)}>
@@ -118,12 +122,13 @@ const [S_IDENTIDAD, S_WEBS, S_ARTE, S_CONTENIDO] = CIERRE.servicios;
           {CAPAS.map((c) => <span class="bd-cota"><b>{c.n}</b><span>{c.nombre} · {c.cota}</span></span>)}
         </div>
 
-        <!-- Los seis capítulos, uno por capa: qué es, qué efecto tiene, el dato con su fuente y su juego. Están todos en el
-             HTML (los lee quien no ejecuta el JS: buscadores y asistentes) y brand.js enseña el de la capa que toca. Los
+        <!-- Los seis capítulos, uno por capa: qué es, qué efecto tiene, el dato con su fuente y, en la de color y la de
+             letra, su juego; cada uno, con el color de su capa (--acento). Están todos en el HTML (los lee quien no
+             ejecuta el JS: buscadores y asistentes) y brand.js enseña el de la capa que toca. Los
              demás quedan ocultos del todo (visibility), así que el lector de pantalla solo anuncia el que entra -->
         <div class="bd-caps" aria-live="polite">
           {CAPAS.map((c, i) => (
-            <article class="bd-cap" data-cap={i}>
+            <article class="bd-cap" data-cap={i} style={`--acento: ${LUZ_CANTO[c.id]}`}>
               <p class="bd-cap__n">{c.n} — {c.nombre}</p>
               <h3 class="bd-cap__t" set:html={cursiva(c.titular)} />
               <p class="bd-cap__que">{c.que}</p>
@@ -132,10 +137,14 @@ const [S_IDENTIDAD, S_WEBS, S_ARTE, S_CONTENIDO] = CIERRE.servicios;
                 <p class="bd-cap__cifra" data-cap-cifra>{c.dato.cifra}</p>
                 <div><p class="bd-cap__dice">{c.dato.texto}</p><p class="bd-cap__fuente">{c.dato.fuente}</p></div>
               </div>
-              <p class="bd-cap__juego" data-cap-juego>{c.juego}</p>
+              {c.juego && <p class="bd-cap__juego" data-cap-juego>{c.juego}</p>}
             </article>
           ))}
         </div>
+        <!-- El índice: las seis capas, de la que se ve a la que lo sostiene; cada tramo se llena con su color al bajar -->
+        <ol class="bd-indice" data-indice aria-hidden="true">
+          {CAPAS.map((c, i) => <li style={canto(i)}><i></i><b>{c.n}</b><span>{c.nombre}</span></li>)}
+        </ol>
         <p class="bd-pista" data-pista><span>{PORTADA.pista}</span><i aria-hidden="true"></i></p>
       </div>
     </section>
@@ -256,11 +265,11 @@ const [S_IDENTIDAD, S_WEBS, S_ARTE, S_CONTENIDO] = CIERRE.servicios;
   /* Largo: cada una de las seis capas tiene pantalla y media para ella */
   .bd-viaje { position: relative; height: 1300vh; }
   .bd-escena { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; user-select: none; -webkit-user-select: none; }
-  .bd-texto { position: absolute; left: var(--lado); top: 15vh; z-index: 3; max-width: 36vw; pointer-events: none; transition: opacity .5s var(--curva), transform .5s var(--curva); }
+  .bd-texto { position: absolute; left: var(--lado); top: 15vh; z-index: 3; max-width: 33vw; pointer-events: none; transition: opacity .5s var(--curva), transform .5s var(--curva); }
   /* Mientras hay un capítulo, la portada se aparta y la pila se va un poco a la derecha */
   .bd-texto.fuera { opacity: 0; transform: translateY(-14px); }
-  .bd-etq { margin: 0 0 3vh; font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--crema-2); }
-  .bd-t { margin: 0; font-family: var(--serif); font-weight: 300; font-size: clamp(44px, 5vw, 92px); line-height: .94; letter-spacing: -.02em; }
+  .bd-etq { margin: 0 0 3vh; font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--brand); }
+  .bd-t { margin: 0; font-family: var(--serif); font-weight: 300; font-size: clamp(48px, min(5.8vw, 11vh), 112px); line-height: .9; letter-spacing: -.03em; }
   .bd-t em, .bd-cierre__t em { font-style: italic; }
   .bd-p { margin: 3vh 0 0; max-width: 34ch; font-size: 15px; line-height: 1.6; color: var(--crema-2); }
 
@@ -295,8 +304,6 @@ const [S_IDENTIDAD, S_WEBS, S_ARTE, S_CONTENIDO] = CIERRE.servicios;
   .bd-forma__iso { display: block; transform-origin: 0 50%; }
   .bd-forma::before, .bd-forma::after { content: ''; position: absolute; left: -9%; right: -9%; border-top: 1px dashed var(--rosa-2); }
   .bd-forma::before { top: 0; } .bd-forma::after { bottom: 0; }
-  .bd-forma__cota { position: absolute; right: 0; bottom: -2%; font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--rosa); opacity: 0; transition: opacity .3s; }
-  .bd-forma__cota.on { opacity: 1; }
   /* el área de respeto (el aire que lleva siempre alrededor), con sus esquinas, y el tamaño mínimo */
   .bd-forma__aire { position: absolute; inset: -16% -9%; border: 1px dashed var(--rosa-2); }
   .bd-forma__aire i { position: absolute; width: 9px; height: 9px; border-color: var(--rosa); border-style: solid; border-width: 0; }
@@ -353,24 +360,29 @@ const [S_IDENTIDAD, S_WEBS, S_ARTE, S_CONTENIDO] = CIERRE.servicios;
     opacity: 0; transform: translateY(16px); visibility: hidden; transition: opacity .45s var(--curva), transform .45s var(--curva), visibility 0s linear .45s; }
   .bd-cap.on { opacity: 1; transform: none; visibility: visible; transition: opacity .8s var(--curva), transform .8s var(--curva), visibility 0s; }
   .bd-cap p, .bd-cap h3 { margin: 0; }
-  .bd-cap__n { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--rosa); }
-  .bd-cap__t { margin-top: 2.2vh !important; font-family: var(--serif); font-weight: 300; font-size: clamp(34px, 3.3vw, 60px); line-height: .98; letter-spacing: -.02em; }
-  .bd-cap__t em { font-style: italic; }
-  .bd-cap__que { margin-top: 2.8vh !important; font-size: 15px; line-height: 1.6; }
-  .bd-cap__importa { margin-top: 1.4vh !important; font-size: 15px; line-height: 1.6; color: var(--crema-2); }
+  .bd-cap__n { align-self: flex-start; padding: 6px 9px 5px; font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--tinta); background: var(--acento, var(--rosa)); }
+  .bd-cap__t { margin-top: 2.4vh !important; font-family: var(--serif); font-weight: 300; font-size: clamp(38px, min(4.4vw, 7.6vh), 80px); line-height: .94; letter-spacing: -.025em; }
+  .bd-cap__t em { font-style: italic; color: var(--acento, var(--rosa)); }
+  /* la entradilla, en la letra de la marca; el segundo párrafo, sangrado y con una raya de su color */
+  .bd-cap__que { margin-top: 2.8vh !important; font-family: var(--serif); font-size: clamp(17px, min(1.4vw, 2.4vh), 21px); line-height: 1.38; }
+  .bd-cap__importa { margin: 1.8vh 0 0 16% !important; padding-left: 14px; border-left: 1px solid var(--acento, var(--rosa)); font-size: 14px; line-height: 1.6; color: var(--crema-2); }
   .bd-cap__dato { margin-top: 3.4vh; padding-top: 2.4vh; border-top: 1px solid var(--linea); display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 20px; align-items: start; }
-  .bd-cap__cifra { font-family: var(--serif); font-weight: 300; font-size: clamp(42px, 3.8vw, 70px); line-height: .88; letter-spacing: -.02em; color: var(--rosa); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .bd-cap__cifra { font-family: var(--serif); font-weight: 300; font-size: clamp(48px, min(5vw, 9vh), 96px); line-height: .88; letter-spacing: -.03em; color: var(--acento, var(--rosa)); white-space: nowrap; font-variant-numeric: tabular-nums; }
   .bd-cap__dice { font-size: 14px; line-height: 1.5; }
   .bd-cap__fuente { margin-top: 10px !important; font-family: var(--mono); font-size: 9px; line-height: 1.55; letter-spacing: .08em; text-transform: uppercase; color: var(--crema-3); }
   .bd-cap__juego { margin-top: 3.2vh !important; display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--crema-2); }
-  .bd-cap__juego::before { content: ''; width: 6px; height: 6px; background: var(--rosa); }
+  .bd-cap__juego::before { content: ''; width: 6px; height: 6px; background: var(--acento, var(--rosa)); }
 
   /* --- Lo que hace una marca bien hecha --------------------------------------------------------------------------- */
   .bd-efectos { position: relative; z-index: 2; padding: 18vh calc(var(--lado) + 4vw) 6vh var(--lado); border-top: 1px solid var(--linea); }
   .bd-efectos__ante { margin: 0 0 4vh; font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--rosa); }
-  .bd-efectos__t { margin: 0; max-width: 15ch; font-family: var(--serif); font-weight: 300; font-size: clamp(42px, 4.8vw, 88px); line-height: .94; letter-spacing: -.02em; }
-  .bd-efectos__t em { font-style: italic; }
-  .bd-efectos__lista { margin: 10vh 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3.4vw; }
+  .bd-efectos__t { margin: 0; max-width: none; font-family: var(--serif); font-weight: 300; font-size: clamp(44px, 6.4vw, 120px); line-height: .9; letter-spacing: -.03em; }
+  /* la segunda línea, sangrada y en el rosa de Brand (al bajar se corre un poco: brand.js) */
+  .bd-efectos__t em { display: block; padding-left: 1.6em; font-style: italic; color: var(--brand); }
+  /* las tres, en escalera */
+  .bd-efectos__lista { margin: 10vh 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3.4vw; align-items: start; }
+  .bd-efecto:nth-child(2) { margin-top: 7vh; }
+  .bd-efecto:nth-child(3) { margin-top: 14vh; }
   .bd-efecto { padding-top: 3vh; border-top: 1px solid var(--linea); opacity: 0; transform: translateY(20px); transition: opacity .9s var(--curva) calc(var(--i) * 140ms), transform .9s var(--curva) calc(var(--i) * 140ms); }
   .bd-efectos.on .bd-efecto { opacity: 1; transform: none; }
   .bd-efecto p, .bd-efecto h3 { margin: 0; }
@@ -550,6 +562,52 @@ const [S_IDENTIDAD, S_WEBS, S_ARTE, S_CONTENIDO] = CIERRE.servicios;
   .bd-cierre__servicios li, .bd-cierre__enlaces { border-top-color: rgba(25, 9, 0, .2); }
   .bd-cierre__carta .bd-subraya { text-decoration-color: var(--brand); text-decoration-thickness: 2px; }
 
+  /* --- Editorial (15-nov: «dale un poco más de color, dinamismo y editorialidad a la página y ya») ---------------
+     La portada, más grande y con su cursiva en el rosa de Brand; detrás de la pila, el número de la capa que tiene su
+     capítulo, a tamaño de cartel; abajo, el índice de las seis, que se llena al bajar; y lo de cada capítulo entra por
+     partes, de arriba abajo */
+  .bd-t em { color: var(--brand); }
+  /* Con un capítulo, solo coge el ratón la plancha que lo tiene (la marca, que sigue encendida en el turno del color, no
+     tapa los colores) */
+  .bd-escena.en-capitulo .bd-capa:not(.activa) { pointer-events: none; }
+
+  .bd-folio { position: absolute; right: calc(var(--lado) * 2); bottom: 76px; width: 0; height: 0; margin: 0; pointer-events: none; will-change: transform;
+    font-family: var(--serif); font-weight: 300; font-size: min(64vh, 34vw); line-height: .74; letter-spacing: -.05em; }
+  .bd-folio span { position: absolute; right: 0; bottom: 0; white-space: nowrap; opacity: 0; transform: translate3d(0, 30%, 0);
+    transition: opacity .6s var(--curva), transform 1.1s var(--curva); }
+  .bd-folio span.on { opacity: 1; transform: none; transition-delay: .15s; }
+  .bd-folio span.antes { transform: translate3d(0, -30%, 0); }
+  .bd-folio--marca { color: var(--brand); }
+  .bd-folio--forma { color: transparent; -webkit-text-stroke: 1.5px rgba(231, 226, 218, .7); }
+  .bd-folio--color { color: transparent; background: linear-gradient(#34190A 0 20%, #E7E2DA 20% 40%, #F5CBD7 40% 60%, #F5F3F1 60% 80%, #190900 80%);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-stroke: 1px rgba(245, 203, 215, .45); }
+  .bd-folio--letra { font-weight: 400; font-style: italic; color: var(--brand); }
+  .bd-folio--voz { color: var(--rosa); }
+  .bd-folio--idea { color: transparent; -webkit-text-stroke: 1.5px var(--rosa); }
+
+  .bd-indice { position: absolute; left: var(--lado); right: calc(var(--lado) + 80px); bottom: 22px; z-index: 2; margin: 0; padding: 0; list-style: none;
+    display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; pointer-events: none; }
+  .bd-indice li { position: relative; padding-top: 10px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-family: var(--mono); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--crema-3); transition: color .4s; }
+  .bd-indice li::before, .bd-indice i { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 2px; background: var(--linea); }
+  .bd-indice i { background: var(--canto-luz); transform: scaleX(0); transform-origin: 0 50%; }
+  .bd-indice li:nth-child(3) i { background: linear-gradient(90deg, #34190A 0 20%, #E7E2DA 20% 40%, #F5CBD7 40% 60%, #F5F3F1 60% 80%, #190900 80%); }
+  .bd-indice b { margin-right: 8px; font-weight: 400; color: var(--crema-2); transition: color .4s; }
+  .bd-indice li.activa { color: var(--crema); }
+  .bd-indice li.activa b { color: var(--canto-luz); }
+
+  /* Lo de cada capítulo entra por partes */
+  .bd-cap > * { opacity: 0; transform: translate3d(0, 22px, 0); transition: opacity .5s var(--curva), transform .8s var(--curva); }
+  .bd-cap > .bd-cap__t { transform: translate3d(0, 38px, 0); }
+  .bd-cap.on > * { opacity: 1; transform: none; }
+  .bd-cap.on > :nth-child(2) { transition-delay: .07s; }
+  .bd-cap.on > :nth-child(3) { transition-delay: .16s; }
+  .bd-cap.on > :nth-child(4) { transition-delay: .24s; }
+  .bd-cap.on > :nth-child(5) { transition-delay: .32s; }
+  .bd-cap.on > :nth-child(6) { transition-delay: .42s; }
+  @media (prefers-reduced-motion: reduce) {
+    .bd-folio span, .bd-cap > *, .bd-cap > .bd-cap__t { transform: none; transition: none; }
+  }
+
 
   /* --- Móvil ------------------------------------------------------------------------------------------------------ */
   @media (max-width: 760px) {
@@ -565,7 +623,7 @@ const [S_IDENTIDAD, S_WEBS, S_ARTE, S_CONTENIDO] = CIERRE.servicios;
     .bd-escena.en-capitulo .bd-pila { left: 50%; top: 27%; }
     .bd-cap { top: auto; bottom: 6vh; width: auto; right: var(--lado); justify-content: flex-end; }
     .bd-cap__t { font-size: 28px; }
-    .bd-cap__que { font-size: 13px; }
+    .bd-cap__que { font-size: 16px; line-height: 1.3; }
     .bd-cap__importa { display: none; }
     .bd-cap__dato { gap: 14px; }
     .bd-cap__cifra { font-size: 36px; }
@@ -574,5 +632,12 @@ const [S_IDENTIDAD, S_WEBS, S_ARTE, S_CONTENIDO] = CIERRE.servicios;
     .bd-efectos__lista { grid-template-columns: 1fr; gap: 6vh; }
     .bd-cierre { grid-template-columns: 1fr; padding: 14vh var(--lado) 18vh; }
     .bd-cierre__t { font-size: 46px; }
+    /* el número, arriba a la derecha, detrás de la pila (abajo va el capítulo); el índice, solo con los números */
+    .bd-folio { top: 7vh; bottom: auto; right: var(--lado); font-size: 30vh; }
+    .bd-folio span { top: 0; bottom: auto; }
+    .bd-indice { right: calc(var(--lado) + 56px); bottom: 14px; gap: 6px; }
+    .bd-indice span { display: none; }
+    .bd-efectos__t em { padding-left: .8em; }
+    .bd-efecto:nth-child(n) { margin-top: 0; }
   }
 </style>
