@@ -72,6 +72,10 @@ const base = import.meta.env.BASE_URL;
   :global(html.menu-abierto) .cab__menu-i i { width: 100% !important; }
   :global(html.menu-abierto) .cab__menu-i i:first-child { transform: translateY(.5px) rotate(45deg) !important; }
   :global(html.menu-abierto) .cab__menu-i i:last-child { transform: translateY(-.5px) rotate(-45deg); }
+  /* Al pinchar una pieza (el menú, que va justo detrás, se zambulle en ella), la barra se va con el resto de lo del menú:
+     si no, queda encima de la ventana con el fondo de la página que viene (Entrada.astro) y desaparece al llegar */
+  :global(html.menu-abierto .cab:has(~ [data-menu].zambullendo)) { opacity: 0; pointer-events: none; }
+  :global(html.menu-abierto .cab:has(~ [data-menu].zambullendo) > *) { pointer-events: none; }
   .cab__dcha { display: flex; align-items: center; gap: 22px; }
 
   /* Sonido: con sonido, las barras se mueven; sin sonido, se quedan planas */
