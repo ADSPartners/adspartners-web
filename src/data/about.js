@@ -23,7 +23,7 @@ export const CAPITULOS = [
       foto: { src: 'sebas1.webp', alto: 1357, pie: 'Una foto de carrete, en su cuarto.', donde: 'Madrid', cuando: 'Invierno de 2020', nota: 'El año en que empecé: logos para amigos y muchas horas mirando referencias.' },
     },
     alvaro: {
-      texto: 'Empecé con esto hacia los 18 años, sabiendo una cosa: no quería un nueve a cinco toda la vida.',
+      texto: 'Empecé con esto hacia los 18 años, sabiendo una cosa: no quería un nueve a cinco toda la vida. Desde ese momento, algo me impulsaba a buscar qué era lo que me apasionaba, qué se me daba bien. Así, probando, fue como encontré el desarrollo de negocio y de procesos.',
       foto: { src: 'alvaro2.webp', alto: 1200, pie: 'Paseo al atardecer', donde: 'Santander', cuando: 'Verano de 2026', nota: 'Desconectar también es trabajo: las mejores ideas llegan lejos de la pantalla', provisional: true },
     },
   },
@@ -62,7 +62,7 @@ export const CAPITULOS = [
       foto: { src: 'sebas4.webp', alto: 1600, pie: 'En el coche.', donde: 'Madrid', cuando: 'Otoño de 2024', nota: 'Saliendo de una reunión que fue bien. Escuchar primero y proponer después nunca falla.' },
     },
     alvaro: {
-      texto: 'En ese proyecto de redes, por un amigo común. Sebas es de los tíos más majos y buenos que he conocido nunca, y curra casi tanto como yo, que es difícil de encontrar.',
+      texto: 'En uno de los intentos por montar algo diferente, buscando a una persona que nos hiciera de cámara y editor, un amigo me presentó a Sebas. Desde el primer momento me cayó bien, y vi que curraba casi tanto como yo. Algo muy difícil de encontrar.',
       foto: { src: 'alvaro4.webp', alto: 1200, pie: 'La Giralda', donde: 'Sevilla', cuando: 'Semana Santa de 2025', nota: 'Viaje de trabajo con Sebas' },
     },
   },
