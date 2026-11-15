@@ -1,0 +1,117 @@
+---
+// Las cuatro páginas, a la vista en cada una de ellas (15-nov: «un enlace por subpágina», sin la palabra «Menú» ni
+// hamburguesa, tampoco en el móvil). Salen de las piezas del menú (data/menu.js, DESTINOS): su número, su nombre y,
+// debajo, su pieza en la placa con su LED, como los LED de diagnóstico de una placa base (los que el menú lleva
+// serigrafiados: SSD, CPU, VGA, BIOS). El de la página en la que estás está encendido, en su color y con las dos esquinas
+// del inspector (aria-current); al pasar por otro, su LED se enciende a medias. A la home se vuelve con el logo.
+// Todos llevan data-entrada (scripts/entrada.js): la salida abre la ventana con el color de la página a la que vas.
+// Va con el color del texto de donde se ponga (currentColor); cada página la coloca y la ajusta con su clase.
+// forma: «fila», los cuatro en línea (en la barra de arriba); «indice», en columna con sus puntos guía, como el índice
+// de una revista (en el escritorio; en el móvil, en fila). La llegada: si la página se construye (html.construye), los
+// cuatro entran uno detrás de otro a partir de --nsp-retraso (lo pone cada página: cuando entra su barra de arriba) y
+// después se enciende el LED de la página.
+import { DESTINOS } from '../data/menu.js';
+
+interface Props { actual: 'proyectos' | 'tech' | 'brand' | 'about'; forma?: 'fila' | 'indice'; class?: string }
+const { actual, forma = 'fila', class: clase = '' } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const dos = (n: number) => String(n).padStart(2, '0');
+const PAGINAS = DESTINOS.filter((d) => d.ruta && !d.ruta.startsWith('#'));
+---
+<nav class:list={['nsp', `nsp--${forma}`, clase]} aria-label="Páginas">
+  <ol class="nsp__lista">
+    {PAGINAS.map((d, i) => {
+      const es = d.slug === actual;
+      return (
+        <li class="nsp__item" style={`--led: ${d.color}; --i: ${i}`}>
+          <a class:list={['nsp__a', { 'es-actual': es }]} href={`${base}${d.ruta}`} aria-current={es ? 'page' : undefined} data-entrada data-sonido-hover>
+            <span class="nsp__n" aria-hidden="true">{dos(i + 1)}</span>
+            <span class="nsp__nombre">{d.nombre}</span>
+            <span class="nsp__guia" aria-hidden="true"></span>
+            <span class="nsp__led" aria-hidden="true"></span>
+            <span class="nsp__pieza" aria-hidden="true">{d.pieza.toUpperCase()}</span>
+          </a>
+        </li>
+      );
+    })}
+  </ol>
+</nav>
+
+<style>
+  .nsp { --nsp-hueco: clamp(16px, 1.7vw, 28px); }
+  .nsp__lista { display: flex; align-items: flex-start; gap: 0 var(--nsp-hueco); margin: 0; padding: 0; list-style: none; }
+
+  /* --- En fila: el número y el nombre arriba; debajo, el LED y la pieza (como la etiqueta de una pieza en la placa) */
+  .nsp__a {
+    position: relative; display: grid; grid-template-columns: auto auto; column-gap: 6px; row-gap: 5px; align-items: baseline;
+    padding: 5px 7px 6px; margin: 0 -7px; color: inherit; text-decoration: none; text-align: left; white-space: nowrap;
+  }
+  .nsp__n { grid-column: 1; grid-row: 1; font-family: var(--mono); font-size: 9px; line-height: 1; letter-spacing: .04em; opacity: .5; font-variant-numeric: tabular-nums; }
+  .nsp__nombre {
+    grid-column: 2; grid-row: 1; font-family: var(--serif); font-weight: 300; font-size: 20px; line-height: .9; letter-spacing: -.005em;
+    opacity: .74; transition: opacity .3s var(--curva);
+  }
+  .nsp__guia { display: none; }
+  .nsp__led {
+    grid-column: 1; grid-row: 2; justify-self: center; align-self: center; position: relative; width: 6px; height: 6px;
+    box-shadow: inset 0 0 0 1px currentColor; opacity: .45; transition: opacity .3s var(--curva);
+  }
+  /* (la luz, aparte, para encenderla sin tocar el contorno) */
+  .nsp__led::after {
+    content: ''; position: absolute; inset: 0; background: var(--led); opacity: 0;
+    box-shadow: 0 0 6px var(--led), 0 0 14px color-mix(in srgb, var(--led) 55%, transparent); transition: opacity .3s var(--curva);
+  }
+  .nsp__pieza { grid-column: 2; grid-row: 2; font-family: var(--mono); font-size: 8.5px; line-height: 1; letter-spacing: .18em; opacity: .5; }
+
+  /* Al pasar (o con el foco), el nombre a todo color y el LED de esa página, a medias */
+  .nsp__a:hover .nsp__nombre, .nsp__a:focus-visible .nsp__nombre { opacity: 1; }
+  .nsp__a:hover .nsp__led, .nsp__a:focus-visible .nsp__led { opacity: 1; }
+  .nsp__a:hover .nsp__led::after, .nsp__a:focus-visible .nsp__led::after { opacity: .55; }
+  .nsp__a:focus-visible { outline: 1px solid currentColor; outline-offset: 2px; }
+
+  /* La página en la que estás: el LED encendido, el nombre en cursiva y las dos esquinas del inspector en su color */
+  .es-actual .nsp__nombre { font-weight: 400; font-style: italic; opacity: 1; }
+  .es-actual .nsp__led { box-shadow: inset 0 0 0 1px var(--led); opacity: 1; }
+  .es-actual .nsp__led::after { opacity: 1; }
+  .es-actual .nsp__pieza { opacity: .8; }
+  .es-actual::before, .es-actual::after { content: ''; position: absolute; width: 6px; height: 6px; border: 1px solid var(--led); pointer-events: none; }
+  .es-actual::before { left: 0; top: 0; border-right: 0; border-bottom: 0; }
+  .es-actual::after { right: 0; bottom: 0; border-left: 0; border-top: 0; }
+
+  /* --- En índice (en el escritorio): una línea por página, con sus puntos guía hasta el LED y la pieza ------------ */
+  @media (min-width: 761px) {
+    .nsp--indice .nsp__lista { flex-direction: column; align-items: stretch; gap: 3px; }
+    .nsp--indice .nsp__a { grid-template-columns: 18px auto minmax(10px, 1fr) auto auto; column-gap: 0; margin: 0 -7px; }
+    .nsp--indice .nsp__n, .nsp--indice .nsp__nombre, .nsp--indice .nsp__guia, .nsp--indice .nsp__led, .nsp--indice .nsp__pieza { grid-row: 1; }
+    .nsp--indice .nsp__n { grid-column: 1; }
+    .nsp--indice .nsp__nombre { grid-column: 2; }
+    .nsp--indice .nsp__guia { display: block; grid-column: 3; align-self: end; height: 1px; margin: 0 8px 3px; background-image: radial-gradient(circle, currentColor .6px, transparent .9px); background-size: 4px 1px; background-repeat: repeat-x; opacity: .4; }
+    .nsp--indice .nsp__led { grid-column: 4; margin-right: 6px; align-self: center; }
+    .nsp--indice .nsp__pieza { grid-column: 5; width: 4.4em; }   /* (todas igual de anchas: los LED, en columna) */
+  }
+
+  /* --- La llegada (html.construye): entran uno detrás de otro, con la barra de su página; después, el LED -------- */
+  :global(html.construye) .nsp__item {
+    animation-name: nsp-entra; animation-duration: .4s; animation-delay: calc(var(--nsp-retraso, 1s) + var(--i) * 50ms);
+    animation-timing-function: var(--curva); animation-fill-mode: both;
+  }
+  @keyframes nsp-entra { from { opacity: 0; translate: 0 5px; } }
+  /* El LED de la página se enciende como uno de verdad, con un par de parpadeos (fuera de html.construye: no lo corta
+     el final de la llegada) */
+  @media (prefers-reduced-motion: no-preference) {
+    :global(html[data-construye]:not(.mov-reducido)) .es-actual .nsp__led::after {
+      animation-name: nsp-enciende; animation-duration: .7s; animation-delay: calc(var(--nsp-retraso, 1s) + .3s);
+      animation-timing-function: linear; animation-fill-mode: both;
+    }
+  }
+  @keyframes nsp-enciende { 0%, 18% { opacity: 0; } 24% { opacity: 1; } 34% { opacity: .15; } 46% { opacity: 1; } 54% { opacity: .4; } 100% { opacity: 1; } }
+
+  /* --- En el móvil: los cuatro en una fila a todo el ancho, más juntos ------------------------------------------- */
+  @media (max-width: 760px) {
+    .nsp__lista { justify-content: space-between; gap: 0 8px; }
+    .nsp__a { column-gap: 5px; row-gap: 4px; padding: 5px 6px 6px; margin: 0 -6px; }
+    .nsp__nombre { font-size: 18px; }
+    .nsp__n { font-size: 8px; }
+    .nsp__pieza { font-size: 8px; letter-spacing: .14em; }
+  }
+</style>

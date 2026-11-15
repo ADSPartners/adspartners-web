@@ -11,6 +11,7 @@ import Base from '../../layouts/Base.astro';
 import Fondo from '../../components/Fondo.astro';
 import Marca from '../../components/Marca.astro';
 import EnlacesWeb from '../../components/EnlacesWeb.astro';
+import NavSubpaginas from '../../components/NavSubpaginas.astro';
 import { PERSONAS, CAPITULOS, CIERRE } from '../../data/about.js';
 import { ORG_ID, PERSONAS as PERSONAS_SCHEMA } from '../../data/schema.js';
 const base = import.meta.env.BASE_URL;
@@ -53,7 +54,8 @@ const TAM_CAPITULO = '(max-width: 760px) 48vw, 26vw';
       </span>
     </div>
 
-    <!-- Fijo, como en Tech: dónde estás; a la derecha, la hora de aquí, el sonido y la vuelta; abajo, el logo y el correo -->
+    <!-- Fijo, como en Tech: dónde estás; a la derecha, la hora de aquí, el sonido y las cuatro páginas (en el móvil, en
+         una fila debajo); abajo, el logo (que lleva a la home) y el correo -->
     <p class="ab__donde"><span class="ab__barra" aria-hidden="true"></span><span>About · <span class="ab__marca">adsPartners</span></span></p>
     <div class="ab__arriba">
       <p class="ab__madrid" aria-hidden="true">Desde Madrid <span class="ab__hora" data-ab-hora></span></p>
@@ -61,7 +63,7 @@ const TAM_CAPITULO = '(max-width: 760px) 48vw, 26vw';
         <span class="ab__ondas" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
         <span class="oculto-accesible" data-sonido-txt>Sonido off</span>
       </button>
-      <a class="ab__volver" href={base} data-sonido-hover><span aria-hidden="true">◀</span> Página principal</a>
+      <NavSubpaginas actual="about" class="ab__nav" />
     </div>
     <a class="ab__logo" href={base} aria-label="adsPartners, inicio" data-sonido-hover><Marca tipo="logo" /></a>
     <a class="ab__correo" href="mailto:adsgroup@ads-partners.com" data-sonido-hover>Escríbenos a <b>adsgroup@</b></a>
@@ -212,7 +214,7 @@ const TAM_CAPITULO = '(max-width: 760px) 48vw, 26vw';
   .ab__marca { text-transform: none; letter-spacing: .04em; }
 
   /* --- Fijo (lo mismo que Tech) ----------------------------------------------------------------------------------- */
-  .ab__donde, .ab__madrid, .ab__volver, .ab__correo {
+  .ab__donde, .ab__madrid, .ab__correo {
     font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--crema-2);
   }
   .ab__donde { position: fixed; left: var(--lado); top: var(--arriba); z-index: 20; margin: 0; display: flex; align-items: center; gap: 14px; pointer-events: none; }
@@ -220,8 +222,14 @@ const TAM_CAPITULO = '(max-width: 760px) 48vw, 26vw';
   .ab__arriba { position: fixed; right: var(--lado); top: var(--arriba); z-index: 20; height: 18px; display: flex; align-items: center; gap: 30px; }
   .ab__madrid { margin: 0; pointer-events: none; }
   .ab__hora { margin-left: 6px; opacity: .58; font-variant-numeric: tabular-nums; }
-  .ab__volver { transition: color .3s; }
-  .ab__volver:hover, .ab__correo:hover { color: var(--crema); }
+  .ab__correo:hover { color: var(--crema); }
+  /* Las cuatro páginas (components/NavSubpaginas.astro), al final de la barra: el nombre, a la altura de lo demás */
+  .ab { --nsp-retraso: 1.45s; }
+  :global(.ab__nav) { align-self: flex-start; margin-top: -9px; color: var(--crema); }
+  /* Con el fondo partido, lo de la derecha tiene que quedar en la noche, pasada la costura (57 %): sin la hora por
+     debajo de 1500 px y, por debajo de 940, las páginas en una segunda fila */
+  @media (min-width: 761px) and (max-width: 1499px) { .ab__madrid { display: none; } }
+  @media (min-width: 761px) and (max-width: 940px) { :global(.ab__nav) { position: absolute; right: 0; top: calc(100% + 16px); margin: 0; } }
   .ab__logo { position: fixed; left: var(--lado); bottom: calc(var(--arriba) - 4px); z-index: 20; width: 128px; color: var(--crema); }
   .ab__correo { position: fixed; right: var(--lado); bottom: var(--arriba); z-index: 20; font-size: 10px; letter-spacing: .16em; }
   .ab__correo b { font-weight: 400; color: var(--crema); }
@@ -457,15 +465,17 @@ const TAM_CAPITULO = '(max-width: 760px) 48vw, 26vw';
   @media (max-width: 760px) {
     .ab__donde, .ab__madrid { display: none; }
     .ab__arriba { gap: 18px; }
+    /* Las cuatro páginas, en una fila debajo de la barra y a todo el ancho */
+    :global(.ab__nav) { position: absolute; right: 0; top: calc(100% + 16px); width: calc(100vw - 2 * var(--lado)); margin: 0; }
     .ab__logo { top: var(--arriba); bottom: auto; width: 112px; }
     .ab__correo { display: none; }
-    /* El contenido pasa por debajo de una franja oscura, para que el logo y la vuelta no se monten en el texto */
+    /* El contenido pasa por debajo de una franja oscura, para que el logo y las páginas no se monten en el texto */
     .ab::before {
-      content: ''; position: fixed; left: 0; right: 0; top: 0; height: calc(var(--arriba) + 70px); z-index: 19; pointer-events: none;
-      background: linear-gradient(var(--noche) 58%, rgba(18, 13, 10, 0));
+      content: ''; position: fixed; left: 0; right: 0; top: 0; height: calc(var(--arriba) + 116px); z-index: 19; pointer-events: none;
+      background: linear-gradient(var(--noche) 72%, rgba(18, 13, 10, 0));
     }
     /* Arriba, en columna: Sebas, el marco, Álvaro y el texto */
-    .ab__portada { height: auto; min-height: 100svh; display: flex; flex-direction: column; padding: calc(var(--arriba) + 70px) var(--lado) 8vh; }
+    .ab__portada { height: auto; min-height: 100svh; display: flex; flex-direction: column; padding: calc(var(--arriba) + 108px) var(--lado) 8vh; }
     .ab__portada > * { position: relative; left: auto; right: auto; top: auto; bottom: auto; }
     .ab__nombre--sebas { align-self: flex-start; font-size: 27vw; }
     .ab__marco--portada { width: 100%; margin-top: 46px; transform: none; }

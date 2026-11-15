@@ -13,6 +13,7 @@ import '../../styles/construye-brand.css';   // (la llegada: la página se const
 import Cursor from '../../components/Cursor.astro';
 import Marca from '../../components/Marca.astro';
 import EnlacesWeb from '../../components/EnlacesWeb.astro';
+import NavSubpaginas from '../../components/NavSubpaginas.astro';
 import { PORTADA, CAPAS, IDEA, PALETA, LETRAS, TITULAR_LETRA, EFECTOS, CIERRE } from '../../data/brand.js';
 import { SERVICIO_BRAND } from '../../data/schema.js';
 
@@ -37,15 +38,16 @@ const [S_IDENTIDAD, S_WEBS, S_ARTE, S_CONTENIDO] = CIERRE.servicios;
   schema={[SERVICIO_BRAND]}
   construye
 >
-  <!-- Fijo, como en Tech: dónde estás y, a la derecha, la hora de aquí, el sonido y la vuelta -->
-  <p class="bd-donde"><span class="bd-barra" aria-hidden="true"></span><span>Brand · <span class="bd-marca">adsPartners</span></span></p>
+  <!-- Fijo, como en Tech: dónde estás y, a la derecha, la hora de aquí, el sonido y las cuatro páginas (en el móvil,
+       en una fila debajo). Brand no lleva el logotipo fijo: a la home se vuelve con «adsPartners» -->
+  <p class="bd-donde"><span class="bd-barra" aria-hidden="true"></span><span>Brand · <a class="bd-marca" href={base} aria-label="adsPartners, inicio" data-sonido-hover>adsPartners</a></span></p>
   <div class="bd-arriba">
     <p class="bd-madrid" aria-hidden="true">Desde Madrid <span class="bd-hora" data-bd-hora></span></p>
     <button class="bd-sonido" type="button" aria-pressed="false" aria-label="Sonido" data-sonido-btn data-sonido-hover>
       <span class="bd-ondas" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
       <span class="oculto-accesible" data-sonido-txt>Sonido off</span>
     </button>
-    <a class="bd-volver" href={base} data-sonido-hover><span aria-hidden="true">◀</span> Página principal</a>
+    <NavSubpaginas actual="brand" class="bd-nav" />
   </div>
 
   <main class="bd" data-brand data-cursor="manual">
@@ -245,15 +247,16 @@ const [S_IDENTIDAD, S_WEBS, S_ARTE, S_CONTENIDO] = CIERRE.servicios;
   .bd { --lado: clamp(18px, 2.4vw, 36px); --arriba: clamp(18px, 2.6vh, 30px); --rosa-2: rgba(245, 203, 215, .38); color: var(--crema); }
 
   /* --- Fijo ---------------------------------------------------------------------------------------------------- */
-  .bd-donde, .bd-madrid, .bd-volver { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--crema-2); }
+  .bd-donde, .bd-madrid { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--crema-2); }
   .bd-donde { position: fixed; left: clamp(18px, 2.4vw, 36px); top: clamp(18px, 2.6vh, 30px); z-index: 40; margin: 0; display: flex; align-items: center; gap: 14px; pointer-events: none; }
   .bd-barra { width: 4px; height: 18px; background: var(--rosa); }
-  .bd-marca { text-transform: none; letter-spacing: .04em; }
+  .bd-marca { text-transform: none; letter-spacing: .04em; pointer-events: auto; }
+  .bd-marca:hover, .bd-marca:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
   .bd-arriba { position: fixed; right: clamp(18px, 2.4vw, 36px); top: clamp(18px, 2.6vh, 30px); z-index: 40; height: 18px; display: flex; align-items: center; gap: 30px; }
   .bd-madrid { margin: 0; pointer-events: none; }
   .bd-hora { margin-left: 6px; opacity: .58; font-variant-numeric: tabular-nums; }
-  .bd-volver { transition: color .3s; }
-  .bd-volver:hover { color: var(--crema); }
+  /* Las cuatro páginas (components/NavSubpaginas.astro), al final de la barra: el nombre, a la altura de lo demás */
+  .bd-nav { --nsp-retraso: 1.4s; align-self: flex-start; margin-top: -9px; color: var(--crema); }
   .bd-sonido { display: block; padding: 6px; margin: -6px -6px -6px 0; }
   .bd-ondas { display: flex; align-items: center; gap: 3px; height: 16px; }
   .bd-ondas i { width: 2px; height: 3px; background: var(--crema); transition: height .3s var(--curva); }
@@ -539,10 +542,11 @@ const [S_IDENTIDAD, S_WEBS, S_ARTE, S_CONTENIDO] = CIERRE.servicios;
   .bd-bolsa__iso { position: absolute; left: 50%; top: 22%; width: 36%; transform: translateX(-50%); color: var(--brand); }
 
   /* Sobre lo claro (la marca aplicada y el cierre), lo fijo de arriba pasa a tinta */
-  html.bd-claro .bd-donde, html.bd-claro .bd-volver, html.bd-claro .bd-madrid { color: rgba(25, 9, 0, .75); }
+  html.bd-claro .bd-donde, html.bd-claro .bd-madrid { color: rgba(25, 9, 0, .75); }
+  html.bd-claro .bd-nav { color: var(--tinta); }
   html.bd-claro .bd-barra { background: var(--tinta); }
   html.bd-claro .bd-ondas i { background: var(--tinta); }
-  .bd-donde, .bd-volver, .bd-madrid { transition: color .4s; }
+  .bd-donde, .bd-nav, .bd-madrid { transition: color .4s; }
 
   /* --- Los efectos, cada uno en su color: el rosa (lo que tiene que verse), el beige (la calma) y el marrón (el peso) -- */
   .bd-efectos { background: radial-gradient(ellipse 50% 40% at 10% 0%, rgba(255, 143, 200, .12), transparent 70%); }
@@ -614,8 +618,17 @@ const [S_IDENTIDAD, S_WEBS, S_ARTE, S_CONTENIDO] = CIERRE.servicios;
   /* --- Móvil ------------------------------------------------------------------------------------------------------ */
   @media (max-width: 760px) {
     .bd-madrid { display: none; }
+    /* las cuatro páginas, en una fila debajo de la barra y a todo el ancho */
+    .bd-nav { position: absolute; right: 0; top: calc(100% + 14px); width: calc(100vw - 2 * clamp(18px, 2.4vw, 36px)); margin: 0; }
+    /* y, como en Tech y el About, lo de debajo pasa por una franja para no montarse en ellas: de noche y, sobre lo claro,
+       del rosa del cierre */
+    .bd::before {
+      content: ''; position: fixed; left: 0; right: 0; top: 0; height: calc(var(--arriba) + 96px); z-index: 39; pointer-events: none;
+      background: linear-gradient(var(--noche) 74%, rgba(18, 13, 10, 0));
+    }
+    html.bd-claro .bd::before { background: linear-gradient(#F5CBD7 74%, rgba(245, 203, 215, 0)); }
     .bd-efecto { padding: 3vh 5vw 3.6vh; }
-    .bd-texto { max-width: none; right: var(--lado); top: 11vh; }
+    .bd-texto { max-width: none; right: var(--lado); top: calc(11vh + 36px); }   /* (36 px: la fila de las páginas) */
     .bd-t { font-size: 42px; }
     .bd-pila { left: 50%; top: 60%; }
     .bd-capa { --w: 76vw; }
@@ -635,7 +648,7 @@ const [S_IDENTIDAD, S_WEBS, S_ARTE, S_CONTENIDO] = CIERRE.servicios;
     .bd-cierre { grid-template-columns: 1fr; padding: 14vh var(--lado) 18vh; }
     .bd-cierre__t { font-size: 46px; }
     /* el número, arriba a la derecha, detrás de la pila (abajo va el capítulo); el índice, solo con los números */
-    .bd-folio { top: 7vh; bottom: auto; right: var(--lado); font-size: 30vh; }
+    .bd-folio { top: calc(7vh + 40px); bottom: auto; right: var(--lado); font-size: 30vh; }
     .bd-folio span { top: 0; bottom: auto; }
     .bd-indice { right: calc(var(--lado) + 56px); bottom: 14px; gap: 6px; }
     .bd-indice span { display: none; }
