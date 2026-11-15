@@ -35,6 +35,10 @@ const datos = PROYECTOS.map((p) => ({ ...p, enlace: `${base}proyectos/#${p.slug}
 // La ficha del proyecto abierto sale ya escrita en el HTML con el primero del lienzo (sin encabezados vacíos: auditoría
 // SEO del 03-nov); al abrir uno, secciones/proyectos.js la reescribe entera con el suyo
 const primero = datos[0];
+// Al final, el archivo entero: «Ver los N proyectos» (con la entrada del menú, data-entrada). Al pasar el ratón se
+// escriben a máquina los que no salen en el lienzo
+const resto = TODOS.filter((p) => !p.home).map((p) => p.nombre);
+const otros = resto.length ? `Y ${resto.length} más: ${new Intl.ListFormat('es', { type: 'conjunction' }).format(resto)}` : '';
 ---
 <section class="pro" id="proyectos" data-seccion="proyectos" data-cursor="proyectos" aria-labelledby="pro-titulo">
   <div class="pro__pegado" data-pro-pegado>
@@ -66,6 +70,16 @@ const primero = datos[0];
           </div>
         );
       })}
+    </div>
+
+    <!-- Después de la última foto sube como una más y se queda bajo el título (donde la pista) hasta que se enciende la luz -->
+    <div class="pro__mas" data-pro-mas>
+      <a class="pro__ver" href={`${base}proyectos/`} data-entrada data-iman data-sonido-hover data-pro-ver>
+        <span class="pro__ver-luz" aria-hidden="true"></span>
+        <span class="pro__ver-t">Ver los <em>{TODOS.length}</em> proyectos</span>
+        <span class="pro__ver-flecha" aria-hidden="true"><span>→</span><span>→</span></span>
+      </a>
+      {otros && <p class="pro__otros mono" aria-hidden="true" data-pro-otros data-txt={otros}></p>}
     </div>
 
     <div class="pro__abierto" data-pro-abierto hidden>
@@ -141,8 +155,36 @@ const primero = datos[0];
   .pro__frag--meta, .pro__frag--con, .pro__frag--cta { font-family: var(--mono); font-size: max(10px, 1.9cqw); line-height: 1.35; letter-spacing: .06em; text-transform: uppercase; }
   .pro__frag--con { color: var(--rosa); }
   .pro__frag--cta { color: var(--tinta); background: var(--crema); padding: .35em .6em; text-shadow: none; }
-  .pro__frag :global(.caret) { display: inline-block; width: .5em; height: .95em; margin-left: 2px; vertical-align: -.08em; background: currentColor; animation: caret 1s steps(1) infinite; }
+  .pro__frag :global(.caret), .pro__otros :global(.caret) { display: inline-block; width: .5em; height: .95em; margin-left: 2px; vertical-align: -.08em; background: currentColor; animation: caret 1s steps(1) infinite; }
   @keyframes caret { 50% { opacity: 0; } }
+
+  /* «Ver los N proyectos»: la píldora de los botones de la web, en grande. proyectos.js la sube con el scroll y la deja
+     bajo el título; sin JS, abajo. Al pasar el ratón, la luz crema sube desde abajo (como la transición que viene), la
+     flecha se cambia por otra y debajo se escriben los que faltan */
+  .pro__mas {
+    position: absolute; left: 0; right: 0; bottom: 12vh;
+    display: flex; flex-direction: column; align-items: center; gap: 18px;
+    padding: 0 var(--margen); text-align: center; pointer-events: none;
+  }
+  :global(html.js:not(.mov-reducido)) .pro__mas { top: 0; bottom: auto; transform: translate3d(0, 110vh, 0); will-change: transform; }
+  .pro__ver {
+    position: relative; isolation: isolate; overflow: hidden; pointer-events: auto;
+    display: inline-flex; align-items: center; gap: 14px;
+    padding: 15px 24px 15px 30px; border: 1px solid var(--crema); border-radius: 99px;
+    font-size: 15px; line-height: 1.2; letter-spacing: .01em; color: var(--crema);
+    transition: color .45s var(--curva);
+  }
+  .pro__mas.apagado .pro__ver { pointer-events: none; }
+  .pro__ver-luz { position: absolute; inset: -1px; z-index: -1; border-radius: inherit; background: var(--crema); transform: translateY(102%); transition: transform .6s var(--curva); }
+  .pro__ver em { font-family: var(--serif); font-style: italic; font-size: 1.5em; line-height: 0; letter-spacing: -.01em; color: var(--rosa); transition: color .45s var(--curva); }
+  .pro__ver-flecha { position: relative; display: inline-block; width: 1em; height: 1.2em; overflow: hidden; }
+  .pro__ver-flecha span { position: absolute; left: 0; top: 0; transition: transform .6s var(--curva); }
+  .pro__ver-flecha span + span { transform: translateX(-130%); }
+  .pro__ver:hover, .pro__ver:focus-visible, .pro__ver:hover em, .pro__ver:focus-visible em { color: var(--tinta); }
+  .pro__ver:hover .pro__ver-luz, .pro__ver:focus-visible .pro__ver-luz { transform: none; }
+  .pro__ver:hover .pro__ver-flecha span, .pro__ver:focus-visible .pro__ver-flecha span { transform: translateX(130%); }
+  .pro__ver:hover .pro__ver-flecha span + span, .pro__ver:focus-visible .pro__ver-flecha span + span { transform: none; }
+  .pro__otros { margin: 0; max-width: 46ch; min-height: 2.8em; color: var(--crema-2); }
 
   /* Proyecto abierto */
   /* El proyecto abierto va fijo a la pantalla (no a la sección): da igual dónde estuviera la foto o si la sección
@@ -179,6 +221,8 @@ const primero = datos[0];
     .pro__ficha-texto { margin-top: 14px; font-size: 14px; }
     .pro__ficha-datos { display: none; }
     .pro__ficha-enlace { margin-top: 16px; }
+    .pro__ver { font-size: 14px; padding: 13px 20px 13px 24px; gap: 12px; }
+    .pro__otros { max-width: 34ch; }
   }
 
   /* Sin movimiento: una rejilla quieta, con el texto ya escrito */
@@ -187,4 +231,10 @@ const primero = datos[0];
   :global(html.mov-reducido) .pro__cabeza { position: static; margin-bottom: 8vh; }
   :global(html.mov-reducido) .pro__lienzo { position: static; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
   :global(html.mov-reducido) .pro__pieza { position: relative; left: auto; width: auto; transform: none !important; }
+  /* …y «Ver los N proyectos» debajo, con los que faltan ya escritos; la luz entra con un fundido y la flecha no se mueve */
+  :global(html.mov-reducido) .pro__mas { position: static; margin-top: 10vh; padding: 0; }
+  :global(html.mov-reducido) .pro__ver-luz { transform: none; opacity: 0; transition: opacity .3s; }
+  :global(html.mov-reducido) .pro__ver:hover .pro__ver-luz, :global(html.mov-reducido) .pro__ver:focus-visible .pro__ver-luz { opacity: 1; }
+  :global(html.mov-reducido) .pro__ver-flecha span { transition: none; transform: none !important; }
+  :global(html.mov-reducido) .pro__ver-flecha span + span { display: none; }
 </style>
