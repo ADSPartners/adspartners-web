@@ -3,6 +3,7 @@ import '../styles/global.css';
 import Consentimiento from '../components/Consentimiento.astro';
 import Entrada from '../components/Entrada.astro';
 import { ORGANIZACION, WEBSITE, WEB_ID, migas } from '../data/schema.js';
+import { DESTINOS } from '../data/menu.js';
 
 // titulo: el <title>, con las palabras que se buscan; ogTitulo: lo que sale al compartir en redes (si no, el titulo).
 // Los datos estructurados (data/schema.js): la organización y el sitio en todas, la página (tipoPagina, con lo de
@@ -34,6 +35,13 @@ const grafo = indexar ? {
     ...schema,
   ],
 } : null;
+// «Ir con entrada» (scripts/entrada.js, para los enlaces con data-entrada): la base y, por ruta, el LED y el fondo de
+// cada página del menú
+const entradas = {
+  base,
+  destinos: Object.fromEntries(DESTINOS.filter((d) => d.ruta && !d.ruta.startsWith('#'))
+    .map((d) => [d.ruta, { c: d.color, f: d.fondo || '#120D0A', p: d.partido ? 1 : 0 }])),
+};
 ---
 <!doctype html>
 <html lang={lang} data-umbral={umbral ? '' : undefined} data-construye={construye ? '' : undefined}>
@@ -107,6 +115,8 @@ const grafo = indexar ? {
   </head>
   <body>
     <Entrada />
+    <script is:inline type="application/json" id="ads-entradas" set:html={JSON.stringify(entradas).replace(/</g, '\\u003c')} />
+    <script>import '../scripts/entrada.js';</script>
     <slot />
     <Consentimiento />
   </body>

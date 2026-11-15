@@ -48,7 +48,7 @@ src/pages/about/index.astro   About («About · adsPartners»): los dos que hace
                         se acercan hasta juntarse en el marco; al final, lo que hace cada uno (scripts/about.js; textos y fotos en
                         src/data/about.js; lo que falta de Sebas sale como hueco marcado con su pregunta)
 src/layouts/Base.astro  <head>, metas, fuentes precargadas y el script que decide umbral, movimiento y ratón. construye: la
-                        página se construye al llegar (About, Proyectos, Tech): la coreografía es CSS de cada página bajo
+                        página se construye al llegar (About, Proyectos, Tech, Brand): la coreografía es CSS de cada página bajo
                         html.construye, empieza con el primer pintado y acaba con la animación «construida» del <html>; lo
                         que pesa (WebGL, letras que notan el ratón, fotos de más) espera a ads:construida (pagina.js)
 src/components/
@@ -65,8 +65,9 @@ src/components/
   Consentimiento.astro  la «N. del E.»: el aviso de consentimiento de medición y campañas. Solo sale si hay IDs en
                         src/data/rastreo.js (o al compilar con ADS_RASTREO_DEMO=1, que lo enseña sin cargar nada); lo mueve
                         scripts/consentimiento.js y lo que carga, scripts/rastreo.js, solo después del sí
-  Entrada.astro         la llegada desde el menú: la página empieza con el fondo en el que acaba el viaje y lo desvanece (solo
-                        si se llega así: lo cuenta ads-entrada, que lee el script de Base.astro)
+  Entrada.astro         la llegada desde el menú (o desde un enlace con data-entrada: scripts/entrada.js): la página empieza
+                        con el fondo en el que acaba el viaje y lo desvanece (solo si se llega así: lo cuenta ads-entrada,
+                        que lee el script de Base.astro)
   Cursor.astro, Marca.astro
 src/data/               partners y proyectos (el archivo los enseña todos con su foto «cinta»; el lienzo de la home, los home: true con su «foto»); de dónde sale cada logo, en partners-LEEME.md
 src/scripts/
@@ -74,6 +75,8 @@ src/scripts/
   pagina.js             arranque de las subpáginas: lo mismo menos el umbral y la portada, más el montaje propio de cada una
                         (que recibe construida, enReposo y compas para esperar a la llegada o ponerse en hora con ella)
   comun.js              lo compartido: los imanes y la barra que se esconde (y se pone en tinta sobre lo claro)
+  entrada.js            «ir con entrada»: un enlace con data-entrada sale con la ventana de color del final del menú (sin la
+                        placa) y la página llega con su entrada y su construcción. Lo carga Base.astro; cómo se usa, arriba
   menu.js               el menú (components/Menu.astro, datos en data/menu.js): abrir y cerrar
   menu/placa.js         el menú baja de la web a la placa que la ejecuta: una ola que sale del botón vuelve la página su
                         código y la cámara baja recta por sus capas (lo que ves, el código que lo pinta, los píxeles),
@@ -110,6 +113,7 @@ src/scripts/
   sonido.js             música generativa y efectos con Web Audio (no hay ficheros de audio)
   ajustes.js            solo el sonido (las barras)
 src/styles/global.css   colores, tipos y curvas de la casa
+src/styles/construye-brand.css  la llegada de Brand (html.construye), aparte del CSS de la página por su rediseño
 public/assets/          fuentes, logos, partners, imagen de portada, fondo y material de los proyectos
 ```
 

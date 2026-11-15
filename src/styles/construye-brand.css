@@ -1,0 +1,35 @@
+/* Brand: la página se construye al llegar (html.construye; Base.astro), como Proyectos, Tech y el About. La marca se
+   monta capa a capa: primero lo que dice dónde estás (la etiqueta y «Una marca no es un logo»); después llegan desde
+   abajo las seis planchas, de la de debajo de todo (la idea) a la de arriba (la marca), que se posa la última y deja el
+   ads terminado; mientras, sube la luz de detrás. Al final, el texto, lo fijo de arriba y la pista.
+   Solo opacity y las propiedades sueltas translate y rotate: corren en el compositor y no pisan el transform que
+   brand.js pone a cada plancha en cada fotograma. Va aparte del <style> de pages/brand para no cruzarse con su
+   rediseño: si cambian sus clases o el número de planchas, se pone al día aquí ------------------------------------ */
+html.construye { animation-name: construida; animation-duration: 2s; animation-timing-function: linear; animation-fill-mode: both; }
+
+html.construye .bd-etq { animation-name: bd-c-entra; animation-duration: .5s; animation-delay: .05s; animation-timing-function: ease-out; animation-fill-mode: both; }
+html.construye .bd-t { animation-name: bd-c-entra, bd-c-sube; animation-duration: .6s, .9s; animation-delay: .12s; animation-timing-function: ease-out, var(--curva); animation-fill-mode: both; }
+html.construye .bd-escena::before { animation-name: bd-c-entra; animation-duration: 1.4s; animation-delay: .2s; animation-timing-function: ease-out; animation-fill-mode: both; }
+
+/* Las planchas, de abajo arriba y un poco giradas, como hojas que se dejan en el montón. Mientras llegan, cada una
+   lleva ya su altura en la pila cerrada (la que le da brand.js), para que la nueva quede encima aunque brand.js no
+   haya arrancado todavía (sin ella, se apilan en el orden del HTML: la idea arriba) */
+html.construye .bd-capa { animation-name: bd-c-entra, bd-c-plancha; animation-duration: .3s, .75s; animation-timing-function: ease-out, var(--curva); animation-fill-mode: both; }
+html.construye .bd-capa[data-capa='5'] { translate: 0 0 .6px; --bd-gira: -3deg; animation-delay: .3s; }
+html.construye .bd-capa[data-capa='4'] { translate: 0 0 1.2px; --bd-gira: 2.5deg; animation-delay: .4s; }
+html.construye .bd-capa[data-capa='3'] { translate: 0 0 1.8px; --bd-gira: -2deg; animation-delay: .5s; }
+html.construye .bd-capa[data-capa='2'] { translate: 0 0 2.4px; --bd-gira: 3deg; animation-delay: .6s; }
+html.construye .bd-capa[data-capa='1'] { translate: 0 0 3px; --bd-gira: -2.5deg; animation-delay: .7s; }
+html.construye .bd-capa[data-capa='0'] { translate: 0 0 3.6px; --bd-gira: 1.5deg; animation-delay: .84s; }
+
+/* Las cotas de la vista técnica, fuera hasta el final (si no, al llegar se ven un momento mientras se apagan) */
+html.construye .bd-cotas { visibility: hidden; }
+
+html.construye .bd-p { animation-name: bd-c-entra, bd-c-sube; animation-duration: .5s, .8s; animation-delay: 1.2s; animation-timing-function: ease-out, var(--curva); animation-fill-mode: both; }
+html.construye .bd-donde,
+html.construye .bd-arriba { animation-name: bd-c-entra; animation-duration: .5s; animation-delay: 1.4s; animation-timing-function: ease-out; animation-fill-mode: both; }
+html.construye .bd-pista { animation-name: bd-c-entra; animation-duration: .5s; animation-delay: 1.45s; animation-timing-function: ease-out; animation-fill-mode: both; }
+
+@keyframes bd-c-entra { from { opacity: 0; } }
+@keyframes bd-c-sube { from { translate: 0 16px; } }
+@keyframes bd-c-plancha { from { translate: 0 46vh; rotate: var(--bd-gira, 0deg); } }

@@ -9,6 +9,7 @@
 // Los seis capítulos van enteros en el HTML (auditoría SEO del 03-nov: antes los escribía el JS y no los veía quien no lo
 // ejecuta); brand.js solo decide cuál se ve.
 import Base from '../../layouts/Base.astro';
+import '../../styles/construye-brand.css';   // (la llegada: la página se construye; aparte, por el rediseño de Brand)
 import Cursor from '../../components/Cursor.astro';
 import Marca from '../../components/Marca.astro';
 import EnlacesWeb from '../../components/EnlacesWeb.astro';
@@ -34,6 +35,7 @@ const [S_IDENTIDAD, S_WEBS, S_ARTE, S_CONTENIDO] = CIERRE.servicios;
   miga="Brand"
   pagina={{ about: { '@id': SERVICIO_BRAND['@id'] } }}
   schema={[SERVICIO_BRAND]}
+  construye
 >
   <!-- Fijo, como en Tech: dónde estás y, a la derecha, la hora de aquí, el sonido y la vuelta -->
   <p class="bd-donde"><span class="bd-barra" aria-hidden="true"></span><span>Brand · <span class="bd-marca">adsPartners</span></span></p>
