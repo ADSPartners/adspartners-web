@@ -17,6 +17,10 @@ export function montar(sec, { reducido, conRaton, lenis, cursor }) {
   const abierto = sec.querySelector('[data-pro-abierto]');
   const foco = sec.querySelector('[data-pro-foco]');
   const ficha = sec.querySelector('[data-pro-ficha]');
+  const mas = sec.querySelector('[data-pro-mas]');
+  const otros = sec.querySelector('[data-pro-otros]');
+  const pista = sec.querySelector('.pro__pista');
+  const titulo = sec.querySelector('.pro__titulo');
   const tactil = !matchMedia('(hover: hover) and (pointer: fine)').matches;
 
   // --- El scroll: cada pieza sube a su velocidad ---------------------------------
@@ -25,26 +29,45 @@ export function montar(sec, { reducido, conRaton, lenis, cursor }) {
   const VEL = 0.72;
   const vel = piezas.map((_, i) => VEL - 0.03 + azar(i, 1) * 0.06);
   let base = [];
+  let inicioTransicion = 1, baseMas = 0, paradaMas = 0, masLlegado = false, otrosN = 0, otrosT = null;
+  const u = piezas.length - 1;
   function medir() {
     L = Math.max(1, sec.offsetHeight - innerHeight);
-    const n = piezas.length;
     // La transición se monta sobre los últimos 120vh y no empieza hasta que todas las fotos han salido por arriba:
     // la última se coloca para que su borde de abajo pase el de arriba de la pantalla justo ahí. La primera asoma
     // ya al empezar
-    const inicioTransicion = Math.max(1, L - innerHeight * 1.2);
-    const u = n - 1;
+    inicioTransicion = Math.max(1, L - innerHeight * 1.2);
     const factor = (i) => 0.97 + azar(i, 2) * 0.06;
     const baseUltima = inicioTransicion * vel[u] - piezas[u].offsetHeight - innerHeight * 0.06;
     const hueco = Math.max(innerHeight * 0.4, (baseUltima - innerHeight * 0.82) / ((u || 1) * factor(u)));
     base = piezas.map((_, i) => innerHeight * 0.82 + i * hueco * factor(i));
+    // «Ver los N proyectos» va detrás de la última, como una foto más (a su velocidad), y se para donde está la pista,
+    // bajo el título (y lo que le cuelga a la «q»): siempre antes de que empiece la transición
+    baseMas = base[u] + Math.min(hueco, piezas[u].offsetHeight + innerHeight * 0.45);
+    if (pista) paradaMas = pista.offsetTop + parseFloat(getComputedStyle(titulo).fontSize) * 0.14;
   }
   medir();
   addEventListener('resize', () => { medir(); colocar(); });
+  // (la parada depende de cómo cae el título, que cambia al llegar la Garamond)
+  document.fonts?.ready.then(() => { medir(); colocar(); });
 
   function colocar() {
     if (reducido || estado !== 'lienzo') return;
     const s = p * L;
     piezas.forEach((el, i) => { el.style.transform = `translate3d(0, ${(base[i] - s * vel[i]).toFixed(1)}px, 0)`; });
+    if (!mas) return;
+    // Sube como las fotos y frena al llegar (softplus: la distancia que le queda se va a cero sin golpe)
+    const d = baseMas - s * vel[u] - paradaMas, k = 60;
+    const y = paradaMas + (d > k * 8 ? d : k * Math.log1p(Math.exp(d / k)));
+    mas.style.transform = `translate3d(0, ${y.toFixed(1)}px, 0)`;
+    // La pista («pasa el ratón por encima de una foto») se apaga mientras llega: ya no quedan fotos
+    if (pista) pista.style.opacity = String(Math.min(1, Math.max(0, d / (innerHeight * 0.3))));
+    // Cuando la luz ya lo ha tapado casi entero, no se puede pulsar
+    mas.classList.toggle('apagado', s > inicioTransicion + innerHeight * 1.2 * 0.55);
+    // En el móvil no hay ratón: los que faltan se escriben al llegar y se borran si vuelve a bajar
+    const llegado = d < k;
+    if (tactil && llegado !== masLlegado) escribirOtros(llegado);
+    masLlegado = llegado;
   }
   if (!reducido) {
     ScrollTrigger.create({ trigger: sec, start: 'top top', end: 'bottom bottom', onUpdate: (st) => { p = st.progress; colocar(); } });
@@ -98,6 +121,33 @@ export function montar(sec, { reducido, conRaton, lenis, cursor }) {
     }
   }
   function pararEscrito(el) { const e = escritos.get(el); if (e) e.frags.forEach((f) => clearTimeout(f.t)); }
+
+  // «Ver los N proyectos»: con el ratón encima (o el foco) se escriben debajo, a máquina, los que no salen en el
+  // lienzo; al irse, se borran deprisa hacia atrás. Sin movimiento, ya están escritos
+  // (al ritmo del reloj y no de los setTimeout, que se retrasan con la página ocupada: unas 45 letras por segundo)
+  function escribirOtros(si) {
+    if (!otros) return;
+    clearTimeout(otrosT);
+    const txt = otros.dataset.txt || '';
+    const desde = otrosN, t0 = performance.now() + (si && !otrosN ? 140 : 0);
+    const paso = () => {
+      const n = Math.floor(Math.max(0, performance.now() - t0) / (si ? 22 : 4));
+      const antes = otrosN;
+      otrosN = si ? Math.min(txt.length, desde + n) : Math.max(0, desde - n);
+      if (si && otrosN > antes && txt.slice(antes, otrosN).trim()) sonido.tecla(0.6);
+      otros.innerHTML = otrosN ? `${esc(txt.slice(0, otrosN))}${si ? '<span class="caret"></span>' : ''}` : '';
+      if (si ? otrosN < txt.length : otrosN > 0) otrosT = setTimeout(paso, si ? 14 + Math.random() * 18 : 10);
+    };
+    otrosT = setTimeout(paso, Math.max(0, t0 - performance.now()));
+  }
+  const ver = sec.querySelector('[data-pro-ver]');
+  if (otros && reducido) otros.textContent = otros.dataset.txt || '';
+  else if (ver) {
+    ver.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') escribirOtros(true); });
+    ver.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') escribirOtros(false); });
+    ver.addEventListener('focus', () => { if (!tactil) escribirOtros(true); });
+    ver.addEventListener('blur', () => { if (!tactil) escribirOtros(false); });
+  }
 
   // La foto señalada se inclina un poco hacia el ratón
   function inclinar(el, ev) {
@@ -201,7 +251,7 @@ export function montar(sec, { reducido, conRaton, lenis, cursor }) {
         duration: reducido ? 0 : 0.8, ease: 'power3.in', delay: reducido ? 0 : Math.min(0.25, len / 4000),
       });
     });
-    gsap.to(sec.querySelector('.pro__cabeza'), { opacity: 0, duration: dur * 0.4 });
+    gsap.to([sec.querySelector('.pro__cabeza'), mas].filter(Boolean), { opacity: 0, duration: dur * 0.4 });
     escribirNombre(pr.nombre);
   }
 
@@ -230,7 +280,7 @@ export function montar(sec, { reducido, conRaton, lenis, cursor }) {
       if (otra === origen) return;
       gsap.to(otra.querySelector('[data-pro-marco]'), { x: 0, y: 0, scale: 1, opacity: 1, filter: 'blur(0px)', duration: dur, ease: 'power3.out', delay: dur * 0.3, clearProps: 'filter,transform,opacity' });
     });
-    gsap.to(sec.querySelector('.pro__cabeza'), { opacity: 1, duration: dur, delay: dur * 0.4 });
+    gsap.to([sec.querySelector('.pro__cabeza'), mas].filter(Boolean), { opacity: 1, duration: dur, delay: dur * 0.4 });
   }
 
   function rellenarFicha(pr) {
