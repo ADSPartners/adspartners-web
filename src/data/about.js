@@ -88,5 +88,5 @@ export const CIERRE = {
     pregunta: '¿Qué haces tú que el otro no sabe hacer?',
     texto: 'La marca de arriba abajo: el logo, los colores, cómo habla y cómo se ve en cada sitio. Y la dirección de arte de cada web, para que tu negocio no se parezca a ningún otro.',
   },
-  alvaro: { texto: 'La IA, la informática, los servidores y todo lo que hay montado por dentro, para ads y para los clientes.' },
+  alvaro: { texto: 'La IA, la informática, los servidores y todo lo que hay montado por dentro, para ads y para los clientes. Esto, combinado con la optimización de procesos y la estrategia empresarial, hace que podamos ofrecer un servicio que de verdad marca la diferencia.' },
 };
