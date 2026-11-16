@@ -6,7 +6,8 @@
 // - Nada se mueve solo: si nadie mueve el ratón, no se pinta (el canvas se queda con el último fotograma).
 // - Con data-papel (el About), la mitad izquierda es el papel de la marca: grano y fibras quietos, y por donde pasa el
 //   ratón, acuarela rosa. La costura no es una línea: el papel se deshace en píxeles (matriz de Bayer) a lo largo de
-//   una franja, con el borde algo irregular, y el mismo fluido la empuja.
+//   una franja, con el borde algo irregular, y el mismo fluido la empuja. La costura va a media pantalla o donde diga
+//   data-costura (de 0 a 1 del ancho; Brand, 16-nov: 0,43, o más de 1 para que todo sea papel).
 import { Renderer, Program, Mesh, Triangle, Texture } from 'ogl';
 import { gsap } from 'gsap';
 import { Fluido } from './fluido.js';
@@ -27,7 +28,7 @@ in vec2 vUv; out vec4 color;
 uniform sampler2D tTinte; uniform sampler2D tVel; uniform sampler2D tGlifos;
 uniform vec2 uRes; uniform float uDpr; uniform float uCelda; uniform float uGlifosN; uniform float uIntro;
 uniform vec3 cNoche; uniform vec3 cCrema; uniform vec3 cRosa;
-uniform float uPapel; uniform vec3 cPapel; uniform vec3 cPigmento;
+uniform float uPapel; uniform vec3 cPapel; uniform vec3 cPigmento; uniform float uCostura;
 
 float hash (vec2 p) { p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
 float ruido (vec2 p) {
@@ -72,7 +73,7 @@ void main () {
   // del 12 % del ancho el papel se funde con la máquina (lo brand) con una trama fina de Bayer encima (lo tech), en
   // celdas de 2 px. La rampa pasa de −0,3 a 1,3 para que, fuera de la franja, ninguna celda de la trama quede a medias
   float sx = q.x - vel.x * 0.05 * uDpr;
-  float borde = uRes.x * (0.5 + (ruido(vec2(q.y / (140.0 * uDpr), 4.7)) - 0.5) * 0.05);
+  float borde = uRes.x * (uCostura + (ruido(vec2(q.y / (140.0 * uDpr), 4.7)) - 0.5) * 0.05);
   float zona = uRes.x * 0.06;
   float m = 1.0 - smoothstep(borde - zona, borde + zona, sx);
   float b = bayer8(floor(q / (2.0 * uDpr)));
@@ -121,6 +122,7 @@ export async function crearFondo() {
     uCelda: { value: 12 * renderer.dpr }, uGlifosN: { value: GLIFOS.length }, uIntro: { value: 0 },
     cNoche: { value: hex('#120D0A') }, cCrema: { value: hex('#E7E2DA') }, cRosa: { value: hex('#F5CBD7') },
     uPapel: { value: canvas.hasAttribute('data-papel') ? 1 : 0 }, cPapel: { value: hex('#E7E2DA') }, cPigmento: { value: hex('#E2A0B6') },
+    uCostura: { value: Number(canvas.dataset.costura) || 0.5 },
   };
   const malla = new Mesh(gl, { geometry: new Triangle(gl), program: new Program(gl, { vertex: VERT, fragment: FRAG, uniforms: u, depthTest: false, depthWrite: false }) });
 

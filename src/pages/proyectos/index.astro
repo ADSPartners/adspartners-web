@@ -8,11 +8,11 @@
 // diez fichas de la esquina, cada una con el id de su proyecto (el #slug del índice lleva a ella), y el índice.
 // Las fotos de la cinta van con sus variantes de 480, 800 y 1200 px (<foto>-<ancho>.webp, junto a la original): el
 // navegador pide la que le basta para el tamaño de la carta, y cinta.js solo las de las cartas que están en pantalla o
-// a un paso. Bajo el logotipo, las cuatro páginas (components/NavSubpaginas.astro, en índice) y la carta de la home.
+// a un paso. Bajo el logotipo, la carta de la home; abajo a la izquierda, el menú (components/MenuPaginas.astro).
 import Base from '../../layouts/Base.astro';
 import Cursor from '../../components/Cursor.astro';
 import Marca from '../../components/Marca.astro';
-import NavSubpaginas from '../../components/NavSubpaginas.astro';
+import MenuPaginas from '../../components/MenuPaginas.astro';
 import { PROYECTOS } from '../../data/proyectos.js';
 import { ORG_ID, LISTA_ID, LISTA_PROYECTOS } from '../../data/schema.js';
 const base = import.meta.env.BASE_URL;
@@ -45,10 +45,8 @@ const PRIMERAS = [0, 1, 2, PROYECTOS.length - 1];
     <button class="cin__sonido" type="button" aria-pressed="false" aria-label="Sonido" data-sonido-btn data-sonido-hover><span data-sonido-txt>Sonido off</span> —</button>
     <p class="cin__donde" aria-hidden="true"><span>Desde Madrid</span><span class="cin__hora" data-cin-hora></span></p>
     <a class="cin__volver" href={base} data-sonido-hover><span class="cin__flecha" aria-hidden="true">◀</span> <span class="cin__subraya">Página principal</span></a>
-    <!-- Bajo el logotipo, las cuatro páginas (en índice) y la carta de la home; aquí, para llegar a ellas con el
-         tabulador antes que a los proyectos -->
+    <!-- Bajo el logotipo, la carta de la home -->
     <div class="cin__enlaces">
-      <NavSubpaginas actual="proyectos" forma="indice" />
       <a class="cin__carta-home" href={`${base}#contacto`} data-sonido-hover>Escríbenos <span aria-hidden="true">▶</span></a>
     </div>
 
@@ -114,7 +112,8 @@ const PRIMERAS = [0, 1, 2, PROYECTOS.length - 1];
       <span class="cin__total" data-cin-total>/{dos(PROYECTOS.length)}</span>
     </div>
 
-    <p class="cin__pista" aria-hidden="true"><span class="cin__pista-raton">Rueda</span><span class="cin__pista-dedo">Desliza</span></p>
+    <!-- Abajo a la izquierda, donde estaba «Rueda»: el menú, que sube desde el botón -->
+    <MenuPaginas actual="proyectos" abre="arriba" class="cin__menu" />
     <a class="cin__ver" href={`mailto:${correo}`} data-cin-ver data-sonido-hover><span class="cin__subraya" data-cin-ver-t>Te lo contamos</span> <span class="cin__flecha" aria-hidden="true">▶</span></a>
   </main>
   <Cursor />
@@ -239,15 +238,9 @@ const PRIMERAS = [0, 1, 2, PROYECTOS.length - 1];
   .cin__tira { display: block; will-change: transform; }
   .cin__tira :global(span) { display: block; height: 1em; line-height: 1em; white-space: nowrap; }
 
-  .cin__pista { position: absolute; left: var(--margen); bottom: var(--margen); z-index: 4; margin: 0; font-weight: 500; color: var(--gris); }
-  .cin__pista-dedo { display: none; }
-  @media (hover: none), (pointer: coarse) {
-    .cin__pista-raton { display: none; }
-    .cin__pista-dedo { display: inline; }
-  }
-  /* Las cuatro páginas (components/NavSubpaginas.astro), en índice, y la carta de la home: en la columna del logotipo,
-     debajo de él, por donde no pasa la fila */
-  .cin { --nsp-retraso: 1.25s; }
+  /* El menú (components/MenuPaginas.astro), abajo a la izquierda, en tinta como lo demás */
+  .cin :global(.cin__menu) { position: absolute; left: var(--margen); bottom: calc(var(--margen) - 6px); z-index: 6; color: var(--tinta); }
+  /* La carta de la home: en la columna del logotipo, debajo de él, por donde no pasa la fila */
   .cin__enlaces { position: absolute; left: var(--margen); top: calc(var(--arriba) + 136px + 3vh); z-index: 4; width: calc(var(--col-b) - var(--margen) - 24px); }
   .cin__carta-home { display: inline-block; margin-top: 14px; font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; font-weight: 500; border-bottom: 1px solid transparent; transition: border-color .3s; }
   .cin__carta-home:hover, .cin__carta-home:focus-visible { border-bottom-color: currentColor; }
@@ -260,11 +253,10 @@ const PRIMERAS = [0, 1, 2, PROYECTOS.length - 1];
     .cin { --alto-item: 160px; --col-b: var(--margen); --arriba: var(--margen); }
     .cin__logo { width: 120px; height: 24px; }
     .cin__logo :global(svg) { top: 0; width: 120px; transform: none; }
-    .cin__sello, .cin__donde, .cin__sonido, .cin__info, .cin__paleta, .cin__pista { display: none; }
-    /* las páginas, en fila, y la carta, centradas en el hueco que queda entre la carta que se acaba de ir (arriba) y la
-       del centro */
-    .cin__enlaces { left: var(--margen); right: var(--margen); top: 17%; width: auto; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; }
-    .cin__enlaces > :global(nav) { align-self: stretch; }
+    .cin__sello, .cin__donde, .cin__sonido, .cin__info, .cin__paleta { display: none; }
+    /* el menú y la carta, centrados en el hueco que queda entre la carta que se acaba de ir (arriba) y la del centro */
+    .cin :global(.cin__menu) { left: 50%; bottom: auto; top: 13%; translate: -50% 0; }
+    .cin__enlaces { left: var(--margen); right: var(--margen); top: 19%; width: auto; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; }
     .cin__carta-home { margin-top: 10px; font-size: 10px; }
     .cin__marca { transform: translate(-50%, calc(var(--h, 0px) / -2 - 100% - 10px)); }
     .cin__indice { left: var(--margen); right: var(--margen); width: auto; top: 57%; bottom: auto; height: var(--alto-item); -webkit-mask-image: none; mask-image: none; }
@@ -290,7 +282,7 @@ const PRIMERAS = [0, 1, 2, PROYECTOS.length - 1];
   :global(html.construye) .cin__sonido,
   :global(html.construye) .cin__donde,
   :global(html.construye) .cin__volver,
-  :global(html.construye) .cin__pista,
+  :global(html.construye) .cin__menu,
   :global(html.construye) .cin__enlaces,
   :global(html.construye) .cin__ver { animation-name: cin-c-entra; animation-duration: .5s; animation-delay: 1.25s; animation-timing-function: ease-out; animation-fill-mode: both; }
   @keyframes cin-c-entra { from { opacity: 0; } }

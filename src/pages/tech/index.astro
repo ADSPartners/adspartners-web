@@ -6,7 +6,7 @@
 import Base from '../../layouts/Base.astro';
 import Marca from '../../components/Marca.astro';
 import EnlacesWeb from '../../components/EnlacesWeb.astro';
-import NavSubpaginas from '../../components/NavSubpaginas.astro';
+import MenuPaginas from '../../components/MenuPaginas.astro';
 import { TECH } from '../../data/tech.js';
 import { SERVICIOS_TECH } from '../../data/schema.js';
 const base = import.meta.env.BASE_URL;
@@ -26,8 +26,8 @@ const primero = TECH[0];
     <canvas class="tec__lienzo" data-tec-lienzo aria-hidden="true"></canvas>
     <div class="tec__rejilla" aria-hidden="true"></div>
 
-    <!-- Fijo: arriba, dónde estás y, a la derecha, la hora de aquí, el sonido y las cuatro páginas (el sonido, arriba a
-         la derecha como en las demás páginas; en el móvil, las páginas en una fila debajo); abajo, el logotipo (que
+    <!-- Fijo: arriba, dónde estás y, a la derecha, la hora de aquí, el sonido y el menú (el sonido, arriba a
+         la derecha como en las demás páginas); abajo, el logotipo (que
          lleva a la home) y el correo -->
     <p class="tec__donde"><span class="tec__barra" aria-hidden="true"></span><span>Tech · <span class="tec__marca">adsPartners</span></span></p>
     <div class="tec__arriba">
@@ -36,7 +36,7 @@ const primero = TECH[0];
         <span class="tec__ondas" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
         <span class="oculto-accesible" data-sonido-txt>Sonido off</span>
       </button>
-      <NavSubpaginas actual="tech" class="tec__nav" />
+      <MenuPaginas actual="tech" class="tec__nav" />
     </div>
     <a class="tec__logo" href={base} aria-label="adsPartners, inicio" data-sonido-hover><Marca tipo="logo" /></a>
     <div class="tec__pie">
@@ -185,9 +185,8 @@ const primero = TECH[0];
   .tec__madrid { margin: 0; pointer-events: none; }
   .tec__hora { margin-left: 6px; opacity: .58; font-variant-numeric: tabular-nums; }
   .tec__correo:hover { color: var(--crema); }
-  /* Las cuatro páginas (components/NavSubpaginas.astro), al final de la barra: el nombre, a la altura de lo demás */
-  .tec { --nsp-retraso: 1.05s; }
-  :global(.tec__nav) { align-self: flex-start; margin-top: -9px; color: var(--crema); }
+  /* El menú (components/MenuPaginas.astro), al final de la barra */
+  :global(.tec__nav) { color: var(--crema); }
   .tec__logo { position: absolute; left: var(--lado); bottom: calc(var(--arriba) - 4px); z-index: 6; width: 128px; color: var(--crema); }
   .tec__pie { position: absolute; right: var(--lado); bottom: var(--arriba); z-index: 6; display: flex; align-items: center; gap: clamp(24px, 6vw, 110px); }
   .tec__correo { font-size: 10px; letter-spacing: .16em; }
@@ -384,8 +383,6 @@ const primero = TECH[0];
     .tec__rejilla { opacity: .6; }
     .tec__donde, .tec__madrid { display: none; }
     .tec__arriba { gap: 18px; }
-    /* Las cuatro páginas, en una fila debajo de la barra y a todo el ancho; lo de arriba de cada vista baja lo que ocupa */
-    :global(.tec__nav) { position: absolute; right: 0; top: calc(100% + 16px); width: calc(100vw - 2 * var(--lado)); margin: 0; }
     .tec__logo { top: var(--arriba); bottom: auto; width: 112px; }
     .tec__pie { left: 0; right: 0; bottom: 0; justify-content: space-between; padding: 16px var(--lado); background: rgba(18, 13, 10, .92); border-top: 1px solid var(--tenue); }
     .tec__contador { top: calc(var(--arriba) + 88px); left: 50%; padding: 10px 26px; font-size: 11px; }

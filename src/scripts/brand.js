@@ -7,10 +7,11 @@
 //   Solo se tocan dos planchas (Álvaro, 15-nov: las demás «no se entienden»): la de color (la marca toma el color por
 //   el que pasas) y la de letra (el titular se pone la letra que eliges); esas dos se levantan al pasar por encima.
 // - Lo que pasa solo al bajar: un brillo recorre la marca, la frase de agencia de la voz se corrige sola mientras dura
-//   su capítulo, el número grande de cada capa entra y sale, y el índice de abajo se llena capa a capa.
-// Debajo, la marca aplicada (sus soportes pasan de lado al bajar), lo que hace una marca bien hecha (cada efecto en su
-// color, y sus cifras suben contando al verse) y el cierre, sobre un bloque rosa que sube.
-// La luz de detrás de la pila cambia con cada capítulo (el color de su capa, de la paleta de la marca).
+//   su capítulo y el índice de abajo se llena capa a capa (si la opción lo enseña).
+// Debajo, lo que hace una marca bien hecha (sus cifras suben contando al verse) y el cierre.
+// 16-nov: fuera la marca aplicada (la zona rosa, con sus soportes de lado) y el número grande; la luz de detrás ya no se
+// pinta (data-luz queda, sin CSS). Lo fijo de arriba cambia de tinta según lo que tenga debajo: html.bd-abajo, pasado el
+// viaje; html.bd-claro, con el cierre arriba (cada opción de la página decide sus colores).
 import { gsap } from 'gsap';
 import * as sonido from './sonido.js';
 import { CAPAS, PALETA, LETRAS, VOZ, PORTADA } from '../data/brand.js';
@@ -35,8 +36,7 @@ export function montarBrand({ reducido, conRaton, cursor }) {
   // Los seis capítulos ya están en el HTML (pages/brand), uno por capa y en el mismo orden: aquí solo se elige cuál se ve
   const caps = [...viaje.querySelectorAll('[data-cap]')];
   const titulo = $('[data-titulo]'), pista = $('[data-pista]');
-  // El número grande de cada capa (entra y sale con su capítulo) y el índice de abajo, que se llena capa a capa al bajar
-  const folio = $('[data-folio]'), folios = folio ? [...folio.children] : [];
+  // El índice de abajo, que se llena capa a capa al bajar
   const llenos = [...viaje.querySelectorAll('[data-indice] li')].map((li) => ({ li, i: li.querySelector('i'), k: -1 }));
 
   const hora = document.querySelector('[data-bd-hora]');
@@ -224,14 +224,9 @@ export function montarBrand({ reducido, conRaton, cursor }) {
       c.classList.toggle('activa', i === ahoraActiva);
     });
 
-    // Lo que se mueve solo al bajar: el brillo recorre la marca, el número grande sube despacio mientras dura su
-    // capítulo y cada tramo del índice se llena con el suyo
+    // Lo que se mueve solo al bajar: el brillo recorre la marca y cada tramo del índice se llena con el suyo
     const bx = Math.round(30 + p * 90), by = Math.round(20 + p * 70);
     if (marca.dataset.b !== `${bx},${by}`) { marca.dataset.b = `${bx},${by}`; marca.style.setProperty('--bx', `${bx}%`); marca.style.setProperty('--by', `${by}%`); }
-    if (folio && !reducido && ahoraActiva >= 0) {
-      const dentro = clamp((p - INICIO - ahoraActiva * PASO) / PASO, 0, 1);
-      folio.style.transform = `translate3d(0, ${((0.5 - dentro) * innerHeight * 0.08).toFixed(1)}px, 0)`;
-    }
     llenos.forEach((l, i) => {
       const k = Math.round(clamp((p - INICIO - i * PASO) / PASO, 0, 1) * 200) / 200;
       if (k !== l.k) { l.k = k; l.i.style.transform = `scaleX(${k})`; }
@@ -255,8 +250,6 @@ export function montarBrand({ reducido, conRaton, cursor }) {
     // El capítulo de la capa que toca
     if (ahoraActiva !== activa) {
       activa = ahoraActiva;
-      // el número grande: entra el suyo desde abajo y los de antes se van por arriba
-      folios.forEach((f, k) => { f.classList.toggle('on', k === activa); f.classList.toggle('antes', activa >= 0 ? k < activa : p > FIN); });
       escena.classList.toggle('en-capitulo', activa >= 0);
       texto.classList.toggle('fuera', activa >= 0);
       ponerCapitulo(activa);
@@ -273,28 +266,6 @@ export function montarBrand({ reducido, conRaton, cursor }) {
     if (escena.dataset.luz !== luz) escena.dataset.luz = luz;
   });
 
-  // --- La marca aplicada: la escena se queda fija y la fila de soportes pasa de lado al bajar; cada uno se endereza
-  // al pasar por el centro. Sin JS o con movimiento reducido, la fila se desliza con el dedo (lo pone el CSS)
-  const aplicada = raiz.querySelector('[data-aplicada]');
-  const fila = aplicada?.querySelector('[data-aplicada-pista]');
-  const piezas = fila ? [...fila.children] : [];
-  let recorrido = 0, centros = [], giros = [];
-  const medirAplicada = () => {
-    if (!aplicada || reducido) return;
-    recorrido = Math.max(0, fila.scrollWidth - innerWidth);
-    aplicada.style.height = `calc(100vh + ${recorrido}px)`;
-    // (dónde cae el centro de cada soporte dentro de la fila, para no medirlos en cada fotograma)
-    centros = piezas.map((el) => el.offsetLeft + el.offsetWidth / 2);
-    giros = piezas.map((el) => parseFloat(el.style.getPropertyValue('--g')) || 0);
-  };
-  if (aplicada && !reducido) {
-    aplicada.classList.add('en-viaje');
-    medirAplicada();
-    addEventListener('resize', medirAplicada);
-    // (las fuentes cambian el ancho de lo escrito)
-    document.fonts?.ready.then(medirAplicada);
-  }
-
   // --- Los efectos: cada tarjeta, a su ritmo al bajar (un poco de profundidad entre ellas), y la segunda línea del
   // titular, sangrada, se corre un poco hacia la izquierda
   const efectosEl = raiz.querySelector('[data-efectos]');
@@ -302,24 +273,16 @@ export function montarBrand({ reducido, conRaton, cursor }) {
   const efectosEm = efectosEl?.querySelector('.bd-efectos__t em');
   const RITMO = [-38, 12, 54];
 
-  // --- El cierre: el bloque rosa sube desde abajo al llegar, y el texto entra cuando ya está casi entero
+  // --- El cierre: el texto entra al llegar (sin el bloque rosa que subía, fuera el 16-nov)
   const cierreEl = raiz.querySelector('[data-cierre]');
-  const fondoCierre = cierreEl?.querySelector('[data-cierre-fondo]');
   const html = document.documentElement;
 
   gsap.ticker.add(() => {
     const vh = innerHeight;
-    if (aplicada && !reducido && recorrido) {
-      const r = aplicada.getBoundingClientRect();
-      if (r.bottom > -50 && r.top < vh + 50) {
-        const k = clamp(-r.top / recorrido, 0, 1);
-        fila.style.transform = `translate3d(${(-k * recorrido).toFixed(1)}px, 0, 0)`;
-        // cada soporte se endereza y sube un poco al pasar por el centro de la pantalla
-        piezas.forEach((el, i) => {
-          const centro = (centros[i] - k * recorrido) / innerWidth - 0.5;
-          el.style.transform = `translate3d(0, ${(Math.abs(centro) * 40).toFixed(1)}px, 0) rotate(${(giros[i] * Math.min(1, Math.abs(centro) * 2.4)).toFixed(2)}deg)`;
-        });
-      }
+    if (efectosEl) {
+      // pasado el viaje (los efectos ya llegan arriba)
+      const abajo = efectosEl.getBoundingClientRect().top < 40;
+      if (abajo !== html.classList.contains('bd-abajo')) html.classList.toggle('bd-abajo', abajo);
     }
     if (efectosEl && !reducido) {
       const r = efectosEl.getBoundingClientRect();
@@ -332,13 +295,10 @@ export function montarBrand({ reducido, conRaton, cursor }) {
     if (cierreEl) {
       const r = cierreEl.getBoundingClientRect();
       const k = reducido ? 1 : clamp((vh - r.top) / (vh * 0.75), 0, 1);
-      const escala = `scaleY(${(1 - Math.pow(1 - k, 3)).toFixed(3)})`;
-      if (fondoCierre && fondoCierre.style.transform !== escala) fondoCierre.style.transform = escala;
       if (k > 0.7 && !cierreEl.classList.contains('on')) cierreEl.classList.add('on');
-      // lo fijo de arriba, en tinta sobre lo claro (la marca aplicada y el cierre, ya subido)
-      const a = aplicada?.getBoundingClientRect();
-      const claro = (a && a.top < 40 && a.bottom > 40) || (k > 0.95 && r.top < 40 && r.bottom > 40);
-      html.classList.toggle('bd-claro', !!claro);
+      // con el cierre arriba, lo fijo de arriba cambia de tinta (cada opción decide a cuál)
+      const claro = r.top < 40 && r.bottom > 40;
+      if (claro !== html.classList.contains('bd-claro')) html.classList.toggle('bd-claro', claro);
     }
   });
 
@@ -351,5 +311,5 @@ export function montarBrand({ reducido, conRaton, cursor }) {
     efectos.querySelectorAll('[data-cuenta]').forEach((n, i) => setTimeout(() => contar(n, Number(n.dataset.cuenta), n.dataset.antes ?? '', n.dataset.sufijo ?? ''), i * 140));
   }, { threshold: 0.25 }).observe(efectos);
 
-  // (el cierre entra con su bloque rosa: lo pone el ticker de arriba)
+  // (el cierre entra al llegar: lo pone el ticker de arriba)
 }

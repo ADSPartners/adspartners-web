@@ -1,7 +1,7 @@
 /* Brand: la página se construye al llegar (html.construye; Base.astro), como Proyectos, Tech y el About. La marca se
    monta capa a capa: primero lo que dice dónde estás (la etiqueta y «Una marca no es un logo»); después llegan desde
    abajo las seis planchas, de la de debajo de todo (la idea) a la de arriba (la marca), que se posa la última y deja el
-   ads terminado; mientras, sube la luz de detrás. Al final, el texto, lo fijo de arriba y la pista.
+   ads terminado. Al final, el texto, lo fijo de arriba y la pista (la luz de detrás y el número grande, fuera el 16-nov).
    Solo opacity y las propiedades sueltas translate y rotate: corren en el compositor y no pisan el transform que
    brand.js pone a cada plancha en cada fotograma. Va aparte del <style> de pages/brand para no cruzarse con su
    rediseño: si cambian sus clases o el número de planchas, se pone al día aquí ------------------------------------ */
@@ -9,7 +9,6 @@ html.construye { animation-name: construida; animation-duration: 2s; animation-t
 
 html.construye .bd-etq { animation-name: bd-c-entra; animation-duration: .5s; animation-delay: .05s; animation-timing-function: ease-out; animation-fill-mode: both; }
 html.construye .bd-t { animation-name: bd-c-entra, bd-c-sube; animation-duration: .6s, .9s; animation-delay: .12s; animation-timing-function: ease-out, var(--curva); animation-fill-mode: both; }
-html.construye .bd-escena::before { animation-name: bd-c-entra; animation-duration: 1.4s; animation-delay: .2s; animation-timing-function: ease-out; animation-fill-mode: both; }
 
 /* Las planchas, de abajo arriba y un poco giradas, como hojas que se dejan en el montón. Mientras llegan, cada una
    lleva ya su altura en la pila cerrada (la que le da brand.js), para que la nueva quede encima aunque brand.js no
@@ -25,11 +24,6 @@ html.construye .bd-capa[data-capa='0'] { translate: 0 0 3.6px; --bd-gira: 1.5deg
 /* Las cotas de la vista técnica, fuera hasta el final (si no, al llegar se ven un momento mientras se apagan) */
 html.construye .bd-cotas { visibility: hidden; }
 
-/* El número grande de la capa, detrás de la pila: en la portada no hay ninguno encendido, pero si se llega a media
-   página (al recargar, con el scroll donde estaba), espera a que se posen las planchas. Solo opacity, en el contenedor:
-   el transform es de brand.js y cada número lleva su propio fundido */
-html.construye .bd-folio { animation-name: bd-c-entra; animation-duration: .6s; animation-delay: 1.05s; animation-timing-function: ease-out; animation-fill-mode: both; }
-
 html.construye .bd-p { animation-name: bd-c-entra, bd-c-sube; animation-duration: .5s, .8s; animation-delay: 1.2s; animation-timing-function: ease-out, var(--curva); animation-fill-mode: both; }
 /* El índice de las seis capas, abajo: con la montada ya hecha, un tramo detrás de otro, de izquierda a derecha, hasta la
    pista (en el li, que es solo opacity y translate; el tramo que se llena, <i>, lo escala brand.js) */
@@ -40,8 +34,7 @@ html.construye .bd-indice li:nth-child(3) { animation-delay: 1.34s; }
 html.construye .bd-indice li:nth-child(4) { animation-delay: 1.38s; }
 html.construye .bd-indice li:nth-child(5) { animation-delay: 1.42s; }
 html.construye .bd-indice li:nth-child(6) { animation-delay: 1.46s; }
-/* Lo fijo de arriba: el «Brand · adsPartners» y la barra de la derecha, con las cuatro páginas (NavSubpaginas, que
-   además entran una a una desde --nsp-retraso, el mismo 1.4s, y enciende su LED después) */
+/* Lo fijo de arriba: el «Brand · adsPartners» y la barra de la derecha, con el menú */
 html.construye .bd-donde,
 html.construye .bd-arriba { animation-name: bd-c-entra; animation-duration: .5s; animation-delay: 1.4s; animation-timing-function: ease-out; animation-fill-mode: both; }
 html.construye .bd-pista { animation-name: bd-c-entra; animation-duration: .5s; animation-delay: 1.45s; animation-timing-function: ease-out; animation-fill-mode: both; }

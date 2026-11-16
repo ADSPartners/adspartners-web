@@ -68,6 +68,9 @@ src/components/
   Entrada.astro         la llegada desde el menú (o desde un enlace con data-entrada: scripts/entrada.js): la página empieza
                         con el fondo en el que acaba el viaje y lo desvanece (solo si se llega así: lo cuenta ads-entrada,
                         que lee el script de Base.astro)
+  MenuPaginas.astro     el menú de las subpáginas: un botón «Menú» que cada página pone donde le encaja. Prototipo del 16-nov
+                        con tres opciones (?menu=a|b|c): a, lista que cuelga del botón; b, índice a pantalla completa; c, la
+                        placa de la home (scripts/menu-paginas.js)
   Cursor.astro, Marca.astro
 src/data/               partners y proyectos (el archivo los enseña todos con su foto «cinta»; el lienzo de la home, los home: true con su «foto»); de dónde sale cada logo, en partners-LEEME.md
 src/scripts/
@@ -78,6 +81,7 @@ src/scripts/
   entrada.js            «ir con entrada»: un enlace con data-entrada sale con la ventana de color del final del menú (sin la
                         placa) y la página llega con su entrada y su construcción. Lo carga Base.astro; cómo se usa, arriba
   menu.js               el menú (components/Menu.astro, datos en data/menu.js): abrir y cerrar
+  menu-paginas.js       el menú de las subpáginas (components/MenuPaginas.astro): abre la opción elegida
   menu/placa.js         el menú baja de la web a la placa que la ejecuta: una ola que sale del botón vuelve la página su
                         código y la cámara baja recta por sus capas (lo que ves, el código que lo pinta, los píxeles),
                         que se deshacen a bloques al atravesarlas, hasta la placa base, donde cada página es una pieza (Tech, el procesador; Proyectos, el SSD; Brand, la

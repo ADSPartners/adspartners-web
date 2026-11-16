@@ -8,27 +8,29 @@
 // bien hecha y el cierre, que remata con los enlaces a las demás páginas (components/EnlacesWeb.astro).
 // Los seis capítulos van enteros en el HTML (auditoría SEO del 03-nov: antes los escribía el JS y no los veía quien no lo
 // ejecuta); brand.js solo decide cuál se ve.
+// 16-nov (prototipo para que Álvaro elija; «me gustaba más antes», más llamativa sin perder información): fuera la marca
+// aplicada (la zona rosa del sobre y la bolsa), el número grande, la luz de color y los bloques de color; vuelve la noche
+// de antes y, para que llame, el papel de Sebas del About. Tres opciones, con ?brand=a|b|c (ver «Opciones», abajo).
 import Base from '../../layouts/Base.astro';
 import '../../styles/construye-brand.css';   // (la llegada: la página se construye; aparte, por el rediseño de Brand)
 import Cursor from '../../components/Cursor.astro';
 import Marca from '../../components/Marca.astro';
 import EnlacesWeb from '../../components/EnlacesWeb.astro';
-import NavSubpaginas from '../../components/NavSubpaginas.astro';
+import MenuPaginas from '../../components/MenuPaginas.astro';
+import Fondo from '../../components/Fondo.astro';
 import { PORTADA, CAPAS, IDEA, PALETA, LETRAS, TITULAR_LETRA, EFECTOS, CIERRE } from '../../data/brand.js';
 import { SERVICIO_BRAND } from '../../data/schema.js';
 
 const base = import.meta.env.BASE_URL;
 const cursiva = (s: string) => s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
-// El canto de cada plancha, de la paleta del manual y el rosa de Brand (el de su pieza en el menú): en la vista técnica,
-// la pila se lee como hojas de color apiladas
+// El canto de cada plancha, de la paleta del manual (solo en el pliego, la opción c): en la vista técnica, la pila se lee
+// como hojas de color apiladas
 const CANTO: Record<string, string> = {
-  marca: '#ff8fc8', forma: '#E7E2DA', color: 'linear-gradient(#34190A 0 20%, #E7E2DA 20% 40%, #F5CBD7 40% 60%, #F5F3F1 60% 80%, #190900 80%)',
-  letra: '#F5CBD7', voz: '#ff8fc8', idea: '#34190A',
+  marca: '#F5CBD7', forma: '#E7E2DA', color: 'linear-gradient(#34190A 0 20%, #E7E2DA 20% 40%, #F5CBD7 40% 60%, #F5F3F1 60% 80%, #190900 80%)',
+  letra: '#F5CBD7', voz: '#E7E2DA', idea: '#34190A',
 };
-const LUZ_CANTO: Record<string, string> = { marca: '#ff8fc8', forma: '#E7E2DA', color: '#F5CBD7', letra: '#F5CBD7', voz: '#ff8fc8', idea: '#F5CBD7' };
+const LUZ_CANTO: Record<string, string> = { marca: '#F5CBD7', forma: '#E7E2DA', color: '#F5CBD7', letra: '#F5CBD7', voz: '#F5CBD7', idea: '#F5CBD7' };
 const canto = (i: number) => `--canto: ${CANTO[CAPAS[i].id]}; --canto-luz: ${LUZ_CANTO[CAPAS[i].id]}`;
-// La marca aplicada: lo que hacemos (los servicios del cierre) puesto en sus soportes
-const [S_IDENTIDAD, S_WEBS, S_ARTE, S_CONTENIDO] = CIERRE.servicios;
 ---
 <Base
   titulo="Branding e identidad de marca en Madrid · adsPartners®"
@@ -38,8 +40,32 @@ const [S_IDENTIDAD, S_WEBS, S_ARTE, S_CONTENIDO] = CIERRE.servicios;
   schema={[SERVICIO_BRAND]}
   construye
 >
-  <!-- Fijo, como en Tech: dónde estás y, a la derecha, la hora de aquí, el sonido y las cuatro páginas (en el móvil,
-       en una fila debajo). Brand no lleva el logotipo fijo: a la home se vuelve con «adsPartners» -->
+  <!-- El papel de Sebas (el del About): con ratón lo pinta el fondo vivo (gl/fondo.js, data-papel, con la costura donde
+       diga data-costura); sin él, el papel quieto (.bd-papel). La opción (?brand=a|b|c, recordada en la visita) decide
+       dónde va la costura: a, al 43 %; c, fuera de la pantalla (todo papel); b, sin papel de fondo -->
+  <Fondo papel />
+  <script is:inline>
+    (function () {
+      var h = document.documentElement, v = new URLSearchParams(location.search).get('brand');
+      try { if (v) sessionStorage.setItem('ads-op-brand', v); else v = sessionStorage.getItem('ads-op-brand'); } catch (e) { /* sin almacenamiento */ }
+      v = /^[abc]$/.test(v || '') ? v : 'a';
+      h.dataset.opBrand = v;
+      var f = document.querySelector('[data-fondo]');
+      if (v === 'b') { f && f.parentNode.remove(); return; }
+      if (f) f.dataset.costura = v === 'c' ? '1.5' : '0.43';
+    })();
+  </script>
+  <div class="bd-papel" aria-hidden="true"></div>
+  <!-- c · Pliego: las marcas de un pliego de imprenta (cruces de corte, la de registro y la carta de colores del manual) -->
+  <div class="bd-imprenta" aria-hidden="true">
+    <i class="bd-corte bd-corte--1"></i><i class="bd-corte bd-corte--2"></i><i class="bd-corte bd-corte--3"></i><i class="bd-corte bd-corte--4"></i>
+    <span class="bd-imprenta__centro">
+      <span class="bd-registro"></span>
+      <span class="bd-carta">{PALETA.map((c) => <i style={`--c: ${c.hex}`}></i>)}<span>{PALETA.map((c) => c.nombre).join(' · ')}</span></span>
+    </span>
+  </div>
+  <!-- Fijo, como en Tech: dónde estás y, a la derecha, la hora de aquí, el sonido y el menú. Brand no lleva el logotipo
+       fijo: a la home se vuelve con «adsPartners» (o desde el menú) -->
   <p class="bd-donde"><span class="bd-barra" aria-hidden="true"></span><span>Brand · <a class="bd-marca" href={base} aria-label="adsPartners, inicio" data-sonido-hover>adsPartners</a></span></p>
   <div class="bd-arriba">
     <p class="bd-madrid" aria-hidden="true">Desde Madrid <span class="bd-hora" data-bd-hora></span></p>
@@ -47,7 +73,7 @@ const [S_IDENTIDAD, S_WEBS, S_ARTE, S_CONTENIDO] = CIERRE.servicios;
       <span class="bd-ondas" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
       <span class="oculto-accesible" data-sonido-txt>Sonido off</span>
     </button>
-    <NavSubpaginas actual="brand" class="bd-nav" />
+    <MenuPaginas actual="brand" class="bd-nav" />
   </div>
 
   <main class="bd" data-brand data-cursor="manual">
@@ -61,11 +87,6 @@ const [S_IDENTIDAD, S_WEBS, S_ARTE, S_CONTENIDO] = CIERRE.servicios;
           <h2 class="bd-t" data-vivo data-titulo set:html={cursiva(PORTADA.titulo)} />
           <p class="bd-p">{PORTADA.texto}</p>
         </div>
-
-        <!-- El número grande de la capa que tiene su capítulo, detrás de la pila, cada uno a su manera: la marca en rosa,
-             la forma solo en su contorno, el color con los cinco, la letra en cursiva, la voz en rosa claro y la idea,
-             que no se ve, en hueco -->
-        <p class="bd-folio" data-folio aria-hidden="true">{CAPAS.map((c) => <span class={`bd-folio--${c.id}`}>{c.n}</span>)}</p>
 
         <div class="bd-pila" data-pila aria-hidden="true">
           <div class="bd-giro" data-giro>
@@ -127,12 +148,12 @@ const [S_IDENTIDAD, S_WEBS, S_ARTE, S_CONTENIDO] = CIERRE.servicios;
         </div>
 
         <!-- Los seis capítulos, uno por capa: qué es, qué efecto tiene, el dato con su fuente y, en la de color y la de
-             letra, su juego; cada uno, con el color de su capa (--acento). Están todos en el HTML (los lee quien no
+             letra, su juego. Están todos en el HTML (los lee quien no
              ejecuta el JS: buscadores y asistentes) y brand.js enseña el de la capa que toca. Los
              demás quedan ocultos del todo (visibility), así que el lector de pantalla solo anuncia el que entra -->
         <div class="bd-caps" aria-live="polite">
           {CAPAS.map((c, i) => (
-            <article class="bd-cap" data-cap={i} style={`--acento: ${LUZ_CANTO[c.id]}`}>
+            <article class="bd-cap" data-cap={i}>
               <p class="bd-cap__n">{c.n} — {c.nombre}</p>
               <h3 class="bd-cap__t" set:html={cursiva(c.titular)} />
               <p class="bd-cap__que">{c.que}</p>
@@ -150,47 +171,6 @@ const [S_IDENTIDAD, S_WEBS, S_ARTE, S_CONTENIDO] = CIERRE.servicios;
           {CAPAS.map((c, i) => <li style={canto(i)}><i></i><b>{c.n}</b><span>{c.nombre}</span></li>)}
         </ol>
         <p class="bd-pista" data-pista><span>{PORTADA.pista}</span><i aria-hidden="true"></i></p>
-      </div>
-    </section>
-
-    <!-- La marca aplicada: la misma marca en sus soportes (la tarjeta, la web, el post, el sobre, el cartel y la bolsa),
-         sobre el rosa de Brand. Al bajar, la fila pasa de lado (brand.js); sin JS o con «movimiento reducido», se
-         desliza con el dedo. Es dibujo: las palabras son las que ya salen en la página -->
-    <section class="bd-aplicada" data-aplicada aria-hidden="true">
-      <div class="bd-aplicada__fijo" data-aplicada-fijo>
-        <div class="bd-aplicada__pista" data-aplicada-pista>
-          <figure class="bd-ap bd-ap--tarjetas" style="--g: -4deg">
-            <div class="bd-tarjeta bd-tarjeta--detras"><span class="bd-tarjeta__iso"><Marca tipo="iso" /></span></div>
-            <div class="bd-tarjeta"><span class="bd-tarjeta__iso"><Marca tipo="iso" /></span><span class="bd-tarjeta__logo"><Marca tipo="logo" /></span><span class="bd-tarjeta__raya"></span></div>
-            <figcaption>{S_IDENTIDAD}</figcaption>
-          </figure>
-          <figure class="bd-ap bd-ap--web" style="--g: 3deg">
-            <div class="bd-web">
-              <div class="bd-web__barra"><i></i><i></i><i></i><span></span></div>
-              <div class="bd-web__dentro">
-                <span class="bd-web__logo"><Marca tipo="logo" /></span>
-                <p class="bd-web__t" set:html={cursiva(PORTADA.titulo)} />
-                <span class="bd-web__boton"></span>
-                <span class="bd-web__iso"><Marca tipo="iso" /></span>
-              </div>
-            </div>
-            <figcaption>{S_WEBS}</figcaption>
-          </figure>
-          <figure class="bd-ap bd-ap--post" style="--g: -2deg">
-            <div class="bd-post"><span class="bd-post__iso"><Marca tipo="iso" /></span><span class="bd-post__logo"><Marca tipo="logo" /></span></div>
-            <figcaption>{S_CONTENIDO}</figcaption>
-          </figure>
-          <figure class="bd-ap bd-ap--sobre" style="--g: 5deg">
-            <div class="bd-sobre"><span class="bd-sobre__solapa"></span><span class="bd-sobre__sello"><Marca tipo="iso" /></span><span class="bd-sobre__logo"><Marca tipo="logo" /></span></div>
-          </figure>
-          <figure class="bd-ap bd-ap--cartel" style="--g: -3deg">
-            <div class="bd-cartel"><p class="bd-cartel__t" set:html={cursiva(PORTADA.final)} /><span class="bd-cartel__logo"><Marca tipo="logo" /></span><span class="bd-cartel__iso"><Marca tipo="iso" /></span></div>
-            <figcaption>{S_ARTE}</figcaption>
-          </figure>
-          <figure class="bd-ap bd-ap--bolsa" style="--g: 4deg">
-            <div class="bd-bolsa"><span class="bd-bolsa__asa"></span><span class="bd-bolsa__logo"><Marca tipo="logo" /></span><span class="bd-bolsa__iso"><Marca tipo="iso" /></span></div>
-          </figure>
-        </div>
       </div>
     </section>
 
@@ -212,7 +192,6 @@ const [S_IDENTIDAD, S_WEBS, S_ARTE, S_CONTENIDO] = CIERRE.servicios;
 
     <!-- Lo que hacemos con la tuya -->
     <section class="bd-cierre" id="la-tuya" data-cierre aria-labelledby="bd-cierre-t">
-      <div class="bd-cierre__fondo" data-cierre-fondo aria-hidden="true"></div>
       <div>
         <p class="bd-cierre__ante">{CIERRE.antetitulo}</p>
         <h2 class="bd-cierre__t" id="bd-cierre-t" data-vivo set:html={cursiva(CIERRE.titulo)} />
@@ -255,8 +234,8 @@ const [S_IDENTIDAD, S_WEBS, S_ARTE, S_CONTENIDO] = CIERRE.servicios;
   .bd-arriba { position: fixed; right: clamp(18px, 2.4vw, 36px); top: clamp(18px, 2.6vh, 30px); z-index: 40; height: 18px; display: flex; align-items: center; gap: 30px; }
   .bd-madrid { margin: 0; pointer-events: none; }
   .bd-hora { margin-left: 6px; opacity: .58; font-variant-numeric: tabular-nums; }
-  /* Las cuatro páginas (components/NavSubpaginas.astro), al final de la barra: el nombre, a la altura de lo demás */
-  .bd-nav { --nsp-retraso: 1.4s; align-self: flex-start; margin-top: -9px; color: var(--crema); }
+  /* El menú (components/MenuPaginas.astro), al final de la barra */
+  .bd-nav { color: var(--crema); }
   .bd-sonido { display: block; padding: 6px; margin: -6px -6px -6px 0; }
   .bd-ondas { display: flex; align-items: center; gap: 3px; height: 16px; }
   .bd-ondas i { width: 2px; height: 3px; background: var(--crema); transition: height .3s var(--curva); }
@@ -424,172 +403,21 @@ const [S_IDENTIDAD, S_WEBS, S_ARTE, S_CONTENIDO] = CIERRE.servicios;
   .bd-cierre.on .bd-cierre__dcha > :nth-child(3) { transition-delay: .54s; }
   .bd-cierre.on .bd-cierre__enlaces { transition-delay: .7s; }
 
-  /* --- Color (13-nov: «la idea me encanta, pero la página me parece sosa») ------------------------------------------
-     La paleta del manual (marrón, beige, rosa, blanco y negro) y el rosa de Brand, el de su pieza en el menú (#ff8fc8),
-     con su papel: el rosa marca lo que tiene que verse, el marrón da peso, el beige calma */
-  .bd { --brand: #ff8fc8; --marron: #34190A; }
+  /* --- Color: la paleta del manual (marrón, beige, rosa, blanco y negro), cada uno con su papel: el rosa marca lo que
+     tiene que verse, el marrón da peso, el beige calma (16-nov: fuera el #ff8fc8 de la pieza del menú, que no es del
+     manual; --brand queda como el rosa) */
+  .bd { --brand: var(--rosa); }
 
-  /* La luz de cada capítulo, detrás de la pila: dos manchas de luz cuyos colores cambian con la capa que tiene su turno
-     (brand.js pone data-luz en la escena) y se funden al cambiar (propiedades registradas, que se pueden animar). Va en
-     su propia capa (::before, will-change): así no se repinta cuando cambian las cotas, que se mueven en cada
-     fotograma, y solo se pinta mientras cambia de color. Sin JS, la de la portada; sin @property, cambia sin fundido */
-  @property --luz-a { syntax: '<color>'; inherits: false; initial-value: rgba(255, 143, 200, .26); }
-  @property --luz-b { syntax: '<color>'; inherits: false; initial-value: rgba(52, 25, 10, .95); }
-  .bd-escena::before {
-    content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none; will-change: transform;
-    --luz-a: rgba(255, 143, 200, .26); --luz-b: rgba(52, 25, 10, .95);
-    background:
-      radial-gradient(ellipse 44% 52% at 62% 55%, var(--luz-a), transparent 70%),
-      radial-gradient(ellipse 75% 65% at 92% 100%, var(--luz-b), transparent 75%);
-    transition: --luz-a 1.2s var(--curva), --luz-b 1.2s var(--curva);
-  }
-  /* 01 la marca: su rosa · 02 la forma: beige, la calma de un tablero de dibujo · 03 el color: el que tocas (si no, el
-     rosa del manual), sobre el marrón que da peso · 04 la letra: rosa claro · 05 la voz: el rosa de Brand, de abajo
-     arriba · 06 la idea: el marrón de debajo de todo · y montada otra vez, el rosa entero */
-  .bd-escena[data-luz='marca']::before { --luz-a: rgba(255, 143, 200, .34); --luz-b: rgba(52, 25, 10, .9); }
-  .bd-escena[data-luz='forma']::before { --luz-a: rgba(231, 226, 218, .2); --luz-b: rgba(52, 25, 10, .5); }
-  .bd-escena[data-luz='color']::before { --luz-a: color-mix(in srgb, var(--luz-color, #F5CBD7) 42%, transparent); --luz-b: rgba(52, 25, 10, 1); }
-  .bd-escena[data-luz='letra']::before { --luz-a: rgba(245, 203, 215, .24); --luz-b: rgba(52, 25, 10, .6); }
-  .bd-escena[data-luz='voz']::before { --luz-a: rgba(255, 143, 200, .26); --luz-b: rgba(255, 143, 200, .36); }
-  .bd-escena[data-luz='idea']::before { --luz-a: rgba(245, 203, 215, .2); --luz-b: rgba(52, 25, 10, 1); }
-  .bd-escena[data-luz='final']::before { --luz-a: rgba(255, 143, 200, .42); --luz-b: rgba(52, 25, 10, .9); }
-  @media (prefers-reduced-motion: reduce) {
-    .bd-escena::before { transition: none; }
-  }
-
-  /* El canto de cada plancha: una tira de su color en el borde izquierdo (en la de color, las cinco) y, mientras tiene su
-     capítulo, el borde en su color */
-  .bd-capa::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--canto); pointer-events: none; }
-  /* (sin sombra difuminada: en una plancha en 3D que se mueve en cada fotograma, cuesta; el resplandor lo da la luz) */
-  .bd-capa.activa { border-color: var(--canto-luz); }
-
-  /* --- La marca aplicada ------------------------------------------------------------------------------------------ */
-  .bd-aplicada {
-    --u: min(1.15vh, 1.7vw);
-    position: relative; z-index: 2; overflow: clip; color: var(--tinta);
-    background:
-      radial-gradient(ellipse 60% 70% at 20% 30%, rgba(245, 203, 215, .7), transparent 70%),
-      radial-gradient(ellipse 50% 60% at 90% 90%, rgba(52, 25, 10, .22), transparent 70%),
-      var(--brand);
-  }
-  /* sin JS o con movimiento reducido, una fila que se desliza */
-  .bd-aplicada__fijo { height: 100vh; height: 100svh; display: flex; align-items: center; overflow-x: auto; scrollbar-width: none; }
-  .bd-aplicada__fijo::-webkit-scrollbar { display: none; }
-  .bd-aplicada__pista { display: flex; align-items: center; gap: calc(var(--u) * 9); padding: 0 calc(var(--u) * 12); flex: none; }
-  /* con JS: la escena se queda fija y la fila pasa de lado al bajar (brand.js da el alto y mueve la pista) */
-  .bd-aplicada.en-viaje .bd-aplicada__fijo { position: sticky; top: 0; overflow: visible; }
-  .bd-aplicada.en-viaje .bd-aplicada__pista { will-change: transform; }
-  .bd-ap { position: relative; flex: none; margin: 0; transform: rotate(var(--g, 0deg)); }
-  .bd-aplicada.en-viaje .bd-ap { will-change: transform; }
-  .bd-ap figcaption {
-    position: absolute; left: 0; top: calc(100% + var(--u) * 3.4); white-space: nowrap;
-    font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: rgba(25, 9, 0, .78);
-  }
-  .bd-ap figcaption::before { content: ''; display: inline-block; width: 6px; height: 6px; margin-right: 10px; background: var(--tinta); vertical-align: 1px; }
-  .bd-ap svg { display: block; width: 100%; height: auto; }
-  .bd-ap > div { box-shadow: 0 calc(var(--u) * 3) calc(var(--u) * 6) calc(var(--u) * -2) rgba(25, 9, 0, .45), 0 2px 4px rgba(25, 9, 0, .18); }
-
-  /* La tarjeta, por delante y por detrás */
-  .bd-ap--tarjetas { width: calc(var(--u) * 36); height: calc(var(--u) * 21); }
-  .bd-tarjeta { position: absolute; inset: 0; background: #F5F3F1; }
-  .bd-tarjeta--detras { background: var(--marron); transform: translate(calc(var(--u) * 6), calc(var(--u) * -5)) rotate(7deg); }
-  .bd-tarjeta__iso { position: absolute; right: 8%; top: 12%; width: 18%; color: var(--brand); }
-  .bd-tarjeta--detras .bd-tarjeta__iso { left: 50%; top: 50%; width: 36%; transform: translate(-50%, -50%); color: #F5CBD7; }
-  .bd-tarjeta__logo { position: absolute; left: 8%; bottom: 14%; width: 42%; color: var(--tinta); }
-  .bd-tarjeta__raya { position: absolute; left: 8%; bottom: 8%; width: 10%; height: 2px; background: var(--brand); }
-
-  /* La web */
-  .bd-ap--web { width: calc(var(--u) * 52); }
-  .bd-web { background: var(--noche); overflow: hidden; border-radius: calc(var(--u) * .6); }
-  .bd-web__barra { display: flex; align-items: center; gap: calc(var(--u) * .7); height: calc(var(--u) * 3); padding: 0 calc(var(--u) * 1.4); background: #1B1410; }
-  .bd-web__barra i { width: calc(var(--u) * .9); height: calc(var(--u) * .9); border-radius: 50%; background: rgba(231, 226, 218, .25); }
-  .bd-web__barra span { flex: 1; height: calc(var(--u) * 1.1); margin-left: calc(var(--u) * 2); border-radius: 99px; background: rgba(231, 226, 218, .08); }
-  .bd-web__dentro { position: relative; height: calc(var(--u) * 30); padding: calc(var(--u) * 3) calc(var(--u) * 3.4); color: var(--crema);
-    background: radial-gradient(ellipse 50% 60% at 78% 60%, rgba(255, 143, 200, .3), transparent 70%), var(--noche); }
-  .bd-web__logo { display: block; width: calc(var(--u) * 9); color: var(--crema); }
-  .bd-web__t { margin: calc(var(--u) * 5) 0 0; max-width: 9ch; font-family: var(--serif); font-weight: 300; font-size: calc(var(--u) * 4.4); line-height: .95; letter-spacing: -.02em; }
-  .bd-web__t em { color: var(--brand); }
-  .bd-web__boton { display: block; width: calc(var(--u) * 11); height: calc(var(--u) * 2.6); margin-top: calc(var(--u) * 3); background: var(--crema); border-left: calc(var(--u) * .8) solid var(--brand); }
-  .bd-web__iso { position: absolute; right: 9%; top: 34%; width: 30%; color: var(--brand); }
-
-  /* El post */
-  .bd-ap--post { width: calc(var(--u) * 28); }
-  .bd-post { position: relative; aspect-ratio: 1; background: #F5CBD7; }
-  .bd-post__iso { position: absolute; left: 50%; top: 46%; width: 64%; transform: translate(-50%, -50%); color: var(--marron); }
-  .bd-post__logo { position: absolute; left: 50%; bottom: 9%; width: 30%; transform: translateX(-50%); color: var(--marron); }
-
-  /* El sobre, con su sello */
-  .bd-ap--sobre { width: calc(var(--u) * 36); }
-  .bd-sobre { position: relative; aspect-ratio: 16 / 10; background: #EFEAE2; overflow: hidden; }
-  .bd-sobre__solapa { position: absolute; inset: 0 0 38% 0; background: #E7E2DA; clip-path: polygon(0 0, 100% 0, 50% 100%); box-shadow: inset 0 -1px 0 rgba(25, 9, 0, .1); }
-  .bd-sobre__sello { position: absolute; left: 50%; top: 62%; width: 17%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%;
-    background: var(--brand); color: var(--tinta); display: grid; place-items: center; padding: 3.5%; box-shadow: 0 2px 6px rgba(25, 9, 0, .3); }
-  .bd-sobre__logo { position: absolute; left: 6%; bottom: 8%; width: 22%; color: var(--tinta); opacity: .8; }
-
-  /* El cartel */
-  .bd-ap--cartel { width: calc(var(--u) * 27); }
-  .bd-cartel { position: relative; aspect-ratio: 5 / 7; background: var(--marron); color: var(--crema); padding: 10% 9%; }
-  .bd-cartel__t { margin: 0; font-family: var(--serif); font-weight: 300; font-size: calc(var(--u) * 3.6); line-height: .98; letter-spacing: -.02em; }
-  .bd-cartel__t em { color: var(--brand); }
-  .bd-cartel__logo { position: absolute; left: 9%; bottom: 7%; width: 34%; color: var(--crema); }
-  .bd-cartel__iso { position: absolute; right: -14%; bottom: 14%; width: 66%; color: #F5CBD7; opacity: .9; }
-
-  /* La bolsa */
-  .bd-ap--bolsa { width: calc(var(--u) * 27); margin-top: calc(var(--u) * 8); }
-  .bd-bolsa { position: relative; aspect-ratio: 9 / 10; background: #E7E2DA; }
-  .bd-bolsa__asa { position: absolute; left: 30%; right: 30%; bottom: 100%; height: calc(var(--u) * 9); border: calc(var(--u) * .9) solid #E7E2DA; border-bottom: 0; border-radius: 50% 50% 0 0 / 100% 100% 0 0; }
-  .bd-bolsa__logo { position: absolute; left: 50%; top: 58%; width: 50%; transform: translateX(-50%); color: var(--tinta); }
-  .bd-bolsa__iso { position: absolute; left: 50%; top: 22%; width: 36%; transform: translateX(-50%); color: var(--brand); }
-
-  /* Sobre lo claro (la marca aplicada y el cierre), lo fijo de arriba pasa a tinta */
-  html.bd-claro .bd-donde, html.bd-claro .bd-madrid { color: rgba(25, 9, 0, .75); }
-  html.bd-claro .bd-nav { color: var(--tinta); }
-  html.bd-claro .bd-barra { background: var(--tinta); }
-  html.bd-claro .bd-ondas i { background: var(--tinta); }
-  .bd-donde, .bd-nav, .bd-madrid { transition: color .4s; }
-
-  /* --- Los efectos, cada uno en su color: el rosa (lo que tiene que verse), el beige (la calma) y el marrón (el peso) -- */
-  .bd-efectos { background: radial-gradient(ellipse 50% 40% at 10% 0%, rgba(255, 143, 200, .12), transparent 70%); }
-  .bd-efecto { padding: 3.4vh 2.2vw 4vh; border-top: 0; will-change: transform; }
-  .bd-efecto:nth-child(1) { background: var(--brand); color: var(--tinta); }
-  .bd-efecto:nth-child(2) { background: var(--crema); color: var(--tinta); }
-  .bd-efecto:nth-child(3) { background: var(--marron); color: var(--crema); }
-  .bd-efecto:nth-child(1) .bd-efecto__cifra, .bd-efecto:nth-child(2) .bd-efecto__cifra { color: var(--tinta); }
-  .bd-efecto:nth-child(3) .bd-efecto__cifra { color: var(--brand); }
-  .bd-efecto:nth-child(-n+2) :is(.bd-efecto__texto, .bd-efecto__cifra span) { color: rgba(25, 9, 0, .74); }
-  .bd-efecto:nth-child(-n+2) .bd-efecto__fuente { color: rgba(25, 9, 0, .56); }
-
-  /* --- El cierre, sobre un bloque rosa que sube al llegar (brand.js; sin JS, ya arriba) ------------------------------- */
-  .bd-cierre { color: var(--tinta); border-top: 0; }
-  .bd-cierre__fondo { position: absolute; inset: 0; z-index: -1; background: radial-gradient(ellipse 50% 60% at 85% 20%, rgba(255, 143, 200, .45), transparent 70%), #F5CBD7; transform-origin: 50% 100%; will-change: transform; }
-  .bd-cierre__ante { color: var(--marron); }
-  .bd-cierre__t em { color: var(--marron); }
-  .bd-cierre__p { color: rgba(25, 9, 0, .74); }
-  .bd-cierre__servicios li, .bd-cierre__enlaces { border-top-color: rgba(25, 9, 0, .2); }
-  .bd-cierre__carta .bd-subraya { text-decoration-color: var(--brand); text-decoration-thickness: 2px; }
+  /* El canto de cada plancha: una tira de su color en el borde izquierdo (en la de color, las cinco); solo en el pliego
+     (opción c), donde las planchas son de imprenta */
+  .bd-capa::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--canto); pointer-events: none; display: none; }
 
   /* --- Editorial (15-nov: «dale un poco más de color, dinamismo y editorialidad a la página y ya») ---------------
-     La portada, más grande y con su cursiva en el rosa de Brand; detrás de la pila, el número de la capa que tiene su
-     capítulo, a tamaño de cartel; abajo, el índice de las seis, que se llena al bajar; y lo de cada capítulo entra por
-     partes, de arriba abajo */
-  .bd-t em { color: var(--brand); }
+     La portada, más grande; abajo, el índice de las seis, que se llena al bajar; y lo de cada capítulo entra por partes,
+     de arriba abajo (el número grande de detrás de la pila y la luz de color, fuera el 16-nov) */
   /* Con un capítulo, solo coge el ratón la plancha que lo tiene (la marca, que sigue encendida en el turno del color, no
      tapa los colores) */
   .bd-escena.en-capitulo .bd-capa:not(.activa) { pointer-events: none; }
-
-  .bd-folio { position: absolute; right: calc(var(--lado) * 2); bottom: 76px; width: 0; height: 0; margin: 0; pointer-events: none; will-change: transform;
-    font-family: var(--serif); font-weight: 300; font-size: min(64vh, 34vw); line-height: .74; letter-spacing: -.05em; }
-  .bd-folio span { position: absolute; right: 0; bottom: 0; white-space: nowrap; opacity: 0; transform: translate3d(0, 30%, 0);
-    transition: opacity .6s var(--curva), transform 1.1s var(--curva); }
-  .bd-folio span.on { opacity: 1; transform: none; transition-delay: .15s; }
-  .bd-folio span.antes { transform: translate3d(0, -30%, 0); }
-  .bd-folio--marca { color: var(--brand); }
-  .bd-folio--forma { color: transparent; -webkit-text-stroke: 1.5px rgba(231, 226, 218, .7); }
-  .bd-folio--color { color: transparent; background: linear-gradient(#34190A 0 20%, #E7E2DA 20% 40%, #F5CBD7 40% 60%, #F5F3F1 60% 80%, #190900 80%);
-    -webkit-background-clip: text; background-clip: text; -webkit-text-stroke: 1px rgba(245, 203, 215, .45); }
-  .bd-folio--letra { font-weight: 400; font-style: italic; color: var(--brand); }
-  .bd-folio--voz { color: var(--rosa); }
-  .bd-folio--idea { color: transparent; -webkit-text-stroke: 1.5px var(--rosa); }
 
   .bd-indice { position: absolute; left: var(--lado); right: calc(var(--lado) + 80px); bottom: 22px; z-index: 2; margin: 0; padding: 0; list-style: none;
     display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; pointer-events: none; }
@@ -611,24 +439,21 @@ const [S_IDENTIDAD, S_WEBS, S_ARTE, S_CONTENIDO] = CIERRE.servicios;
   .bd-cap.on > :nth-child(5) { transition-delay: .32s; }
   .bd-cap.on > :nth-child(6) { transition-delay: .42s; }
   @media (prefers-reduced-motion: reduce) {
-    .bd-folio span, .bd-cap > *, .bd-cap > .bd-cap__t { transform: none; transition: none; }
+    .bd-cap > *, .bd-cap > .bd-cap__t { transform: none; transition: none; }
   }
 
 
   /* --- Móvil ------------------------------------------------------------------------------------------------------ */
   @media (max-width: 760px) {
     .bd-madrid { display: none; }
-    /* las cuatro páginas, en una fila debajo de la barra y a todo el ancho */
-    .bd-nav { position: absolute; right: 0; top: calc(100% + 14px); width: calc(100vw - 2 * clamp(18px, 2.4vw, 36px)); margin: 0; }
-    /* y, como en Tech y el About, lo de debajo pasa por una franja para no montarse en ellas: de noche y, sobre lo claro,
-       del rosa del cierre */
+    /* como en Tech y el About, lo de debajo pasa por una franja para no montarse en la barra (de noche; sobre el papel,
+       de papel: lo ponen las opciones) */
     .bd::before {
-      content: ''; position: fixed; left: 0; right: 0; top: 0; height: calc(var(--arriba) + 96px); z-index: 39; pointer-events: none;
-      background: linear-gradient(var(--noche) 74%, rgba(18, 13, 10, 0));
+      content: ''; position: fixed; left: 0; right: 0; top: 0; height: calc(var(--arriba) + 44px); z-index: 39; pointer-events: none;
+      background: linear-gradient(var(--noche) 64%, rgba(18, 13, 10, 0));
     }
-    html.bd-claro .bd::before { background: linear-gradient(#F5CBD7 74%, rgba(245, 203, 215, 0)); }
     .bd-efecto { padding: 3vh 5vw 3.6vh; }
-    .bd-texto { max-width: none; right: var(--lado); top: calc(11vh + 36px); }   /* (36 px: la fila de las páginas) */
+    .bd-texto { max-width: none; right: var(--lado); top: 11vh; }
     .bd-t { font-size: 42px; }
     .bd-pila { left: 50%; top: 60%; }
     .bd-capa { --w: 76vw; }
@@ -647,12 +472,156 @@ const [S_IDENTIDAD, S_WEBS, S_ARTE, S_CONTENIDO] = CIERRE.servicios;
     .bd-efectos__lista { grid-template-columns: 1fr; gap: 6vh; }
     .bd-cierre { grid-template-columns: 1fr; padding: 14vh var(--lado) 18vh; }
     .bd-cierre__t { font-size: 46px; }
-    /* el número, arriba a la derecha, detrás de la pila (abajo va el capítulo); el índice, solo con los números */
-    .bd-folio { top: calc(7vh + 40px); bottom: auto; right: var(--lado); font-size: 30vh; }
-    .bd-folio span { top: 0; bottom: auto; }
+    /* el índice, solo con los números */
     .bd-indice { right: calc(var(--lado) + 56px); bottom: 14px; gap: 6px; }
     .bd-indice span { display: none; }
     .bd-efectos__t em { padding-left: .8em; }
     .bd-efecto:nth-child(n) { margin-top: 0; }
+  }
+
+  /* === Opciones (16-nov, prototipo para que Álvaro elija: ?brand=a|b|c) ============================================
+     Las tres vuelven a lo de antes del 15-nov (la noche, sin la luz de color, sin el número grande ni los bloques de
+     color; «me gustaba más antes») y lo hacen más llamativo con el papel de Sebas del About: grano, fibras y, con ratón,
+     acuarela rosa por donde pasa (el fondo vivo, gl/fondo.js). Lo que se lee va siempre sobre el papel, en tinta:
+       a · Media hoja: el lado del texto es papel (la idea de Álvaro); la pila, en la noche, al otro lado de la costura
+       b · Hoja suelta: la noche de antes entera; lo que se lee va en hojas de papel sujetas con cinta, como las fotos
+           de Sebas
+       c · Pliego: la página entera es papel, la pila son planchas de imprenta y alrededor, las marcas del pliego */
+  /* (en :root: lo fijo de arriba y el papel quieto van fuera de <main>) */
+  :root { --marron: #34190A; --grano: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .1 0 0 0 0 .04 0 0 0 0 0 .16 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E"); --fibras: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='turbulence' baseFrequency='.006 .05' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2 0 0 0 0 .1 0 0 0 0 .04 .06 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");
+    --p-tx2: rgba(25, 9, 0, .68); --p-tx3: rgba(25, 9, 0, .46); --p-ln: rgba(25, 9, 0, .16); }
+  .bd-papel, .bd-imprenta { display: none; }
+  .bd-indice { display: none; }
+  .bd-capa.activa { border-color: var(--rosa); }
+
+  /* Lo que se lee, sobre el papel: tinta, la cursiva y el dato en marrón, la etiqueta del capítulo en tinta */
+  .bd-texto, .bd-cap { color: var(--tinta); --acento: var(--marron); }
+  .bd-etq { color: var(--marron); }
+  .bd-t em { color: var(--marron); }
+  .bd-p { color: var(--p-tx2); }
+  .bd-cap__n { color: var(--rosa); background: var(--tinta); }
+  .bd-cap__importa { color: var(--p-tx2); }
+  .bd-cap__dato { border-top-color: var(--p-ln); }
+  .bd-cap__fuente { color: var(--p-tx3); }
+  .bd-cap__juego { color: var(--p-tx2); }
+  /* las letras que notan el ratón (vivo.js), sin el rojo y el azul de la máquina: en el papel no van */
+  .bd-texto [data-vivo] * { text-shadow: none !important; }
+
+  /* --- a · Media hoja ------------------------------------------------------------------------------------------------ */
+  /* El papel quieto (sin ratón o hasta que llega el fondo vivo): del borde al 37 % y, hasta el 49 %, la costura */
+  html[data-op-brand='a'] .bd-papel, html[data-op-brand='c'] .bd-papel { display: block; position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+  html[data-op-brand='a'] .bd-papel::before, html[data-op-brand='c'] .bd-papel::before { content: ''; position: absolute; inset: 0; background: var(--grano), var(--fibras), var(--crema); }
+  html[data-op-brand='a'] .bd-papel::before { -webkit-mask-image: linear-gradient(90deg, #000 37%, transparent 49%); mask-image: linear-gradient(90deg, #000 37%, transparent 49%); }
+  html.papel-gl .bd-papel { visibility: hidden; transition: visibility 0s 1.2s; }
+  /* los efectos, en la noche (tapan el papel del fondo); el cierre, en papel entero */
+  html[data-op-brand='a'] .bd-efectos { background: var(--noche); }
+  html[data-op-brand='a'] .bd-cierre { background: var(--grano), var(--fibras), var(--crema); color: var(--tinta); }
+  html[data-op-brand='a'] .bd-cierre__ante, html[data-op-brand='a'] .bd-cierre__t em { color: var(--marron); }
+  html[data-op-brand='a'] .bd-cierre__p { color: var(--p-tx2); }
+  html[data-op-brand='a'] :is(.bd-cierre__servicios li, .bd-cierre__enlaces) { border-top-color: var(--p-ln); }
+  html[data-op-brand='a'] .bd-cierre__carta .bd-subraya { text-decoration-color: var(--marron); text-decoration-thickness: 2px; }
+  /* lo fijo: en tinta sobre el papel (a la izquierda mientras dura el viaje; todo, en el cierre) */
+  html[data-op-brand='a'].bd-claro :is(.bd-donde, .bd-madrid) { color: var(--p-tx2); }
+  html[data-op-brand='a'].bd-claro .bd-nav { color: var(--tinta); }
+  html[data-op-brand='a'].bd-claro :is(.bd-barra, .bd-ondas i) { background: var(--tinta); }
+  @media (min-width: 761px) {
+    html[data-op-brand='a']:not(.bd-abajo) .bd-donde { color: var(--p-tx2); }
+    html[data-op-brand='a']:not(.bd-abajo) .bd-barra { background: var(--tinta); }
+    html[data-op-brand='a']:not(.bd-abajo) .bd-marca { color: var(--tinta); }
+  }
+  .bd-donde, .bd-nav, .bd-madrid { transition: color .4s; }
+
+  /* --- b · Hoja suelta ------------------------------------------------------------------------------------------------- */
+  /* Cada hoja: papel con grano y fibras, una mancha de acuarela en una esquina, su sombra y su cinta rosa */
+  html[data-op-brand='b'] :is(.bd-texto, .bd-cap, .bd-efecto) {
+    background: radial-gradient(ellipse 46% 30% at 92% 6%, rgba(226, 160, 182, .42), transparent 70%), var(--grano), var(--fibras), #EFEAE2;
+    box-shadow: 0 26px 60px rgba(0, 0, 0, .55), 0 2px 6px rgba(0, 0, 0, .35);
+  }
+  html[data-op-brand='b'] :is(.bd-texto, .bd-cap, .bd-efecto)::before {
+    content: ''; position: absolute; z-index: 1; left: 50%; top: -13px; width: 104px; height: 26px; margin-left: -52px;
+    background: rgba(245, 203, 215, .82); transform: rotate(-4deg); clip-path: polygon(0 8%, 6% 0, 12% 10%, 20% 2%, 30% 9%, 42% 0, 55% 8%, 66% 1%, 78% 9%, 88% 0, 100% 7%, 97% 50%, 100% 93%, 90% 100%, 80% 91%, 68% 100%, 56% 92%, 44% 100%, 32% 91%, 20% 100%, 9% 92%, 0 100%, 3% 50%);
+  }
+  html[data-op-brand='b'] .bd-texto { top: 14vh; max-width: none; width: min(37vw, 560px); padding: 5.4vh 2.8vw 4.6vh; rotate: -1.6deg; }
+  html[data-op-brand='b'] .bd-t { font-size: clamp(44px, min(4.6vw, 9vh), 92px); }
+  html[data-op-brand='b'] .bd-cap { top: 50%; bottom: auto; translate: 0 -50%; width: min(37vw, 560px); padding: 4.6vh 2.6vw 4.2vh; rotate: -1.2deg; }
+  html[data-op-brand='b'] .bd-cap:nth-child(even) { rotate: .9deg; }
+  html[data-op-brand='b'] .bd-cap:nth-child(even)::before { left: 26%; transform: rotate(6deg); }
+  html[data-op-brand='b'] .bd-cap__t { font-size: clamp(34px, min(3.6vw, 6.4vh), 66px); }
+  /* los efectos: tres hojas en escalera */
+  html[data-op-brand='b'] .bd-efecto { position: relative; padding: 4vh 2.4vw 4.2vh; border-top: 0; color: var(--tinta); }
+  html[data-op-brand='b'] .bd-efecto:nth-child(1) { rotate: -1.4deg; }
+  html[data-op-brand='b'] .bd-efecto:nth-child(2) { rotate: 1deg; }
+  html[data-op-brand='b'] .bd-efecto:nth-child(2)::before { left: 70%; transform: rotate(8deg); }
+  html[data-op-brand='b'] .bd-efecto:nth-child(3) { rotate: -.6deg; }
+  html[data-op-brand='b'] .bd-efecto__cifra { color: var(--marron); }
+  html[data-op-brand='b'] :is(.bd-efecto__texto, .bd-efecto__cifra span) { color: var(--p-tx2); }
+  html[data-op-brand='b'] .bd-efecto__fuente { color: var(--p-tx3); }
+
+  /* --- c · Pliego ------------------------------------------------------------------------------------------------------- */
+  html[data-op-brand='c'] .bd { color: var(--tinta); }
+  html[data-op-brand='c'] .bd-pila { color: var(--crema); }
+  /* las planchas, de imprenta: en noche, opacas y con el canto de su color */
+  html[data-op-brand='c'] .bd-capa { background: var(--noche); border-color: rgba(25, 9, 0, .5); }
+  html[data-op-brand='c'] .bd-capa--idea { background: #1C130F; }
+  html[data-op-brand='c'] .bd-capa::after { display: block; }
+  html[data-op-brand='c'] .bd-capa.apagada { opacity: .2; }
+  html[data-op-brand='c'] .bd-cota { color: var(--p-tx2); }
+  html[data-op-brand='c'] .bd-cota b { color: var(--marron); }
+  html[data-op-brand='c'] .bd-cota.activa { color: var(--tinta); }
+  html[data-op-brand='c'] .bd-cotas line { stroke: rgba(25, 9, 0, .42); }
+  html[data-op-brand='c'] .bd-pista { color: var(--p-tx2); }
+  /* el índice de las seis, abajo, en tinta */
+  html[data-op-brand='c'] .bd-indice { display: grid; }
+  html[data-op-brand='c'] .bd-indice li { color: var(--p-tx3); }
+  html[data-op-brand='c'] .bd-indice li::before { background: var(--p-ln); }
+  html[data-op-brand='c'] .bd-indice i { background: var(--marron); }
+  html[data-op-brand='c'] .bd-indice b { color: var(--p-tx2); }
+  html[data-op-brand='c'] .bd-indice li.activa, html[data-op-brand='c'] .bd-indice li.activa b { color: var(--tinta); }
+  /* los efectos, sobre el papel */
+  html[data-op-brand='c'] .bd-efectos { border-top-color: var(--p-ln); }
+  html[data-op-brand='c'] :is(.bd-efectos__ante, .bd-efectos__t em, .bd-efecto__cifra) { color: var(--marron); }
+  html[data-op-brand='c'] .bd-efecto { border-top-color: rgba(25, 9, 0, .5); }
+  html[data-op-brand='c'] :is(.bd-efecto__texto, .bd-efecto__cifra span) { color: var(--p-tx2); }
+  html[data-op-brand='c'] .bd-efecto__fuente { color: var(--p-tx3); }
+  /* y el cierre, en la noche: la última plancha */
+  html[data-op-brand='c'] .bd-cierre { background: var(--noche); color: var(--crema); }
+  /* lo fijo, en tinta (en la noche del cierre, en claro) */
+  html[data-op-brand='c']:not(.bd-claro) :is(.bd-donde, .bd-madrid) { color: var(--p-tx2); }
+  html[data-op-brand='c']:not(.bd-claro) :is(.bd-nav, .bd-marca) { color: var(--tinta); }
+  html[data-op-brand='c']:not(.bd-claro) :is(.bd-barra, .bd-ondas i) { background: var(--tinta); }
+  /* el cursor, en tinta */
+  html[data-op-brand='c'] .cursor__pista { stroke: rgba(25, 9, 0, .34); }
+  html[data-op-brand='c'] .cursor__texto { color: var(--tinta); }
+  /* las marcas del pliego: las cruces de corte en las esquinas y, arriba en medio, la de registro y la carta de colores */
+  html[data-op-brand='c'] .bd-imprenta { display: block; position: fixed; inset: 0; z-index: -1; pointer-events: none; color: rgba(25, 9, 0, .55); }
+  .bd-corte { position: absolute; width: 26px; height: 26px; }
+  .bd-corte::before, .bd-corte::after { content: ''; position: absolute; background: currentColor; }
+  .bd-corte::before { width: 100%; height: 1px; top: 50%; }
+  .bd-corte::after { width: 1px; height: 100%; left: 50%; }
+  .bd-corte--1 { left: 6px; top: 6px; } .bd-corte--2 { right: 6px; top: 6px; } .bd-corte--3 { left: 6px; bottom: 6px; } .bd-corte--4 { right: 6px; bottom: 6px; }
+  .bd-imprenta__centro { position: absolute; left: 50%; top: calc(clamp(18px, 2.6vh, 30px) - 2px); translate: -50% 0; display: flex; align-items: center; gap: 22px; }
+  .bd-registro { position: relative; width: 22px; height: 22px; border: 1px solid currentColor; border-radius: 50%;
+    background: linear-gradient(currentColor, currentColor) 50% / 1px 140% no-repeat, linear-gradient(currentColor, currentColor) 50% / 140% 1px no-repeat; }
+  .bd-registro::after { content: ''; position: absolute; inset: 6px; border-radius: 50%; background: currentColor; opacity: .5; }
+  .bd-carta { display: flex; align-items: center; gap: 3px; font-family: var(--mono); font-size: 9px; letter-spacing: .16em; text-transform: uppercase; color: var(--p-tx3); }
+  .bd-carta i { width: 13px; height: 13px; background: var(--c); outline: 1px solid rgba(25, 9, 0, .2); outline-offset: -1px; }
+  .bd-carta span { margin-left: 12px; }
+
+  /* --- Las opciones en el móvil ----------------------------------------------------------------------------------- */
+  @media (max-width: 760px) {
+    /* a: arriba la noche con la pila; abajo, el papel con lo que se lee (también la portada) */
+    html[data-op-brand='a'] .bd-papel::before { -webkit-mask-image: linear-gradient(0deg, #000 50%, transparent 58%); mask-image: linear-gradient(0deg, #000 50%, transparent 58%); }
+    html[data-op-brand='a'] .bd-texto { top: auto; bottom: 7vh; }
+    html[data-op-brand='a'] .bd-pila { top: 27%; }
+    html[data-op-brand='a'] .bd-pista { color: var(--p-tx2); }
+    html[data-op-brand='a'].bd-claro .bd::before { background: linear-gradient(var(--crema) 64%, rgba(231, 226, 218, 0)); }
+    /* b: la portada, arriba; los capítulos, abajo */
+    html[data-op-brand='b'] .bd-texto { top: 10vh; width: auto; padding: 3.6vh 6vw 3.4vh; }
+    html[data-op-brand='b'] .bd-cap { top: auto; bottom: 4vh; translate: none; width: auto; padding: 3vh 5vw 2.8vh; }
+    html[data-op-brand='b'] .bd-cap__t { font-size: 28px; }
+    html[data-op-brand='b'] .bd-efecto { padding: 3.4vh 6vw 3.6vh; }
+    /* c: la franja de arriba, de papel */
+    html[data-op-brand='c']:not(.bd-claro) .bd::before { background: linear-gradient(var(--crema) 64%, rgba(231, 226, 218, 0)); }
+    .bd-imprenta__centro { display: none; }
   }
 </style>

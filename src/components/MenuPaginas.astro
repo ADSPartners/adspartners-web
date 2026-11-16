@@ -1,0 +1,169 @@
+---
+// El menú de las subpáginas (16-nov: fuera NavSubpaginas, el botón por página; «un menú normal, que ocupe poco y vaya
+// donde mejor encaje según la subpágina»). Cerrado es un botón pequeño, «Menú», como el de la home (dos rayas y la
+// palabra); cada página lo pone donde le encaja (Tech, Brand y About, al final de la barra de arriba; Proyectos, abajo a
+// la izquierda, donde estaba «Rueda»). Lo que abre es la opción que elija Álvaro (prototipo del 16-nov: se elige con
+// ?menu=a|b|c y se recuerda durante la visita; sin elegir, la a):
+//   a «Desplegable»: una lista pequeña que cuelga del botón (o sube desde él, si el botón está abajo)
+//   b «Índice»: la pantalla entera en noche, con las páginas en grande, como el índice de una revista
+//   c «La placa»: el mismo menú que la home (components/Menu.astro y scripts/menu.js), la bajada hasta la placa
+// Las páginas salen de data/menu.js (DESTINOS), con su número y el color de su LED; «Inicio» va primero.
+import { DESTINOS } from '../data/menu.js';
+import Menu from './Menu.astro';
+
+interface Props { actual: 'proyectos' | 'tech' | 'brand' | 'about'; abre?: 'abajo' | 'arriba'; class?: string }
+const { actual, abre = 'abajo', class: clase = '' } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const dos = (n: number) => String(n).padStart(2, '0');
+const PAGINAS = DESTINOS.filter((d) => d.ruta && !d.ruta.startsWith('#'));
+---
+<script is:inline define:vars={{ base }}>
+  // La opción del menú (prototipo): ?menu=a|b|c, recordada en la visita
+  (function () {
+    var h = document.documentElement, v = new URLSearchParams(location.search).get('menu');
+    try { if (v) sessionStorage.setItem('ads-op-menu', v); else v = sessionStorage.getItem('ads-op-menu'); } catch (e) { /* sin almacenamiento */ }
+    h.dataset.opMenu = /^[abc]$/.test(v || '') ? v : 'a';
+    window.ADS_BASE = base;
+  })();
+</script>
+<div class:list={['mp', `mp--${abre}`, clase]} data-mp>
+  <button class="mp__btn" type="button" aria-expanded="false" aria-haspopup="true" data-mp-btn data-sonido-hover>
+    <span class="mp__i" aria-hidden="true"><i></i><i></i></span><span class="mp__txt" data-mp-txt data-menu-txt>Menú</span>
+  </button>
+
+  <!-- a · Desplegable: la lista, colgada del botón -->
+  <nav class="mp__lista" aria-label="Páginas" data-mp-lista hidden>
+    <a class="mp__a mp__a--inicio" href={base} data-sonido-hover><span class="mp__n">00</span><span class="mp__nombre">Inicio</span></a>
+    {PAGINAS.map((d, i) => {
+      const es = d.slug === actual;
+      return (
+        <a class:list={['mp__a', { 'es-actual': es }]} href={`${base}${d.ruta}`} aria-current={es ? 'page' : undefined} style={`--led: ${d.color}`} data-entrada data-sonido-hover>
+          <span class="mp__n">{dos(i + 1)}</span><span class="mp__nombre">{d.nombre}</span><span class="mp__led" aria-hidden="true"></span>
+        </a>
+      );
+    })}
+    <a class="mp__correo" href="mailto:adsgroup@ads-partners.com" data-sonido-hover>Escríbenos a <b>adsgroup@</b></a>
+  </nav>
+</div>
+
+<!-- b · Índice: la pantalla entera, con las páginas en grande (el script lo saca al <body>, encima de todo) -->
+<div class="mpi" role="dialog" aria-modal="true" aria-label="Menú" data-mp-indice hidden>
+  <button class="mpi__cerrar" type="button" data-mpi-cerrar data-sonido-hover><span class="mp__i mp__i--x" aria-hidden="true"><i></i><i></i></span>Cerrar</button>
+  <p class="mpi__etq">( Índice · adsPartners )</p>
+  <ol class="mpi__lista">
+    {PAGINAS.map((d, i) => {
+      const es = d.slug === actual;
+      return (
+        <li style={`--led: ${d.color}; --i: ${i}`}>
+          <a class:list={['mpi__a', { 'es-actual': es }]} href={`${base}${d.ruta}`} aria-current={es ? 'page' : undefined} data-entrada data-sonido-hover>
+            <span class="mpi__n">{dos(i + 1)}</span>
+            <span class="mpi__nombre">{d.nombre}</span>
+            <span class="mpi__frase">{d.frase}</span>
+            <span class="mpi__led" aria-hidden="true"></span>
+          </a>
+        </li>
+      );
+    })}
+  </ol>
+  <p class="mpi__pie"><a href={base} data-sonido-hover>◀ Página principal</a><a href="mailto:adsgroup@ads-partners.com" data-sonido-hover>Escríbenos a <b>adsgroup@</b></a></p>
+</div>
+
+<!-- c · La placa: el menú de la home, tal cual (solo se monta con la opción c) -->
+<Menu />
+
+<script>
+  import { montarMenuPaginas } from '../scripts/menu-paginas.js';
+  montarMenuPaginas();
+</script>
+
+<style>
+  /* --- El botón: dos rayas y «Menú», como el de la home ------------------------------------------------------------ */
+  .mp { position: relative; }
+  .mp__btn {
+    display: inline-flex; align-items: center; gap: 9px; padding: 6px 0; color: inherit; white-space: nowrap;
+    font-family: var(--mono); font-size: 11px; line-height: 1; letter-spacing: .14em; text-transform: uppercase;
+  }
+  .mp__i { position: relative; display: inline-block; width: 16px; height: 7px; }
+  .mp__i i { position: absolute; left: 0; height: 1px; background: currentColor; transition: width .4s var(--curva), transform .4s var(--curva), top .4s var(--curva); }
+  .mp__i i:nth-child(1) { top: 0; width: 16px; }
+  .mp__i i:nth-child(2) { top: 6px; width: 10px; }
+  .mp__btn:hover .mp__i i:nth-child(2), .mp__btn:focus-visible .mp__i i:nth-child(2) { width: 16px; }
+  /* abierto: las dos rayas se cruzan */
+  .mp__btn[aria-expanded='true'] .mp__i i, .mp__i--x i { top: 3px; width: 14px; }
+  .mp__btn[aria-expanded='true'] .mp__i i:nth-child(1), .mp__i--x i:nth-child(1) { transform: rotate(45deg); }
+  .mp__btn[aria-expanded='true'] .mp__i i:nth-child(2), .mp__i--x i:nth-child(2) { transform: rotate(-45deg); }
+
+  /* --- a · Desplegable ---------------------------------------------------------------------------------------------- */
+  .mp__lista {
+    position: absolute; right: -14px; top: calc(100% + 14px); z-index: 2; width: 236px; padding: 10px 14px 12px;
+    display: grid; background: rgba(18, 13, 10, .97); color: var(--crema); border: 1px solid rgba(231, 226, 218, .16);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, .35);
+    opacity: 0; translate: 0 -6px; transition: opacity .25s var(--curva), translate .35s var(--curva);
+  }
+  .mp--arriba .mp__lista { right: auto; left: -14px; top: auto; bottom: calc(100% + 14px); translate: 0 6px; }
+  .mp__lista[hidden] { display: none; }
+  .mp__lista.on { opacity: 1; translate: 0 0; }
+  /* las esquinas del inspector, en rosa */
+  .mp__lista::before { content: ''; position: absolute; right: -1px; top: -1px; width: 7px; height: 7px; background: var(--rosa); }
+  .mp__a {
+    display: grid; grid-template-columns: 22px 1fr auto; align-items: baseline; padding: 7px 0 6px;
+    border-top: 1px solid rgba(231, 226, 218, .1); color: var(--crema-2); transition: color .25s;
+  }
+  .mp__a--inicio { border-top: 0; }
+  .mp__n { font-family: var(--mono); font-size: 9px; letter-spacing: .04em; opacity: .6; }
+  .mp__nombre { font-family: var(--serif); font-weight: 300; font-size: 22px; line-height: 1; letter-spacing: -.005em; }
+  .mp__led { align-self: center; width: 6px; height: 6px; box-shadow: inset 0 0 0 1px currentColor; opacity: .5; }
+  .mp__a:hover, .mp__a:focus-visible { color: var(--crema); }
+  .mp__a:hover .mp__led { background: color-mix(in srgb, var(--led) 60%, transparent); box-shadow: none; opacity: 1; }
+  .mp__a.es-actual { color: var(--crema); }
+  .mp__a.es-actual .mp__nombre { font-weight: 400; font-style: italic; }
+  .mp__a.es-actual .mp__led { background: var(--led); box-shadow: 0 0 6px var(--led); opacity: 1; }
+  .mp__correo { margin-top: 8px; padding-top: 10px; border-top: 1px solid rgba(231, 226, 218, .1); font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--crema-2); }
+  .mp__correo b { font-weight: 400; color: var(--crema); }
+
+  /* --- b · Índice a pantalla completa ------------------------------------------------------------------------------ */
+  .mpi {
+    --lado: clamp(18px, 2.4vw, 36px);
+    position: fixed; inset: 0; z-index: 60; display: grid; grid-template-rows: auto 1fr auto; padding: var(--lado);
+    background: var(--noche); color: var(--crema); overflow: auto;
+    clip-path: inset(0 0 100% 0); transition: clip-path .7s var(--curva);
+  }
+  .mpi[hidden] { display: none; }
+  .mpi.on { clip-path: inset(0 0 0 0); }
+  .mpi__cerrar { position: absolute; right: var(--lado, var(--margen)); top: var(--lado, var(--margen)); display: inline-flex; align-items: center; gap: 9px; padding: 6px 0;
+    font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
+  .mpi__etq { margin: 6px 0 0; font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--crema-2); }
+  .mpi__lista { align-self: center; margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--linea); }
+  .mpi__lista li { border-bottom: 1px solid var(--linea); opacity: 0; translate: 0 24px; transition: opacity .5s var(--curva), translate .8s var(--curva); }
+  .mpi.on .mpi__lista li { opacity: 1; translate: 0 0; transition-delay: calc(.18s + var(--i) * 60ms); }
+  .mpi__a { display: grid; grid-template-columns: 7vw auto 1fr auto; align-items: baseline; gap: 2vw; padding: 1.6vh 0 1.2vh; color: var(--crema-2); transition: color .3s; }
+  .mpi__n { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; }
+  .mpi__nombre { font-family: var(--serif); font-weight: 300; font-size: clamp(54px, min(8.4vw, 13vh), 150px); line-height: .9; letter-spacing: -.03em; color: var(--crema); transition: translate .5s var(--curva); }
+  .mpi__frase { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
+  .mpi__led { align-self: center; width: 10px; height: 10px; box-shadow: inset 0 0 0 1px currentColor; }
+  .mpi__a:hover .mpi__nombre, .mpi__a:focus-visible .mpi__nombre { translate: 1.2vw 0; font-style: italic; }
+  .mpi__a:hover .mpi__led { background: var(--led); box-shadow: 0 0 10px var(--led); }
+  .mpi__a.es-actual .mpi__nombre { font-style: italic; color: var(--rosa); }
+  .mpi__a.es-actual .mpi__led { background: var(--led); box-shadow: 0 0 10px var(--led); }
+  .mpi__pie { margin: 0; display: flex; justify-content: space-between; gap: 20px; font-family: var(--mono); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--crema-2); }
+  .mpi__pie b { font-weight: 400; color: var(--crema); }
+  .mpi__pie a:hover { color: var(--crema); }
+
+  /* c · La placa: lo de la página que se queda encima del menú (lo fijo de arriba), fuera mientras está abierto; y su
+     «Cerrar», que pone el script dentro del menú */
+  :global(html[data-op-menu='c'].menu-abierto) :global(:is(.bd-donde, .bd-madrid, .tec__donde, .tec__madrid, .ab__donde, .ab__madrid)) { opacity: 0; }
+  :global(.menu .mpi__cerrar) { z-index: 5; color: var(--crema); }
+  :global(.menu .mpi__cerrar[hidden]) { display: none; }
+
+  @media (max-width: 760px) {
+    /* (en el móvil, el botón de Proyectos va arriba: la lista baja, centrada) */
+    .mp--arriba .mp__lista { top: calc(100% + 14px); bottom: auto; left: 50%; right: auto; margin-left: -118px; translate: 0 -6px; }
+    .mpi__a { grid-template-columns: 30px 1fr auto; gap: 10px; padding: 2vh 0 1.6vh; }
+    .mpi__frase { grid-column: 2 / -1; grid-row: 2; font-size: 9px; }
+    .mpi__nombre { font-size: 52px; }
+    .mpi__pie { flex-direction: column; gap: 10px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .mpi, .mpi__lista li, .mp__lista { transition: none; }
+  }
+</style>
