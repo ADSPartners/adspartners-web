@@ -56,6 +56,7 @@ escrita en reglas. En la web, esas reglas son código, y se cumplen solas.
 - RaciónJusta: una app para bares que lee las facturas de los proveedores y saca lo que
   cuesta y lo que deja cada plato.
 - Inversalia: su marca, creada desde cero, su web y sus automatizaciones.
+- Klink: la marca de una app de mensajería privada, desde cero.
 - Butter Studio: la web de unas cookies hechas a mano en Madrid.
 - Métele Voltaje: la web de una asesoría energética de Teruel.
 - Ava Pastelería: la web de una pastelería de tartas por encargo.
