@@ -149,4 +149,17 @@ export const PROYECTOS = [
     resumen: 'La web de un cirujano vascular en Madrid y la captación de pacientes para su consulta.',
     cinta: { src: 'jorge-cato/lienzo-ia.webp', ancho: 4, alto: 3 },
   },
+  {
+    slug: 'nomad-coach',
+    nombre: 'Nomad Coach',
+    con: 'Hugo Silva, clases a domicilio',
+    rama: 'Brand + Tech', anio: '2026', sector: 'Tenis y pádel · Madrid',
+    linea: 'Su web, con la marca en movimiento y un chat con IA',
+    dato: 'el logo se separa',
+    texto: 'Hugo da clases de tenis y pádel en la pista privada del alumno, en el noroeste de Madrid. Hicimos su web y todo lo que se ve y se mueve en ella: la marca aplicada, el logo que se separa en «Nomad» y «Coach» al bajar, la pantalla de carga, el cursor con la N y el movimiento del scroll. Además, un chat con IA para resolver dudas.',
+    datos: ['Logo que se separa en dos', 'Carga, cursor y scroll propios', 'Chat con IA en la web'],
+    equipo: 'Sebas y Álvaro', rol: ['Marca y diseño de la web', 'Chat con IA'],
+    resumen: 'La web de un profe de tenis y pádel a domicilio en Madrid: la marca en movimiento y un chat con IA.',
+    cinta: { src: 'nomad-coach/lienzo-ia.webp', ancho: 4, alto: 3 },
+  },
 ];
