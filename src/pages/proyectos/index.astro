@@ -95,7 +95,7 @@ const PRIMERAS = [0, 1, 2, PROYECTOS.length - 1];
           <li class="cin__item" data-cin-item={j}>
             <a href={`#${p.slug}`} data-cursor-enlace data-sonido-hover>
               <span class="cin__item-etq">{p.sector}</span>
-              <span class="cin__item-nombre" id={`${p.slug}-nombre`}>{p.nombre}</span>
+              <h2 class="cin__item-nombre" id={`${p.slug}-nombre`}>{p.nombre}</h2>
               <span class="cin__item-raya" aria-hidden="true"></span>
               <span class="cin__item-linea">{p.resumen}</span>
             </a>
@@ -215,7 +215,7 @@ const PRIMERAS = [0, 1, 2, PROYECTOS.length - 1];
   .cin__item { height: var(--alto-item); }
   .cin__item a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; height: 100%; text-align: center; }
   .cin__item-etq { color: var(--gris); font-weight: 500; }
-  .cin__item-nombre { font-size: clamp(24px, 1.6vw, 30px); line-height: .9; letter-spacing: -.03em; text-transform: uppercase; }
+  .cin__item-nombre { margin: 0; font-weight: inherit; font-size: clamp(24px, 1.6vw, 30px); line-height: .9; letter-spacing: -.03em; text-transform: uppercase; }
   .cin__item-raya { width: 9px; height: 1px; background: currentColor; }
   .cin__item-linea { max-width: 36ch; font-weight: 500; }
 

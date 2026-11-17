@@ -27,7 +27,7 @@ window.LEGAL = {
           titular: "Titular: ALDASE SOCIOS GP S.L.",
           cif: "NIF/CIF: B21757786",
           domicilio:
-            "Domicilio: Calle Infante Don Luis 14, 28660, Boadilla del Monte, Madrid",
+            "Domicilio: Avenida del Infante Don Luis 14, portal 5, 2.º B, 28660 Boadilla del Monte (Madrid)",
           email: "Correo electrónico: adsgroup@ads-partners.com",
           registro:
             "Datos registrales: Inscrita en el Registro Mercantil de Madrid, Hoja M-849202, Inscripción 1ª",
@@ -75,7 +75,7 @@ window.LEGAL = {
           responsable: "Responsable: ALDASE SOCIOS GP S.L.",
           cif: "NIF/CIF: B21757786",
           domicilio:
-            "Domicilio: Calle Infante Don Luis 14, 28660, Boadilla del Monte, Madrid",
+            "Domicilio: Avenida del Infante Don Luis 14, portal 5, 2.º B, 28660 Boadilla del Monte (Madrid)",
           email: "Correo electrónico: adsgroup@ads-partners.com",
           web: "Sitio web: www.ads-partners.com",
         },
@@ -123,7 +123,7 @@ window.LEGAL = {
             "Solicitar la portabilidad de los datos.",
           ],
           ejercicio:
-            "Puede ejercer estos derechos dirigiéndose por escrito a adsgroup@ads-partners.com o a Calle Infante Don Luis 14, 28660, Boadilla del Monte, Madrid, adjuntando copia de su DNI o documento identificativo equivalente.",
+            "Puede ejercer estos derechos dirigiéndose por escrito a adsgroup@ads-partners.com o a Avenida del Infante Don Luis 14, portal 5, 2.º B, 28660 Boadilla del Monte (Madrid), adjuntando copia de su DNI o documento identificativo equivalente.",
           reclamacion:
             "Asimismo, tiene derecho a presentar una reclamación ante la Agencia Española de Protección de Datos (AEPD), con domicilio en C/ Jorge Juan, 6, 28001 Madrid (www.aepd.es), si considera que el tratamiento no se ajusta a la normativa vigente.",
         },
@@ -259,7 +259,7 @@ window.LEGAL = {
           titular: "Owner: ALDASE SOCIOS GP S.L.",
           cif: "Tax ID (CIF): B21757786",
           domicilio:
-            "Registered address: Calle Infante Don Luis 14, 28660, Boadilla del Monte, Madrid (Spain)",
+            "Registered address: Avenida del Infante Don Luis 14, portal 5, 2.º B, 28660 Boadilla del Monte (Madrid), Spain",
           email: "Email: adsgroup@ads-partners.com",
           registro:
             "Registry details: Registered with the Mercantile Registry of Madrid, Sheet M-849202, 1st Entry",
@@ -307,7 +307,7 @@ window.LEGAL = {
           responsable: "Controller: ALDASE SOCIOS GP S.L.",
           cif: "Tax ID (CIF): B21757786",
           domicilio:
-            "Address: Calle Infante Don Luis 14, 28660, Boadilla del Monte, Madrid (Spain)",
+            "Address: Avenida del Infante Don Luis 14, portal 5, 2.º B, 28660 Boadilla del Monte (Madrid), Spain",
           email: "Email: adsgroup@ads-partners.com",
           web: "Website: www.ads-partners.com",
         },
@@ -355,7 +355,7 @@ window.LEGAL = {
             "Request data portability.",
           ],
           ejercicio:
-            "You may exercise these rights in writing to adsgroup@ads-partners.com or to Calle Infante Don Luis 14, 28660, Boadilla del Monte, Madrid, enclosing a copy of your ID or equivalent identifying document.",
+            "You may exercise these rights in writing to adsgroup@ads-partners.com or to Avenida del Infante Don Luis 14, portal 5, 2.º B, 28660 Boadilla del Monte (Madrid), enclosing a copy of your ID or equivalent identifying document.",
           reclamacion:
             "You also have the right to lodge a complaint with the Spanish Data Protection Agency (AEPD), located at C/ Jorge Juan, 6, 28001 Madrid (www.aepd.es), if you consider that the processing does not comply with current regulations.",
         },

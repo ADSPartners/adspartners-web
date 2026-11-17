@@ -3,8 +3,8 @@
 // la auditoría SEO del 03-nov (seo/datos/2026-11-03/.../schema-propuestas, validadas 8/8) y todo lo que dicen está
 // publicado en la web: el aviso legal, «Qué somos», Tech, Brand, About y Proyectos.
 // Los @id son siempre de https://ads-partners.com, también en las copias de prueba: el grafo bueno es el de producción.
-// Lo que falta y no se pone hasta que esté publicado: teléfono de llamadas, fecha de fundación, apellidos y perfiles
-// de los socios, zona de servicio y ficha de Google (si hay ficha, pasar a ["Organization", "LocalBusiness"]).
+// La dirección no lleva calle ni código postal (es una vivienda; la completa está en el aviso legal). Lo que falta y no se
+// pone hasta que esté publicado: fecha de fundación, apellidos y perfiles de los socios y ficha de Google (si hay ficha, pasar a ["Organization", "LocalBusiness"]).
 import { TECH } from './tech.js';
 import { PROYECTOS } from './proyectos.js';
 import { CIERRE as BRAND_CIERRE } from './brand.js';
@@ -52,12 +52,12 @@ export const ORGANIZACION = {
   },
   address: {
     '@type': 'PostalAddress',
-    streetAddress: 'Avenida del Infante Don Luis, 14',
-    postalCode: '28660',
     addressLocality: 'Boadilla del Monte',
-    addressRegion: 'Madrid',
+    addressRegion: 'Comunidad de Madrid',
     addressCountry: 'ES',
   },
+  telephone: '+34633565840',
+  areaServed: [{ '@type': 'City', name: 'Madrid' }, { '@type': 'AdministrativeArea', name: 'Comunidad de Madrid' }, { '@type': 'Country', name: 'España' }],
   taxID: 'B21757786',
   identifier: { '@type': 'PropertyValue', propertyID: 'Registro Mercantil de Madrid', value: 'Hoja M-849202' },
   knowsAbout: [...BRAND, ...TECH_SERVICIOS],

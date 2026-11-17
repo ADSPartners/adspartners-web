@@ -15,7 +15,7 @@ export const TITULAR = {
   marca: 'adsPartners',
   nif: 'B21757786',
   // Sin piso ni puerta, como en la web anterior. La dirección completa, en la nota de datos fiscales
-  domicilio: 'Avenida del Infante Don Luis, 14, 28660 Boadilla del Monte (Madrid)',
+  domicilio: 'Avenida del Infante Don Luis 14, portal 5, 2.º B, 28660 Boadilla del Monte (Madrid)',
   correo: 'adsgroup@ads-partners.com',
   registro: 'Registro Mercantil de Madrid, hoja M-849202, inscripción 1.ª',
   web: 'ads-partners.com',
