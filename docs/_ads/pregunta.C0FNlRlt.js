@@ -1,4 +1,4 @@
-import{p as e}from"./preload-helper.BuYXinTM.js";import{r as t}from"./index.astro_astro_type_script_index_0_lang.DQWx3rj7.js";var n={nombre:`Cafetería de Ejemplo`,hoy:`2026-10-31`},r=`
+import{p as e}from"./preload-helper.BuYXinTM.js";import{r as t}from"./index.astro_astro_type_script_index_0_lang.CPsprGe1.js";var n={nombre:`Cafetería de Ejemplo`,hoy:`2026-10-31`},r=`
 .mpre { position: absolute; inset: 0; display: grid; place-items: center; user-select: none; -webkit-user-select: none; }
 .mpre__panel { position: relative; display: flex; flex-direction: column; border: 1px solid rgba(231,226,218,.55); background: rgba(18,13,10,.82);
   font-family: var(--mono); color: var(--crema-2); letter-spacing: .03em; }

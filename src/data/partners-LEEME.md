@@ -6,7 +6,6 @@ hay ninguno inventado.
 
 | Fichero | Partner | Origen |
 |---|---|---|
-| `klink.webp` | Klink | Web anterior de ads (`adspartners-web`, git `70c0c70`, `assets/logos/marcas/klink.png`). Monocolor: se tiñe |
 | `inversalia.webp` | Inversalia | Web anterior de ads (git `70c0c70`, `assets/logos/marcas/inversalia.png`). Monocolor: se tiñe |
 | `quironsalud.webp` (+ `-noche`) | Quirónsalud | Su web (`quironsalud.com/es/banners/3365261-logo-quironsalud.png`), sin el lema |
 | `fundacion-jimenez-diaz.webp` (+ `-noche`) | Fundación Jiménez Díaz | Su web (`fjd.es/es/banners/2062-HOP-UNIV-FJD-Alt_100.png`) |

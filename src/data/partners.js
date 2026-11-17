@@ -4,7 +4,6 @@
 // ancho: ancho relativo del logo en su caja (los apaisados, más; los cuadrados, menos).
 // De dónde sale cada logo, en src/data/partners-LEEME.md.
 export const PARTNERS = [
-  { id: 'klink', nombre: 'Klink', sector: 'marca · app', logo: 'klink.webp', tinta: '#2BB8C2', ancho: 0.62 },
   { id: 'quironsalud', nombre: 'Quirónsalud', sector: 'salud', logo: 'quironsalud-noche.webp', ancho: 0.74 },
   { id: 'metele-voltaje', nombre: 'Métele Voltaje', sector: 'energía · web', logo: 'metele-voltaje.webp', ancho: 0.62 },
   { id: 'tercero-b', nombre: 'Tercero B', sector: 'noche · marca y web', logo: 'tercero-b.svg', ancho: 0.62 },

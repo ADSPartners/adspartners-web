@@ -6,12 +6,13 @@
 // - El ratón: la pila se ladea un poco hacia él, sin rebote (un poco de profundidad, no un asa: 15-nov) y, quieta, flota.
 //   Solo se tocan dos planchas (Álvaro, 15-nov: las demás «no se entienden»): la de color (la marca toma el color por
 //   el que pasas) y la de letra (el titular se pone la letra que eliges); esas dos se levantan al pasar por encima.
-// - Lo que pasa solo al bajar: un brillo recorre la marca, la frase de agencia de la voz se corrige sola mientras dura
-//   su capítulo y el índice de abajo se llena capa a capa (si la opción lo enseña).
+// - Lo que pasa solo al bajar: un brillo recorre la marca y la frase de agencia de la voz se corrige sola mientras dura
+//   su capítulo.
 // Debajo, lo que hace una marca bien hecha (sus cifras suben contando al verse) y el cierre.
 // 16-nov: fuera la marca aplicada (la zona rosa, con sus soportes de lado) y el número grande; la luz de detrás ya no se
 // pinta (data-luz queda, sin CSS). Lo fijo de arriba cambia de tinta según lo que tenga debajo: html.bd-abajo, pasado el
-// viaje; html.bd-claro, con el cierre arriba (cada opción de la página decide sus colores).
+// viaje; html.bd-claro, con el cierre arriba. Las dos cuentan con la costura con la que empieza cada sección (la franja en
+// la que la noche y el papel se funden, --costura-alto): cambian cuando lo de debajo ya es la sección nueva.
 import { gsap } from 'gsap';
 import * as sonido from './sonido.js';
 import { CAPAS, PALETA, LETRAS, VOZ, PORTADA } from '../data/brand.js';
@@ -36,8 +37,6 @@ export function montarBrand({ reducido, conRaton, cursor }) {
   // Los seis capítulos ya están en el HTML (pages/brand), uno por capa y en el mismo orden: aquí solo se elige cuál se ve
   const caps = [...viaje.querySelectorAll('[data-cap]')];
   const titulo = $('[data-titulo]'), pista = $('[data-pista]');
-  // El índice de abajo, que se llena capa a capa al bajar
-  const llenos = [...viaje.querySelectorAll('[data-indice] li')].map((li) => ({ li, i: li.querySelector('i'), k: -1 }));
 
   const hora = document.querySelector('[data-bd-hora]');
   const reloj = new Intl.DateTimeFormat('es-ES', { timeZone: 'Europe/Madrid', hour: '2-digit', minute: '2-digit' });
@@ -185,7 +184,7 @@ export function montarBrand({ reducido, conRaton, cursor }) {
   const progreso = () => { const r = viaje.getBoundingClientRect(); return clamp(-r.top / Math.max(1, r.height - innerHeight), 0, 1); };
   let h = capas[0].offsetHeight;
   addEventListener('resize', () => { h = capas[0].offsetHeight; });
-  let p = progreso(), antes = performance.now(), visible = true, cierreAntes = false;
+  let p = progreso(), antes = performance.now(), visible = true, cierreAntes = false, saleAntes = 0;
   new IntersectionObserver(([e]) => { visible = e.isIntersecting; }).observe(viaje);
   const FIN = INICIO + N * PASO;
 
@@ -193,6 +192,14 @@ export function montarBrand({ reducido, conRaton, cursor }) {
     const ahora = performance.now(), dt = Math.min(0.05, (ahora - antes) / 1000), t = ahora / 1000;
     antes = ahora;
     if (!visible) return;
+    // Al acabar, la escena se va hacia arriba con la portada: la portada se apaga en la primera décima de pantalla.
+    // Si no, en escritorio se montaba en lo fijo de arriba y, en el móvil, cruzaba del papel a la noche en tinta
+    const sale = Math.round(clamp((innerHeight - viaje.getBoundingClientRect().bottom) / (innerHeight * 0.1), 0, 1) * 100) / 100;
+    if (sale !== saleAntes) {
+      saleAntes = sale;
+      texto.style.opacity = sale > 0 ? String(1 - sale) : '';
+      texto.style.transition = sale > 0 ? 'none' : '';
+    }
     p += (progreso() - p) * (reducido ? 1 : 1 - Math.exp(-dt * 7));
     pista.classList.toggle('fuera', p > 0.01);
 
@@ -224,14 +231,9 @@ export function montarBrand({ reducido, conRaton, cursor }) {
       c.classList.toggle('activa', i === ahoraActiva);
     });
 
-    // Lo que se mueve solo al bajar: el brillo recorre la marca y cada tramo del índice se llena con el suyo
+    // Lo que se mueve solo al bajar: el brillo recorre la marca
     const bx = Math.round(30 + p * 90), by = Math.round(20 + p * 70);
     if (marca.dataset.b !== `${bx},${by}`) { marca.dataset.b = `${bx},${by}`; marca.style.setProperty('--bx', `${bx}%`); marca.style.setProperty('--by', `${by}%`); }
-    llenos.forEach((l, i) => {
-      const k = Math.round(clamp((p - INICIO - i * PASO) / PASO, 0, 1) * 200) / 200;
-      if (k !== l.k) { l.k = k; l.i.style.transform = `scaleX(${k})`; }
-      l.li.classList.toggle('activa', i === ahoraActiva);
-    });
 
     // Las cotas, a la derecha de cada plancha; si no caben (la plancha se sale por arriba o por abajo, o llega al borde
     // derecho y la cota la pisaría), no se ponen
@@ -276,12 +278,17 @@ export function montarBrand({ reducido, conRaton, cursor }) {
   // --- El cierre: el texto entra al llegar (sin el bloque rosa que subía, fuera el 16-nov)
   const cierreEl = raiz.querySelector('[data-cierre]');
   const html = document.documentElement;
+  // Lo que mide la costura del principio de cada sección; lo fijo cambia de tinta pasada algo más de la mitad
+  let costura = 0;
+  const medirCostura = () => { costura = parseFloat(getComputedStyle(raiz).getPropertyValue('--costura-alto')) || 0; };
+  medirCostura();
+  addEventListener('resize', medirCostura);
 
   gsap.ticker.add(() => {
     const vh = innerHeight;
     if (efectosEl) {
-      // pasado el viaje (los efectos ya llegan arriba)
-      const abajo = efectosEl.getBoundingClientRect().top < 40;
+      // pasado el viaje (la noche de los efectos ya llega arriba)
+      const abajo = efectosEl.getBoundingClientRect().top + costura * 0.6 < 40;
       if (abajo !== html.classList.contains('bd-abajo')) html.classList.toggle('bd-abajo', abajo);
     }
     if (efectosEl && !reducido) {
@@ -296,8 +303,8 @@ export function montarBrand({ reducido, conRaton, cursor }) {
       const r = cierreEl.getBoundingClientRect();
       const k = reducido ? 1 : clamp((vh - r.top) / (vh * 0.75), 0, 1);
       if (k > 0.7 && !cierreEl.classList.contains('on')) cierreEl.classList.add('on');
-      // con el cierre arriba, lo fijo de arriba cambia de tinta (cada opción decide a cuál)
-      const claro = r.top < 40 && r.bottom > 40;
+      // con el papel del cierre arriba, lo fijo de arriba se pone en tinta
+      const claro = r.top + costura * 0.6 < 40 && r.bottom > 40;
       if (claro !== html.classList.contains('bd-claro')) html.classList.toggle('bd-claro', claro);
     }
   });

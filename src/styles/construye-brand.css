@@ -25,15 +25,6 @@ html.construye .bd-capa[data-capa='0'] { translate: 0 0 3.6px; --bd-gira: 1.5deg
 html.construye .bd-cotas { visibility: hidden; }
 
 html.construye .bd-p { animation-name: bd-c-entra, bd-c-sube; animation-duration: .5s, .8s; animation-delay: 1.2s; animation-timing-function: ease-out, var(--curva); animation-fill-mode: both; }
-/* El índice de las seis capas, abajo: con la montada ya hecha, un tramo detrás de otro, de izquierda a derecha, hasta la
-   pista (en el li, que es solo opacity y translate; el tramo que se llena, <i>, lo escala brand.js) */
-html.construye .bd-indice li { animation-name: bd-c-entra, bd-c-indice; animation-duration: .4s; animation-timing-function: ease-out, var(--curva); animation-fill-mode: both; }
-html.construye .bd-indice li:nth-child(1) { animation-delay: 1.26s; }
-html.construye .bd-indice li:nth-child(2) { animation-delay: 1.3s; }
-html.construye .bd-indice li:nth-child(3) { animation-delay: 1.34s; }
-html.construye .bd-indice li:nth-child(4) { animation-delay: 1.38s; }
-html.construye .bd-indice li:nth-child(5) { animation-delay: 1.42s; }
-html.construye .bd-indice li:nth-child(6) { animation-delay: 1.46s; }
 /* Lo fijo de arriba: el «Brand · adsPartners» y la barra de la derecha, con el menú */
 html.construye .bd-donde,
 html.construye .bd-arriba { animation-name: bd-c-entra; animation-duration: .5s; animation-delay: 1.4s; animation-timing-function: ease-out; animation-fill-mode: both; }
@@ -42,4 +33,3 @@ html.construye .bd-pista { animation-name: bd-c-entra; animation-duration: .5s; 
 @keyframes bd-c-entra { from { opacity: 0; } }
 @keyframes bd-c-sube { from { translate: 0 16px; } }
 @keyframes bd-c-plancha { from { translate: 0 46vh; rotate: var(--bd-gira, 0deg); } }
-@keyframes bd-c-indice { from { translate: 0 6px; } }

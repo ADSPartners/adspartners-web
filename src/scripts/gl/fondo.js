@@ -7,7 +7,7 @@
 // - Con data-papel (el About), la mitad izquierda es el papel de la marca: grano y fibras quietos, y por donde pasa el
 //   ratón, acuarela rosa. La costura no es una línea: el papel se deshace en píxeles (matriz de Bayer) a lo largo de
 //   una franja, con el borde algo irregular, y el mismo fluido la empuja. La costura va a media pantalla o donde diga
-//   data-costura (de 0 a 1 del ancho; Brand, 16-nov: 0,43, o más de 1 para que todo sea papel).
+//   data-costura (de 0 a 1 del ancho; Brand: 0,43).
 import { Renderer, Program, Mesh, Triangle, Texture } from 'ogl';
 import { gsap } from 'gsap';
 import { Fluido } from './fluido.js';

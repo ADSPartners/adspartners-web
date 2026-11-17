@@ -2,15 +2,17 @@
 // Brand, «Desmontada» (02-nov; la B del prototipo de tres direcciones, la que eligió Álvaro). La marca de adsPartners
 // despiezada en seis planchas: arriba, el ads terminado; al bajar, la pila se pone en vista técnica, se abre y se
 // recorre capa a capa (la marca, la forma, el color, la letra, la voz y, debajo de todo, la idea). Cada capa es un
-// capítulo: su plancha crece y, al lado, qué es, qué efecto tiene en una empresa y un dato con su fuente, con su número
-// grande detrás y el índice abajo. Al final se vuelve a montar. Solo se tocan la de color y la de letra (15-nov); el
-// ratón ladea un poco la pila y levanta esas dos (scripts/brand.js). CSS 3D, sin WebGL. Debajo, lo que hace una marca
-// bien hecha y el cierre, que remata con los enlaces a las demás páginas (components/EnlacesWeb.astro).
+// capítulo: su plancha crece y, al lado, qué es, qué efecto tiene en una empresa y un dato con su fuente. Al final se
+// vuelve a montar. Solo se tocan la de color y la de letra (15-nov); el ratón ladea un poco la pila y levanta esas dos
+// (scripts/brand.js). CSS 3D, sin WebGL. Debajo, lo que hace una marca bien hecha y el cierre, que remata con los
+// enlaces a las demás páginas (components/EnlacesWeb.astro).
 // Los seis capítulos van enteros en el HTML (auditoría SEO del 03-nov: antes los escribía el JS y no los veía quien no lo
 // ejecuta); brand.js solo decide cuál se ve.
-// 16-nov (prototipo para que Álvaro elija; «me gustaba más antes», más llamativa sin perder información): fuera la marca
-// aplicada (la zona rosa del sobre y la bolsa), el número grande, la luz de color y los bloques de color; vuelve la noche
-// de antes y, para que llame, el papel de Sebas del About. Tres opciones, con ?brand=a|b|c (ver «Opciones», abajo).
+// 16-nov: de las tres opciones, Álvaro eligió la A, «Media hoja»: el lado del texto es el papel de Sebas (el del About)
+// y la pila, en la noche, al otro lado de la costura. Y la pidió más editorial, como una revista: cada capítulo abre con
+// su folio (el número, una raya y el nombre; nada de etiqueta de menú), la entradilla lleva capitular, las secciones,
+// su antetítulo con raya, y de una sección a otra no hay corte: el papel y la noche se funden con la misma trama de la
+// costura (--costura).
 import Base from '../../layouts/Base.astro';
 import '../../styles/construye-brand.css';   // (la llegada: la página se construye; aparte, por el rediseño de Brand)
 import Cursor from '../../components/Cursor.astro';
@@ -23,14 +25,9 @@ import { SERVICIO_BRAND } from '../../data/schema.js';
 
 const base = import.meta.env.BASE_URL;
 const cursiva = (s: string) => s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
-// El canto de cada plancha, de la paleta del manual (solo en el pliego, la opción c): en la vista técnica, la pila se lee
-// como hojas de color apiladas
-const CANTO: Record<string, string> = {
-  marca: '#F5CBD7', forma: '#E7E2DA', color: 'linear-gradient(#34190A 0 20%, #E7E2DA 20% 40%, #F5CBD7 40% 60%, #F5F3F1 60% 80%, #190900 80%)',
-  letra: '#F5CBD7', voz: '#E7E2DA', idea: '#34190A',
-};
-const LUZ_CANTO: Record<string, string> = { marca: '#F5CBD7', forma: '#E7E2DA', color: '#F5CBD7', letra: '#F5CBD7', voz: '#F5CBD7', idea: '#F5CBD7' };
-const canto = (i: number) => `--canto: ${CANTO[CAPAS[i].id]}; --canto-luz: ${LUZ_CANTO[CAPAS[i].id]}`;
+const dos = (n: number) => String(n).padStart(2, '0');
+// El antetítulo de la portada, en dos partes: la sección («Brand») y lo que es («desmontada»)
+const [ETQ_SECCION, ETQ_NOMBRE] = PORTADA.etiqueta.split(' · ');
 ---
 <Base
   titulo="Branding e identidad de marca en Madrid · adsPartners®"
@@ -40,30 +37,10 @@ const canto = (i: number) => `--canto: ${CANTO[CAPAS[i].id]}; --canto-luz: ${LUZ
   schema={[SERVICIO_BRAND]}
   construye
 >
-  <!-- El papel de Sebas (el del About): con ratón lo pinta el fondo vivo (gl/fondo.js, data-papel, con la costura donde
-       diga data-costura); sin él, el papel quieto (.bd-papel). La opción (?brand=a|b|c, recordada en la visita) decide
-       dónde va la costura: a, al 43 %; c, fuera de la pantalla (todo papel); b, sin papel de fondo -->
-  <Fondo papel />
-  <script is:inline>
-    (function () {
-      var h = document.documentElement, v = new URLSearchParams(location.search).get('brand');
-      try { if (v) sessionStorage.setItem('ads-op-brand', v); else v = sessionStorage.getItem('ads-op-brand'); } catch (e) { /* sin almacenamiento */ }
-      v = /^[abc]$/.test(v || '') ? v : 'a';
-      h.dataset.opBrand = v;
-      var f = document.querySelector('[data-fondo]');
-      if (v === 'b') { f && f.parentNode.remove(); return; }
-      if (f) f.dataset.costura = v === 'c' ? '1.5' : '0.43';
-    })();
-  </script>
+  <!-- El papel de Sebas (el del About): con ratón lo pinta el fondo vivo (gl/fondo.js, data-papel), con la costura al
+       43 %; sin él, el papel quieto (.bd-papel) -->
+  <Fondo papel costura={0.43} />
   <div class="bd-papel" aria-hidden="true"></div>
-  <!-- c · Pliego: las marcas de un pliego de imprenta (cruces de corte, la de registro y la carta de colores del manual) -->
-  <div class="bd-imprenta" aria-hidden="true">
-    <i class="bd-corte bd-corte--1"></i><i class="bd-corte bd-corte--2"></i><i class="bd-corte bd-corte--3"></i><i class="bd-corte bd-corte--4"></i>
-    <span class="bd-imprenta__centro">
-      <span class="bd-registro"></span>
-      <span class="bd-carta">{PALETA.map((c) => <i style={`--c: ${c.hex}`}></i>)}<span>{PALETA.map((c) => c.nombre).join(' · ')}</span></span>
-    </span>
-  </div>
   <!-- Fijo, como en Tech: dónde estás y, a la derecha, la hora de aquí, el sonido y el menú. Brand no lleva el logotipo
        fijo: a la home se vuelve con «adsPartners» (o desde el menú) -->
   <p class="bd-donde"><span class="bd-barra" aria-hidden="true"></span><span>Brand · <a class="bd-marca" href={base} aria-label="adsPartners, inicio" data-sonido-hover>adsPartners</a></span></p>
@@ -83,21 +60,21 @@ const canto = (i: number) => `--canto: ${CANTO[CAPAS[i].id]}; --canto-luz: ${LUZ
     <section class="bd-viaje" data-viaje aria-label="La marca de adsPartners, desmontada">
       <div class="bd-escena" data-escena>
         <div class="bd-texto" data-texto>
-          <p class="bd-etq">( {PORTADA.etiqueta} )</p>
+          <p class="bd-etq bd-folio bd-folio--seccion"><span class="bd-folio__raya" aria-hidden="true"></span> <span class="bd-folio__sec">{ETQ_SECCION}</span> <span class="bd-folio__nombre">{ETQ_NOMBRE}</span></p>
           <h2 class="bd-t" data-vivo data-titulo set:html={cursiva(PORTADA.titulo)} />
           <p class="bd-p">{PORTADA.texto}</p>
         </div>
 
         <div class="bd-pila" data-pila aria-hidden="true">
           <div class="bd-giro" data-giro>
-            <div class="bd-capa bd-capa--marca" data-capa="0" style={canto(0)}>
+            <div class="bd-capa bd-capa--marca" data-capa="0">
               <div class="bd-capa__brillo"></div>
               <div class="bd-capa__dentro">
                 <div class="bd-marca__iso"><Marca tipo="iso" /></div>
                 <div class="bd-marca__logo"><Marca tipo="logo" /></div>
               </div>
             </div>
-            <div class="bd-capa" data-capa="1" style={canto(1)}>
+            <div class="bd-capa" data-capa="1">
               <div class="bd-capa__dentro">
                 <div class="bd-forma" data-forma>
                   <span class="bd-forma__aire" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
@@ -108,14 +85,14 @@ const canto = (i: number) => `--canto: ${CANTO[CAPAS[i].id]}; --canto-luz: ${LUZ
                 <span class="bd-forma__nota bd-forma__nota--min">Mínimo · 24 px</span>
               </div>
             </div>
-            <div class="bd-capa" data-capa="2" style={canto(2)}>
+            <div class="bd-capa" data-capa="2">
               <div class="bd-colores">
                 {PALETA.map((c, i) => (
                   <button class="bd-color" type="button" data-color={i} tabindex="-1" style={`background:${c.hex};color:${c.oscuro ? '#E7E2DA' : '#190900'}`}><span>{c.nombre}</span></button>
                 ))}
               </div>
             </div>
-            <div class="bd-capa" data-capa="3" style={canto(3)}>
+            <div class="bd-capa" data-capa="3">
               <div class="bd-capa__dentro bd-letra">
                 <p class="bd-letra__t" data-letra-t>{TITULAR_LETRA}</p>
                 <p class="bd-letra__escala"><span>Titular · 300</span><span>Texto · 400</span><span>Detalle</span></p>
@@ -126,14 +103,14 @@ const canto = (i: number) => `--canto: ${CANTO[CAPAS[i].id]}; --canto-luz: ${LUZ
                 </div>
               </div>
             </div>
-            <div class="bd-capa" data-capa="4" style={canto(4)}>
+            <div class="bd-capa" data-capa="4">
               <div class="bd-capa__dentro bd-vozcapa" data-voz-capa>
                 <p class="bd-voz__etq">Así no · así sí</p>
                 <p class="bd-voz" data-voz></p>
                 <p class="bd-voz__no" data-voz-no></p>
               </div>
             </div>
-            <div class="bd-capa bd-capa--idea" data-capa="5" style={canto(5)}>
+            <div class="bd-capa bd-capa--idea" data-capa="5">
               <div class="bd-capa__dentro bd-idea" data-idea>
                 {IDEA.map(([que, dice]) => <p class="bd-idea__linea"><span>{que}</span>{dice}</p>)}
               </div>
@@ -147,14 +124,14 @@ const canto = (i: number) => `--canto: ${CANTO[CAPAS[i].id]}; --canto-luz: ${LUZ
           {CAPAS.map((c) => <span class="bd-cota"><b>{c.n}</b><span>{c.nombre} · {c.cota}</span></span>)}
         </div>
 
-        <!-- Los seis capítulos, uno por capa: qué es, qué efecto tiene, el dato con su fuente y, en la de color y la de
-             letra, su juego. Están todos en el HTML (los lee quien no
-             ejecuta el JS: buscadores y asistentes) y brand.js enseña el de la capa que toca. Los
-             demás quedan ocultos del todo (visibility), así que el lector de pantalla solo anuncia el que entra -->
+        <!-- Los seis capítulos, uno por capa: su folio (número, raya y nombre, como el de una revista), qué es, qué efecto
+             tiene, el dato con su fuente y, en la de color y la de letra, su juego. Están todos en el HTML (los lee quien
+             no ejecuta el JS: buscadores y asistentes) y brand.js enseña el de la capa que toca. Los demás quedan ocultos
+             del todo (visibility), así que el lector de pantalla solo anuncia el que entra -->
         <div class="bd-caps" aria-live="polite">
           {CAPAS.map((c, i) => (
             <article class="bd-cap" data-cap={i}>
-              <p class="bd-cap__n">{c.n} — {c.nombre}</p>
+              <p class="bd-cap__n bd-folio"><span class="bd-folio__n">{c.n}</span> <span class="bd-folio__de">/{dos(CAPAS.length)}</span> <span class="bd-folio__raya" aria-hidden="true"></span> <span class="bd-folio__nombre">{c.nombre}</span></p>
               <h3 class="bd-cap__t" set:html={cursiva(c.titular)} />
               <p class="bd-cap__que">{c.que}</p>
               <p class="bd-cap__importa">{c.importa}</p>
@@ -166,17 +143,13 @@ const canto = (i: number) => `--canto: ${CANTO[CAPAS[i].id]}; --canto-luz: ${LUZ
             </article>
           ))}
         </div>
-        <!-- El índice: las seis capas, de la que se ve a la que lo sostiene; cada tramo se llena con su color al bajar -->
-        <ol class="bd-indice" data-indice aria-hidden="true">
-          {CAPAS.map((c, i) => <li style={canto(i)}><i></i><b>{c.n}</b><span>{c.nombre}</span></li>)}
-        </ol>
         <p class="bd-pista" data-pista><span>{PORTADA.pista}</span><i aria-hidden="true"></i></p>
       </div>
     </section>
 
     <!-- Lo que hace una marca bien hecha: tres efectos medidos, cada uno con su fuente y su pega -->
     <section class="bd-efectos" data-efectos aria-labelledby="bd-efectos-t">
-      <p class="bd-efectos__ante">{EFECTOS.antetitulo}</p>
+      <p class="bd-efectos__ante bd-folio bd-folio--seccion"><span class="bd-folio__raya" aria-hidden="true"></span> <span class="bd-folio__sec">{EFECTOS.antetitulo}</span></p>
       <h2 class="bd-efectos__t" id="bd-efectos-t" data-vivo set:html={cursiva(EFECTOS.titulo)} />
       <ol class="bd-efectos__lista">
         {EFECTOS.lista.map((e, i) => (
@@ -193,13 +166,13 @@ const canto = (i: number) => `--canto: ${CANTO[CAPAS[i].id]}; --canto-luz: ${LUZ
     <!-- Lo que hacemos con la tuya -->
     <section class="bd-cierre" id="la-tuya" data-cierre aria-labelledby="bd-cierre-t">
       <div>
-        <p class="bd-cierre__ante">{CIERRE.antetitulo}</p>
+        <p class="bd-cierre__ante bd-folio bd-folio--seccion"><span class="bd-folio__raya" aria-hidden="true"></span> <span class="bd-folio__sec">{CIERRE.antetitulo}</span></p>
         <h2 class="bd-cierre__t" id="bd-cierre-t" data-vivo set:html={cursiva(CIERRE.titulo)} />
       </div>
       <div class="bd-cierre__dcha">
         <p class="bd-cierre__p">{CIERRE.texto}</p>
         <ul class="bd-cierre__servicios">{CIERRE.servicios.map((s) => <li>{s}</li>)}</ul>
-        <a class="bd-cierre__carta" href={`${base}#contacto`} data-sonido-hover><span class="bd-subraya">{CIERRE.carta}</span> <span aria-hidden="true">▶</span></a>
+        <a class="bd-cierre__carta" href={`${base}#contacto`} data-sonido-hover><span class="bd-subraya">{CIERRE.carta}</span> <span class="bd-cierre__flecha" aria-hidden="true">▶</span></a>
       </div>
       <EnlacesWeb actual="brand" class="bd-cierre__enlaces" />
     </section>
@@ -221,9 +194,26 @@ const canto = (i: number) => `--canto: ${CANTO[CAPAS[i].id]}; --canto-luz: ${LUZ
   @font-face { font-family: 'Open Sauce'; src: url('/assets/fonts/OpenSauceSans-Regular.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
   @font-face { font-family: 'Open Sauce'; src: url('/assets/fonts/OpenSauceSans-Medium.woff2') format('woff2'); font-weight: 500; font-style: normal; font-display: swap; }
 
-  /* El cursor, sin el logotipo dentro (a Álvaro le distrae): solo el aro y, sobre cada plancha, qué se puede hacer */
+  /* La paleta del manual (marrón, beige, rosa, blanco y negro), cada uno con su papel: el rosa marca lo que tiene que
+     verse, el marrón da peso, el beige calma. El papel de Sebas: grano y fibras (en :root: lo fijo de arriba y el papel
+     quieto van fuera de <main>). La costura: la trama de Bayer con la que el papel se deshace en la noche (la misma, en
+     celdas de 2 px, que pinta gl/fondo.js entre las dos mitades), de transparente arriba a opaco abajo; es la que funde
+     una sección con la siguiente */
+  :root { --marron: #34190A; --grano: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .1 0 0 0 0 .04 0 0 0 0 0 .16 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E"); --fibras: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='turbulence' baseFrequency='.006 .05' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2 0 0 0 0 .1 0 0 0 0 .04 .06 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");
+    --p-tx2: rgba(25, 9, 0, .68); --p-tx3: rgba(25, 9, 0, .46); --p-ln: rgba(25, 9, 0, .16);
+    --costura: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAADwCAQAAACjvixoAAADd0lEQVR42u3YzWsdVRgG8F9qWqWQxMTSxDRKkGAT02rVJvbGtoJigh8FoYJdCOLKRcGd4D8guBO6cCWuXFSwiyIGekWk4CdaUoX6USRIKlUxtYnpIpYmcXHPxJmh1nM6chWbd3N4Z+Y+5znP+5z3nhnWYi3W4v8aG20s5BtsyKfr/k1urVqbxqFdeyHv0gVatDRdh06dhbxNW9M49OsHHTpAn768T5rCIfNgj56CRwOXSA6hcqux3voEV2+1FWy2GWyzDfTqjUJoKa2Ii8W7ERy22AK22w66dYNBgwk6ZCvI1p85Ow5hjz1g2DCoqeX1SdShA/Ph6gpuiuIwYACMGgVDhsCYsQQO/fge7fgNA/gOXVEIE6hjJz7DYyEfwUfRHDZhFrfjNG7EHG6LQtiND7AvzL0Dn+KRRh7J4b7wq4zDvTgRzeGZnA51PIljQYd6ci3uxlSuFiNJtTgQxlrgcCCJw0N4D/cEDuMBZTQK4WBJh6dzfojnUAtuGsdkQPu8kUcgPBvmfCrnh3qSDt1h7sNh/DiMb0ZzeKlYf/uvSofxnA5HinkEwvPF+qsVdYlAGCjpcDKXT0QhHKrsh97cuifwRrIOL5f2xY5kHfYW67/qh8PRHI5cwQ/HohAGr+CHuFq8WtoXteR98Xix/qbCGK9DvVj/VT/sjObwYJgz0yHzQ3x/OFq5PzxX0iHdD6dKOuxP1uGJ4rqvoj+8X7k/vPAX/SG+T56p3B8OlnRI7w/fVu4Pr1TuD0uV/fBiZT+cvcz5IU2H10o6nEzWYQUf/tkX7Qunsng/HKrshxW8i4cDSuaHR/FJFMJk5fPDCqYbp08nwmn0dDidxnF4vfS/+VZyn1xpnOGN4RsMBrSRxqk0AuE49uJomHsqoL2TxOFndOc4/Np4O4nkMJnTYRfezuW7k2sxF95Oslr8EoHQmq+cXTiF4fDWEs8hi/PoxCW0RnM4jgfwJe4Mu+x+fI2haA4/oQe/4/rw1rYJy1EczuAWfIG78CNuxle4I1mHRdyQyy9FcQhzra4k0+MH9EVzWMJ1uauZHqI4ZMzPohcLaMMMbk3W4TLxtwjrTJsObjoPZsyABQuRXw+qc1i2DM45V7gzb75pHObMFa7MmgVLlprGIYtMjywuNr6ONYXDBRcKVxYtJiH8kzr8lx4o1eSa1WHtgWv5gT8A0V0hu5IMgPgAAAAASUVORK5CYII="); }
+  .bd { --lado: clamp(18px, 2.4vw, 36px); --arriba: clamp(18px, 2.6vh, 30px); --rosa-2: rgba(245, 203, 215, .38); --brand: var(--rosa);
+    --costura-alto: 240px; color: var(--crema); }
+
+  /* --- El cursor ------------------------------------------------------------------------------------------------------
+     Sin el logotipo dentro (a Álvaro le distrae): el aro, un punto en medio y, sobre cada plancha, qué se puede hacer.
+     16-nov: no se veía en el papel. En todo <main> el del sistema se esconde (data-cursor) y el propio era un aro beige
+     al 32 % sobre el papel beige (en el cierre y en la mitad izquierda del viaje): 1:1 de contraste. Ahora se pinta en
+     diferencia con lo que tiene debajo: sobre la noche, claro; sobre el papel, oscuro; sin tocar el de las demás páginas */
+  html:has(main.bd) .cursor { mix-blend-mode: difference; }
   html:has(main.bd) .cursor__iso { display: none; }
-  .bd { --lado: clamp(18px, 2.4vw, 36px); --arriba: clamp(18px, 2.6vh, 30px); --rosa-2: rgba(245, 203, 215, .38); color: var(--crema); }
+  html:has(main.bd) .cursor__pista { stroke: rgba(231, 226, 218, .62); }
+  html:has(main.bd) .cursor__cuerpo::after { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--crema); }
 
   /* --- Fijo ---------------------------------------------------------------------------------------------------- */
   .bd-donde, .bd-madrid { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--crema-2); }
@@ -244,18 +234,69 @@ const canto = (i: number) => `--canto: ${CANTO[CAPAS[i].id]}; --canto-luz: ${LUZ
   html.sonido-on .bd-ondas i:nth-child(3) { animation-delay: -.7s; }
   html.sonido-on .bd-ondas i:nth-child(4) { animation-delay: -.5s; }
   @keyframes bd-onda { 0%, 100% { height: 3px; } 50% { height: 15px; } }
+  /* Lo fijo cambia de tinta según lo que tenga debajo (brand.js): en tinta sobre el papel (a la izquierda mientras dura
+     el viaje, html:not(.bd-abajo); todo, con el cierre arriba, html.bd-claro) */
+  .bd-donde, .bd-nav, .bd-madrid { transition: color .4s; }
+  html.bd-claro :is(.bd-donde, .bd-madrid) { color: var(--p-tx2); }
+  html.bd-claro .bd-nav { color: var(--tinta); }
+  html.bd-claro :is(.bd-barra, .bd-ondas i) { background: var(--tinta); }
+  @media (min-width: 761px) {
+    html:not(.bd-abajo) .bd-donde { color: var(--p-tx2); }
+    html:not(.bd-abajo) .bd-barra { background: var(--tinta); }
+    html:not(.bd-abajo) .bd-marca { color: var(--tinta); }
+    /* Pasado el viaje, lo de debajo pasa por una franja para no montarse en lo fijo (antes, «Crece más» o el
+       antetítulo quedaban debajo de «Brand · adsPartners»): de noche y, con el cierre arriba, de papel, como en el
+       móvil. Durante el viaje no hace falta (la escena está quieta) y arriba hay papel y noche a la vez */
+    .bd::before {
+      content: ''; position: fixed; left: 0; right: 0; top: 0; height: calc(var(--arriba) + 44px); z-index: 39; pointer-events: none;
+      background: linear-gradient(var(--noche) 64%, rgba(18, 13, 10, 0)); opacity: 0; transition: opacity .3s;
+    }
+    html.bd-abajo .bd::before { opacity: 1; }
+    html.bd-claro .bd::before { background: linear-gradient(var(--crema) 64%, rgba(231, 226, 218, 0)); }
+  }
+
+  /* El papel quieto (sin ratón o hasta que llega el fondo vivo): del borde al 37 % y, hasta el 49 %, la costura */
+  .bd-papel { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+  .bd-papel::before { content: ''; position: absolute; inset: 0; background: var(--grano), var(--fibras), var(--crema);
+    -webkit-mask-image: linear-gradient(90deg, #000 37%, transparent 49%); mask-image: linear-gradient(90deg, #000 37%, transparent 49%); }
+  html.papel-gl .bd-papel { visibility: hidden; transition: visibility 0s 1.2s; }
+
+  /* --- El folio (16-nov: «muuuucho más editorial»; antes, una etiqueta en caja que parecía un punto de menú) -----------
+     Como en una revista: en los capítulos, el número en Garamond, de cuántos, una raya fina hasta el nombre, en cursiva;
+     en las secciones, el antetítulo a máquina con su raya delante. Sin caja ni fondo: solo letra y filete */
+  .bd-folio { margin: 0; display: flex; align-items: baseline; gap: 0 12px; }
+  .bd-folio__raya { flex: 1 1 auto; min-width: 24px; height: 1px; align-self: center; background: currentColor; opacity: .3; }
+  .bd-folio__n { font-family: var(--serif); font-weight: 300; font-size: clamp(32px, min(2.7vw, 4.8vh), 48px); line-height: .8; letter-spacing: -.02em; color: var(--acento, var(--rosa)); }
+  .bd-folio__de { margin-left: -7px; font-family: var(--mono); font-size: 10px; letter-spacing: .1em; opacity: .5; }
+  .bd-folio__nombre { font-family: var(--serif); font-style: italic; font-size: clamp(19px, min(1.45vw, 2.6vh), 24px); line-height: 1; }
+  .bd-folio__sec { font-family: var(--mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; }
+  .bd-folio--seccion { gap: 0 14px; }
+  .bd-folio--seccion .bd-folio__raya { flex: 0 0 44px; opacity: .7; }
+  .bd-folio--seccion .bd-folio__nombre { font-size: clamp(17px, 1.3vw, 21px); }
+
+  /* La capitular: la primera letra de la entradilla, en Garamond y marrón, de tres líneas (de dos en el móvil y donde
+     el navegador no sabe hacer initial-letter, a mano) */
+  .bd-cap__que::first-letter, .bd-cierre__p::first-letter { float: left; margin: .09em .1em 0 0; font-family: var(--serif); font-weight: 300; font-size: 3.15em; line-height: .74; color: var(--marron); }
+  @supports (initial-letter: 3) or (-webkit-initial-letter: 3) {
+    .bd-cap__que::first-letter, .bd-cierre__p::first-letter { float: none; margin: 0 .12em 0 0; font-size: inherit; line-height: inherit; -webkit-initial-letter: 3; initial-letter: 3; }
+  }
 
   /* --- El viaje ---------------------------------------------------------------------------------------------------- */
   /* Largo: cada una de las seis capas tiene pantalla y media para ella */
   .bd-viaje { position: relative; height: 1300vh; }
   .bd-escena { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; user-select: none; -webkit-user-select: none; }
-  .bd-texto { position: absolute; left: var(--lado); top: 15vh; z-index: 3; max-width: 33vw; pointer-events: none; transition: opacity .5s var(--curva), transform .5s var(--curva); }
+  /* La portada, sobre el papel: el antetítulo, el titular y la entradilla, en la letra de la marca */
+  .bd-texto { position: absolute; left: var(--lado); top: 15vh; z-index: 3; max-width: 33vw; pointer-events: none; color: var(--tinta); --acento: var(--marron);
+    transition: opacity .5s var(--curva), transform .5s var(--curva); }
   /* Mientras hay un capítulo, la portada se aparta y la pila se va un poco a la derecha */
   .bd-texto.fuera { opacity: 0; transform: translateY(-14px); }
-  .bd-etq { margin: 0 0 3vh; font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--brand); }
+  .bd-etq { margin: 0 0 4vh; color: var(--marron); }
   .bd-t { margin: 0; font-family: var(--serif); font-weight: 300; font-size: clamp(48px, min(5.8vw, 11vh), 112px); line-height: .9; letter-spacing: -.03em; }
   .bd-t em, .bd-cierre__t em { font-style: italic; }
-  .bd-p { margin: 3vh 0 0; max-width: 34ch; font-size: 15px; line-height: 1.6; color: var(--crema-2); }
+  .bd-t em { color: var(--marron); }
+  .bd-p { margin: 4vh 0 0; max-width: 29ch; font-family: var(--serif); font-size: clamp(18px, min(1.45vw, 2.6vh), 22px); line-height: 1.34; color: var(--p-tx2); }
+  /* las letras que notan el ratón (vivo.js), sin el rojo y el azul de la máquina: en el papel no van */
+  .bd-texto [data-vivo] * { text-shadow: none !important; }
 
   /* La pila: el contenedor con perspectiva, el que gira y las planchas */
   .bd-pila { position: absolute; left: 58%; top: 56%; width: 0; height: 0; perspective: 1800px; transition: left .9s var(--curva), top .9s var(--curva); }
@@ -271,6 +312,9 @@ const canto = (i: number) => `--canto: ${CANTO[CAPAS[i].id]}; --canto-luz: ${LUZ
   .bd-capa.apagada { opacity: .16; pointer-events: none; }
   .bd-capa.activa, .bd-capa.encima { border-color: var(--rosa); }
   .bd-capa__dentro { position: absolute; inset: 9%; display: flex; align-items: center; justify-content: center; }
+  /* Con un capítulo, solo coge el ratón la plancha que lo tiene (la marca, que sigue encendida en el turno del color, no
+     tapa los colores) */
+  .bd-escena.en-capitulo .bd-capa:not(.activa) { pointer-events: none; }
 
   /* 01 · La marca: el isotipo y el logotipo; toma el color que pases en la de color. Un brillo sigue al ratón */
   .bd-capa--marca { --iso: #F5CBD7; --logo: #E7E2DA; background: #120D0A; }
@@ -337,99 +381,32 @@ const canto = (i: number) => `--canto: ${CANTO[CAPAS[i].id]}; --canto-luz: ${LUZ
   .bd-cota b { font-weight: 400; color: var(--rosa); margin-right: 8px; }
   .bd-cota.activa { color: var(--crema); }
 
-  /* Los capítulos, uno encima de otro: se ve el de la capa que toca, que entra al cambiar de capa (brand.js le pone .on y
-     se la quita al que sale). El que sale se apaga y, al acabar, se oculta del todo (visibility: fuera del árbol de
-     accesibilidad, para que el lector de pantalla no lea los seis) */
+  /* --- Los capítulos, sobre el papel ------------------------------------------------------------------------------
+     Uno encima de otro: se ve el de la capa que toca, que entra al cambiar de capa (brand.js le pone .on y se la quita
+     al que sale). El que sale se apaga y, al acabar, se oculta del todo (visibility: fuera del árbol de accesibilidad,
+     para que el lector de pantalla no lea los seis). Como la apertura de un artículo: el folio, el titular, la
+     entradilla con su capitular, el segundo párrafo sangrado con su filete, el dato con su fuente y, si lo hay, el juego */
   .bd-cap { position: absolute; left: var(--lado); top: 12vh; bottom: 9vh; z-index: 3; width: min(34vw, 530px); display: flex; flex-direction: column; justify-content: center; pointer-events: none;
+    color: var(--tinta); --acento: var(--marron);
     opacity: 0; transform: translateY(16px); visibility: hidden; transition: opacity .45s var(--curva), transform .45s var(--curva), visibility 0s linear .45s; }
   .bd-cap.on { opacity: 1; transform: none; visibility: visible; transition: opacity .8s var(--curva), transform .8s var(--curva), visibility 0s; }
   .bd-cap p, .bd-cap h3 { margin: 0; }
-  .bd-cap__n { align-self: flex-start; padding: 6px 9px 5px; font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--tinta); background: var(--acento, var(--rosa)); }
-  .bd-cap__t { margin-top: 2.4vh !important; font-family: var(--serif); font-weight: 300; font-size: clamp(38px, min(4.4vw, 7.6vh), 80px); line-height: .94; letter-spacing: -.025em; }
-  .bd-cap__t em { font-style: italic; color: var(--acento, var(--rosa)); }
+  .bd-cap > .bd-cap__n { margin-bottom: 3.6vh; }
+  .bd-cap__t { font-family: var(--serif); font-weight: 300; font-size: clamp(38px, min(4.4vw, 7.6vh), 80px); line-height: .94; letter-spacing: -.025em; }
+  .bd-cap__t em { font-style: italic; color: var(--acento); }
   /* la entradilla, en la letra de la marca; el segundo párrafo, sangrado y con una raya de su color */
-  .bd-cap__que { margin-top: 2.8vh !important; font-family: var(--serif); font-size: clamp(17px, min(1.4vw, 2.4vh), 21px); line-height: 1.38; }
-  .bd-cap__importa { margin: 1.8vh 0 0 16% !important; padding-left: 14px; border-left: 1px solid var(--acento, var(--rosa)); font-size: 14px; line-height: 1.6; color: var(--crema-2); }
-  .bd-cap__dato { margin-top: 3.4vh; padding-top: 2.4vh; border-top: 1px solid var(--linea); display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 20px; align-items: start; }
-  .bd-cap__cifra { font-family: var(--serif); font-weight: 300; font-size: clamp(48px, min(5vw, 9vh), 96px); line-height: .88; letter-spacing: -.03em; color: var(--acento, var(--rosa)); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .bd-cap__que { margin-top: 3vh !important; font-family: var(--serif); font-size: clamp(17px, min(1.4vw, 2.4vh), 21px); line-height: 1.38; }
+  .bd-cap__importa { margin: 2vh 0 0 16% !important; padding-left: 14px; border-left: 1px solid var(--acento); font-size: 14px; line-height: 1.6; color: var(--p-tx2); }
+  /* el dato: un filete fino a todo lo ancho y, al principio, un tramo en tinta (como el de un despiece de revista) */
+  .bd-cap__dato { position: relative; margin-top: 3.6vh; padding-top: 2.6vh; border-top: 1px solid var(--p-ln); display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 22px; align-items: start; }
+  .bd-cap__dato::before { content: ''; position: absolute; left: 0; top: -1px; width: 44px; height: 1px; background: var(--tinta); }
+  .bd-cap__cifra { font-family: var(--serif); font-weight: 300; font-size: clamp(48px, min(5vw, 9vh), 96px); line-height: .88; letter-spacing: -.03em; color: var(--acento); white-space: nowrap; font-variant-numeric: tabular-nums; }
   .bd-cap__dice { font-size: 14px; line-height: 1.5; }
-  .bd-cap__fuente { margin-top: 10px !important; font-family: var(--mono); font-size: 9px; line-height: 1.55; letter-spacing: .08em; text-transform: uppercase; color: var(--crema-3); }
-  .bd-cap__juego { margin-top: 3.2vh !important; display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--crema-2); }
-  .bd-cap__juego::before { content: ''; width: 6px; height: 6px; background: var(--acento, var(--rosa)); }
+  .bd-cap__fuente { margin-top: 10px !important; font-family: var(--mono); font-size: 9px; line-height: 1.55; letter-spacing: .08em; text-transform: uppercase; color: var(--p-tx3); }
+  .bd-cap__juego { margin-top: 3.2vh !important; display: flex; align-items: center; gap: 12px; font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--p-tx2); }
+  .bd-cap__juego::before { content: ''; width: 28px; height: 1px; background: currentColor; }
 
-  /* --- Lo que hace una marca bien hecha --------------------------------------------------------------------------- */
-  .bd-efectos { position: relative; z-index: 2; padding: 18vh calc(var(--lado) + 4vw) 6vh var(--lado); border-top: 1px solid var(--linea); }
-  .bd-efectos__ante { margin: 0 0 4vh; font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--rosa); }
-  .bd-efectos__t { margin: 0; max-width: none; font-family: var(--serif); font-weight: 300; font-size: clamp(44px, 6.4vw, 120px); line-height: .9; letter-spacing: -.03em; }
-  /* la segunda línea, sangrada y en el rosa de Brand (al bajar se corre un poco: brand.js) */
-  .bd-efectos__t em { display: block; padding-left: 1.6em; font-style: italic; color: var(--brand); }
-  /* las tres, en escalera */
-  .bd-efectos__lista { margin: 10vh 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3.4vw; align-items: start; }
-  .bd-efecto:nth-child(2) { margin-top: 7vh; }
-  .bd-efecto:nth-child(3) { margin-top: 14vh; }
-  .bd-efecto { padding-top: 3vh; border-top: 1px solid var(--linea); opacity: 0; transform: translateY(20px); transition: opacity .9s var(--curva) calc(var(--i) * 140ms), transform .9s var(--curva) calc(var(--i) * 140ms); }
-  .bd-efectos.on .bd-efecto { opacity: 1; transform: none; }
-  .bd-efecto p, .bd-efecto h3 { margin: 0; }
-  .bd-efecto__cifra { font-family: var(--serif); font-weight: 300; font-size: clamp(58px, 6vw, 112px); line-height: .9; letter-spacing: -.03em; color: var(--rosa); font-variant-numeric: tabular-nums; }
-  .bd-efecto__cifra b { font-weight: inherit; }
-  .bd-efecto__cifra span { margin-left: 10px; font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--crema-2); }
-  .bd-efecto__t { margin-top: 2.6vh !important; font-family: var(--serif); font-weight: 400; font-size: 28px; line-height: 1.1; }
-  .bd-efecto__texto { margin-top: 1.4vh !important; font-size: 15px; line-height: 1.6; color: var(--crema-2); }
-  .bd-efecto__fuente { margin-top: 2.4vh !important; font-family: var(--mono); font-size: 9px; line-height: 1.55; letter-spacing: .08em; text-transform: uppercase; color: var(--crema-3); }
-
-  /* La pista del principio: se va en cuanto bajas */
-  .bd-pista { position: absolute; right: var(--lado); bottom: 26px; z-index: 2; margin: 0; display: grid; justify-items: center; gap: 10px; font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--crema-2); transition: transform .8s var(--curva), opacity .8s; }
-  .bd-pista i { width: 1px; height: 34px; background: currentColor; transform-origin: 50% 0; animation: bd-pista 1.8s var(--curva) infinite; }
-  @keyframes bd-pista { 0% { transform: scaleY(0); } 60% { transform: scaleY(1); } 100% { transform: scaleY(1) translateY(12px); opacity: 0; } }
-  .bd-pista.fuera { transform: translateY(160%); opacity: 0; }
-
-  /* --- Lo que hacemos con la tuya --------------------------------------------------------------------------------- */
-  .bd-cierre { position: relative; z-index: 2; display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 5vw; padding: 18vh calc(var(--lado) + 4vw) 20vh var(--lado); border-top: 1px solid var(--linea); }
-  .bd-cierre__ante { margin: 0 0 4vh; font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--rosa); }
-  .bd-cierre__t { margin: 0; max-width: 11ch; font-family: var(--serif); font-weight: 300; font-size: clamp(46px, 6.2vw, 112px); line-height: .92; letter-spacing: -.03em; }
-  .bd-cierre__dcha { padding-top: calc(4vh + 16px); }
-  .bd-cierre__p { margin: 0 0 4vh; font-size: 16px; line-height: 1.55; color: var(--crema-2); }
-  .bd-cierre__servicios { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 20px; font-family: var(--mono); font-size: 11px; line-height: 1.4; letter-spacing: .06em; text-transform: uppercase; }
-  .bd-cierre__servicios li { padding-top: 8px; border-top: 1px solid var(--linea); }
-  .bd-cierre__carta { display: inline-block; margin-top: 6vh; font-weight: 500; }
-  .bd-subraya { text-decoration: underline; text-underline-offset: 2px; }
-  /* De remate, los enlaces a las demás páginas (components/EnlacesWeb.astro), a todo lo ancho y con su raya */
-  .bd-cierre__enlaces { grid-column: 1 / -1; margin-top: 12vh; padding-top: 3vh; border-top: 1px solid var(--linea); }
-  .bd-cierre__ante, .bd-cierre__t, .bd-cierre__dcha > *, .bd-cierre__enlaces { opacity: 0; transform: translateY(18px); transition: opacity .9s var(--curva), transform .9s var(--curva); }
-  .bd-cierre.on .bd-cierre__ante, .bd-cierre.on .bd-cierre__t, .bd-cierre.on .bd-cierre__dcha > *, .bd-cierre.on .bd-cierre__enlaces { opacity: 1; transform: none; }
-  .bd-cierre.on .bd-cierre__t { transition-delay: .1s; }
-  .bd-cierre.on .bd-cierre__dcha > :nth-child(1) { transition-delay: .3s; }
-  .bd-cierre.on .bd-cierre__dcha > :nth-child(2) { transition-delay: .42s; }
-  .bd-cierre.on .bd-cierre__dcha > :nth-child(3) { transition-delay: .54s; }
-  .bd-cierre.on .bd-cierre__enlaces { transition-delay: .7s; }
-
-  /* --- Color: la paleta del manual (marrón, beige, rosa, blanco y negro), cada uno con su papel: el rosa marca lo que
-     tiene que verse, el marrón da peso, el beige calma (16-nov: fuera el #ff8fc8 de la pieza del menú, que no es del
-     manual; --brand queda como el rosa) */
-  .bd { --brand: var(--rosa); }
-
-  /* El canto de cada plancha: una tira de su color en el borde izquierdo (en la de color, las cinco); solo en el pliego
-     (opción c), donde las planchas son de imprenta */
-  .bd-capa::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--canto); pointer-events: none; display: none; }
-
-  /* --- Editorial (15-nov: «dale un poco más de color, dinamismo y editorialidad a la página y ya») ---------------
-     La portada, más grande; abajo, el índice de las seis, que se llena al bajar; y lo de cada capítulo entra por partes,
-     de arriba abajo (el número grande de detrás de la pila y la luz de color, fuera el 16-nov) */
-  /* Con un capítulo, solo coge el ratón la plancha que lo tiene (la marca, que sigue encendida en el turno del color, no
-     tapa los colores) */
-  .bd-escena.en-capitulo .bd-capa:not(.activa) { pointer-events: none; }
-
-  .bd-indice { position: absolute; left: var(--lado); right: calc(var(--lado) + 80px); bottom: 22px; z-index: 2; margin: 0; padding: 0; list-style: none;
-    display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; pointer-events: none; }
-  .bd-indice li { position: relative; padding-top: 10px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-family: var(--mono); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--crema-3); transition: color .4s; }
-  .bd-indice li::before, .bd-indice i { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 2px; background: var(--linea); }
-  .bd-indice i { background: var(--canto-luz); transform: scaleX(0); transform-origin: 0 50%; }
-  .bd-indice li:nth-child(3) i { background: linear-gradient(90deg, #34190A 0 20%, #E7E2DA 20% 40%, #F5CBD7 40% 60%, #F5F3F1 60% 80%, #190900 80%); }
-  .bd-indice b { margin-right: 8px; font-weight: 400; color: var(--crema-2); transition: color .4s; }
-  .bd-indice li.activa { color: var(--crema); }
-  .bd-indice li.activa b { color: var(--canto-luz); }
-
-  /* Lo de cada capítulo entra por partes */
+  /* Lo de cada capítulo entra por partes, de arriba abajo */
   .bd-cap > * { opacity: 0; transform: translate3d(0, 22px, 0); transition: opacity .5s var(--curva), transform .8s var(--curva); }
   .bd-cap > .bd-cap__t { transform: translate3d(0, 38px, 0); }
   .bd-cap.on > * { opacity: 1; transform: none; }
@@ -442,186 +419,124 @@ const canto = (i: number) => `--canto: ${CANTO[CAPAS[i].id]}; --canto-luz: ${LUZ
     .bd-cap > *, .bd-cap > .bd-cap__t { transform: none; transition: none; }
   }
 
+  /* La pista del principio: se va en cuanto bajas */
+  .bd-pista { position: absolute; right: var(--lado); bottom: 26px; z-index: 2; margin: 0; display: grid; justify-items: center; gap: 10px; font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--crema-2); transition: transform .8s var(--curva), opacity .8s; }
+  .bd-pista i { width: 1px; height: 34px; background: currentColor; transform-origin: 50% 0; animation: bd-pista 1.8s var(--curva) infinite; }
+  @keyframes bd-pista { 0% { transform: scaleY(0); } 60% { transform: scaleY(1); } 100% { transform: scaleY(1) translateY(12px); opacity: 0; } }
+  .bd-pista.fuera { transform: translateY(160%); opacity: 0; }
+
+  /* --- Sin cortes entre secciones (16-nov) ------------------------------------------------------------------------
+     Antes, cada sección empezaba con su raya y un fondo liso: el papel del viaje se cortaba en seco contra la noche de
+     los efectos, y esta, contra el papel del cierre. Ahora cada sección empieza con la costura: una franja en la que la
+     noche se deshace (o se hace) con la trama de Bayer de --costura, como el papel y la noche del viaje. En los efectos,
+     de lo que hay detrás (el papel y la noche del fondo fijo) a la noche; en el cierre, de la noche al papel */
+  .bd-efectos::before, .bd-cierre::before {
+    content: ''; position: absolute; z-index: -1; left: 0; right: 0; top: 0; height: var(--costura-alto); pointer-events: none; background: var(--noche);
+    -webkit-mask: var(--costura) 0 0 / 16px var(--costura-alto) repeat-x; mask: var(--costura) 0 0 / 16px var(--costura-alto) repeat-x;
+  }
+  .bd-cierre::before { transform: scaleY(-1); }
+
+  /* --- Lo que hace una marca bien hecha, en la noche --------------------------------------------------------------- */
+  .bd-efectos { position: relative; z-index: 2; padding: calc(var(--costura-alto) + 10vh) calc(var(--lado) + 4vw) 12vh var(--lado);
+    background: linear-gradient(transparent var(--costura-alto), var(--noche) 0); }
+  .bd-efectos__ante { margin: 0 0 5vh; color: var(--rosa); }
+  .bd-efectos__t { margin: 0; max-width: none; font-family: var(--serif); font-weight: 300; font-size: clamp(44px, 6.4vw, 120px); line-height: .9; letter-spacing: -.03em; }
+  /* la segunda línea, sangrada y en el rosa de Brand (al bajar se corre un poco: brand.js) */
+  .bd-efectos__t em { display: block; padding-left: 1.6em; font-style: italic; color: var(--brand); }
+  /* las tres, en escalera y en columnas de revista, con un filete entre una y otra */
+  .bd-efectos__lista { margin: 12vh 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; }
+  .bd-efecto:nth-child(2) { margin-top: 7vh; }
+  .bd-efecto:nth-child(3) { margin-top: 14vh; }
+  .bd-efecto { padding: 0 2.6vw 1vh; border-left: 1px solid var(--linea); opacity: 0; transform: translateY(20px); transition: opacity .9s var(--curva) calc(var(--i) * 140ms), transform .9s var(--curva) calc(var(--i) * 140ms); }
+  .bd-efecto:first-child { padding-left: 0; border-left: 0; }
+  .bd-efectos.on .bd-efecto { opacity: 1; transform: none; }
+  .bd-efecto p, .bd-efecto h3 { margin: 0; }
+  .bd-efecto__cifra { font-family: var(--serif); font-weight: 300; font-size: clamp(58px, 6vw, 112px); line-height: .9; letter-spacing: -.03em; color: var(--rosa); font-variant-numeric: tabular-nums; }
+  .bd-efecto__cifra b { font-weight: inherit; }
+  .bd-efecto__cifra span { margin-left: 10px; font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--crema-2); }
+  .bd-efecto__t { margin-top: 2.8vh !important; font-family: var(--serif); font-weight: 400; font-size: 28px; line-height: 1.1; }
+  .bd-efecto__texto { margin-top: 1.4vh !important; max-width: 36ch; font-size: 15px; line-height: 1.6; color: var(--crema-2); }
+  /* la fuente, como el pie de una foto: con su raya corta encima */
+  .bd-efecto__fuente { margin-top: 2.8vh !important; max-width: 46ch; font-family: var(--mono); font-size: 9px; line-height: 1.55; letter-spacing: .08em; text-transform: uppercase; color: var(--crema-3); }
+  .bd-efecto__fuente::before { content: ''; display: block; width: 28px; height: 1px; margin-bottom: 10px; background: currentColor; }
+
+  /* --- Lo que hacemos con la tuya, en el papel --------------------------------------------------------------------- */
+  .bd-cierre { position: relative; z-index: 2; display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 5vw;
+    padding: calc(var(--costura-alto) + 12vh) calc(var(--lado) + 4vw) 10vh var(--lado);
+    background: var(--grano), var(--fibras), var(--crema); color: var(--tinta); }
+  .bd-cierre__ante { margin: 0 0 5vh; color: var(--marron); }
+  .bd-cierre__t { margin: 0; max-width: 11ch; font-family: var(--serif); font-weight: 300; font-size: clamp(46px, 6.2vw, 112px); line-height: .92; letter-spacing: -.03em; }
+  .bd-cierre__t em { color: var(--marron); }
+  /* a la derecha, a la altura del titular: la entradilla con su capitular, lo que hacemos, como un sumario, y la carta */
+  .bd-cierre__dcha { padding-top: calc(5vh + 18px); }
+  .bd-cierre__p { margin: 0 0 5vh; font-family: var(--serif); font-size: clamp(19px, 1.5vw, 23px); line-height: 1.38; }
+  .bd-cierre__servicios { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
+  .bd-cierre__servicios li { padding: 12px 0 14px; border-top: 1px solid var(--p-ln); font-family: var(--serif); font-size: clamp(18px, 1.4vw, 22px); line-height: 1.15; }
+  .bd-cierre__carta { display: inline-flex; align-items: baseline; gap: 12px; margin-top: 6vh; font-family: var(--serif); font-style: italic; font-size: clamp(26px, 2.2vw, 34px); line-height: 1.1; }
+  .bd-subraya { text-decoration: underline; text-underline-offset: 2px; }
+  .bd-cierre__carta .bd-subraya { text-decoration-color: var(--marron); text-decoration-thickness: 1px; text-underline-offset: 7px; }
+  .bd-cierre__flecha { font-style: normal; font-size: .42em; color: var(--marron); transition: translate .4s var(--curva); }
+  .bd-cierre__carta:hover .bd-cierre__flecha, .bd-cierre__carta:focus-visible .bd-cierre__flecha { translate: 4px 0; }
+  /* De remate, los enlaces a las demás páginas (components/EnlacesWeb.astro), a todo lo ancho y con su raya */
+  .bd-cierre__enlaces { grid-column: 1 / -1; margin-top: 16vh; padding-top: 2.6vh; border-top: 1px solid var(--p-ln); }
+  .bd-cierre__ante, .bd-cierre__t, .bd-cierre__dcha > *, .bd-cierre__enlaces { opacity: 0; transform: translateY(18px); transition: opacity .9s var(--curva), transform .9s var(--curva); }
+  .bd-cierre.on .bd-cierre__ante, .bd-cierre.on .bd-cierre__t, .bd-cierre.on .bd-cierre__dcha > *, .bd-cierre.on .bd-cierre__enlaces { opacity: 1; transform: none; }
+  .bd-cierre.on .bd-cierre__t { transition-delay: .1s; }
+  .bd-cierre.on .bd-cierre__dcha > :nth-child(1) { transition-delay: .3s; }
+  .bd-cierre.on .bd-cierre__dcha > :nth-child(2) { transition-delay: .42s; }
+  .bd-cierre.on .bd-cierre__dcha > :nth-child(3) { transition-delay: .54s; }
+  .bd-cierre.on .bd-cierre__enlaces { transition-delay: .7s; }
 
   /* --- Móvil ------------------------------------------------------------------------------------------------------ */
   @media (max-width: 760px) {
     .bd-madrid { display: none; }
-    /* como en Tech y el About, lo de debajo pasa por una franja para no montarse en la barra (de noche; sobre el papel,
-       de papel: lo ponen las opciones) */
+    /* como en Tech y el About, lo de debajo pasa por una franja para no montarse en la barra: de noche y, con el cierre
+       arriba, de papel */
     .bd::before {
       content: ''; position: fixed; left: 0; right: 0; top: 0; height: calc(var(--arriba) + 44px); z-index: 39; pointer-events: none;
       background: linear-gradient(var(--noche) 64%, rgba(18, 13, 10, 0));
     }
-    .bd-efecto { padding: 3vh 5vw 3.6vh; }
-    .bd-texto { max-width: none; right: var(--lado); top: 11vh; }
+    html.bd-claro .bd::before { background: linear-gradient(var(--crema) 64%, rgba(231, 226, 218, 0)); }
+    /* arriba la noche con la pila; abajo, el papel con lo que se lee (también la portada) */
+    .bd-papel::before { -webkit-mask-image: linear-gradient(0deg, #000 50%, transparent 58%); mask-image: linear-gradient(0deg, #000 50%, transparent 58%); }
+    .bd-texto { max-width: none; right: var(--lado); top: auto; bottom: 7vh; }
+    .bd-etq { margin-bottom: 2.6vh; }
     .bd-t { font-size: 42px; }
-    .bd-pila { left: 50%; top: 60%; }
+    /* (lo bastante estrecha para no pisar la pista, abajo a la derecha) */
+    .bd-p { margin-top: 2.6vh; max-width: calc(100% - 52px); font-size: 17px; }
+    .bd-pila { left: 50%; top: 27%; }
+    .bd-pista { color: var(--p-tx2); }
     .bd-capa { --w: 76vw; }
     .bd-cota { font-size: 9px; }
     .bd-cota > span { display: none; }
     /* en el móvil, con capítulo: la pila arriba y el capítulo abajo (sin el segundo párrafo, que no cabe) */
     .bd-escena.en-capitulo .bd-pila { left: 50%; top: 27%; }
     .bd-cap { top: auto; bottom: 6vh; width: auto; right: var(--lado); justify-content: flex-end; }
+    .bd-cap > .bd-cap__n { margin-bottom: 2vh; }
+    .bd-folio__n { font-size: 30px; }
+    .bd-folio__nombre { font-size: 18px; }
     .bd-cap__t { font-size: 28px; }
-    .bd-cap__que { font-size: 16px; line-height: 1.3; }
+    .bd-cap__que { margin-top: 2vh !important; font-size: 16px; line-height: 1.3; }
     .bd-cap__importa { display: none; }
-    .bd-cap__dato { gap: 14px; }
+    .bd-cap__dato { margin-top: 2.6vh; padding-top: 2vh; gap: 14px; }
     .bd-cap__cifra { font-size: 36px; }
     .bd-cap__dice { font-size: 12px; }
-    .bd-efectos { padding: 14vh var(--lado) 4vh; }
-    .bd-efectos__lista { grid-template-columns: 1fr; gap: 6vh; }
-    .bd-cierre { grid-template-columns: 1fr; padding: 14vh var(--lado) 18vh; }
-    .bd-cierre__t { font-size: 46px; }
-    /* el índice, solo con los números */
-    .bd-indice { right: calc(var(--lado) + 56px); bottom: 14px; gap: 6px; }
-    .bd-indice span { display: none; }
+    .bd-cap__juego { margin-top: 2.2vh !important; }
+    /* la capitular, de dos líneas */
+    .bd-cap__que::first-letter, .bd-cierre__p::first-letter { font-size: 2.45em; }
+    @supports (initial-letter: 2) or (-webkit-initial-letter: 2) {
+      .bd-cap__que::first-letter, .bd-cierre__p::first-letter { font-size: inherit; -webkit-initial-letter: 2; initial-letter: 2; }
+    }
+    .bd-efectos { padding: calc(var(--costura-alto) + 6vh) var(--lado) 9vh; }
     .bd-efectos__t em { padding-left: .8em; }
+    .bd-efectos__lista { margin-top: 7vh; grid-template-columns: 1fr; }
+    .bd-efecto, .bd-efecto:first-child { padding: 3.6vh 0 4vh; border-left: 0; border-top: 1px solid var(--linea); }
     .bd-efecto:nth-child(n) { margin-top: 0; }
-  }
-
-  /* === Opciones (16-nov, prototipo para que Álvaro elija: ?brand=a|b|c) ============================================
-     Las tres vuelven a lo de antes del 15-nov (la noche, sin la luz de color, sin el número grande ni los bloques de
-     color; «me gustaba más antes») y lo hacen más llamativo con el papel de Sebas del About: grano, fibras y, con ratón,
-     acuarela rosa por donde pasa (el fondo vivo, gl/fondo.js). Lo que se lee va siempre sobre el papel, en tinta:
-       a · Media hoja: el lado del texto es papel (la idea de Álvaro); la pila, en la noche, al otro lado de la costura
-       b · Hoja suelta: la noche de antes entera; lo que se lee va en hojas de papel sujetas con cinta, como las fotos
-           de Sebas
-       c · Pliego: la página entera es papel, la pila son planchas de imprenta y alrededor, las marcas del pliego */
-  /* (en :root: lo fijo de arriba y el papel quieto van fuera de <main>) */
-  :root { --marron: #34190A; --grano: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .1 0 0 0 0 .04 0 0 0 0 0 .16 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E"); --fibras: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='turbulence' baseFrequency='.006 .05' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2 0 0 0 0 .1 0 0 0 0 .04 .06 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");
-    --p-tx2: rgba(25, 9, 0, .68); --p-tx3: rgba(25, 9, 0, .46); --p-ln: rgba(25, 9, 0, .16); }
-  .bd-papel, .bd-imprenta { display: none; }
-  .bd-indice { display: none; }
-  .bd-capa.activa { border-color: var(--rosa); }
-
-  /* Lo que se lee, sobre el papel: tinta, la cursiva y el dato en marrón, la etiqueta del capítulo en tinta */
-  .bd-texto, .bd-cap { color: var(--tinta); --acento: var(--marron); }
-  .bd-etq { color: var(--marron); }
-  .bd-t em { color: var(--marron); }
-  .bd-p { color: var(--p-tx2); }
-  .bd-cap__n { color: var(--rosa); background: var(--tinta); }
-  .bd-cap__importa { color: var(--p-tx2); }
-  .bd-cap__dato { border-top-color: var(--p-ln); }
-  .bd-cap__fuente { color: var(--p-tx3); }
-  .bd-cap__juego { color: var(--p-tx2); }
-  /* las letras que notan el ratón (vivo.js), sin el rojo y el azul de la máquina: en el papel no van */
-  .bd-texto [data-vivo] * { text-shadow: none !important; }
-
-  /* --- a · Media hoja ------------------------------------------------------------------------------------------------ */
-  /* El papel quieto (sin ratón o hasta que llega el fondo vivo): del borde al 37 % y, hasta el 49 %, la costura */
-  html[data-op-brand='a'] .bd-papel, html[data-op-brand='c'] .bd-papel { display: block; position: fixed; inset: 0; z-index: -1; pointer-events: none; }
-  html[data-op-brand='a'] .bd-papel::before, html[data-op-brand='c'] .bd-papel::before { content: ''; position: absolute; inset: 0; background: var(--grano), var(--fibras), var(--crema); }
-  html[data-op-brand='a'] .bd-papel::before { -webkit-mask-image: linear-gradient(90deg, #000 37%, transparent 49%); mask-image: linear-gradient(90deg, #000 37%, transparent 49%); }
-  html.papel-gl .bd-papel { visibility: hidden; transition: visibility 0s 1.2s; }
-  /* los efectos, en la noche (tapan el papel del fondo); el cierre, en papel entero */
-  html[data-op-brand='a'] .bd-efectos { background: var(--noche); }
-  html[data-op-brand='a'] .bd-cierre { background: var(--grano), var(--fibras), var(--crema); color: var(--tinta); }
-  html[data-op-brand='a'] .bd-cierre__ante, html[data-op-brand='a'] .bd-cierre__t em { color: var(--marron); }
-  html[data-op-brand='a'] .bd-cierre__p { color: var(--p-tx2); }
-  html[data-op-brand='a'] :is(.bd-cierre__servicios li, .bd-cierre__enlaces) { border-top-color: var(--p-ln); }
-  html[data-op-brand='a'] .bd-cierre__carta .bd-subraya { text-decoration-color: var(--marron); text-decoration-thickness: 2px; }
-  /* lo fijo: en tinta sobre el papel (a la izquierda mientras dura el viaje; todo, en el cierre) */
-  html[data-op-brand='a'].bd-claro :is(.bd-donde, .bd-madrid) { color: var(--p-tx2); }
-  html[data-op-brand='a'].bd-claro .bd-nav { color: var(--tinta); }
-  html[data-op-brand='a'].bd-claro :is(.bd-barra, .bd-ondas i) { background: var(--tinta); }
-  @media (min-width: 761px) {
-    html[data-op-brand='a']:not(.bd-abajo) .bd-donde { color: var(--p-tx2); }
-    html[data-op-brand='a']:not(.bd-abajo) .bd-barra { background: var(--tinta); }
-    html[data-op-brand='a']:not(.bd-abajo) .bd-marca { color: var(--tinta); }
-  }
-  .bd-donde, .bd-nav, .bd-madrid { transition: color .4s; }
-
-  /* --- b · Hoja suelta ------------------------------------------------------------------------------------------------- */
-  /* Cada hoja: papel con grano y fibras, una mancha de acuarela en una esquina, su sombra y su cinta rosa */
-  html[data-op-brand='b'] :is(.bd-texto, .bd-cap, .bd-efecto) {
-    background: radial-gradient(ellipse 46% 30% at 92% 6%, rgba(226, 160, 182, .42), transparent 70%), var(--grano), var(--fibras), #EFEAE2;
-    box-shadow: 0 26px 60px rgba(0, 0, 0, .55), 0 2px 6px rgba(0, 0, 0, .35);
-  }
-  html[data-op-brand='b'] :is(.bd-texto, .bd-cap, .bd-efecto)::before {
-    content: ''; position: absolute; z-index: 1; left: 50%; top: -13px; width: 104px; height: 26px; margin-left: -52px;
-    background: rgba(245, 203, 215, .82); transform: rotate(-4deg); clip-path: polygon(0 8%, 6% 0, 12% 10%, 20% 2%, 30% 9%, 42% 0, 55% 8%, 66% 1%, 78% 9%, 88% 0, 100% 7%, 97% 50%, 100% 93%, 90% 100%, 80% 91%, 68% 100%, 56% 92%, 44% 100%, 32% 91%, 20% 100%, 9% 92%, 0 100%, 3% 50%);
-  }
-  html[data-op-brand='b'] .bd-texto { top: 14vh; max-width: none; width: min(37vw, 560px); padding: 5.4vh 2.8vw 4.6vh; rotate: -1.6deg; }
-  html[data-op-brand='b'] .bd-t { font-size: clamp(44px, min(4.6vw, 9vh), 92px); }
-  html[data-op-brand='b'] .bd-cap { top: 50%; bottom: auto; translate: 0 -50%; width: min(37vw, 560px); padding: 4.6vh 2.6vw 4.2vh; rotate: -1.2deg; }
-  html[data-op-brand='b'] .bd-cap:nth-child(even) { rotate: .9deg; }
-  html[data-op-brand='b'] .bd-cap:nth-child(even)::before { left: 26%; transform: rotate(6deg); }
-  html[data-op-brand='b'] .bd-cap__t { font-size: clamp(34px, min(3.6vw, 6.4vh), 66px); }
-  /* los efectos: tres hojas en escalera */
-  html[data-op-brand='b'] .bd-efecto { position: relative; padding: 4vh 2.4vw 4.2vh; border-top: 0; color: var(--tinta); }
-  html[data-op-brand='b'] .bd-efecto:nth-child(1) { rotate: -1.4deg; }
-  html[data-op-brand='b'] .bd-efecto:nth-child(2) { rotate: 1deg; }
-  html[data-op-brand='b'] .bd-efecto:nth-child(2)::before { left: 70%; transform: rotate(8deg); }
-  html[data-op-brand='b'] .bd-efecto:nth-child(3) { rotate: -.6deg; }
-  html[data-op-brand='b'] .bd-efecto__cifra { color: var(--marron); }
-  html[data-op-brand='b'] :is(.bd-efecto__texto, .bd-efecto__cifra span) { color: var(--p-tx2); }
-  html[data-op-brand='b'] .bd-efecto__fuente { color: var(--p-tx3); }
-
-  /* --- c · Pliego ------------------------------------------------------------------------------------------------------- */
-  html[data-op-brand='c'] .bd { color: var(--tinta); }
-  html[data-op-brand='c'] .bd-pila { color: var(--crema); }
-  /* las planchas, de imprenta: en noche, opacas y con el canto de su color */
-  html[data-op-brand='c'] .bd-capa { background: var(--noche); border-color: rgba(25, 9, 0, .5); }
-  html[data-op-brand='c'] .bd-capa--idea { background: #1C130F; }
-  html[data-op-brand='c'] .bd-capa::after { display: block; }
-  html[data-op-brand='c'] .bd-capa.apagada { opacity: .2; }
-  html[data-op-brand='c'] .bd-cota { color: var(--p-tx2); }
-  html[data-op-brand='c'] .bd-cota b { color: var(--marron); }
-  html[data-op-brand='c'] .bd-cota.activa { color: var(--tinta); }
-  html[data-op-brand='c'] .bd-cotas line { stroke: rgba(25, 9, 0, .42); }
-  html[data-op-brand='c'] .bd-pista { color: var(--p-tx2); }
-  /* el índice de las seis, abajo, en tinta */
-  html[data-op-brand='c'] .bd-indice { display: grid; }
-  html[data-op-brand='c'] .bd-indice li { color: var(--p-tx3); }
-  html[data-op-brand='c'] .bd-indice li::before { background: var(--p-ln); }
-  html[data-op-brand='c'] .bd-indice i { background: var(--marron); }
-  html[data-op-brand='c'] .bd-indice b { color: var(--p-tx2); }
-  html[data-op-brand='c'] .bd-indice li.activa, html[data-op-brand='c'] .bd-indice li.activa b { color: var(--tinta); }
-  /* los efectos, sobre el papel */
-  html[data-op-brand='c'] .bd-efectos { border-top-color: var(--p-ln); }
-  html[data-op-brand='c'] :is(.bd-efectos__ante, .bd-efectos__t em, .bd-efecto__cifra) { color: var(--marron); }
-  html[data-op-brand='c'] .bd-efecto { border-top-color: rgba(25, 9, 0, .5); }
-  html[data-op-brand='c'] :is(.bd-efecto__texto, .bd-efecto__cifra span) { color: var(--p-tx2); }
-  html[data-op-brand='c'] .bd-efecto__fuente { color: var(--p-tx3); }
-  /* y el cierre, en la noche: la última plancha */
-  html[data-op-brand='c'] .bd-cierre { background: var(--noche); color: var(--crema); }
-  /* lo fijo, en tinta (en la noche del cierre, en claro) */
-  html[data-op-brand='c']:not(.bd-claro) :is(.bd-donde, .bd-madrid) { color: var(--p-tx2); }
-  html[data-op-brand='c']:not(.bd-claro) :is(.bd-nav, .bd-marca) { color: var(--tinta); }
-  html[data-op-brand='c']:not(.bd-claro) :is(.bd-barra, .bd-ondas i) { background: var(--tinta); }
-  /* el cursor, en tinta */
-  html[data-op-brand='c'] .cursor__pista { stroke: rgba(25, 9, 0, .34); }
-  html[data-op-brand='c'] .cursor__texto { color: var(--tinta); }
-  /* las marcas del pliego: las cruces de corte en las esquinas y, arriba en medio, la de registro y la carta de colores */
-  html[data-op-brand='c'] .bd-imprenta { display: block; position: fixed; inset: 0; z-index: -1; pointer-events: none; color: rgba(25, 9, 0, .55); }
-  .bd-corte { position: absolute; width: 26px; height: 26px; }
-  .bd-corte::before, .bd-corte::after { content: ''; position: absolute; background: currentColor; }
-  .bd-corte::before { width: 100%; height: 1px; top: 50%; }
-  .bd-corte::after { width: 1px; height: 100%; left: 50%; }
-  .bd-corte--1 { left: 6px; top: 6px; } .bd-corte--2 { right: 6px; top: 6px; } .bd-corte--3 { left: 6px; bottom: 6px; } .bd-corte--4 { right: 6px; bottom: 6px; }
-  .bd-imprenta__centro { position: absolute; left: 50%; top: calc(clamp(18px, 2.6vh, 30px) - 2px); translate: -50% 0; display: flex; align-items: center; gap: 22px; }
-  .bd-registro { position: relative; width: 22px; height: 22px; border: 1px solid currentColor; border-radius: 50%;
-    background: linear-gradient(currentColor, currentColor) 50% / 1px 140% no-repeat, linear-gradient(currentColor, currentColor) 50% / 140% 1px no-repeat; }
-  .bd-registro::after { content: ''; position: absolute; inset: 6px; border-radius: 50%; background: currentColor; opacity: .5; }
-  .bd-carta { display: flex; align-items: center; gap: 3px; font-family: var(--mono); font-size: 9px; letter-spacing: .16em; text-transform: uppercase; color: var(--p-tx3); }
-  .bd-carta i { width: 13px; height: 13px; background: var(--c); outline: 1px solid rgba(25, 9, 0, .2); outline-offset: -1px; }
-  .bd-carta span { margin-left: 12px; }
-
-  /* --- Las opciones en el móvil ----------------------------------------------------------------------------------- */
-  @media (max-width: 760px) {
-    /* a: arriba la noche con la pila; abajo, el papel con lo que se lee (también la portada) */
-    html[data-op-brand='a'] .bd-papel::before { -webkit-mask-image: linear-gradient(0deg, #000 50%, transparent 58%); mask-image: linear-gradient(0deg, #000 50%, transparent 58%); }
-    html[data-op-brand='a'] .bd-texto { top: auto; bottom: 7vh; }
-    html[data-op-brand='a'] .bd-pila { top: 27%; }
-    html[data-op-brand='a'] .bd-pista { color: var(--p-tx2); }
-    html[data-op-brand='a'].bd-claro .bd::before { background: linear-gradient(var(--crema) 64%, rgba(231, 226, 218, 0)); }
-    /* b: la portada, arriba; los capítulos, abajo */
-    html[data-op-brand='b'] .bd-texto { top: 10vh; width: auto; padding: 3.6vh 6vw 3.4vh; }
-    html[data-op-brand='b'] .bd-cap { top: auto; bottom: 4vh; translate: none; width: auto; padding: 3vh 5vw 2.8vh; }
-    html[data-op-brand='b'] .bd-cap__t { font-size: 28px; }
-    html[data-op-brand='b'] .bd-efecto { padding: 3.4vh 6vw 3.6vh; }
-    /* c: la franja de arriba, de papel */
-    html[data-op-brand='c']:not(.bd-claro) .bd::before { background: linear-gradient(var(--crema) 64%, rgba(231, 226, 218, 0)); }
-    .bd-imprenta__centro { display: none; }
+    .bd-cierre { grid-template-columns: 1fr; gap: 4vh; padding: calc(var(--costura-alto) + 8vh) var(--lado) 9vh; }
+    .bd-cierre__t { font-size: 46px; }
+    .bd-cierre__dcha { padding-top: 0; }
+    .bd-cierre__p { font-size: 18px; }
+    .bd-cierre__servicios { grid-template-columns: 1fr; }
+    .bd-cierre__enlaces { margin-top: 8vh; }
   }
 </style>
