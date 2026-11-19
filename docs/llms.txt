@@ -64,6 +64,8 @@ escrita en reglas. En la web, esas reglas son código, y se cumplen solas.
   presentaciones, de días a un clic.
 - Dr. Jorge Cato: la web de un cirujano vascular en Madrid y la captación de pacientes para
   su consulta.
+- Nomad Coach: la web de un profe de tenis y pádel a domicilio en Madrid, con la marca en
+  movimiento y un chat con IA.
 
 ## Contacto
 
